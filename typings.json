@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "base64-js": "registry:npm/base64-js"
+  },
+  "globalDependencies": {
+    "utf8": "registry:dt/utf8"
+  }
+}
