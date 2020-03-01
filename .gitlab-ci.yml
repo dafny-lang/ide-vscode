@@ -1,0 +1,45 @@
+variables:
+  BUILD_IMAGE: $CI_REGISTRY_IMAGE/dafny-linux-mono-build
+
+stages:
+  - prebuild
+  - build
+  - sonar
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+  - VSCodePlugin/node_modules/
+
+build_image:
+  stage: prebuild
+  image: docker:latest
+  only:
+    refs:
+      - master
+    changes:
+      - Dockerfile
+      - .gitlab-ci.yml
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build --tag $BUILD_IMAGE:latest - < Dockerfile
+    - docker push $BUILD_IMAGE:latest
+
+build_client:
+  stage: build
+  image: $BUILD_IMAGE:latest
+  script:
+    - cd VSCodePlugin
+    - npm install
+    - npm run vscode:compile-typescript
+  artifacts:
+    paths:
+      - VSCodePlugin/out/
+
+sonar_scanner:
+  stage: sonar
+  image: $BUILD_IMAGE:latest
+  only:
+    - master@dafny-ba/dafny-vscode-plugin
+  script:
+    - sonar-scanner
