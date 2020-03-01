@@ -14,7 +14,6 @@ This extension adds _Dafny_ support to Visual Studio Code.
 * **Display counter example** for failing proof.
 * _IntelliSense_ for classes and _CodeLens_ showing method references.
 
-![assertions animation](simpleassert.gif)
 
 You can find [more Examples below](#examples).
 
