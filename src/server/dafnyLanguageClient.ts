@@ -10,7 +10,7 @@ export default class DafnyLanguageClient extends LanguageClient {
     constructor() {
 
         // 2do: Production Folder Structure may be different. Ticket #45
-        const dafnyLangServerExe = path.join(__dirname, "../../../../dafny/Binaries/DafnyLanguageServer.exe");
+        const dafnyLangServerExe = path.join(__dirname, "../../../../dafny-language-server/Binaries/DafnyLanguageServer.exe");
 
         window.showInformationMessage("Chosen Server Exe: " + dafnyLangServerExe);
 
