@@ -9,7 +9,7 @@ stages:
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
-  - VSCodePlugin/node_modules/
+  - node_modules/
 
 build_image:
   stage: prebuild
