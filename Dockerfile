@@ -1,3 +1,5 @@
+FROM mono:5.20
+
 ARG NODE_VERSION=10.16.3
 ARG SonarScanner_RELEASE=3.0.3.778
 
