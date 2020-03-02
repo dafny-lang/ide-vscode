@@ -1,5 +1,5 @@
 variables:
-  BUILD_IMAGE: $CI_REGISTRY_IMAGE/dafny-linux-mono-build
+  BUILD_IMAGE: $CI_REGISTRY_IMAGE/dafny-plugin-node-build
 
 stages:
   - prebuild
@@ -29,12 +29,11 @@ build_client:
   stage: build
   image: $BUILD_IMAGE:latest
   script:
-    - cd VSCodePlugin
     - npm install
     - npm run vscode:compile-typescript
   artifacts:
     paths:
-      - VSCodePlugin/out/
+      - out/
 
 sonar_scanner:
   stage: sonar
