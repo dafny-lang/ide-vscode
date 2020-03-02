@@ -7,7 +7,7 @@ ENV NODE_ENV=dev
 
 # Note: The mkdir is required due to a bug in the debian-slim image.
 RUN apt-get update \
- && apt-get install -y libsecret-1-0 iproute2 xvfb x11-utils libdbus-1-3 libgtk-3-0 libnotify-bin libgnome-keyring0 libgconf2-4 libasound2 libcap2 libcups2 libxtst6 libxss1 libnss3 \
+ && apt-get install -y wget unzip\
  && rm -rf /var/lib/apt/lists/* /tmp/*
 
 WORKDIR /opt
