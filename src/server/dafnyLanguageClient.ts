@@ -14,11 +14,9 @@ export default class DafnyLanguageClient extends LanguageClient {
 
         window.showInformationMessage("Chosen Server Exe: " + dafnyLangServerExe);
 
-        const serverArguments = ["--log", "Log.txt", "--stream", "RedirectedStreamOutput.txt"];
-
         const serverOptions: ServerOptions = {
-            run: { command: dafnyLangServerExe, args: serverArguments },
-            debug: { command: dafnyLangServerExe, args: serverArguments }
+            run: { command: dafnyLangServerExe, args: [] },
+            debug: { command: dafnyLangServerExe, args: [] }
         }
 
         const clientOptions: LanguageClientOptions = {
