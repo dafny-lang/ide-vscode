@@ -149,7 +149,7 @@ export default class Commands {
         vscode.window.showInformationMessage(InfoMsg.CompilationStarted);
 
         //2Do: Production Folder Structure may be different. Sollte man auch auslagern. Ticket #45
-        const dafnyExe = path.join(__dirname, "../../../../dafny/Binaries/Dafny.exe")
+        const dafnyExe = path.join(__dirname, "../../../../dafny-language-server/Binaries/Dafny.exe")
         const arg = {
             DafnyFilePath: document.fileName,
             DafnyExePath: dafnyExe
