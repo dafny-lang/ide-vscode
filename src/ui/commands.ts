@@ -148,11 +148,10 @@ export default class Commands {
         document.save();
         vscode.window.showInformationMessage(InfoMsg.CompilationStarted);
 
-        //2Do: Production Folder Structure may be different. Sollte man auch auslagern. Ticket #45
-        const dafnyExe = path.join(__dirname, "../../../../dafny-language-server/Binaries/Dafny.exe")
+        let compilationArgs: string[] = ["/compile:1", "/nologo"]    //todo: read compilation arguments from client environment here. just placeholders here.
         const arg = {
-            DafnyFilePath: document.fileName,
-            DafnyExePath: dafnyExe
+            FileToCompile: document.fileName,
+            CompilationArguments: compilationArgs
         }
 
         this.languageServer.sendRequest<ICompilerResult>(LanguageServerRequest.Compile, arg)
