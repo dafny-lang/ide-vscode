@@ -2,7 +2,6 @@
 import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient";
 
-import { StatusbarPriority } from "./StatusbarPriority";
 import { EnvironmentConfig, LanguageServerNotification, StatusString } from "./stringRessources";
 
 export class Statusbar {
@@ -14,9 +13,10 @@ export class Statusbar {
     private currentDocumentStatucBar: vscode.StatusBarItem;
 
     constructor(languageServer: LanguageClient) {
-        this.currentDocumentStatucBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, StatusbarPriority.high);
-        this.progressBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, StatusbarPriority.high);
-        this.serverStatusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, StatusbarPriority.high);
+        const priority = 10; 
+        this.currentDocumentStatucBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, priority);
+        this.progressBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, priority);
+        this.serverStatusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, priority);
 
         languageServer.onNotification(LanguageServerNotification.ServerStarted, (serverversion: string ) => {
             this.dafnyversion = serverversion;

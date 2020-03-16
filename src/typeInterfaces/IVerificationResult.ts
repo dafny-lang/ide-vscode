@@ -1,4 +1,4 @@
-import { VerificationStatus } from "./verificationResult";
+import { VerificationStatus } from "../types/verificationResult";
 export interface IVerificationResult {
     verificationStatus: VerificationStatus;
     proofObligations: number;

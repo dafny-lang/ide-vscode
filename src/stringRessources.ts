@@ -52,7 +52,6 @@ export class CommandStrings {
     public static CompileAndRun: string = "dafny.compileAndRun";
     public static ShowCounterExample: string = "dafny.showCounterExample";
     public static HideCounterExample: string = "dafny.hideCounterExample";
-    //public static RequestTest: string = "dafny.requestTest";
 }
 
 export class InfoMsg {
@@ -110,15 +109,12 @@ export class LanguageServerNotification {
     public static Error: string = "ERROR";
     public static Warning: string = "WARNING";
     public static Info: string = "INFO";
-    public static DafnyMissing: string = "dafnymissing";
-    public static Verify: string = "verify";
-    public static QueueSize: string = "queueSize";
+    public static UpdateStatusbar: string = "updateStatusbar";
     public static ServerStarted: string = "serverStarted";
     public static ActiveVerifiyingDocument: string = "activeVerifiyingDocument";
-    public static VerificationResult: string = "verificationResult";
+    public static Verify: string = "verify";
     public static ChangeServerStatus: string = "changeServerStatus";
     public static Ready: string = "ready";
     public static Progress: string = "progress";
     public static CounterExample: string = "counterExample";
-    public static UpdateStatusbar: string = "updateStatusbar";
 }

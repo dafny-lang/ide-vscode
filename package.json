@@ -123,6 +123,16 @@
             "type": "object",
             "title": "Dafny extension configuration",
             "properties": {
+                "dafny.serverExePath": {
+                    "type": "string",
+                    "default": "../../../../dafny-language-server/Binaries/DafnyLanguageServer.exe", 
+                    "description": "Path to the DafnyServer.exe"
+                },
+                "dafny.compilationArgs": {
+                    "type": "array", 
+                    "default": ["/compile:1", "/nologo"] , 
+                    "description": "Optional array of strings as Dafny compilation arguments"
+                },
                 "dafny.basePath": {
                     "type": "string",
                     "description": "Absolute path to the _Dafny_ binary directory (which contains `DafnyServer.exe`)."
@@ -204,8 +214,7 @@
         "vscode:compile-typescript": "tsc -p ./",
         "compile": "tsc -watch -p ./",
         "postinstall": "node ./node_modules/vscode/bin/install",
-        "update-vscode": "node ./node_modules/vscode/bin/install",
-        "test": "node ./node_modules/vscode/bin/test"
+        "update-vscode": "node ./node_modules/vscode/bin/install"
     },
     "devDependencies": {
         "@types/mocha": "^2.2.32",

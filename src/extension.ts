@@ -2,10 +2,8 @@
 
 import { platform } from "os";
 import * as vscode from "vscode";
-
 import { Trace } from 'vscode-jsonrpc';
 
-import { Context } from "./context";
 import { DafnyClientProvider } from "./dafnyProvider";
 import { DafnyRunner } from "./dafnyRunner";
 import Capabilities from "./helpers/capabilities";
@@ -18,8 +16,6 @@ let provider: DafnyClientProvider;
 const runner: DafnyRunner = new DafnyRunner();
 
 export function activate(extensionContext: vscode.ExtensionContext) {
-
-    // @todo This should be a gracefull feature reduction
     if (vscode.workspace.workspaceFolders === undefined) {
         vscode.window.showWarningMessage(WarningMsg.NoWorkspace);
     }
@@ -32,7 +28,7 @@ export function activate(extensionContext: vscode.ExtensionContext) {
                     vscode.commands.executeCommand("vscode.open", vscode.Uri.parse(ErrorMsg.GetMonoUri));
                     let restartMessage;
                     if (platform() === EnvironmentConfig.OSX) {
-                        // Mono adds a new folder to PATH; so give the easiest advice... ;)
+                        // Mono adds a new folder to PATH; so give the easiest advice
                         restartMessage = ErrorMsg.RestartMacAfterMonoInstall;
                     } else {
                         restartMessage = ErrorMsg.RestartCodeAfterMonoInstall;
@@ -60,9 +56,6 @@ export function activate(extensionContext: vscode.ExtensionContext) {
         notifications.registerNotifications();
 
         languageServer.onNotification(LanguageServerNotification.Ready, () => {
-            if (Context.unitTest) {
-                Context.unitTest.backendStarted();
-            }
             provider.activate(extensionContext.subscriptions);
         });
     });

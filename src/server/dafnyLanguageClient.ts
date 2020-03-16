@@ -1,17 +1,22 @@
-import { workspace } from "vscode";
+import { workspace, WorkspaceConfiguration } from "vscode";
 import { LanguageClient, ServerOptions } from "vscode-languageclient";
-//import { TransportKind, LanguageClientOptions, VersionedTextDocumentIdentifier } from "vscode-languageclient/lib/client";
 import { LanguageClientOptions } from "vscode-languageclient/lib/client";
 import { window } from 'vscode';
 import * as path from 'path';
-import *  as fs from 'fs';
+import * as fs from 'fs';
+
+import { EnvironmentConfig } from "../stringRessources";
 
 export default class DafnyLanguageClient extends LanguageClient {
-
     constructor() {
+        const config: WorkspaceConfiguration = workspace.getConfiguration(EnvironmentConfig.Dafny);
+        var serverExePath : string | undefined = config.get("serverExePath");
+        if(serverExePath === undefined)  {
+            window.showErrorMessage("Server Executable not defined: please check your config for serverExePath");
+            return; 
+        }
 
-        // 2do: Production Folder Structure may be different. Falls einfach zu machen fänd ich gut, wenn man den User nach der Exe fragt wenn nicht gefunden. Ticket #45
-        const dafnyLangServerExe = path.join(__dirname, "../../../../dafny-language-server/Binaries/DafnyLanguageServer.exe");
+        const dafnyLangServerExe = path.join(__dirname, serverExePath);
 
         fs.exists(dafnyLangServerExe, (exist) => {
             if (!exist) {
