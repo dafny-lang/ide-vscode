@@ -5,7 +5,6 @@ import * as vscode from "vscode";
 import { Config, EnvironmentConfig } from "./stringRessources";
 
 export class DafnyRunner {
-
     private config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(EnvironmentConfig.Dafny);
 
     public run(filename: string) {
@@ -22,7 +21,7 @@ export class DafnyRunner {
         if (!useMono) {
             return `& "${executable}"`; // TODO: this is not safe for "creative" paths.
         } else {
-            const monoPath = this.config.get<string>(Config.MonoPath); // deprecated monoPath configuration option #40
+            const monoPath = this.config.get<string>(Config.MonoPath);
             const monoExecutable = this.config.get<string>(Config.MonoExecutable) || monoPath || "mono";
             return `${monoExecutable} "${executable}"`; // TODO: this is not safe for "creative" paths.
         }

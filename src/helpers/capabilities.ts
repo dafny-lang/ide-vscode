@@ -8,7 +8,6 @@ import { Config, EnvironmentConfig } from "../stringRessources";
  * Check for supported capabilities (mono/.net runtime, dafny etc.)
  */
 export default class Capabilities {
-
     public static config = workspace.getConfiguration(EnvironmentConfig.Dafny);
 
     public static hasSupportedMonoVersion(): boolean {
@@ -22,7 +21,7 @@ export default class Capabilities {
             return true;
         }
 
-        const monoPath = Capabilities.config.get<string>(Config.MonoPath); // deprecated monoPath configuration option #40
+        const monoPath = Capabilities.config.get<string>(Config.MonoPath);
         const monoExecutable = Capabilities.config.get<string>(Config.MonoExecutable) || monoPath || "mono";
 
         try {

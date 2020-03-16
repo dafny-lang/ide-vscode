@@ -2,14 +2,13 @@ import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient";
 import { DafnyClientProvider } from "../dafnyProvider";
 import { DafnyRunner } from "../dafnyRunner";
-import { ICompilerResult } from "../serverHelper/ICompilerResult";
+import { ICompilerResult } from "../typeInterfaces/ICompilerResult";
 import { CommandStrings, Config, EnvironmentConfig, ErrorMsg, InfoMsg, LanguageServerRequest } from "../stringRessources";
 
 /**
  * VSCode UI Commands
  */
 export default class Commands {
-
     public static showReferences(uri: any, position: any, locations: any) {
         function parsePosition(p: any): vscode.Position {
             return new vscode.Position(p.line, p.character);
@@ -78,9 +77,6 @@ export default class Commands {
         this.extensionContext = extensionContext;
     }
 
-    /**
-     * Register commands listed in @var this.commands to vscode
-     */
     public registerCommands() {
         for (const cmd of this.commands) {
             const disposable = vscode.commands.registerCommand(cmd.name, cmd.callback);
@@ -147,7 +143,7 @@ export default class Commands {
         document.save();
         vscode.window.showInformationMessage(InfoMsg.CompilationStarted);
 
-        let compilationArgs: string[] = ["/compile:1", "/nologo"]    //todo: read compilation arguments from client environment here. just placeholders here.
+        let compilationArgs: string[] = ["/compile:1", "/nologo"]   //todo: read compilation arguments from client environment here. just placeholders here.
         const arg = {
             FileToCompile: document.fileName,
             CompilationArguments: compilationArgs

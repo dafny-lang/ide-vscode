@@ -6,7 +6,6 @@ import Commands from "./commands";
 
 /**
  * VSCode UI Notifications
- * Subscribes to notification events from the DafnyLanguageClient.
  */
 export default class Notifications {
     public extensionContext: vscode.ExtensionContext;
