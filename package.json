@@ -128,6 +128,11 @@
                     "default": "../../../../dafny-language-server/Binaries/DafnyLanguageServer.exe", 
                     "description": "Path to the DafnyServer.exe"
                 },
+                "dafny.compilationArgs": {
+                    "type": "array", 
+                    "default": ["/compile:1", "/nologo"] , 
+                    "description": "Optional array of strings as Dafny compilation arguments"
+                },
                 "dafny.basePath": {
                     "type": "string",
                     "description": "Absolute path to the _Dafny_ binary directory (which contains `DafnyServer.exe`)."

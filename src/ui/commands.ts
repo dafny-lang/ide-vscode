@@ -143,7 +143,9 @@ export default class Commands {
         document.save();
         vscode.window.showInformationMessage(InfoMsg.CompilationStarted);
 
-        let compilationArgs: string[] = ["/compile:1", "/nologo"]   //todo: read compilation arguments from client environment here. just placeholders here.
+        const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(EnvironmentConfig.Dafny);
+        var compilationArgs : string[]  = config.get("compilationArgs") || [];
+
         const arg = {
             FileToCompile: document.fileName,
             CompilationArguments: compilationArgs
