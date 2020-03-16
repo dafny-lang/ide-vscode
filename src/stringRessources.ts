@@ -110,7 +110,6 @@ export class LanguageServerNotification {
     public static Error: string = "ERROR";
     public static Warning: string = "WARNING";
     public static Info: string = "INFO";
-    public static DafnyMissing: string = "dafnymissing";
     // ...
     public static Verify: string = "verify";
     public static QueueSize: string = "queueSize";

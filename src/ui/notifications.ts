@@ -17,7 +17,6 @@ export default class Notifications {
         { method: LanguageServerNotification.Error, handler: vscode.window.showErrorMessage },
         { method: LanguageServerNotification.Warning, handler: vscode.window.showWarningMessage },
         { method: LanguageServerNotification.Info, handler: vscode.window.showInformationMessage },
-        { method: LanguageServerNotification.DafnyMissing, handler: (message: string) => this.askToInstall(message) },
     ];
 
     constructor(extensionContext: vscode.ExtensionContext, languageServer: DafnyLanguageServer, provider: DafnyClientProvider, commands: Commands) {
