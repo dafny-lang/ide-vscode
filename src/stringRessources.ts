@@ -106,19 +106,15 @@ export class LanguageServerRequest {
 }
 
 export class LanguageServerNotification {
-    // notifications
     public static Error: string = "ERROR";
     public static Warning: string = "WARNING";
     public static Info: string = "INFO";
-    // ...
-    public static Verify: string = "verify";
-    public static QueueSize: string = "queueSize";
+    public static UpdateStatusbar: string = "updateStatusbar";
     public static ServerStarted: string = "serverStarted";
     public static ActiveVerifiyingDocument: string = "activeVerifiyingDocument";
-    public static VerificationResult: string = "verificationResult";
+    public static Verify: string = "verify";
     public static ChangeServerStatus: string = "changeServerStatus";
     public static Ready: string = "ready";
     public static Progress: string = "progress";
     public static CounterExample: string = "counterExample";
-    public static UpdateStatusbar: string = "updateStatusbar";
 }
