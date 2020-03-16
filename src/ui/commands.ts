@@ -4,7 +4,6 @@ import { DafnyClientProvider } from "../dafnyProvider";
 import { DafnyRunner } from "../dafnyRunner";
 import { ICompilerResult } from "../serverHelper/ICompilerResult";
 import { CommandStrings, Config, EnvironmentConfig, ErrorMsg, InfoMsg, LanguageServerRequest } from "../stringRessources";
-import * as path from 'path';
 
 /**
  * VSCode UI Commands

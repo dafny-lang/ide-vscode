@@ -2,10 +2,8 @@
 
 import { platform } from "os";
 import * as vscode from "vscode";
-
 import { Trace } from 'vscode-jsonrpc';
 
-import { Context } from "./context";
 import { DafnyClientProvider } from "./dafnyProvider";
 import { DafnyRunner } from "./dafnyRunner";
 import Capabilities from "./helpers/capabilities";
@@ -60,9 +58,6 @@ export function activate(extensionContext: vscode.ExtensionContext) {
         notifications.registerNotifications();
 
         languageServer.onNotification(LanguageServerNotification.Ready, () => {
-            if (Context.unitTest) {
-                Context.unitTest.backendStarted();
-            }
             provider.activate(extensionContext.subscriptions);
         });
     });

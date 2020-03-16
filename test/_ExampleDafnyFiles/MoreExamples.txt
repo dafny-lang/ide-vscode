@@ -1,2 +1,0 @@
-There are more examples available under 
-..\VSCodePlugin\test\sampleFolder
