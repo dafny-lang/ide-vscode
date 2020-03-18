@@ -123,7 +123,7 @@
             "type": "object",
             "title": "Dafny extension configuration",
             "properties": {
-                "dafny.serverExePath": {
+                "dafny.languageServerExePath": {
                     "type": "string",
                     "default": "../../../../dafny-language-server/Binaries/DafnyLanguageServer.exe", 
                     "description": "Path to the DafnyServer.exe"

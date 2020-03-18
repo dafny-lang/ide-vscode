@@ -10,9 +10,9 @@ import { EnvironmentConfig } from "../stringRessources";
 export default class DafnyLanguageClient extends LanguageClient {
     constructor() {
         const config: WorkspaceConfiguration = workspace.getConfiguration(EnvironmentConfig.Dafny);
-        var serverExePath : string | undefined = config.get("serverExePath");
+        const serverExePath : string | undefined = config.get("languageServerExePath");
         if(serverExePath === undefined)  {
-            window.showErrorMessage("Server Executable not defined: please check your config for serverExePath");
+            window.showErrorMessage("Server Executable not defined: please check your config for languageServerExePath");
             return; 
         }
 
