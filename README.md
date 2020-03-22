@@ -7,7 +7,6 @@ This VSCode plugin needs the Dafny language server, which is placed in a [separa
 ## Features
 
 * **Compile and run `.dfy` files.**
-  * Automatic installation of the newest _Dafny_ version.
 * **Automatic verification as one types.**
   * Errors, warnings and hints are shown through the VSCode interface.
   * When there are no errors, you get a 👍 on the status bar.
@@ -33,27 +32,25 @@ Choose `Tasks -> Run Task...` to run one of the following:
 
 | Task                    | Description                                                                               |
 | :---------------------- |:----------------------------------------------------------------------------------------- | 
-| `Install DafnyServer`   | Downloads and installs the _DafnyServer_ and sets the `dafny.dafnyServerPath accordingly` |
-| `Uninstall DafnyServer` | Uninstalls the _DafnyServer_                                                              |
 | `Restart DafnyServer`   | Restarts the _DafnyServer_                                                                |
 
 ## Requirements
 
 * The plugin needs a _.NET_ runtime to run the _DafnyServer_. If you are not on Windows, please download a distribution from [Mono](http://www.mono-project.com).
   * Note: When you first open a _Dafny_ file, the extension will prompt you to automatically install _Dafny_ and Mono.
-* In case you would like the plugin to use a different _Dafny_ distribution, set the path to the `DafnyServer.exe` file via the `dafny.dafnyServerPath` user setting.
+* In case you would like the plugin to use a different _Dafny_ distribution, set the path to the `DafnyServer.exe` file via the `dafny.languageServerExePath` user setting.
 
 ## Extension Settings
 
 | Setting          | Description                              | Default          |
 | :--------------- |:---------------------------------------- |:---------------- |
-| `dafny.basePath` | Absolute path to the _Dafny_ binary directory (which contains `DafnyServer.exe`). | |
+| `dafny.languageServerExePath` | Relative path to the _Dafny_ language server executable (`DafnyServer.exe`). | |
+| `dafny.compilationArgs` | Optional array of strings as _Dafny_ compilation arguments. | |
 | `dafny.monoExecutable` | Mono executable with absolute path. Only necessary if mono is not in system PATH (you'll get an error if that's the case). Ignored on Windows when `useMono` is `false`.  | |
 | `dafny.useMono` | Only applicable to _Windows_! Requires _.NET_ 4.5 or higher when set to `false`. | `false` |
 | `dafny.automaticVerification` | Verify as soon as the document is changed. When `false`, only verify on save. | `true` |
-| `dafny.automaticVerificationDelayMS` | Delay in ms to wait after a document change before verifying document. This avoids syntax errors while typing. Only relevant if `automaticVerification` is `true`. | `700` |
 | `dafny.automaticShowCounterModel` | Show _CounterModel_ automatically if a proof fails. Might cause performance issues if `true`. | `false` |
-| `dafny.serverVerifyArguments` | Additional arguments to pass to the "verify" command of the Dafny Server. E.g.`["/timeLimit:40", "/vcsLoad:1"]` | `[]` |
+| `dafny.automaticVerificationDelayMS` | Delay in ms to wait after a document change before verifying document. This avoids syntax errors while typing. Only relevant if `automaticVerification` is `true`. | `700` |
 
 ## Examples
 

@@ -48,8 +48,13 @@
                 },
                 {
                     "when": "editorTextFocus && editorLangId == dafny",
-                    "command": "dafny.compileAndRun",
+                    "command": "dafny.compileCustomArgs",
                     "group": "7_Dafny@6"
+                },
+                {
+                    "when": "editorTextFocus && editorLangId == dafny",
+                    "command": "dafny.compileAndRun",
+                    "group": "7_Dafny@7"
                 },
                 {
                     "when": "editorTextFocus && editorLangId == dafny",
@@ -126,16 +131,12 @@
                 "dafny.languageServerExePath": {
                     "type": "string",
                     "default": "../../../../dafny-language-server/Binaries/DafnyLanguageServer.exe", 
-                    "description": "Path to the DafnyServer.exe"
+                    "description": "Relative path to the DafnyServer.exe"
                 },
                 "dafny.compilationArgs": {
                     "type": "array", 
                     "default": ["/compile:1", "/nologo"] , 
                     "description": "Optional array of strings as Dafny compilation arguments"
-                },
-                "dafny.basePath": {
-                    "type": "string",
-                    "description": "Absolute path to the _Dafny_ binary directory (which contains `DafnyServer.exe`)."
                 },
                 "dafny.useMono": {
                     "type": "boolean",
@@ -165,11 +166,6 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Show _CounterModel_ automatically if a proof fails. Might cause performance issues if `true`."
-                },
-                "dafny.serverVerifyArguments": {
-                    "type": "array",
-                    "default": [],
-                    "description": "Arguments to pass to the \"verify\" command of the Dafny Server. E.g., [\"/timeLimit:40\", \"/vcsLoad:1\"] "
                 }
             }
         },
@@ -180,18 +176,12 @@
                 "title": "Dafny: Restart DafnyServer"
             },
             {
-                "command": "dafny.installDafny",
-                "icon": "$(issue-reopened)",
-                "title": "Dafny: Install Dafny"
-            },
-            {
-                "command": "dafny.uninstallDafny",
-                "icon": "$(issue-reopened)",
-                "title": "Dafny: Uninstall Dafny"
-            },
-            {
                 "command": "dafny.compile",
                 "title": "Dafny: Compile"
+            },
+            {
+                "command": "dafny.compileCustomArgs",
+                "title": "Dafny: Compile with Custom Arguments"
             },
             {
                 "command": "dafny.compileAndRun",

@@ -2,16 +2,16 @@ import { execFileSync } from "child_process";
 import * as os from "os";
 import { log } from "util";
 import { workspace } from "vscode";
-import { Config, EnvironmentConfig } from "../stringRessources";
+import { Config, EnvironmentConfig } from "../stringRessources/commands";
 
 /**
  * Check for supported capabilities (mono/.net runtime, dafny etc.)
  */
-export default class Capabilities {
-    public static config = workspace.getConfiguration(EnvironmentConfig.Dafny);
+export default class ExecutionCapabilities {
+    private static config = workspace.getConfiguration(EnvironmentConfig.Dafny);
 
     public static hasSupportedMonoVersion(): boolean {
-        const useMono = Capabilities.config.get<boolean>(Config.UseMono);
+        const useMono = ExecutionCapabilities.config.get<boolean>(Config.UseMono);
 
         if (os.platform() === EnvironmentConfig.Win32 && !useMono) {
             // Sadly, it is not easy to find out the .NET-version on Windows.
@@ -21,8 +21,8 @@ export default class Capabilities {
             return true;
         }
 
-        const monoPath = Capabilities.config.get<string>(Config.MonoPath);
-        const monoExecutable = Capabilities.config.get<string>(Config.MonoExecutable) || monoPath || "mono";
+        const monoPath = ExecutionCapabilities.config.get<string>(Config.MonoPath);
+        const monoExecutable = ExecutionCapabilities.config.get<string>(Config.MonoExecutable) || monoPath || "mono";
 
         try {
             const monoVersionOutput = execFileSync(monoExecutable, ["--version"]);
