@@ -1,10 +1,24 @@
 "use strict";
-
 import * as vscode from "vscode";
+import { ICounterExamples, ICounterExample } from "../typeInterfaces/ICounterExample";
 
 export class CounterModelProvider {
-
     private decorators: { [docPathName: string]: vscode.TextEditorDecorationType } = {};
+    private displayOptions: vscode.DecorationRenderOptions = {
+        dark: {
+            after: {
+                backgroundColor: "#0300ad",
+                color: "#cccccc",
+                margin: "0 0 0 30px",
+            },
+        },
+        light: {
+            after: {
+                backgroundColor: "#161616",
+                color: "#cccccc",
+            },
+        },
+    };
 
     public hideCounterModel(): void {
         if (this.decorators[this.getActiveFileName()]) {
@@ -12,20 +26,20 @@ export class CounterModelProvider {
         }
     }
 
-    public showCounterModel(allCounterExamples: any): void {
+    public showCounterModel(allCounterExamples: ICounterExamples): void {
         const editor: vscode.TextEditor = vscode.window.activeTextEditor!;
         let arrayOfDecorations: vscode.DecorationOptions[] = []
 
         for (let i = 0; i < allCounterExamples.counterExamples.length; i++) {
 
-            let currentCounterExample: any = allCounterExamples.counterExamples[i];
+            let currentCounterExample: ICounterExample = allCounterExamples.counterExamples[i];
             let line = currentCounterExample.line - 1;
             let col = currentCounterExample.col;
             if (line < 0) { return }
 
-            let shownText = "";
+            let shownText = '';
             for (let [key, value] of Object.entries(currentCounterExample.variables)) {
-                shownText += key + " = " + value + "; ";
+                shownText += `${key} = ${value}; `;
             }
 
             const renderOptions: vscode.DecorationRenderOptions = {
@@ -48,26 +62,13 @@ export class CounterModelProvider {
     }
 
     private getDisplay(): vscode.TextEditorDecorationType {
-        return vscode.window.createTextEditorDecorationType({
-            dark: {
-                after: {
-                    backgroundColor: "#0300ad",
-                    color: "#cccccc",
-                    margin: "0 0 0 30px",
-                },
-            },
-            light: {
-                after: {
-                    backgroundColor: "#161616",
-                    color: "#cccccc",
-                },
-            },
-        })
+        return vscode.window.createTextEditorDecorationType(this.displayOptions);
     }
 
     private getActiveFileName(): string {
-        if (!vscode.window.activeTextEditor) return "";
-        return vscode.window.activeTextEditor.document.uri.toString();
+        return vscode.window.activeTextEditor
+            ? vscode.window.activeTextEditor.document?.uri?.toString() 
+            : "";
     }
 
 }

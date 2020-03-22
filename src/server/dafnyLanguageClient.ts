@@ -5,14 +5,19 @@ import { window } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 
-import { EnvironmentConfig } from "../stringRessources";
+import { EnvironmentConfig } from "../stringRessources/commands";
+import { Error } from "../stringRessources/messages";
 
+/*
+* Extends LanguageClient - provides basic config constructor for server initialize  
+* This class is used by dafnyLanguageServer and is basicly just an extraction. 
+*/
 export default class DafnyLanguageClient extends LanguageClient {
     constructor() {
         const config: WorkspaceConfiguration = workspace.getConfiguration(EnvironmentConfig.Dafny);
         const serverExePath : string | undefined = config.get("languageServerExePath");
         if(serverExePath === undefined)  {
-            window.showErrorMessage("Server Executable not defined: please check your config for languageServerExePath");
+            window.showErrorMessage(Error.ServerExeNotDefined);
             return; 
         }
 
@@ -20,7 +25,7 @@ export default class DafnyLanguageClient extends LanguageClient {
 
         fs.exists(dafnyLangServerExe, (exist) => {
             if (!exist) {
-                window.showErrorMessage("Server Executable not found: " + dafnyLangServerExe);
+                window.showErrorMessage(`${Error.ServerExeNotFound}: ${dafnyLangServerExe}`);
             }
         });
 

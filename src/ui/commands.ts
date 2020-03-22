@@ -1,72 +1,37 @@
+"use strict";
 import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient";
+
 import { DafnyClientProvider } from "../dafnyProvider";
-import { DafnyRunner } from "../dafnyRunner";
-import { ICompilerResult } from "../typeInterfaces/ICompilerResult";
-import { CommandStrings, Config, EnvironmentConfig, ErrorMsg, InfoMsg, LanguageServerRequest } from "../stringRessources";
+import { DafnyRunner } from "../localExecutionHelpers/dafnyRunner";
+import { References } from "../server/commandsLogic/references";
+import { Compile } from "../server/commandsLogic/compile";
+import { CounterExample } from "../server/commandsLogic/counterexample";
+import { CommandStrings } from "../stringRessources/commands";
 
 /**
- * VSCode UI Commands
+ * Registers commands for VSCode UI. Actual logic is contained in /server/commandsLogic/<feature> 
+ * to keep this file as simple as possible.
+ * Only register UI commands in this file and delgate logic to a command-class-file.
  */
 export default class Commands {
-    public static showReferences(uri: any, position: any, locations: any) {
-        function parsePosition(p: any): vscode.Position {
-            return new vscode.Position(p.line, p.character);
-        }
-        function parseRange(r: any): vscode.Range {
-            return new vscode.Range(parsePosition(r.start), parsePosition(r.end));
-        }
-        function parseLocation(l: any): vscode.Location {
-            return new vscode.Location(parseUri(l.uri), parseRange(l.range));
-        }
-        function parseUri(u: any): vscode.Uri {
-            return vscode.Uri.file(u);
-        }
+    private extensionContext: vscode.ExtensionContext;
+    private languageServer: LanguageClient;
+    private provider: DafnyClientProvider;
+    private runner: DafnyRunner;
 
-        const parsedUri = vscode.Uri.file(uri);
-        const parsedPosition = parsePosition(position);
-        const parsedLocations = [];
-        for (const location of locations) {
-            parsedLocations.push(parseLocation(location));
-        }
-
-        vscode.commands.executeCommand("editor.action.showReferences", parsedUri, parsedPosition, parsedLocations);
-    }
-
-    public extensionContext: vscode.ExtensionContext;
-    public languageServer: LanguageClient;
-    public provider: DafnyClientProvider;
-    public runner: DafnyRunner;
-
-    public commands = [
-        { name: CommandStrings.ShowReferences, callback: Commands.showReferences, doNotDispose: true },
-        { name: CommandStrings.RestartServer, callback: () => this.restartServer() },
-        { name: CommandStrings.InstallDafny, callback: () => this.installDafny() },
-        { name: CommandStrings.UninstallDafny, callback: () => this.uninstallDafny() },
-        {
-            name: CommandStrings.Compile,
-            callback: () => {
-                return vscode.window.activeTextEditor &&
-                    this.compile(vscode.window.activeTextEditor.document);
-            },
-        },
-        {
-            name: CommandStrings.CompileAndRun,
-            callback: () => {
-                return vscode.window.activeTextEditor &&
-                    this.compile(vscode.window.activeTextEditor.document, true);
-            },
-        },
-        {
+    private commands = [
+        { name: CommandStrings.ShowReferences, callback: References.showReferences, doNotDispose: true },
+        { name: CommandStrings.Compile, callback: () => Compile.doCompile(this.languageServer, this.runner, false)},
+        { name: CommandStrings.CompileCustomArgs, callback: () => Compile.doCompile(this.languageServer, this.runner, false, true)},
+        { name: CommandStrings.CompileAndRun, callback: () => Compile.doCompile(this.languageServer, this.runner, true)},
+        { name: CommandStrings.ShowCounterExample, callback: () => CounterExample.showCounterExample(this.languageServer, this.provider) },
+        { name: CommandStrings.HideCounterExample, callback: () => CounterExample.hideCounterExample(this.provider) },
+        /* Please note that the command "RestartServer" is registered in dafnyLanguageServer for a higher cohesion */ 
+        
+        {   // 2do what is this?? ticket#9042
             name: CommandStrings.EditText,
-            // tslint:disable-next-line:object-literal-sort-keys
             callback: (uri: string, version: number, edits: vscode.TextEdit[]) => this.applyTextEdits(uri, version, edits),
-        },
-        { name: CommandStrings.ShowCounterExample, callback: () => this.showCounterExample() },
-        {
-            name: CommandStrings.HideCounterExample, callback: () => {
-                this.provider.getCounterModelProvider().hideCounterModel()
-            }
         },
     ];
 
@@ -87,92 +52,9 @@ export default class Commands {
             this.extensionContext.subscriptions.push(disposable);
         }
     }
-
-    public restartServer() {
-        this.languageServer.sendRequest(LanguageServerRequest.Reset)
-            .then(() => true, () => {
-                vscode.window.showErrorMessage("Can't restart dafny");
-            });
-    }
-
-    public installDafny() {
-        this.provider.dafnyStatusbar.hideProgress();
-        this.provider.dafnyStatusbar.hide();
-        this.languageServer.sendRequest(LanguageServerRequest.Install).then((basePath) => {
-            console.log("BasePath: " + basePath);
-            const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(EnvironmentConfig.Dafny);
-            config.update(Config.DafnyBasePath, basePath, true).then(() => {
-                vscode.window.showInformationMessage("Installation finished");
-                this.provider.dafnyStatusbar.hideProgress();
-            });
-        }, (e) => {
-            vscode.window.showErrorMessage("Installing error: " + e);
-            this.provider.dafnyStatusbar.hideProgress();
-        });
-    }
-
-    public uninstallDafny() {
-        this.languageServer.sendRequest(LanguageServerRequest.Uninstall).then(() => {
-            vscode.window.showInformationMessage("Uninstall complete");
-            this.provider.dafnyStatusbar.hideProgress();
-            this.provider.dafnyStatusbar.hide();
-        }, (e) => {
-            vscode.window.showErrorMessage("Can't uninstall dafny:" + e);
-            this.provider.dafnyStatusbar.hideProgress();
-            this.provider.dafnyStatusbar.hide();
-        });
-    }
-
-    public showCounterExample() {
-        if (!vscode.window.activeTextEditor) {
-            return;
-        }
-        vscode.window.activeTextEditor.document.save();
-        const arg = { DafnyFile: vscode.window.activeTextEditor.document.fileName }
-
-        this.languageServer.sendRequest(LanguageServerRequest.CounterExample, arg)
-            .then((allCounterExamples: any) => {
-                this.provider.getCounterModelProvider().showCounterModel(allCounterExamples);
-            })
-    }
-
-    public compile(document: vscode.TextDocument | undefined, run: boolean = false): void {
-        if (!document) {
-            return; // Skip if user closed everything in the meantime
-        }
-        document.save();
-        vscode.window.showInformationMessage(InfoMsg.CompilationStarted);
-
-        const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(EnvironmentConfig.Dafny);
-        var compilationArgs : string[]  = config.get("compilationArgs") || [];
-
-        const arg = {
-            FileToCompile: document.fileName,
-            CompilationArguments: compilationArgs
-        }
-
-        this.languageServer.sendRequest<ICompilerResult>(LanguageServerRequest.Compile, arg)
-            .then((result) => {
-                if (result.error) {
-                    vscode.window.showErrorMessage(result.message || InfoMsg.CompilationFailed);
-                    return true;
-                }
-                vscode.window.showInformationMessage(result.message || InfoMsg.CompilationFinished)
-                if (run) {
-                    if (result.executable) {
-                        vscode.window.showInformationMessage(InfoMsg.CompilationStartRunner);
-                        this.runner.run(document.fileName);
-                    } else {
-                        vscode.window.showInformationMessage(ErrorMsg.NoMainMethod);
-                    }
-                }
-                return false;
-            }, (error: any) => {
-                vscode.window.showErrorMessage("Can't compile: " + error.message);
-            });
-    }
-
-    public applyTextEdits(uri: string, documentVersion: number, edits: vscode.TextEdit[]) {
+    
+    // 2do what the hell is this and when is it used?!? mybe useful for replacing text? test it || delete ticket#9042
+    private applyTextEdits(uri: string, documentVersion: number, edits: vscode.TextEdit[]) {
         const textEditor = vscode.window.activeTextEditor;
 
         if (textEditor && textEditor.document.uri.toString() === uri) {

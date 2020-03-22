@@ -1,9 +1,12 @@
 "use strict";
-
 import * as os from "os";
 import * as vscode from "vscode";
-import { Config, EnvironmentConfig } from "./stringRessources";
+import { Config, EnvironmentConfig } from "../stringRessources/commands";
 
+/*
+* This class is used for running dafny files after they are compiled 
+* Therefore it also supports mono for macOS / Linux 
+*/
 export class DafnyRunner {
     private config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(EnvironmentConfig.Dafny);
 
@@ -19,11 +22,11 @@ export class DafnyRunner {
         const executable = filename.replace(".dfy", ".exe");
         const useMono: boolean = this.config.get<boolean>(Config.UseMono) || os.platform() !== EnvironmentConfig.Win32;
         if (!useMono) {
-            return `& "${executable}"`; // TODO: this is not safe for "creative" paths.
+            return `& "${executable}"`; // TODO: this is not safe for "creative" paths. 2do
         } else {
             const monoPath = this.config.get<string>(Config.MonoPath);
             const monoExecutable = this.config.get<string>(Config.MonoExecutable) || monoPath || "mono";
-            return `${monoExecutable} "${executable}"`; // TODO: this is not safe for "creative" paths.
+            return `${monoExecutable} "${executable}"`; // TODO: this is not safe for "creative" paths. 2do
         }
     }
 }

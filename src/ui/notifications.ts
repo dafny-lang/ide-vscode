@@ -1,42 +1,28 @@
 import * as vscode from "vscode";
-import { DafnyClientProvider } from "../dafnyProvider";
 import DafnyLanguageServer from "../server/dafnyLanguageClient";
-import { Answer, LanguageServerNotification } from "../stringRessources";
-import Commands from "./commands";
+import { LanguageServerNotification } from "../stringRessources/languageServer";
 
 /**
  * VSCode UI Notifications
+ * This notifications are triggerable by the server 
+ * If you need client side notifications, use vscde.window
  */
 export default class Notifications {
-    public extensionContext: vscode.ExtensionContext;
-    public languageServer: DafnyLanguageServer;
-    public provider: DafnyClientProvider;
-    public commands: Commands;
+    private languageServer: DafnyLanguageServer;
 
-    public notifications = [
+    private notifications = [
         { method: LanguageServerNotification.Error, handler: vscode.window.showErrorMessage },
         { method: LanguageServerNotification.Warning, handler: vscode.window.showWarningMessage },
         { method: LanguageServerNotification.Info, handler: vscode.window.showInformationMessage },
     ];
 
-    constructor(extensionContext: vscode.ExtensionContext, languageServer: DafnyLanguageServer, provider: DafnyClientProvider, commands: Commands) {
-        this.extensionContext = extensionContext;
+    constructor(languageServer: DafnyLanguageServer) {
         this.languageServer = languageServer;
-        this.provider = provider;
-        this.commands = commands;
     }
 
     public registerNotifications() {
         for (const notification of this.notifications) {
             this.languageServer.onNotification(notification.method, notification.handler);
         }
-    }
-
-    public askToInstall(text: string) {
-        vscode.window.showInformationMessage(text, Answer.Yes, Answer.No).then((value) => {
-            if (Answer.Yes === value) {
-                this.commands.installDafny();
-            }
-        });
     }
 }
