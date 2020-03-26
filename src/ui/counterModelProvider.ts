@@ -33,7 +33,7 @@ export class CounterModelProvider {
         for (let i = 0; i < allCounterExamples.counterExamples.length; i++) {
 
             let currentCounterExample: ICounterExample = allCounterExamples.counterExamples[i];
-            let line = currentCounterExample.line - 1;
+            let line = currentCounterExample.line;
             let col = currentCounterExample.col;
             if (line < 0) { return }
 
@@ -49,7 +49,7 @@ export class CounterModelProvider {
             };
 
             let decorator: vscode.DecorationOptions = {
-                range: new vscode.Range(new vscode.Position(line, col), new vscode.Position(line, Number.MAX_VALUE)),
+                range: new vscode.Range(new vscode.Position(line, col +1), new vscode.Position(line, Number.MAX_VALUE)),
                 renderOptions,
             };
 

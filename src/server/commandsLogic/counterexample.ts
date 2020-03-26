@@ -18,7 +18,7 @@ export class CounterExample {
         const arg = { DafnyFile: vscode.window.activeTextEditor.document.fileName }
 
         languageServer.sendRequest(LanguageServerRequest.CounterExample, arg)
-            .then((allCounterExamples: any) => { // 2do  ICounterExamples schluckt er nicht 
+            .then((allCounterExamples: any) => { // 2do  ICounterExamples schluckt er nicht //tom: ich glaub is wegen key-value store, hatte da auch schonmal was versucht... sonst lassen wir das hier halt ausnahmsweise.
                 provider.getCounterModelProvider().showCounterModel(allCounterExamples);
             })
     }
