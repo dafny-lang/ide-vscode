@@ -1,7 +1,8 @@
 // tslint:disable:max-classes-per-file
 
 export class Warning {
-    public static NoWorkspace: string = "Please use a workspace (File - Open Folder). Otherwise some features aren't working properly";
+    public static NoWorkspace: string = "Please use a workspace (File - Open Folder). Otherwise some features aren't working properly";   //Note: Diese Nachricht geht mir übel auf den SAck, können wir die nicht löschen?
+    public static ReferencesInCounterExample: string = "Obect references can not be shown in counter examples."
 }
 
 export class Error {

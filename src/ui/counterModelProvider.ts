@@ -1,6 +1,7 @@
 "use strict";
 import * as vscode from "vscode";
 import { ICounterExamples, ICounterExample } from "../typeInterfaces/ICounterExample";
+import { Warning } from "../stringRessources/messages";
 
 export class CounterModelProvider {
     private decorators: { [docPathName: string]: vscode.TextEditorDecorationType } = {};
@@ -29,6 +30,7 @@ export class CounterModelProvider {
     public showCounterModel(allCounterExamples: ICounterExamples): void {
         const editor: vscode.TextEditor = vscode.window.activeTextEditor!;
         let arrayOfDecorations: vscode.DecorationOptions[] = []
+        let hasReferences: boolean = false;
 
         for (let i = 0; i < allCounterExamples.counterExamples.length; i++) {
 
@@ -37,11 +39,15 @@ export class CounterModelProvider {
             let col = currentCounterExample.col;
             if (line < 0) { return }
 
+            
             let shownText = '';
             for (let [key, value] of Object.entries(currentCounterExample.variables)) {
                 shownText += `${key} = ${value}; `;
-            }
 
+                if (value == "[Object Reference]") {
+                    hasReferences = true;
+                }
+            }
             const renderOptions: vscode.DecorationRenderOptions = {
                 after: {
                     contentText: shownText,
@@ -49,11 +55,15 @@ export class CounterModelProvider {
             };
 
             let decorator: vscode.DecorationOptions = {
-                range: new vscode.Range(new vscode.Position(line, col +1), new vscode.Position(line, Number.MAX_VALUE)),
+                range: new vscode.Range(new vscode.Position(line, col + 1), new vscode.Position(line, Number.MAX_VALUE)),
                 renderOptions,
             };
 
             arrayOfDecorations.push(decorator);
+        }
+        
+        if (hasReferences) {
+            vscode.window.showWarningMessage(Warning.ReferencesInCounterExample)
         }
 
         const shownTextTemplate = this.getDisplay();
