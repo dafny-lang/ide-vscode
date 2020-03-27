@@ -66,6 +66,10 @@ export class CounterModelProvider {
             vscode.window.showWarningMessage(Warning.ReferencesInCounterExample)
         }
 
+        if (allCounterExamples.counterExamples.length == 0) {
+            vscode.window.showWarningMessage(Warning.NoCounterExamples);
+        }
+
         const shownTextTemplate = this.getDisplay();
         this.decorators[this.getActiveFileName()] = shownTextTemplate;
         editor.setDecorations(shownTextTemplate, arrayOfDecorations);
