@@ -2,6 +2,9 @@
 import * as vscode from "vscode";
 import { ICounterExamples, ICounterExample } from "../typeInterfaces/ICounterExampleResult";
 import { Warning } from "../stringRessources/messages";
+import { CounterExample } from "../server/commandsLogic/counterExample";
+import { LanguageClient } from "vscode-languageclient";
+import { DafnyProvider } from "../dafnyProvider";
 
 export class CounterModelProvider {
     private fileHasVisibleCounterModel: { [docPathName: string]: boolean } = {}; 
@@ -75,6 +78,13 @@ export class CounterModelProvider {
         const shownTextTemplate = this.getDisplay();
         this.decorators[this.getActiveFileName()] = shownTextTemplate;
         editor.setDecorations(shownTextTemplate, arrayOfDecorations);
+    }
+
+    public update(languageServer: LanguageClient, provider: DafnyProvider): void {
+        if(this.fileHasVisibleCounterModel[this.getActiveFileName()] === true){
+            this.hideCounterModel(); 
+            CounterExample.showCounterExample(languageServer, provider);
+        } 
     }
 
     private getDisplay(): vscode.TextEditorDecorationType {

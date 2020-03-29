@@ -20,9 +20,7 @@ export class DafnyProvider {
 
     public registerEventListener(): void {
         vscode.window.onDidChangeActiveTextEditor((editor) => this.activeDocumentTabChanged(editor), this);
-
         vscode.workspace.onDidChangeTextDocument((arg) => this.openDocumentChanged(arg), this);
-        vscode.workspace.onDidCloseTextDocument(this.counterModelProvider.hideCounterModel, this);
     }
 
     public getCounterModelProvider() {
@@ -30,17 +28,17 @@ export class DafnyProvider {
     }
 
     private activeDocumentTabChanged(editor: vscode.TextEditor | undefined) {
-        if (editor && this.isDafnyFile(editor.document)) {
-            this.dafnyStatusbar.update();
-            this.counterModelProvider.hideCounterModel(); 
-        }
+        this.triggerUIupdates(editor);
     }
 
     private openDocumentChanged(change: vscode.TextDocumentChangeEvent): void {
-        this.counterModelProvider.hideCounterModel();
-        if (change !== null && this.isDafnyFile(change.document)) {
-            //const docName: string = change.document.fileName;
+        this.triggerUIupdates(change);
+    }
+
+    private triggerUIupdates(documentreference: vscode.TextEditor | vscode.TextDocumentChangeEvent | undefined) : void {
+        if (documentreference && this.isDafnyFile(documentreference.document)) {
             this.dafnyStatusbar.update();
+            this.counterModelProvider.update(this.languageServer, this); 
         }
     }
 
