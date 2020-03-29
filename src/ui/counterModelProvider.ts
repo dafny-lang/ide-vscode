@@ -6,6 +6,7 @@ import { Warning } from "../stringRessources/messages";
 export class CounterModelProvider {
     private decorators: { [docPathName: string]: vscode.TextEditorDecorationType } = {};
     private displayOptions: vscode.DecorationRenderOptions = {
+        // 2do
         dark: {
             after: {
                 backgroundColor: "#0300ad",

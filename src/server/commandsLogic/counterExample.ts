@@ -4,6 +4,7 @@ import { LanguageClient } from "vscode-languageclient";
 
 import { DafnyClientProvider } from "../../dafnyProvider";
 import { LanguageServerRequest } from "../../stringRessources/languageServer";
+import { ICounterExamples } from "../../typeInterfaces/ICounterExample";
 // import { ICounterExamples } from "../../typeInterfaces/ICounterExample";
 
 /*
@@ -17,8 +18,8 @@ export class CounterExample {
         vscode.window.activeTextEditor.document.save();
         const arg = { DafnyFile: vscode.window.activeTextEditor.document.fileName }
 
-        languageServer.sendRequest(LanguageServerRequest.CounterExample, arg)
-            .then((allCounterExamples: any) => { // 2do  ICounterExamples schluckt er nicht //tom: ich glaub is wegen key-value store, hatte da auch schonmal was versucht... sonst lassen wir das hier halt ausnahmsweise.
+        languageServer.sendRequest<ICounterExamples>(LanguageServerRequest.CounterExample, arg)
+            .then((allCounterExamples: ICounterExamples) => {
                 provider.getCounterModelProvider().showCounterModel(allCounterExamples);
             })
     }

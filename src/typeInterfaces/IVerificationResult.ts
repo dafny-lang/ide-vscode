@@ -1,5 +1,5 @@
 import { VerificationStatus } from "../types/verificationStatus";
-import { ICounterModel } from "./ICounterModel";
+import { ICounterExample } from "./ICounterExample";
 
 // 2do das wird gar nie verwendet oder? 
 export interface IVerificationResult {
@@ -7,5 +7,5 @@ export interface IVerificationResult {
     proofObligations: number;
     errorCount: number;
     crashed: boolean;
-    counterModel: ICounterModel; //nicht einfach counterexample? 
+    counterModel: ICounterExample;
 }
