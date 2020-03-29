@@ -7,7 +7,6 @@ import { EnvironmentConfig } from "./stringRessources/commands";
 
 /*
 * This is kinda the "main manager" for basic instances like statusbar and a filewatcher. 
-* Needs to be refactored => 2do 
 * Instance is created on server start and passed to many components. 
 */
 export class DafnyProvider {
@@ -32,8 +31,7 @@ export class DafnyProvider {
 
     private activeDocumentTabChanged(editor: vscode.TextEditor | undefined) {
         if (editor && this.isDafnyFile(editor.document)) {
-            vscode.window.showWarningMessage("Troll")
-            this.dafnyStatusbar.update(); // not working... force update :/ 
+            this.dafnyStatusbar.update();
             this.counterModelProvider.hideCounterModel(); 
         }
     }
@@ -41,8 +39,8 @@ export class DafnyProvider {
     private openDocumentChanged(change: vscode.TextDocumentChangeEvent): void {
         this.counterModelProvider.hideCounterModel();
         if (change !== null && this.isDafnyFile(change.document)) {
-            const docName: string = change.document.fileName;
-            vscode.window.showWarningMessage("Troll2 "+docName)
+            //const docName: string = change.document.fileName;
+            this.dafnyStatusbar.update();
         }
     }
 

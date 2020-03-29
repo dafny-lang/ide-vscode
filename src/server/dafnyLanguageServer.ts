@@ -9,7 +9,6 @@ import Notifications from "../ui/notifications";
 
 import { DafnyProvider } from "../dafnyProvider";
 import { DafnyRunner } from "../localExecutionHelpers/dafnyRunner";
-import { LanguageServerNotification } from "../stringRessources/languageServer";
 import { CommandStrings } from "../stringRessources/commands";
 
 /*

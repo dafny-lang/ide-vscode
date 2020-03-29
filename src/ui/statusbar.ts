@@ -7,7 +7,7 @@ import { StatusbarStrings } from "../stringRessources/messages";
 import { EnvironmentConfig } from "../stringRessources/commands";
 
 export class Statusbar {
-    private dafnyerrors: number | undefined;
+    private dafnyerrors: { [docPathName: string]: number } = {}; 
     private dafnyversion: string | undefined;
     private activeDocument: vscode.Uri | undefined;
     private serverStatusBar: vscode.StatusBarItem;
@@ -35,20 +35,10 @@ export class Statusbar {
         languageServer.onNotification(
             LanguageServerNotification.UpdateStatusbar,
             (countedErrors: number) => {
-                this.dafnyerrors = countedErrors; 
+                this.dafnyerrors[this.getActiveFileName()] = countedErrors; 
                 this.update();
             }
         );
-    }
-
-    private hide(): void {
-        this.serverStatusBar.hide();
-        this.currentDocumentStatucBar.hide();
-    }
-
-    private show(): void {
-        this.serverStatusBar.show();
-        this.currentDocumentStatucBar.show();
     }
 
     public update(): void {
@@ -57,8 +47,9 @@ export class Statusbar {
         if (!editor || editorsOpen === 0 || editor.document.languageId !== EnvironmentConfig.Dafny) {
             this.hide();
         } else {
-            this.currentDocumentStatucBar.text = (this.dafnyerrors && this.dafnyerrors > 0)
-                ? `${StatusbarStrings.NotVerified} - ${StatusbarStrings.Errors}: ${this.dafnyerrors}`
+            const errors = this.dafnyerrors[this.getActiveFileName()]; 
+            this.currentDocumentStatucBar.text = (this.dafnyerrors && errors > 0)
+                ? `${StatusbarStrings.NotVerified} - ${StatusbarStrings.Errors}: ${errors}`
                 : StatusbarStrings.Verified;
 
             if (this.dafnyversion) {
@@ -72,5 +63,21 @@ export class Statusbar {
             }
             this.show();
         }
+    }
+
+    private hide(): void {
+        this.serverStatusBar.hide();
+        this.currentDocumentStatucBar.hide();
+    }
+
+    private show(): void {
+        this.serverStatusBar.show();
+        this.currentDocumentStatucBar.show();
+    }
+
+    private getActiveFileName(): string {
+        return vscode.window.activeTextEditor
+            ? vscode.window.activeTextEditor.document?.uri?.toString() 
+            : "";
     }
 }
