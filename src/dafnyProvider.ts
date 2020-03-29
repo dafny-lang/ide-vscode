@@ -17,12 +17,7 @@ export class DafnyClientProvider {
     private counterModelProvider: CounterModelProvider;
     
     // config vars 
-    private docChangeVerify: boolean = false;
-    private docChangeDelay: number = 0;
-    private automaticShowCounterExample: boolean = false;
-
-    // some update verification arrays? useful or delete 
-    private docChangeTimers: { [docPathName: string]: NodeJS.Timer } = {};
+    private automaticShowCounterExample: boolean = false; // hmm noch einbauen oder löschen? 
 
     constructor(public vsCodeContext: vscode.ExtensionContext, public languageServer: LanguageClient) {
         this.loadConfig();
@@ -30,25 +25,16 @@ export class DafnyClientProvider {
         this.counterModelProvider = new CounterModelProvider();
     }
 
-    public activate(): void {
+    public registerEventListener(): void {
         vscode.window.onDidChangeActiveTextEditor((editor) => {
             if (editor) {
-                this.dafnyStatusbar.update();
+                this.activeDocumentTabChanged(); 
             }
         }, this);
-        vscode.workspace.onDidOpenTextDocument(this.doVerify, this);
 
-        if (this.docChangeVerify) {
-            vscode.workspace.onDidChangeTextDocument(this.docChanged, this);
-        } else {
-           // vscode.workspace.onDidChangeTextDocument((arg) => this.docChanged(arg), this);
-           // 2do
-           vscode.workspace.onDidChangeTextDocument( () => this.counterModelProvider.hideCounterModel(), this);
-        }
-        // vscode.workspace.onDidChangeTextDocument( () => this.counterModelProvider.hideCounterModel());
+        vscode.workspace.onDidChangeTextDocument((arg) => this.docChanged(arg), this);
+        vscode.workspace.onDidChangeTextDocument( () => this.counterModelProvider.hideCounterModel(), this);
 
-        
-        vscode.workspace.onDidSaveTextDocument(this.doVerify, this);
         vscode.workspace.onDidCloseTextDocument(this.counterModelProvider.hideCounterModel, this);
         vscode.workspace.onDidChangeConfiguration(this.loadConfig, this);
     }
@@ -56,19 +42,7 @@ export class DafnyClientProvider {
     private loadConfig() {
         // some config vars are loaded all over the place tho => 2do 
         const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(EnvironmentConfig.Dafny);
-        this.docChangeVerify = config.get<boolean>(Config.AutomaticVerification)!;
-        this.docChangeDelay = config.get<number>(Config.AutomaticVerificationDelay)!;
         this.automaticShowCounterExample = config.get<boolean>(Config.AutomaticShowCounterExample)!;
-    }
-
-    private doVerify(textDocument: vscode.TextDocument): void {
-        this.counterModelProvider.hideCounterModel();
-        if (this.automaticShowCounterExample) {
-            this.sendDocument(textDocument, LanguageServerNotification.CounterExample);
-        } else {
-            this.sendDocument(textDocument, LanguageServerNotification.Verify);
-        }
-
     }
 
     // hmm... 2do... counter model is spread all over the place. no good
@@ -84,19 +58,17 @@ export class DafnyClientProvider {
         }
     }
 
-    // 2do mby useful || delete
-    private docChanged(change: vscode.TextDocumentChangeEvent): void {
-        // gets not triggered at all... why? 
+    private activeDocumentTabChanged() {
+        vscode.window.showWarningMessage("Troll")
+        this.dafnyStatusbar.update(); // not working... force update :/ 
         this.counterModelProvider.hideCounterModel(); 
 
+    }
+
+    private docChanged(change: vscode.TextDocumentChangeEvent): void {
         if (change !== null && change.document !== null && change.document.languageId === EnvironmentConfig.Dafny) {
             const docName: string = change.document.fileName;
-            if (this.docChangeTimers[docName]) {
-                clearTimeout(this.docChangeTimers[docName]);
-            }
-            this.docChangeTimers[docName] = setTimeout(() => {
-                this.doVerify(change.document);
-            }, this.docChangeDelay);
+            vscode.window.showWarningMessage("Troll2 "+docName)
         }
     }
 }

@@ -4,6 +4,7 @@ import { ICounterExamples, ICounterExample } from "../typeInterfaces/ICounterExa
 import { Warning } from "../stringRessources/messages";
 
 export class CounterModelProvider {
+    private fileHasVisibleCounterModel: { [docPathName: string]: boolean } = {}; 
     private decorators: { [docPathName: string]: vscode.TextEditorDecorationType } = {};
     private displayOptions: vscode.DecorationRenderOptions = {
         // 2do
@@ -25,21 +26,20 @@ export class CounterModelProvider {
     public hideCounterModel(): void {
         if (this.decorators[this.getActiveFileName()]) {
             this.decorators[this.getActiveFileName()].dispose();
+            this.fileHasVisibleCounterModel[this.getActiveFileName()] = false; 
         }
     }
 
     public showCounterModel(allCounterExamples: ICounterExamples): void {
         const editor: vscode.TextEditor = vscode.window.activeTextEditor!;
-        let arrayOfDecorations: vscode.DecorationOptions[] = []
+        const arrayOfDecorations: vscode.DecorationOptions[] = [];
         let hasReferences: boolean = false;
 
         for (let i = 0; i < allCounterExamples.counterExamples.length; i++) {
-
             let currentCounterExample: ICounterExample = allCounterExamples.counterExamples[i];
             let line = currentCounterExample.line;
             let col = currentCounterExample.col;
             if (line < 0) { return }
-
             
             let shownText = '';
             for (let [key, value] of Object.entries(currentCounterExample.variables)) {
@@ -71,6 +71,7 @@ export class CounterModelProvider {
             vscode.window.showWarningMessage(Warning.NoCounterExamples);
         }
 
+        this.fileHasVisibleCounterModel[this.getActiveFileName()] = true; 
         const shownTextTemplate = this.getDisplay();
         this.decorators[this.getActiveFileName()] = shownTextTemplate;
         editor.setDecorations(shownTextTemplate, arrayOfDecorations);

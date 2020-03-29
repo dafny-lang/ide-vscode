@@ -158,16 +158,6 @@
                     "type": "string",
                     "description": "Mono executable with absolute path. Only necessary if mono is not in system PATH (you'll get an error if that's the case). Ignored on Windows when useMono is false."
                 },
-                "dafny.automaticVerification": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Verify as soon as the document is changed. When `false`, only verify on save."
-                },
-                "dafny.automaticVerificationDelayMS": {
-                    "type": "number",
-                    "default": 700,
-                    "description": "Delay in ms to wait after a document change before verifying document. This avoids syntax errors while typing. Only relevant if `automaticVerification` is `true`."
-                },
                 "dafny.automaticShowCounterModel": {
                     "type": "boolean",
                     "default": false,

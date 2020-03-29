@@ -41,9 +41,7 @@ export default class DafnyLanguageServer {
                 const notifications = new Notifications(this.languageServer);
                 notifications.registerNotifications();
         
-                this.languageServer.onNotification(LanguageServerNotification.Ready, () => {
-                    provider.activate();
-                });
+                provider.registerEventListener();
             }
         });
     
