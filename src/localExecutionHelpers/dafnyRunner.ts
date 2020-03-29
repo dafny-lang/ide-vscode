@@ -22,7 +22,9 @@ export class DafnyRunner {
         const executable = filename.replace(".dfy", ".exe");
         const useMono: boolean = this.config.get<boolean>(Config.UseMono) || os.platform() !== EnvironmentConfig.Win32;
         if (!useMono) {
-            return `& "${executable}"`; // TODO: this is not safe for "creative" paths. 2do
+            //const exeFile: vscode.Uri = vscode.Uri.file(executable); 
+            const exeFile: vscode.Uri = vscode.Uri.parse(executable); 
+            return `& "${exeFile.toString()}"`;
         } else {
             const monoPath = this.config.get<string>(Config.MonoPath);
             const monoExecutable = this.config.get<string>(Config.MonoExecutable) || monoPath || "mono";
