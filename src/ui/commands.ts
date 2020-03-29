@@ -6,7 +6,7 @@ import { DafnyClientProvider } from "../dafnyProvider";
 import { DafnyRunner } from "../localExecutionHelpers/dafnyRunner";
 import { References } from "../server/commandsLogic/references";
 import { Compile } from "../server/commandsLogic/compile";
-import { CounterExample } from "../server/commandsLogic/counterexample";
+import { CounterExample } from "../server/commandsLogic/counterExample";
 import { CommandStrings } from "../stringRessources/commands";
 
 /**

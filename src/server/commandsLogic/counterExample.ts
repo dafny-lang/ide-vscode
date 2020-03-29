@@ -4,8 +4,7 @@ import { LanguageClient } from "vscode-languageclient";
 
 import { DafnyClientProvider } from "../../dafnyProvider";
 import { LanguageServerRequest } from "../../stringRessources/languageServer";
-import { ICounterExamples } from "../../typeInterfaces/ICounterExample";
-// import { ICounterExamples } from "../../typeInterfaces/ICounterExample";
+import { ICounterExamples } from "../../typeInterfaces/ICounterExampleResult";
 
 /*
 * Provides Counter Example provided by the Dafny language server. 

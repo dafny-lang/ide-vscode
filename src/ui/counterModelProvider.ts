@@ -1,6 +1,6 @@
 "use strict";
 import * as vscode from "vscode";
-import { ICounterExamples, ICounterExample } from "../typeInterfaces/ICounterExample";
+import { ICounterExamples, ICounterExample } from "../typeInterfaces/ICounterExampleResult";
 import { Warning } from "../stringRessources/messages";
 
 export class CounterModelProvider {
