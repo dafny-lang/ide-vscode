@@ -1,8 +1,9 @@
 "use strict";
 import * as vscode from "vscode";
-import { LanguageClient } from "vscode-languageclient";
+import { LanguageClient, ResponseError } from "vscode-languageclient";
 
 import { ICompilerResult } from "../../typeInterfaces/ICompilerResult";
+import { ICompilerArguments } from "../../typeInterfaces/ICompilerArguments";
 import { DafnyRunner } from "../../localExecutionHelpers/dafnyRunner";
 import { Information, Error } from "../../stringRessources/messages";
 import { EnvironmentConfig } from "../../stringRessources/commands";
@@ -45,7 +46,7 @@ export class Compile {
         function sendServerRequest(filename: string, args: string[], run: boolean) {
             vscode.window.showInformationMessage(Information.CompilationStarted);
 
-            const arg: any = {
+            const arg: ICompilerArguments = { 
                 FileToCompile: filename,
                 CompilationArguments: args
             }
@@ -65,7 +66,7 @@ export class Compile {
                         }
                     }
                     return false;
-                }, (error: any) => {
+                }, (error: ResponseError<void>) => {
                     vscode.window.showErrorMessage(`${Error.CanNotCompile}: ${error.message}`);
                 });
         }

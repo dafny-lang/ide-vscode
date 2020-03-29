@@ -14,7 +14,7 @@ export class Statusbar {
     private currentDocumentStatucBar: vscode.StatusBarItem;
 
     constructor(languageServer: LanguageClient) {
-        const priority = 10; 
+        const priority: number = 10; 
         this.currentDocumentStatucBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, priority);
         this.serverStatusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, priority);
 

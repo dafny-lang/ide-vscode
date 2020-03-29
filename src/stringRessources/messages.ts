@@ -16,6 +16,7 @@ export class Error {
     public static ServerExeNotDefined: string = "Server Executable not defined: please check your config for languageServerExePath";
     public static ServerExeNotFound: string = "Server Executable not found";
     public static CanNotCompile: string = "Can not compile"; 
+    public static CanNotGetCounterExample: string = "Can not get Counter Example"; 
     public static NoAdditionalArgsGiven: string = "No additionaly arguments given";
 }
 
