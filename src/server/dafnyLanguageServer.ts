@@ -7,7 +7,7 @@ import DafnyLanguageClient from "./dafnyLanguageClient";
 import Commands from "../ui/commands";
 import Notifications from "../ui/notifications";
 
-import { DafnyProvider } from "../ui/dafnyProvider";
+import { DafnyUiManager } from "../ui/dafnyUiManager";
 import { DafnyRunner } from "../localExecutionHelpers/dafnyRunner";
 import { CommandStrings } from "../stringRessources/commands";
 
@@ -32,7 +32,7 @@ export default class DafnyLanguageServer {
     
         this.languageServer.onReady().then(() => {
             if(this.languageServer) {
-                const provider = new DafnyProvider(this.extensionContext, this.languageServer);
+                const provider = new DafnyUiManager(this.extensionContext, this.languageServer);
         
                 const commands = new Commands(this.extensionContext, this.languageServer, provider, this.runner);
                 commands.registerCommands();

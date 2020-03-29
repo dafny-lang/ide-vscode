@@ -2,7 +2,7 @@
 import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient";
 
-import { DafnyProvider } from "./dafnyProvider";
+import { DafnyUiManager } from "./dafnyUiManager";
 import { DafnyRunner } from "../localExecutionHelpers/dafnyRunner";
 import { References } from "../server/commandsLogic/references";
 import { Compile } from "../server/commandsLogic/compile";
@@ -17,7 +17,7 @@ import { CommandStrings } from "../stringRessources/commands";
 export default class Commands {
     private extensionContext: vscode.ExtensionContext;
     private languageServer: LanguageClient;
-    private provider: DafnyProvider;
+    private provider: DafnyUiManager;
     private runner: DafnyRunner;
 
     private commands = [
@@ -35,7 +35,7 @@ export default class Commands {
         },
     ];
 
-    constructor(extensionContext: vscode.ExtensionContext, languageServer: LanguageClient, provider: DafnyProvider, runner: DafnyRunner) {
+    constructor(extensionContext: vscode.ExtensionContext, languageServer: LanguageClient, provider: DafnyUiManager, runner: DafnyRunner) {
         this.languageServer = languageServer;
         this.provider = provider;
         this.runner = runner;

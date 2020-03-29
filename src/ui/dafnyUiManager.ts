@@ -9,7 +9,7 @@ import { EnvironmentConfig } from "../stringRessources/commands";
 * This is kinda the "main ui manager" for basic instances like statusbar and a filewatcher. 
 * Instance is created on server start and passed to many components. 
 */
-export class DafnyProvider {
+export class DafnyUiManager {
     private dafnyStatusbar: Statusbar;
     private counterModelProvider: CounterModelProvider;
 

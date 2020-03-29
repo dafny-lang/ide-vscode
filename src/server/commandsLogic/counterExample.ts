@@ -2,7 +2,7 @@
 import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient";
 
-import { DafnyProvider } from "../../ui/dafnyProvider";
+import { DafnyUiManager } from "../../ui/dafnyUiManager";
 import { LanguageServerRequest } from "../../stringRessources/languageServer";
 import { ICounterExamples } from "../../typeInterfaces/ICounterExampleResult";
 
@@ -10,7 +10,7 @@ import { ICounterExamples } from "../../typeInterfaces/ICounterExampleResult";
 * Provides Counter Example provided by the Dafny language server. 
 */
 export class CounterExample {
-    static showCounterExample(languageServer: LanguageClient, provider: DafnyProvider) {
+    static showCounterExample(languageServer: LanguageClient, provider: DafnyUiManager) {
         if (!vscode.window.activeTextEditor) {
             return;
         }
@@ -23,7 +23,7 @@ export class CounterExample {
             })
     }
 
-    static hideCounterExample(provider: DafnyProvider) {
+    static hideCounterExample(provider: DafnyUiManager) {
         provider.getCounterModelProvider().hideCounterModel()
     }
 }

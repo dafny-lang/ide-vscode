@@ -4,7 +4,7 @@ import { ICounterExamples, ICounterExample } from "../typeInterfaces/ICounterExa
 import { Warning } from "../stringRessources/messages";
 import { CounterExample } from "../server/commandsLogic/counterExample";
 import { LanguageClient } from "vscode-languageclient";
-import { DafnyProvider } from "./dafnyProvider";
+import { DafnyUiManager } from "./dafnyUiManager";
 
 export class CounterModelProvider {
     private fileHasVisibleCounterModel: { [docPathName: string]: boolean } = {}; 
@@ -80,7 +80,7 @@ export class CounterModelProvider {
         editor.setDecorations(shownTextTemplate, arrayOfDecorations);
     }
 
-    public update(languageServer: LanguageClient, provider: DafnyProvider): void {
+    public update(languageServer: LanguageClient, provider: DafnyUiManager): void {
         if(this.fileHasVisibleCounterModel[this.getActiveFileName()] === true){
             this.hideCounterModel(); 
             CounterExample.showCounterExample(languageServer, provider);
