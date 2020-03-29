@@ -82,6 +82,12 @@
                 "when": "editorTextFocus && editorLangId == dafny"
             },
             {
+                "command": "dafny.compileCustomArgs",
+                "key": "f6",
+                "mac": "f6",
+                "when": "editorTextFocus && editorLangId == dafny"
+            },
+            {
                 "command": "dafny.showCounterExample",
                 "key": "f7",
                 "when": "editorTextFocus && editorLangId == dafny"

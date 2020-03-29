@@ -14,7 +14,6 @@ import { LanguageServerRequest } from "../../stringRessources/languageServer";
     that can be injected with the "runner" argument)
 */
 export class Compile {
-    // 2do - weniger argumente oO 
     static doCompile(languageServer: LanguageClient, runner: DafnyRunner, run : boolean = false, customArgs: boolean = false) {
         function compile(document: vscode.TextDocument | undefined, run: boolean): void {
             if (!document) {
