@@ -21,22 +21,18 @@ export class Compile {
                 return; // Skip if user closed everything in the meantime
             }
             document.save();
-            vscode.window.showInformationMessage(Information.CompilationStarted);
     
             const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(EnvironmentConfig.Dafny);
-            let compilationArgs : string[]  = config.get("compilationArgs") || [];
-
+            const compilationArgs : string[]  = config.get("compilationArgs") || [];
             if(customArgs === true) {
-                // 2do 
-                let opt: vscode.InputBoxOptions = {
-                    placeHolder: Information.CustomCompileArgsPlaceHolder,
+                const opt: vscode.InputBoxOptions = {
+                    value: compilationArgs.join(" "),
                     prompt: Information.CustomCompileArgsLabel
-                }
+                };
                 vscode.window.showInputBox(opt).then((args) => {
                     if(args) {
-                        Array.prototype.push.apply(compilationArgs, args.split(" "))
-                        vscode.window.showInformationMessage("Args: " + compilationArgs.join(" "));
-                        sendServerRequest(document.fileName, compilationArgs, run)
+                        vscode.window.showInformationMessage("Args: " + args);
+                        sendServerRequest(document.fileName, args.split(" "), run)
                     } else {
                         vscode.window.showErrorMessage(Error.NoAdditionalArgsGiven);
                     }
@@ -48,7 +44,9 @@ export class Compile {
         }
 
         function sendServerRequest(filename: string, args: string[], run: boolean) {
-            const arg = {
+            vscode.window.showInformationMessage(Information.CompilationStarted);
+
+            const arg: any = {
                 FileToCompile: filename,
                 CompilationArguments: args
             }

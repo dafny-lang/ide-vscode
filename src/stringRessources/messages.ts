@@ -25,8 +25,7 @@ export class Information {
     public static CompilationFinished: string = "Compilation finished";
     public static CompilationStartRunner: string = "Running program...";
     public static CompilationFailed: string = "Compilation failed";
-    public static CustomCompileArgsPlaceHolder: string = "Insert arguments, separated by space. They will be added additionaly to your compilationArgs-config."; 
-    public static CustomCompileArgsLabel: string = "Additional Dafny Compilation Arguments";
+    public static CustomCompileArgsLabel: string = "Dafny Compilation Arguments";
 }
 
 export class StatusbarStrings {
