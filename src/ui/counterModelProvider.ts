@@ -10,6 +10,12 @@ import { EnvironmentConfig } from "../stringRessources/commands";
 export class CounterModelProvider {
     private fileHasVisibleCounterModel: { [docPathName: string]: boolean } = {}; 
     private decorators: { [docPathName: string]: vscode.TextEditorDecorationType } = {};
+    private displayOptions: vscode.DecorationRenderOptions = {};
+
+    constructor() {
+        this.loadDisplayOptions(); 
+        vscode.workspace.onDidChangeConfiguration(this.loadDisplayOptions, this);
+    }
 
     public hideCounterModel(): void {
         if (this.decorators[this.getActiveFileName()]) {
@@ -73,11 +79,14 @@ export class CounterModelProvider {
     }
 
     private getDisplay(): vscode.TextEditorDecorationType {
+        return vscode.window.createTextEditorDecorationType(this.displayOptions);
+    }
+
+    private loadDisplayOptions(): void {
         const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(EnvironmentConfig.Dafny);
         const customOptions: {backgroundColor: string, fontColor: string } | undefined = config.get("colorCounterExamples");
 
-        // not realy optimized yet since it loads every time the config file
-        const displayOptions: vscode.DecorationRenderOptions = {
+        this.displayOptions = {
             dark: {
                 after: {
                     backgroundColor: customOptions?.backgroundColor || "#0d47a1",
@@ -93,8 +102,6 @@ export class CounterModelProvider {
                 },
             },
         };
-        
-        return vscode.window.createTextEditorDecorationType(displayOptions);
     }
 
     private getActiveFileName(): string {

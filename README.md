@@ -49,6 +49,7 @@ Choose `Tasks -> Run Task...` to run one of the following:
 | `dafny.compilationArgs` | Optional array of strings as _Dafny_ compilation arguments. | |
 | `dafny.monoExecutable` | Mono executable with absolute path. Only necessary if mono is not in system PATH (you'll get an error if that's the case). Ignored on Windows when `useMono` is `false`.  | |
 | `dafny.useMono` | Only applicable to _Windows_! Requires _.NET_ 4.5 or higher when set to `false`. | `false` |
+| `dafny.colorCounterExamples` | Customize the color (HEX) of Counter Examples. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults. | |
 
 Please note that in this new plugin version "automatic verififaction" is always on and a language server side feature. 
 
