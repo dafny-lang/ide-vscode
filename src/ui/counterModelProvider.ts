@@ -5,26 +5,11 @@ import { Warning } from "../stringRessources/messages";
 import { CounterExample } from "../server/commandsLogic/counterExample";
 import { LanguageClient } from "vscode-languageclient";
 import { DafnyUiManager } from "./dafnyUiManager";
+import { EnvironmentConfig } from "../stringRessources/commands";
 
 export class CounterModelProvider {
     private fileHasVisibleCounterModel: { [docPathName: string]: boolean } = {}; 
     private decorators: { [docPathName: string]: vscode.TextEditorDecorationType } = {};
-    private displayOptions: vscode.DecorationRenderOptions = {
-        // 2do
-        dark: {
-            after: {
-                backgroundColor: "#0300ad",
-                color: "#cccccc",
-                margin: "0 0 0 30px",
-            },
-        },
-        light: {
-            after: {
-                backgroundColor: "#161616",
-                color: "#cccccc",
-            },
-        },
-    };
 
     public hideCounterModel(): void {
         if (this.decorators[this.getActiveFileName()]) {
@@ -88,7 +73,28 @@ export class CounterModelProvider {
     }
 
     private getDisplay(): vscode.TextEditorDecorationType {
-        return vscode.window.createTextEditorDecorationType(this.displayOptions);
+        const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(EnvironmentConfig.Dafny);
+        const customOptions: {backgroundColor: string, fontColor: string } | undefined = config.get("colorCounterExamples");
+
+        // not realy optimized yet since it loads every time the config file
+        const displayOptions: vscode.DecorationRenderOptions = {
+            dark: {
+                after: {
+                    backgroundColor: customOptions?.backgroundColor || "#0d47a1",
+                    color: customOptions?.fontColor || "#e3f2fd",
+                    margin: "0 0 0 30px",
+                },
+            },
+            light: {
+                after: {
+                    backgroundColor: customOptions?.backgroundColor || "#bbdefb",
+                    color: customOptions?.fontColor || "#102027",
+                    margin: "0 0 0 30px",
+                },
+            },
+        };
+        
+        return vscode.window.createTextEditorDecorationType(displayOptions);
     }
 
     private getActiveFileName(): string {
