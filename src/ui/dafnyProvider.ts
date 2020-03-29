@@ -1,12 +1,12 @@
 "use strict";
 import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient";
-import { CounterModelProvider } from "./ui/counterModelProvider";
-import { Statusbar } from "./ui/statusbar";
-import { EnvironmentConfig } from "./stringRessources/commands";
+import { CounterModelProvider } from "./counterModelProvider";
+import { Statusbar } from "./statusbar";
+import { EnvironmentConfig } from "../stringRessources/commands";
 
 /*
-* This is kinda the "main manager" for basic instances like statusbar and a filewatcher. 
+* This is kinda the "main ui manager" for basic instances like statusbar and a filewatcher. 
 * Instance is created on server start and passed to many components. 
 */
 export class DafnyProvider {

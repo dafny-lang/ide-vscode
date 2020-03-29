@@ -4,7 +4,7 @@ import { ICounterExamples, ICounterExample } from "../typeInterfaces/ICounterExa
 import { Warning } from "../stringRessources/messages";
 import { CounterExample } from "../server/commandsLogic/counterExample";
 import { LanguageClient } from "vscode-languageclient";
-import { DafnyProvider } from "../dafnyProvider";
+import { DafnyProvider } from "./dafnyProvider";
 
 export class CounterModelProvider {
     private fileHasVisibleCounterModel: { [docPathName: string]: boolean } = {}; 

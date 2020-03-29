@@ -7,7 +7,7 @@ import DafnyLanguageClient from "./dafnyLanguageClient";
 import Commands from "../ui/commands";
 import Notifications from "../ui/notifications";
 
-import { DafnyProvider } from "../dafnyProvider";
+import { DafnyProvider } from "../ui/dafnyProvider";
 import { DafnyRunner } from "../localExecutionHelpers/dafnyRunner";
 import { CommandStrings } from "../stringRessources/commands";
 

@@ -2,7 +2,7 @@
 import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient";
 
-import { DafnyProvider } from "../../dafnyProvider";
+import { DafnyProvider } from "../../ui/dafnyProvider";
 import { LanguageServerRequest } from "../../stringRessources/languageServer";
 import { ICounterExamples } from "../../typeInterfaces/ICounterExampleResult";
 

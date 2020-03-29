@@ -2,7 +2,7 @@
 import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient";
 
-import { DafnyProvider } from "../dafnyProvider";
+import { DafnyProvider } from "./dafnyProvider";
 import { DafnyRunner } from "../localExecutionHelpers/dafnyRunner";
 import { References } from "../server/commandsLogic/references";
 import { Compile } from "../server/commandsLogic/compile";
