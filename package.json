@@ -157,11 +157,6 @@
                 "dafny.monoExecutable": {
                     "type": "string",
                     "description": "Mono executable with absolute path. Only necessary if mono is not in system PATH (you'll get an error if that's the case). Ignored on Windows when useMono is false."
-                },
-                "dafny.automaticShowCounterModel": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Show _CounterModel_ automatically if a proof fails. Might cause performance issues if `true`."
                 }
             }
         },

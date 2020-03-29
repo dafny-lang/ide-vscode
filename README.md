@@ -49,7 +49,6 @@ Choose `Tasks -> Run Task...` to run one of the following:
 | `dafny.compilationArgs` | Optional array of strings as _Dafny_ compilation arguments. | |
 | `dafny.monoExecutable` | Mono executable with absolute path. Only necessary if mono is not in system PATH (you'll get an error if that's the case). Ignored on Windows when `useMono` is `false`.  | |
 | `dafny.useMono` | Only applicable to _Windows_! Requires _.NET_ 4.5 or higher when set to `false`. | `false` |
-| `dafny.automaticShowCounterModel` | Show _CounterModel_ automatically if a proof fails. Might cause performance issues if `true`. | `false` |
 
 Please note that in this new plugin version "automatic verififaction" is always on and a language server side feature. 
 

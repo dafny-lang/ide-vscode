@@ -15,7 +15,6 @@ export class Config {
     public static MonoPath: string = "monoPath"; // deprecated monoPath configuration option #40
     public static MonoExecutable: string = "monoExecutable";
     public static UseMono: string = "useMono";
-    public static AutomaticShowCounterExample: string = "automaticShowCounterModel";
 }
 
 export class EnvironmentConfig {
