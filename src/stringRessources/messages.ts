@@ -1,7 +1,6 @@
 // tslint:disable:max-classes-per-file
-
 export class Warning {
-    public static NoWorkspace: string = "Please use a workspace (File - Open Folder). Otherwise some features aren't working properly";   //Note: Diese Nachricht geht mir übel auf den SAck, können wir die nicht löschen?
+    public static NoWorkspace: string = "Please use a workspace (File - Open Folder). Otherwise some features may not work properly";
     public static ReferencesInCounterExample: string = "Object references can not be shown in counter examples."
     public static NoCounterExamples: string = "No counter examples could be found."
 }
@@ -16,7 +15,8 @@ export class Error {
     public static NoMainMethod: string = "Can't start a program without a Main method";
     public static ServerExeNotDefined: string = "Server Executable not defined: please check your config for languageServerExePath";
     public static ServerExeNotFound: string = "Server Executable not found";
-    public static CanNotCompile: string = "Can not compile"; 
+    public static CanNotCompile: string = "Compilation failed"; 
+    public static CanNotGetCounterExample: string = "Counter Example Request failed"; 
     public static NoAdditionalArgsGiven: string = "No additionaly arguments given";
 }
 
@@ -25,8 +25,7 @@ export class Information {
     public static CompilationFinished: string = "Compilation finished";
     public static CompilationStartRunner: string = "Running program...";
     public static CompilationFailed: string = "Compilation failed";
-    public static CustomCompileArgsPlaceHolder: string = "Insert arguments, separated by space. They will be added additionaly to your compilationArgs-config."; 
-    public static CustomCompileArgsLabel: string = "Additional Dafny Compilation Arguments";
+    public static CustomCompileArgsLabel: string = "Dafny Compilation Arguments";
 }
 
 export class StatusbarStrings {

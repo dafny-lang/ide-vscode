@@ -1,9 +1,12 @@
 export interface ICounterExample {
     line: number;
     col: number; 
-    //2do was ist genau da drinne? 
-    variables: any; 
+    variables: {
+        key: string, 
+        value: string
+    };
 }
+
 export interface ICounterExamples {
     counterExamples: ICounterExample[];
     length: number; 

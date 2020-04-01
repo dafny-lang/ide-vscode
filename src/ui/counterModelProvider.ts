@@ -1,44 +1,39 @@
 "use strict";
 import * as vscode from "vscode";
-import { ICounterExamples, ICounterExample } from "../typeInterfaces/ICounterExample";
+import { ICounterExamples, ICounterExample } from "../typeInterfaces/ICounterExampleResult";
 import { Warning } from "../stringRessources/messages";
+import { CounterExample } from "../server/commandsLogic/counterExample";
+import { LanguageClient } from "vscode-languageclient";
+import { DafnyUiManager } from "./dafnyUiManager";
+import { EnvironmentConfig } from "../stringRessources/commands";
 
 export class CounterModelProvider {
+    private fileHasVisibleCounterModel: { [docPathName: string]: boolean } = {}; 
     private decorators: { [docPathName: string]: vscode.TextEditorDecorationType } = {};
-    private displayOptions: vscode.DecorationRenderOptions = {
-        dark: {
-            after: {
-                backgroundColor: "#0300ad",
-                color: "#cccccc",
-                margin: "0 0 0 30px",
-            },
-        },
-        light: {
-            after: {
-                backgroundColor: "#161616",
-                color: "#cccccc",
-            },
-        },
-    };
+    private displayOptions: vscode.DecorationRenderOptions = {};
+
+    constructor() {
+        this.loadDisplayOptions(); 
+        vscode.workspace.onDidChangeConfiguration(this.loadDisplayOptions, this);
+    }
 
     public hideCounterModel(): void {
         if (this.decorators[this.getActiveFileName()]) {
             this.decorators[this.getActiveFileName()].dispose();
+            this.fileHasVisibleCounterModel[this.getActiveFileName()] = false; 
         }
     }
 
     public showCounterModel(allCounterExamples: ICounterExamples): void {
         const editor: vscode.TextEditor = vscode.window.activeTextEditor!;
-        let arrayOfDecorations: vscode.DecorationOptions[] = []
+        const arrayOfDecorations: vscode.DecorationOptions[] = [];
         let hasReferences: boolean = false;
 
         for (let i = 0; i < allCounterExamples.counterExamples.length; i++) {
-
             let currentCounterExample: ICounterExample = allCounterExamples.counterExamples[i];
             let line = currentCounterExample.line;
             let col = currentCounterExample.col;
             if (line < 0) { return }
-
             
             let shownText = '';
             for (let [key, value] of Object.entries(currentCounterExample.variables)) {
@@ -70,13 +65,43 @@ export class CounterModelProvider {
             vscode.window.showWarningMessage(Warning.NoCounterExamples);
         }
 
+        this.fileHasVisibleCounterModel[this.getActiveFileName()] = true; 
         const shownTextTemplate = this.getDisplay();
         this.decorators[this.getActiveFileName()] = shownTextTemplate;
         editor.setDecorations(shownTextTemplate, arrayOfDecorations);
     }
 
+    public update(languageServer: LanguageClient, provider: DafnyUiManager): void {
+        if(this.fileHasVisibleCounterModel[this.getActiveFileName()] === true){
+            this.hideCounterModel(); 
+            CounterExample.showCounterExample(languageServer, provider);
+        } 
+    }
+
     private getDisplay(): vscode.TextEditorDecorationType {
         return vscode.window.createTextEditorDecorationType(this.displayOptions);
+    }
+
+    private loadDisplayOptions(): void {
+        const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(EnvironmentConfig.Dafny);
+        const customOptions: {backgroundColor: string, fontColor: string } | undefined = config.get("colorCounterExamples");
+
+        this.displayOptions = {
+            dark: {
+                after: {
+                    backgroundColor: customOptions?.backgroundColor || "#0d47a1",
+                    color: customOptions?.fontColor || "#e3f2fd",
+                    margin: "0 0 0 30px",
+                },
+            },
+            light: {
+                after: {
+                    backgroundColor: customOptions?.backgroundColor || "#bbdefb",
+                    color: customOptions?.fontColor || "#102027",
+                    margin: "0 0 0 30px",
+                },
+            },
+        };
     }
 
     private getActiveFileName(): string {

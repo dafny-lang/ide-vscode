@@ -1,8 +1,9 @@
 "use strict";
 import * as vscode from "vscode";
-import { LanguageClient } from "vscode-languageclient";
+import { LanguageClient, ResponseError } from "vscode-languageclient";
 
 import { ICompilerResult } from "../../typeInterfaces/ICompilerResult";
+import { ICompilerArguments } from "../../typeInterfaces/ICompilerArguments";
 import { DafnyRunner } from "../../localExecutionHelpers/dafnyRunner";
 import { Information, Error } from "../../stringRessources/messages";
 import { EnvironmentConfig } from "../../stringRessources/commands";
@@ -14,29 +15,24 @@ import { LanguageServerRequest } from "../../stringRessources/languageServer";
     that can be injected with the "runner" argument)
 */
 export class Compile {
-    // 2do - weniger argumente oO 
     static doCompile(languageServer: LanguageClient, runner: DafnyRunner, run : boolean = false, customArgs: boolean = false) {
         function compile(document: vscode.TextDocument | undefined, run: boolean): void {
             if (!document) {
                 return; // Skip if user closed everything in the meantime
             }
             document.save();
-            vscode.window.showInformationMessage(Information.CompilationStarted);
     
             const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(EnvironmentConfig.Dafny);
-            let compilationArgs : string[]  = config.get("compilationArgs") || [];
-
+            const compilationArgs : string[]  = config.get("compilationArgs") || [];
             if(customArgs === true) {
-                // 2do 
-                let opt: vscode.InputBoxOptions = {
-                    placeHolder: Information.CustomCompileArgsPlaceHolder,
+                const opt: vscode.InputBoxOptions = {
+                    value: compilationArgs.join(" "),
                     prompt: Information.CustomCompileArgsLabel
-                }
+                };
                 vscode.window.showInputBox(opt).then((args) => {
                     if(args) {
-                        Array.prototype.push.apply(compilationArgs, args.split(" "))
-                        vscode.window.showInformationMessage("Args: " + compilationArgs.join(" "));
-                        sendServerRequest(document.fileName, compilationArgs, run)
+                        vscode.window.showInformationMessage("Args: " + args);
+                        sendServerRequest(document.fileName, args.split(" "), run)
                     } else {
                         vscode.window.showErrorMessage(Error.NoAdditionalArgsGiven);
                     }
@@ -48,7 +44,9 @@ export class Compile {
         }
 
         function sendServerRequest(filename: string, args: string[], run: boolean) {
-            const arg = {
+            vscode.window.showInformationMessage(Information.CompilationStarted);
+
+            const arg: ICompilerArguments = { 
                 FileToCompile: filename,
                 CompilationArguments: args
             }
@@ -68,7 +66,7 @@ export class Compile {
                         }
                     }
                     return false;
-                }, (error: any) => {
+                }, (error: ResponseError<void>) => {
                     vscode.window.showErrorMessage(`${Error.CanNotCompile}: ${error.message}`);
                 });
         }

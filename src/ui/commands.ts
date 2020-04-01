@@ -2,11 +2,10 @@
 import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient";
 
-import { DafnyClientProvider } from "../dafnyProvider";
+import { DafnyUiManager } from "./dafnyUiManager";
 import { DafnyRunner } from "../localExecutionHelpers/dafnyRunner";
-import { References } from "../server/commandsLogic/references";
 import { Compile } from "../server/commandsLogic/compile";
-import { CounterExample } from "../server/commandsLogic/counterexample";
+import { CounterExample } from "../server/commandsLogic/counterExample";
 import { CommandStrings } from "../stringRessources/commands";
 
 /**
@@ -17,11 +16,10 @@ import { CommandStrings } from "../stringRessources/commands";
 export default class Commands {
     private extensionContext: vscode.ExtensionContext;
     private languageServer: LanguageClient;
-    private provider: DafnyClientProvider;
+    private provider: DafnyUiManager;
     private runner: DafnyRunner;
 
     private commands = [
-        { name: CommandStrings.ShowReferences, callback: References.showReferences, doNotDispose: true },
         { name: CommandStrings.Compile, callback: () => Compile.doCompile(this.languageServer, this.runner, false)},
         { name: CommandStrings.CompileCustomArgs, callback: () => Compile.doCompile(this.languageServer, this.runner, false, true)},
         { name: CommandStrings.CompileAndRun, callback: () => Compile.doCompile(this.languageServer, this.runner, true)},
@@ -35,7 +33,7 @@ export default class Commands {
         },
     ];
 
-    constructor(extensionContext: vscode.ExtensionContext, languageServer: LanguageClient, provider: DafnyClientProvider, runner: DafnyRunner) {
+    constructor(extensionContext: vscode.ExtensionContext, languageServer: LanguageClient, provider: DafnyUiManager, runner: DafnyRunner) {
         this.languageServer = languageServer;
         this.provider = provider;
         this.runner = runner;
@@ -45,14 +43,11 @@ export default class Commands {
     public registerCommands() {
         for (const cmd of this.commands) {
             const disposable = vscode.commands.registerCommand(cmd.name, cmd.callback);
-
-            if (cmd.doNotDispose) {
-                continue;
-            }
             this.extensionContext.subscriptions.push(disposable);
         }
     }
     
+    // mby useful for renaming / refactoring tools 
     // 2do what the hell is this and when is it used?!? mybe useful for replacing text? test it || delete ticket#9042
     private applyTextEdits(uri: string, documentVersion: number, edits: vscode.TextEdit[]) {
         const textEditor = vscode.window.activeTextEditor;

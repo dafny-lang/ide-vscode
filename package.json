@@ -82,6 +82,12 @@
                 "when": "editorTextFocus && editorLangId == dafny"
             },
             {
+                "command": "dafny.compileCustomArgs",
+                "key": "f6",
+                "mac": "f6",
+                "when": "editorTextFocus && editorLangId == dafny"
+            },
+            {
                 "command": "dafny.showCounterExample",
                 "key": "f7",
                 "when": "editorTextFocus && editorLangId == dafny"
@@ -151,21 +157,14 @@
                 "dafny.monoExecutable": {
                     "type": "string",
                     "description": "Mono executable with absolute path. Only necessary if mono is not in system PATH (you'll get an error if that's the case). Ignored on Windows when useMono is false."
-                },
-                "dafny.automaticVerification": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Verify as soon as the document is changed. When `false`, only verify on save."
-                },
-                "dafny.automaticVerificationDelayMS": {
-                    "type": "number",
-                    "default": 700,
-                    "description": "Delay in ms to wait after a document change before verifying document. This avoids syntax errors while typing. Only relevant if `automaticVerification` is `true`."
-                },
-                "dafny.automaticShowCounterModel": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Show _CounterModel_ automatically if a proof fails. Might cause performance issues if `true`."
+                }, 
+                "dafny.colorCounterExamples": {
+                    "type": "object",
+                    "default": {
+                        "backgroundColor": null, 
+                        "fontColor": null 
+                    },
+                    "description": "Customize the color (HEX) of Counter Examples. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults."
                 }
             }
         },

@@ -21,8 +21,9 @@ You can find [more Examples below](#examples).
 
 | Shortcut                  | Description                                                          |
 | :------------------------ |:-------------------------------------------------------------------- | 
-| `Ctrl+Shift+B` or `⇧+⌘+B` | Compile `.dfy` file to `.dll` or `.exe`, if there is a `Main` method |
+| `Ctrl+Shift+B` or `⇧+⌘+B`| Compile to `.dll` or, if there is a `Main` method, to `.exe` file     |
 | `F5`                      | Compile and run, if the source file has a `Main` method              |
+| `F6`                      | Compile with custom arguments                                        |
 | `F7`                      | Show _CounterExample_                                                |
 | `F8`                      | Hide _CounterExample_                                                |
 
@@ -48,9 +49,9 @@ Choose `Tasks -> Run Task...` to run one of the following:
 | `dafny.compilationArgs` | Optional array of strings as _Dafny_ compilation arguments. | |
 | `dafny.monoExecutable` | Mono executable with absolute path. Only necessary if mono is not in system PATH (you'll get an error if that's the case). Ignored on Windows when `useMono` is `false`.  | |
 | `dafny.useMono` | Only applicable to _Windows_! Requires _.NET_ 4.5 or higher when set to `false`. | `false` |
-| `dafny.automaticVerification` | Verify as soon as the document is changed. When `false`, only verify on save. | `true` |
-| `dafny.automaticShowCounterModel` | Show _CounterModel_ automatically if a proof fails. Might cause performance issues if `true`. | `false` |
-| `dafny.automaticVerificationDelayMS` | Delay in ms to wait after a document change before verifying document. This avoids syntax errors while typing. Only relevant if `automaticVerification` is `true`. | `700` |
+| `dafny.colorCounterExamples` | Customize the color (HEX) of Counter Examples. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults. | |
+
+Please note that in this new plugin version "automatic verififaction" is always on and a language server side feature. 
 
 ## Examples
 
