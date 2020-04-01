@@ -21,9 +21,9 @@ You can find [more Examples below](#examples).
 
 | Shortcut                  | Description                                                          |
 | :------------------------ |:-------------------------------------------------------------------- | 
-| `Ctrl+Shift+B` or `⇧+⌘+B`| Compile `.dfy` file to `.dll` or `.exe`, if there is a `Main` method |
+| `Ctrl+Shift+B` or `⇧+⌘+B`| Compile to `.dll` or, if there is a `Main` method, to `.exe` file     |
 | `F5`                      | Compile and run, if the source file has a `Main` method              |
-| `F6`                      | Compile with custom arguments, if there is a `Main` method           |
+| `F6`                      | Compile with custom arguments                                        |
 | `F7`                      | Show _CounterExample_                                                |
 | `F8`                      | Hide _CounterExample_                                                |
 
