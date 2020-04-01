@@ -15,8 +15,8 @@ export class Error {
     public static NoMainMethod: string = "Can't start a program without a Main method";
     public static ServerExeNotDefined: string = "Server Executable not defined: please check your config for languageServerExePath";
     public static ServerExeNotFound: string = "Server Executable not found";
-    public static CanNotCompile: string = "Can not compile"; 
-    public static CanNotGetCounterExample: string = "Can not get Counter Example"; 
+    public static CanNotCompile: string = "Compilation failed"; 
+    public static CanNotGetCounterExample: string = "Counter Example Request failed"; 
     public static NoAdditionalArgsGiven: string = "No additionaly arguments given";
 }
 
