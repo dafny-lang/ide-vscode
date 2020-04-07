@@ -11,6 +11,11 @@ export class CounterModelProvider {
     private fileHasVisibleCounterModel: { [docPathName: string]: boolean } = {}; 
     private decorators: { [docPathName: string]: vscode.TextEditorDecorationType } = {};
     private displayOptions: vscode.DecorationRenderOptions = {};
+    private readonly defaultDarkBackgroundColor: string = "#0d47a1";
+    private readonly defaultDarkFontColor = "#e3f2fd";
+    private readonly defaultLightBackgroundColor = "#bbdefb";
+    private readonly defaultLightFontColor = "#102027";
+    private readonly defaultMargin = "0 0 0 30px";
 
     constructor() {
         this.loadDisplayOptions(); 
@@ -89,16 +94,16 @@ export class CounterModelProvider {
         this.displayOptions = {
             dark: {
                 after: {
-                    backgroundColor: customOptions?.backgroundColor || "#0d47a1",
-                    color: customOptions?.fontColor || "#e3f2fd",
-                    margin: "0 0 0 30px",
+                    backgroundColor: customOptions?.backgroundColor || this.defaultDarkBackgroundColor,
+                    color: customOptions?.fontColor || this.defaultDarkFontColor,
+                    margin: this.defaultMargin,
                 },
             },
             light: {
                 after: {
-                    backgroundColor: customOptions?.backgroundColor || "#bbdefb",
-                    color: customOptions?.fontColor || "#102027",
-                    margin: "0 0 0 30px",
+                    backgroundColor: customOptions?.backgroundColor || this.defaultLightBackgroundColor,
+                    color: customOptions?.fontColor || this.defaultLightFontColor,
+                    margin: this.defaultMargin,
                 },
             },
         };
