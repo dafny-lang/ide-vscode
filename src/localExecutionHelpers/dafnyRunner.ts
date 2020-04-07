@@ -22,11 +22,11 @@ export class DafnyRunner {
         const executable = filename.replace(".dfy", ".exe");
         const useMono: boolean = this.config.get<boolean>(Config.UseMono) || os.platform() !== EnvironmentConfig.Win32;
         if (!useMono) {
-            return `& "${executable}"`; // TODO: this is not safe for "creative" paths. 2do
+            return `& "${executable}"`;
         } else {
             const monoPath = this.config.get<string>(Config.MonoPath);
             const monoExecutable = this.config.get<string>(Config.MonoExecutable) || monoPath || "mono";
-            return `${monoExecutable} "${executable}"`; // TODO: this is not safe for "creative" paths. 2do
+            return `${monoExecutable} "${executable}"`;
         }
     }
 }
