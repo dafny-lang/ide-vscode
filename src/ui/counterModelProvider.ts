@@ -35,7 +35,7 @@ export class CounterModelProvider {
         }
     }
 
-    public showCounterModel(allCounterExamples: ICounterExamples): void {
+    public showCounterModel(allCounterExamples: ICounterExamples, autoTriggered: Boolean = false): void {
         const editor: vscode.TextEditor = vscode.window.activeTextEditor!;
         const arrayOfDecorations: vscode.DecorationOptions[] = [];
         let hasReferences: boolean = false;
@@ -68,11 +68,11 @@ export class CounterModelProvider {
             arrayOfDecorations.push(decorator);
         }
         
-        if (hasReferences) {
+        if (!autoTriggered && hasReferences) {
             vscode.window.showWarningMessage(Warning.ReferencesInCounterExample)
         }
 
-        if (allCounterExamples.counterExamples.length == 0) {
+        if (!autoTriggered && allCounterExamples.counterExamples.length == 0) {
             vscode.window.showWarningMessage(Warning.NoCounterExamples);
         }
 
@@ -85,7 +85,7 @@ export class CounterModelProvider {
     public update(languageServer: LanguageClient, provider: DafnyUiManager): void {
         if(this.fileHasVisibleCounterModel[DafnyFileChecker.getActiveFileName()] === true){
             this.hideCounterModel(); 
-            CounterExample.showCounterExample(languageServer, provider);
+            CounterExample.showCounterExample(languageServer, provider, true);
         } 
     }
 

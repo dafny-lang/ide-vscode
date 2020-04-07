@@ -15,7 +15,7 @@ export class CounterExample {
     private static timeout: NodeJS.Timer;
     private static readonly timeoutDuration: number = 500; //ms
      
-    static showCounterExample(languageServer: LanguageClient, provider: DafnyUiManager) {
+    static showCounterExample(languageServer: LanguageClient, provider: DafnyUiManager, autoTriggered: Boolean = false) {
         if (!vscode.window.activeTextEditor) {
             return;
         }
@@ -31,14 +31,14 @@ export class CounterExample {
         this.timeout = setTimeout(function() {
             languageServer.sendRequest<ICounterExamples>(LanguageServerRequest.CounterExample, arg)
             .then((allCounterExamples: ICounterExamples) => {
-                provider.getCounterModelProvider().showCounterModel(allCounterExamples);
+                provider.getCounterModelProvider().showCounterModel(allCounterExamples, autoTriggered);
             }, (error: ResponseError<void>) => {
                 vscode.window.showErrorMessage(`${Error.CanNotGetCounterExample}: ${error.message}`);
             })
-        }, this.timeoutDuration);
+        }, autoTriggered ? this.timeoutDuration : 1);
     }
 
     static hideCounterExample(provider: DafnyUiManager) {
-        provider.getCounterModelProvider().hideCounterModel()
+        provider.getCounterModelProvider().hideCounterModel();
     }
 }
