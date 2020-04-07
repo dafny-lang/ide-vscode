@@ -8,6 +8,11 @@ import { DafnyUiManager } from "./dafnyUiManager";
 import { EnvironmentConfig } from "../stringRessources/commands";
 import { DafnyFileChecker } from "./dafnyFileChecker";
 
+/**
+ * This is the general UI element provider for counter models. 
+ * There is one instance (created in the dafnyUiManager) of this compnent and for every file the counter model is handled in this instance. 
+ * This component is responsible for show and hide counter examples in case one is closing and repoening a file. 
+ */
 export class CounterModelProvider {
     private fileHasVisibleCounterModel: { [docPathName: string]: boolean } = {}; 
     private decorators: { [docPathName: string]: vscode.TextEditorDecorationType } = {};

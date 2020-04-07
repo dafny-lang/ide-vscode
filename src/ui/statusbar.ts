@@ -7,6 +7,12 @@ import { StatusbarStrings } from "../stringRessources/messages";
 import { EnvironmentConfig } from "../stringRessources/commands";
 import { DafnyFileChecker } from "./dafnyFileChecker";
 
+/**
+ * This component adds additional information to the status bare like
+ * if the Dafny file is valid or not and how many errors were found. 
+ * It shows also the information if the server has been startet and the Dafny version received from the server. 
+ * There exists only one instance of this component (created in the dafnyUiManager). 
+ */
 export class Statusbar {
     private dafnyerrors: { [docPathName: string]: number } = {}; 
     private dafnyversion: string | undefined;
