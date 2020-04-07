@@ -6,6 +6,7 @@ import { CounterExample } from "../server/commandsLogic/counterExample";
 import { LanguageClient } from "vscode-languageclient";
 import { DafnyUiManager } from "./dafnyUiManager";
 import { EnvironmentConfig } from "../stringRessources/commands";
+import { DafnyFileChecker } from "./dafnyFileChecker";
 
 export class CounterModelProvider {
     private fileHasVisibleCounterModel: { [docPathName: string]: boolean } = {}; 
@@ -23,9 +24,9 @@ export class CounterModelProvider {
     }
 
     public hideCounterModel(): void {
-        if (this.decorators[this.getActiveFileName()]) {
-            this.decorators[this.getActiveFileName()].dispose();
-            this.fileHasVisibleCounterModel[this.getActiveFileName()] = false; 
+        if (this.decorators[DafnyFileChecker.getActiveFileName()]) {
+            this.decorators[DafnyFileChecker.getActiveFileName()].dispose();
+            this.fileHasVisibleCounterModel[DafnyFileChecker.getActiveFileName()] = false; 
         }
     }
 
@@ -70,14 +71,14 @@ export class CounterModelProvider {
             vscode.window.showWarningMessage(Warning.NoCounterExamples);
         }
 
-        this.fileHasVisibleCounterModel[this.getActiveFileName()] = true; 
+        this.fileHasVisibleCounterModel[DafnyFileChecker.getActiveFileName()] = true; 
         const shownTextTemplate = this.getDisplay();
-        this.decorators[this.getActiveFileName()] = shownTextTemplate;
+        this.decorators[DafnyFileChecker.getActiveFileName()] = shownTextTemplate;
         editor.setDecorations(shownTextTemplate, arrayOfDecorations);
     }
 
     public update(languageServer: LanguageClient, provider: DafnyUiManager): void {
-        if(this.fileHasVisibleCounterModel[this.getActiveFileName()] === true){
+        if(this.fileHasVisibleCounterModel[DafnyFileChecker.getActiveFileName()] === true){
             this.hideCounterModel(); 
             CounterExample.showCounterExample(languageServer, provider);
         } 
@@ -108,11 +109,4 @@ export class CounterModelProvider {
             },
         };
     }
-
-    private getActiveFileName(): string {
-        return vscode.window.activeTextEditor
-            ? vscode.window.activeTextEditor.document?.uri?.toString() 
-            : "";
-    }
-
 }

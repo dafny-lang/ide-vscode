@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient";
 import { CounterModelProvider } from "./counterModelProvider";
 import { Statusbar } from "./statusbar";
-import { EnvironmentConfig } from "../stringRessources/commands";
+import { DafnyFileChecker } from "./dafnyFileChecker";
 
 /*
 * This is kinda the "main ui manager" for basic instances like statusbar and a filewatcher. 
@@ -36,13 +36,9 @@ export class DafnyUiManager {
     }
 
     private triggerUIupdates(documentreference: vscode.TextEditor | vscode.TextDocumentChangeEvent | undefined) : void {
-        if (documentreference && this.isDafnyFile(documentreference.document)) {
+        if (documentreference && DafnyFileChecker.isDafnyFile(documentreference.document)) {
             this.dafnyStatusbar.update();
             this.counterModelProvider.update(this.languageServer, this); 
         }
-    }
-
-    private isDafnyFile(document: vscode.TextDocument) {
-        return document !== null && document.languageId === EnvironmentConfig.Dafny; 
     }
 }
