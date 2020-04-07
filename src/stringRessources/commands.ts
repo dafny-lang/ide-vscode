@@ -2,7 +2,7 @@
 
 export class CommandStrings {
     public static RestartServer: string = "dafny.restartDafnyServer";
-    public static EditText: string = "dafny.editText"; // 2do needed?? 
+    public static EditText: string = "dafny.editText"; // 2do needed?? #1245
     public static Compile: string = "dafny.compile";
     public static CompileCustomArgs: string = "dafny.compileCustomArgs";
     public static CompileAndRun: string = "dafny.compileAndRun";
@@ -18,9 +18,9 @@ export class Config {
 
 export class EnvironmentConfig {
     public static Dafny: string = "dafny";
-    public static Mono: string = "mono"; // 2do could be used 
-    public static NewLine: string = "\n"; // 2do could be used 
+    public static Mono: string = "mono"; // 2do could be used #1245
+    public static NewLine: string = "\n"; // 2do could be used #1245
     public static Win32: string = "win32";
     public static OSX: string = "darwin";
-    public static Ubuntu: string = "linux"; // 2do could be used 
+    public static Ubuntu: string = "linux"; // 2do could be used #1245
 }
