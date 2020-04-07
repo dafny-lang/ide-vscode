@@ -13,6 +13,7 @@ import { ICounterExampleArguments } from "../../typeInterfaces/ICounterExampleAr
 */
 export class CounterExample {
     private static timeout: NodeJS.Timer;
+    private static readonly timeoutDuration: number = 500; //ms
      
     static showCounterExample(languageServer: LanguageClient, provider: DafnyUiManager) {
         if (!vscode.window.activeTextEditor) {
@@ -24,16 +25,17 @@ export class CounterExample {
             DafnyFile: vscode.window.activeTextEditor.document.fileName 
         };
 
+        // This timeout makes sure, that max 2 server requests each second were sent. 
+        // Otherwise - if a user would tipping verry fast - there would be a huge, unnecessary request overhead.
         clearTimeout( this.timeout )
         this.timeout = setTimeout(function() {
-            vscode.window.showErrorMessage(`Updated`);
             languageServer.sendRequest<ICounterExamples>(LanguageServerRequest.CounterExample, arg)
             .then((allCounterExamples: ICounterExamples) => {
                 provider.getCounterModelProvider().showCounterModel(allCounterExamples);
             }, (error: ResponseError<void>) => {
                 vscode.window.showErrorMessage(`${Error.CanNotGetCounterExample}: ${error.message}`);
             })
-        }, 500);
+        }, this.timeoutDuration);
     }
 
     static hideCounterExample(provider: DafnyUiManager) {
