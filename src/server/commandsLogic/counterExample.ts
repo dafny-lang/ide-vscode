@@ -12,6 +12,8 @@ import { ICounterExampleArguments } from "../../typeInterfaces/ICounterExampleAr
 * Provides Counter Example provided by the Dafny language server. 
 */
 export class CounterExample {
+    private static timeout: NodeJS.Timer;
+     
     static showCounterExample(languageServer: LanguageClient, provider: DafnyUiManager) {
         if (!vscode.window.activeTextEditor) {
             return;
@@ -22,12 +24,16 @@ export class CounterExample {
             DafnyFile: vscode.window.activeTextEditor.document.fileName 
         };
 
-        languageServer.sendRequest<ICounterExamples>(LanguageServerRequest.CounterExample, arg)
+        clearTimeout( this.timeout )
+        this.timeout = setTimeout(function() {
+            vscode.window.showErrorMessage(`Updated`);
+            languageServer.sendRequest<ICounterExamples>(LanguageServerRequest.CounterExample, arg)
             .then((allCounterExamples: ICounterExamples) => {
                 provider.getCounterModelProvider().showCounterModel(allCounterExamples);
             }, (error: ResponseError<void>) => {
                 vscode.window.showErrorMessage(`${Error.CanNotGetCounterExample}: ${error.message}`);
             })
+        }, 500);
     }
 
     static hideCounterExample(provider: DafnyUiManager) {
