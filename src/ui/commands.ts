@@ -23,8 +23,8 @@ export default class Commands {
         { name: CommandStrings.Compile, callback: () => Compile.doCompile(this.languageServer, this.runner, false)},
         { name: CommandStrings.CompileCustomArgs, callback: () => Compile.doCompile(this.languageServer, this.runner, false, true)},
         { name: CommandStrings.CompileAndRun, callback: () => Compile.doCompile(this.languageServer, this.runner, true)},
-        { name: CommandStrings.ShowCounterExample, callback: () => CounterExample.showCounterExample(this.languageServer, this.provider) },
-        { name: CommandStrings.HideCounterExample, callback: () => CounterExample.hideCounterExample(this.provider) },
+        { name: CommandStrings.ShowCounterExample, callback: () => CounterExample.createCounterExample(this.languageServer, this.provider.getCounterModelProvider()) },
+        { name: CommandStrings.HideCounterExample, callback: () => this.provider.getCounterModelProvider().hideCounterModel() },
         /* Please note that the command "RestartServer" is registered in dafnyLanguageServer for a higher cohesion */ 
         
         {   // 2do what is this?? ticket#9042

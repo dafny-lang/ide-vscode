@@ -85,7 +85,7 @@ export class CounterModelProvider {
     public update(languageServer: LanguageClient, provider: DafnyUiManager): void {
         if(this.fileHasVisibleCounterModel[DafnyFileChecker.getActiveFileName()] === true){
             this.hideCounterModel(); 
-            CounterExample.showCounterExample(languageServer, provider, true);
+            CounterExample.createCounterExample(languageServer, provider.getCounterModelProvider(), true);
         } 
     }
 
