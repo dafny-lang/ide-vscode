@@ -5,7 +5,14 @@ import { LanguageClient } from "vscode-languageclient";
 import { LanguageServerNotification } from "../stringRessources/languageServer";
 import { StatusbarStrings } from "../stringRessources/messages";
 import { EnvironmentConfig } from "../stringRessources/commands";
+import { DafnyFileChecker } from "./dafnyFileChecker";
 
+/**
+ * This component adds additional information to the status bare like
+ * if the Dafny file is valid or not and how many errors were found. 
+ * It shows also the information if the server has been startet and the Dafny version received from the server. 
+ * There exists only one instance of this component (created in the dafnyUiManager). 
+ */
 export class Statusbar {
     private dafnyerrors: { [docPathName: string]: number } = {}; 
     private dafnyversion: string | undefined;
@@ -35,7 +42,7 @@ export class Statusbar {
         languageServer.onNotification(
             LanguageServerNotification.UpdateStatusbar,
             (countedErrors: number) => {
-                this.dafnyerrors[this.getActiveFileName()] = countedErrors; 
+                this.dafnyerrors[DafnyFileChecker.getActiveFileName()] = countedErrors; 
                 this.update();
             }
         );
@@ -47,7 +54,7 @@ export class Statusbar {
         if (!editor || editorsOpen === 0 || editor.document.languageId !== EnvironmentConfig.Dafny) {
             this.hide();
         } else {
-            const errors = this.dafnyerrors[this.getActiveFileName()]; 
+            const errors = this.dafnyerrors[DafnyFileChecker.getActiveFileName()]; 
             this.currentDocumentStatucBar.text = (this.dafnyerrors && errors > 0)
                 ? `${StatusbarStrings.NotVerified} - ${StatusbarStrings.Errors}: ${errors}`
                 : StatusbarStrings.Verified;
@@ -73,11 +80,5 @@ export class Statusbar {
     private show(): void {
         this.serverStatusBar.show();
         this.currentDocumentStatucBar.show();
-    }
-
-    private getActiveFileName(): string {
-        return vscode.window.activeTextEditor
-            ? vscode.window.activeTextEditor.document?.uri?.toString() 
-            : "";
     }
 }

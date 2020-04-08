@@ -6,11 +6,22 @@ import { CounterExample } from "../server/commandsLogic/counterExample";
 import { LanguageClient } from "vscode-languageclient";
 import { DafnyUiManager } from "./dafnyUiManager";
 import { EnvironmentConfig } from "../stringRessources/commands";
+import { DafnyFileChecker } from "./dafnyFileChecker";
 
+/**
+ * This is the general UI element provider for counter models. 
+ * There is one instance (created in the dafnyUiManager) of this compnent and for every file the counter model is handled in this instance. 
+ * This component is responsible for show and hide counter examples in case one is closing and repoening a file. 
+ */
 export class CounterModelProvider {
     private fileHasVisibleCounterModel: { [docPathName: string]: boolean } = {}; 
     private decorators: { [docPathName: string]: vscode.TextEditorDecorationType } = {};
     private displayOptions: vscode.DecorationRenderOptions = {};
+    private readonly defaultDarkBackgroundColor: string = "#0d47a1";
+    private readonly defaultDarkFontColor = "#e3f2fd";
+    private readonly defaultLightBackgroundColor = "#bbdefb";
+    private readonly defaultLightFontColor = "#102027";
+    private readonly defaultMargin = "0 0 0 30px";
 
     constructor() {
         this.loadDisplayOptions(); 
@@ -18,13 +29,13 @@ export class CounterModelProvider {
     }
 
     public hideCounterModel(): void {
-        if (this.decorators[this.getActiveFileName()]) {
-            this.decorators[this.getActiveFileName()].dispose();
-            this.fileHasVisibleCounterModel[this.getActiveFileName()] = false; 
+        if (this.decorators[DafnyFileChecker.getActiveFileName()]) {
+            this.decorators[DafnyFileChecker.getActiveFileName()].dispose();
+            this.fileHasVisibleCounterModel[DafnyFileChecker.getActiveFileName()] = false; 
         }
     }
 
-    public showCounterModel(allCounterExamples: ICounterExamples): void {
+    public showCounterModel(allCounterExamples: ICounterExamples, autoTriggered: Boolean = false): void {
         const editor: vscode.TextEditor = vscode.window.activeTextEditor!;
         const arrayOfDecorations: vscode.DecorationOptions[] = [];
         let hasReferences: boolean = false;
@@ -57,24 +68,24 @@ export class CounterModelProvider {
             arrayOfDecorations.push(decorator);
         }
         
-        if (hasReferences) {
+        if (!autoTriggered && hasReferences) {
             vscode.window.showWarningMessage(Warning.ReferencesInCounterExample)
         }
 
-        if (allCounterExamples.counterExamples.length == 0) {
+        if (!autoTriggered && allCounterExamples.counterExamples.length == 0) {
             vscode.window.showWarningMessage(Warning.NoCounterExamples);
         }
 
-        this.fileHasVisibleCounterModel[this.getActiveFileName()] = true; 
+        this.fileHasVisibleCounterModel[DafnyFileChecker.getActiveFileName()] = true; 
         const shownTextTemplate = this.getDisplay();
-        this.decorators[this.getActiveFileName()] = shownTextTemplate;
+        this.decorators[DafnyFileChecker.getActiveFileName()] = shownTextTemplate;
         editor.setDecorations(shownTextTemplate, arrayOfDecorations);
     }
 
     public update(languageServer: LanguageClient, provider: DafnyUiManager): void {
-        if(this.fileHasVisibleCounterModel[this.getActiveFileName()] === true){
+        if(this.fileHasVisibleCounterModel[DafnyFileChecker.getActiveFileName()] === true){
             this.hideCounterModel(); 
-            CounterExample.showCounterExample(languageServer, provider);
+            CounterExample.createCounterExample(languageServer, provider.getCounterModelProvider(), true);
         } 
     }
 
@@ -89,25 +100,18 @@ export class CounterModelProvider {
         this.displayOptions = {
             dark: {
                 after: {
-                    backgroundColor: customOptions?.backgroundColor || "#0d47a1",
-                    color: customOptions?.fontColor || "#e3f2fd",
-                    margin: "0 0 0 30px",
+                    backgroundColor: customOptions?.backgroundColor || this.defaultDarkBackgroundColor,
+                    color: customOptions?.fontColor || this.defaultDarkFontColor,
+                    margin: this.defaultMargin,
                 },
             },
             light: {
                 after: {
-                    backgroundColor: customOptions?.backgroundColor || "#bbdefb",
-                    color: customOptions?.fontColor || "#102027",
-                    margin: "0 0 0 30px",
+                    backgroundColor: customOptions?.backgroundColor || this.defaultLightBackgroundColor,
+                    color: customOptions?.fontColor || this.defaultLightFontColor,
+                    margin: this.defaultMargin,
                 },
             },
         };
     }
-
-    private getActiveFileName(): string {
-        return vscode.window.activeTextEditor
-            ? vscode.window.activeTextEditor.document?.uri?.toString() 
-            : "";
-    }
-
 }
