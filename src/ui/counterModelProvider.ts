@@ -2,7 +2,7 @@
 import * as vscode from "vscode";
 import { ICounterExamples, ICounterExample } from "../typeInterfaces/ICounterExampleResult";
 import { Warning } from "../stringRessources/messages";
-import { CounterExample } from "../server/commandsLogic/counterExample";
+import { CounterExample } from "../server/serverRequests/counterExample";
 import { LanguageClient } from "vscode-languageclient";
 import { DafnyUiManager } from "./dafnyUiManager";
 import { EnvironmentConfig } from "../stringRessources/commands";

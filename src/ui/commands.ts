@@ -4,8 +4,8 @@ import { LanguageClient } from "vscode-languageclient";
 
 import { DafnyUiManager } from "./dafnyUiManager";
 import { DafnyRunner } from "../localExecutionHelpers/dafnyRunner";
-import { Compile } from "../server/commandsLogic/compile";
-import { CounterExample } from "../server/commandsLogic/counterExample";
+import { Compile } from "../server/serverRequests/compile";
+import { CounterExample } from "../server/serverRequests/counterExample";
 import { CommandStrings } from "../stringRessources/commands";
 
 /**
