@@ -37,7 +37,7 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(class|trait|datatype|codatatype|type|newtype|function|ghost|var|const|method|constructor|colemma|abstract|module|import|export|lemma|as|opened|static|protected|twostate|refines|witness|extends|returns|break|then|else|if|label|return|while|print|where|new|in|fresh|allocated|match|case|assert|by|assume|reveal|modify|predicate|inductive|copredicate|forall|exists|false|true|null|old|unchanged|calc|iterator|yields|yield)\b</string>
+			<string>\b(class|trait|datatype|codatatype|type|newtype|function|ghost|var|const|method|constructor|colemma|abstract|module|import|export|lemma|as|opened|static|protected|twostate|refines|witness|extends|returns|break|then|else|if|label|return|while|print|where|new|in|fresh|allocated|match|case|assert|by|assume|expect|reveal|modify|predicate|inductive|copredicate|forall|exists|false|true|null|old|unchanged|calc|iterator|yields|yield)\b</string>
 			<key>name</key>
 			<string>keyword.control.dafny</string>
 		</dict>
@@ -182,7 +182,7 @@
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>\b(bool|char|real|multiset|map|imap|nat|int|ORDINAL|object|string|set|iset|seq|array|array2|bv8|bv16)\b</string>
+					<string>\b(bool|char|real|multiset|map|imap|nat|int|ORDINAL|object|string|set|iset|seq|array|array[1-9]\d*|bv0|bv[1-9]\d*)\b</string>
 					<key>name</key>
 					<string>keyword.type.dafny</string>
 				</dict>
