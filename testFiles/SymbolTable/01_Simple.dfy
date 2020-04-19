@@ -1,11 +1,5 @@
-
-
 class MyClass {
-
-
     var field: int; 
-	
-	
     method  addOne(i: int) returns (r:int) {
        r := i + 1;
        return r; 
@@ -15,10 +9,6 @@ class MyClass {
         field := aLocalVar;  
         aLocalVar := addOne(field);
     }
-
-
-
     constructor () { }
-
+    
 }
-

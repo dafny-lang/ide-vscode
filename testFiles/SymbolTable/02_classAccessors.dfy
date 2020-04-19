@@ -1,25 +1,16 @@
-
-
 class MyClass {
-
     var field: int; 
-
     method  addOne(i: int) returns (r:int) {
        r := i + 1;
     }
     constructor () { }
-
 }
-
     method  addOne(i: int) returns (r:int) {
         var field := 2;  
         r := i + 1;
     }
-
 class OtherClass { 
-
     var field: int;  
-
     constructor () { }  
     method  addOne(i: int) returns (r:int) { 
        r := i + 51;
@@ -30,12 +21,9 @@ class OtherClass {
         field := this.addOne(2);
         field := addOne(2);
     }
-
 }
-
 method Main() {
     var a:= new OtherClass();
     a.hotStuff();
     print a.field; 
 }
-
