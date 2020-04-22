@@ -20,27 +20,27 @@ export class Compile {
             if (!document) {
                 return; // Skip if user closed everything in the meantime
             }
-            document.save();
-    
-            const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(EnvironmentConfig.Dafny);
-            const compilationArgs : string[]  = config.get("compilationArgs") || [];
-            if(customArgs === true) {
-                const opt: vscode.InputBoxOptions = {
-                    value: compilationArgs.join(" "),
-                    prompt: Information.CustomCompileArgsLabel
-                };
-                vscode.window.showInputBox(opt).then((args) => {
-                    if(args) {
-                        vscode.window.showInformationMessage("Args: " + args);
-                        sendServerRequest(document.fileName, args.split(" "), run)
-                    } else {
-                        vscode.window.showErrorMessage(Error.NoAdditionalArgsGiven);
-                    }
-                });
-                
-            } else {
-                sendServerRequest(document.fileName, compilationArgs, run)
-            }
+            document.save().then(() => {
+                const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(EnvironmentConfig.Dafny);
+                const compilationArgs : string[]  = config.get("compilationArgs") || [];
+                if(customArgs === true) {
+                    const opt: vscode.InputBoxOptions = {
+                        value: compilationArgs.join(" "),
+                        prompt: Information.CustomCompileArgsLabel
+                    };
+                    vscode.window.showInputBox(opt).then((args) => {
+                        if(args) {
+                            vscode.window.showInformationMessage("Args: " + args);
+                            sendServerRequest(document.fileName, args.split(" "), run)
+                        } else {
+                            vscode.window.showErrorMessage(Error.NoAdditionalArgsGiven);
+                        }
+                    });
+                    
+                } else {
+                    sendServerRequest(document.fileName, compilationArgs, run)
+                }
+            });
         }
 
         function sendServerRequest(filename: string, args: string[], run: boolean) {

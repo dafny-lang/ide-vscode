@@ -19,22 +19,23 @@ export class CounterExample {
         if (!vscode.window.activeTextEditor) {
             return;
         }
-        vscode.window.activeTextEditor.document.save();
-        
         const arg: ICounterExampleArguments = { 
             DafnyFile: vscode.window.activeTextEditor.document.fileName 
         };
-
-        // This timeout makes sure, that max 2 server requests each second were sent. 
-        // Otherwise - if a user would tipping verry fast - there would be a huge, unnecessary request overhead.
-        clearTimeout( this.timeout )
-        this.timeout = setTimeout(function() {
-            languageServer.sendRequest<ICounterExamples>(LanguageServerRequest.CounterExample, arg)
-            .then((allCounterExamples: ICounterExamples) => {
-                provider.showCounterModel(allCounterExamples, autoTriggered);
-            }, (error: ResponseError<void>) => {
-                vscode.window.showErrorMessage(`${Error.CanNotGetCounterExample}: ${error.message}`);
-            })
-        }, autoTriggered ? this.timeoutDuration : 1);
+        vscode.window.activeTextEditor.document.save().then(() => {
+            // This timeout makes sure, that max 2 server requests each second were sent. 
+            // Otherwise - if a user would tipping verry fast - there would be a huge, unnecessary request overhead.
+            clearTimeout( this.timeout )
+            this.timeout = setTimeout(function() {
+                languageServer.sendRequest<ICounterExamples>(LanguageServerRequest.CounterExample, arg)
+                .then((allCounterExamples: ICounterExamples) => {
+                    provider.showCounterModel(allCounterExamples, autoTriggered);
+                }, (error: ResponseError<void>) => {
+                    vscode.window.showErrorMessage(`${Error.CanNotGetCounterExample}: ${error.message}`);
+                })
+            }, autoTriggered ? this.timeoutDuration : 1);
+        });
+        
+        
     }
 }
