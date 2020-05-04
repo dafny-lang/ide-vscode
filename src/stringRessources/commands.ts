@@ -8,6 +8,7 @@ export class CommandStrings {
   public static CompileAndRun: string = "dafny.compileAndRun";
   public static ShowCounterExample: string = "dafny.showCounterExample";
   public static HideCounterExample: string = "dafny.hideCounterExample";
+  public static ShowReferences: string = "dafny.showReferences";
 }
 
 export class Config {

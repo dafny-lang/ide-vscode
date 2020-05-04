@@ -19,6 +19,45 @@ export default class Commands {
   private provider: DafnyUiManager;
   private runner: DafnyRunner;
 
+  // todo move this function
+  public static showReferences(jsonArgs: string) {
+    // todo rm any
+    function parsePosition(p: any): vscode.Position {
+      return new vscode.Position(p.Line, p.Character);
+    }
+    function parseRange(r: any): vscode.Range {
+      return new vscode.Range(parsePosition(r.Start), parsePosition(r.End));
+    }
+    function parseLocation(l: any): vscode.Location {
+      return new vscode.Location(parseUri(l.Uri), parseRange(l.Range));
+    }
+    function parseUri(u: any): vscode.Uri {
+      return vscode.Uri.parse(u);
+    }
+
+    let obj;
+    try {
+      obj = JSON.parse(jsonArgs);
+    } catch (e) {
+      // todo show error msg
+    }
+
+    const parsedUri: vscode.Uri = parseUri(obj.Uri);
+    const parsedPosition: vscode.Position = parsePosition(obj.Position);
+    const parsedLocations: Array<vscode.Location> = [];
+
+    for (const location of obj.Locations) {
+      parsedLocations.push(parseLocation(location));
+    }
+
+    vscode.commands.executeCommand(
+      "editor.action.showReferences",
+      parsedUri,
+      parsedPosition,
+      parsedLocations
+    );
+  }
+
   private commands = [
     {
       name: CommandStrings.Compile,
@@ -46,6 +85,10 @@ export default class Commands {
       name: CommandStrings.HideCounterExample,
       callback: () =>
         this.provider.getCounterModelProvider().hideCounterModel(),
+    },
+    {
+      name: CommandStrings.ShowReferences,
+      callback: Commands.showReferences,
     },
     /* Please note that the command "RestartServer" is registered in dafnyLanguageServer for a higher cohesion */
 
