@@ -1,4 +1,4 @@
 export interface ICompilerArguments {
-    FileToCompile: string;
-    CompilationArguments?: string[];
+  FileToCompile: string;
+  CompilationArguments?: string[];
 }

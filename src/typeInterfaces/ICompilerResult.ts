@@ -1,5 +1,5 @@
 export interface ICompilerResult {
-    error: boolean;
-    message?: string;
-    executable?: boolean;
+  error: boolean;
+  message?: string;
+  executable?: boolean;
 }

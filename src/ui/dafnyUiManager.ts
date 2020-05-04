@@ -6,39 +6,56 @@ import { Statusbar } from "./statusbar";
 import { DafnyFileChecker } from "./dafnyFileChecker";
 
 /*
-* This is kinda the "main ui manager" for basic instances like statusbar and a filewatcher. 
-* Instance is created on server start and passed to many components. 
-*/
+ * This is kinda the "main ui manager" for basic instances like statusbar and a filewatcher.
+ * Instance is created on server start and passed to many components.
+ */
 export class DafnyUiManager {
-    private dafnyStatusbar: Statusbar;
-    private counterModelProvider: CounterModelProvider;
+  private dafnyStatusbar: Statusbar;
+  private counterModelProvider: CounterModelProvider;
 
-    constructor(public vsCodeContext: vscode.ExtensionContext, public languageServer: LanguageClient) {
-        this.dafnyStatusbar = new Statusbar(this.languageServer);
-        this.counterModelProvider = new CounterModelProvider();
-    }
+  constructor(
+    public vsCodeContext: vscode.ExtensionContext,
+    public languageServer: LanguageClient
+  ) {
+    this.dafnyStatusbar = new Statusbar(this.languageServer);
+    this.counterModelProvider = new CounterModelProvider();
+  }
 
-    public registerEventListener(): void {
-        vscode.window.onDidChangeActiveTextEditor((editor) => this.activeDocumentTabChanged(editor), this);
-        vscode.workspace.onDidChangeTextDocument((arg) => this.openDocumentChanged(arg), this);
-    }
+  public registerEventListener(): void {
+    vscode.window.onDidChangeActiveTextEditor(
+      (editor) => this.activeDocumentTabChanged(editor),
+      this
+    );
+    vscode.workspace.onDidChangeTextDocument(
+      (arg) => this.openDocumentChanged(arg),
+      this
+    );
+  }
 
-    public getCounterModelProvider() {
-        return this.counterModelProvider;
-    }
+  public getCounterModelProvider() {
+    return this.counterModelProvider;
+  }
 
-    private activeDocumentTabChanged(editor: vscode.TextEditor | undefined) {
-        this.triggerUIupdates(editor);
-    }
+  private activeDocumentTabChanged(editor: vscode.TextEditor | undefined) {
+    this.triggerUIupdates(editor);
+  }
 
-    private openDocumentChanged(change: vscode.TextDocumentChangeEvent): void {
-        this.triggerUIupdates(change);
-    }
+  private openDocumentChanged(change: vscode.TextDocumentChangeEvent): void {
+    this.triggerUIupdates(change);
+  }
 
-    private triggerUIupdates(documentreference: vscode.TextEditor | vscode.TextDocumentChangeEvent | undefined) : void {
-        if (documentreference && DafnyFileChecker.isDafnyFile(documentreference.document)) {
-            this.dafnyStatusbar.update();
-            this.counterModelProvider.update(this.languageServer, this); 
-        }
+  private triggerUIupdates(
+    documentreference:
+      | vscode.TextEditor
+      | vscode.TextDocumentChangeEvent
+      | undefined
+  ): void {
+    if (
+      documentreference &&
+      DafnyFileChecker.isDafnyFile(documentreference.document)
+    ) {
+      this.dafnyStatusbar.update();
+      this.counterModelProvider.update(this.languageServer, this);
     }
+  }
 }

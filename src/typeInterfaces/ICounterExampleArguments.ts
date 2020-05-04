@@ -1,3 +1,3 @@
 export interface ICounterExampleArguments {
-    DafnyFile: string;
+  DafnyFile: string;
 }
