@@ -1,41 +1,76 @@
 name: CI
 on: [push]
 jobs:
-  prepare:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: "Prepare: Checkout Repository"
+        uses: actions/checkout@v2
+      - name: "Prepare: Use Node.js ${{ matrix.node-version }}"
         uses: actions/setup-node@v1
         with:
           node-version: v12.x
+      - name: "Prepare: Setup sonarqube"
+        uses: warchant/setup-sonar-scanner@v1
+
       - run: npm install
-
-  build:
-    needs: prepare
-    runs-on: ubuntu-latest
-
-    steps:
       - run: npm run build
       - run: npm run package
+#      - run: npm test
+#        env:
+#          CI: true
 
-
-  sonar:
-    needs: prepare
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup sonarqube
-        uses: warchant/setup-sonar-scanner@v1
-      - name: Run sonar-scanner
+      - name: "Run sonar-scanner"
         env:
           # to get access to secrets.SONAR_TOKEN, provide GITHUB_TOKEN
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: sonar-scanner
              -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-#  test:
-#    needs: build
-#    jobs:
-#    - run: npm test
-#      env:
-#        CI: true
+      - name: "Upload Artifact: VSIX Package"
+        uses: actions/upload-artifact@v2
+        with:
+          name: package
+          path: dist/*.vsix
+
+
+  release-github:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Prepare: Get Build Artifact"
+        uses: actions/download-artifact@v2
+        with:
+          name: package
+          path: dist/
+
+      - name: "Prepare: Get the version"
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
+
+      - name: "Check for valid release package"
+        run: test -e ./dist/dafny-vscode-${{ steps.get_version.outputs.VERSION }}.vsix
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./dist/dafny-vscode-${{ steps.get_version.outputs.VERSION }}.vsix
+          asset_name: dafny-vscode-${{ steps.get_version.outputs.VERSION }}.vsix
+          asset_content_type: application/zip
