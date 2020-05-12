@@ -1,0 +1,22 @@
+name: Sonar
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
+    - name: Setup sonarqube
+      uses: warchant/setup-sonar-scanner@v1
+
+    - run: npm install
+
+    - run: sonar-scanner
+           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      env:
+        # to get access to secrets.SONAR_TOKEN, provide GITHUB_TOKEN
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
