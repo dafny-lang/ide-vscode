@@ -203,6 +203,8 @@
         "vscode:compile-typescript": "tsc -p ./",
         "build": "tsc -p ./",
         "compile": "tsc -watch -p ./",
+        "package": "vsce package --out dist/",
+        "publish": "vsce publish",
         "postinstall": "node ./node_modules/vscode/bin/install",
         "update-vscode": "node ./node_modules/vscode/bin/install"
     },
