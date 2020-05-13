@@ -28,7 +28,7 @@ jobs:
         run: sonar-scanner
              -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-      - name: "Upload Artifact: VSIX Package"
+      - name: "Upload Artifact: VSIX Packages"
         uses: actions/upload-artifact@v2
         with:
           name: package
@@ -39,6 +39,8 @@ jobs:
     needs: build
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
+    env:
+      PACKAGE_NAME: dafny-vscode
     steps:
       - name: "Prepare: Get Build Artifact"
         uses: actions/download-artifact@v2
@@ -51,7 +53,7 @@ jobs:
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
 
       - name: "Check for valid release package"
-        run: test -e ./dist/dafny-vscode-${{ steps.get_version.outputs.VERSION }}.vsix
+        run: test -e ./dist/${PACKAGE_NAME}-${{ steps.get_version.outputs.VERSION }}.vsix
 
       - name: Create Release
         id: create_release
@@ -71,6 +73,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./dist/dafny-vscode-${{ steps.get_version.outputs.VERSION }}.vsix
-          asset_name: dafny-vscode-${{ steps.get_version.outputs.VERSION }}.vsix
+          asset_path: ./dist/${{ env.PACKAGE_NAME }}-${{ steps.get_version.outputs.VERSION }}.vsix
+          asset_name: ${{ env.PACKAGE_NAME }}-${{ steps.get_version.outputs.VERSION }}.vsix
           asset_content_type: application/zip
