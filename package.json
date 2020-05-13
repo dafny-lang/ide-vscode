@@ -1,24 +1,17 @@
 {
-    "name": "dafny-vscode",
-    "displayName": "Dafny",
-    "description": "Dafny for Visual Studio Code",
+    "name": "dafny-vscode-preview",
+    "displayName": "Dafny (Preview)",
+    "description": "Dafny for Visual Studio Code (Preview Release)",
     "version": "1.0.0",
     "publisher": "correctnessLab",
     "homepage": "https://github.com/DafnyVSCode/",
     "repository": {
         "type": "git",
-        "url": "https://github.com/DafnyVSCode/Dafny-VSCode.git"
+        "url": "https://github.com/DafnyVSCode/ide-vscode.git"
     },
     "bugs": {
-        "url": "https://github.com/DafnyVSCode/Dafny-VSCode/issues"
+        "url": "https://github.com/DafnyVSCode/ide-vscode/issues"
     },
-    "badges": [
-        {
-            "url": "https://travis-ci.com/DafnyVSCode/Dafny-VSCode.svg?branch=master",
-            "href": "https://travis-ci.com/DafnyVSCode/Dafny-VSCode",
-            "description": "Continuous integration (Travis)"
-        }
-    ],
     "qna": false,
     "license": "MIT",
     "galleryBanner": {

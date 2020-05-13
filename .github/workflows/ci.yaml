@@ -40,7 +40,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     env:
-      PACKAGE_NAME: dafny-vscode
+      PACKAGE_NAME: dafny-vscode-preview
     steps:
       - name: "Prepare: Get Build Artifact"
         uses: actions/download-artifact@v2
