@@ -1,5 +1,10 @@
 name: CI
 on: [push]
+
+env:
+  PACKAGE_NAME: dafny-vscode-preview
+
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -35,13 +40,59 @@ jobs:
           path: dist/*.vsix
 
 
-  release-github:
+#  release-github:
+#    needs: build
+#    if: startsWith(github.ref, 'refs/tags/v')
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: "Prepare: Get Build Artifact"
+#        uses: actions/download-artifact@v2
+#        with:
+#          name: package
+#          path: dist/
+#
+#      - name: "Prepare: Get the version"
+#        id: get_version
+#        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
+#
+#      - name: "Check for valid release package"
+#        run: test -e ./dist/${PACKAGE_NAME}-${{ steps.get_version.outputs.VERSION }}.vsix
+#
+#      - name: Create Release
+#        id: create_release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: ${{ github.ref }}
+#          release_name: Release ${{ github.ref }}
+#          draft: false
+#          prerelease: false
+#
+#      - name: Upload Release Asset
+#        id: upload-release-asset
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ./dist/${{ env.PACKAGE_NAME }}-${{ steps.get_version.outputs.VERSION }}.vsix
+#          asset_name: ${{ env.PACKAGE_NAME }}-${{ steps.get_version.outputs.VERSION }}.vsix
+#          asset_content_type: application/zip
+
+  release-marketplace:
     needs: build
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
-    env:
-      PACKAGE_NAME: dafny-vscode-preview
     steps:
+      - name: "Prepare: Checkout Repository"
+        uses: actions/checkout@v2
+
+      - name: "Prepare: Use Node.js ${{ matrix.node-version }}"
+        uses: actions/setup-node@v1
+        with:
+          node-version: v12.x
+
       - name: "Prepare: Get Build Artifact"
         uses: actions/download-artifact@v2
         with:
@@ -52,27 +103,11 @@ jobs:
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
 
-      - name: "Check for valid release package"
-        run: test -e ./dist/${PACKAGE_NAME}-${{ steps.get_version.outputs.VERSION }}.vsix
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      - run: npm install
+      - run: npm run publish -- -p "${MARKETPLACE_TOKEN}" --packagePath dist/${PACKAGE_NAME}-${VERSION}.vsix
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
-
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-          asset_path: ./dist/${{ env.PACKAGE_NAME }}-${{ steps.get_version.outputs.VERSION }}.vsix
-          asset_name: ${{ env.PACKAGE_NAME }}-${{ steps.get_version.outputs.VERSION }}.vsix
-          asset_content_type: application/zip
+          # Note: Marketplace Token according to:
+          #   https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token
+          #  The token is only valid for a limited time - renewal might be required.
+          MARKETPLACE_TOKEN: ${{ secrets.MARKETPLACE_TOKEN }}
+          VERSION: ${{ steps.get_version.outputs.VERSION }}
