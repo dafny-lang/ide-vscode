@@ -2,7 +2,7 @@
     "name": "dafny-vscode-preview",
     "displayName": "Dafny (Preview)",
     "description": "Dafny for Visual Studio Code (Preview Release)",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "publisher": "correctnessLab",
     "homepage": "https://github.com/DafnyVSCode/",
     "repository": {
@@ -129,12 +129,15 @@
             "properties": {
                 "dafny.languageServerExePath": {
                     "type": "string",
-                    "default": "../../../../dafny-language-server/Binaries/DafnyLanguageServer.exe", 
+                    "default": "../../../../dafny-language-server/Binaries/DafnyLanguageServer.exe",
                     "description": "Relative path to the DafnyServer.exe"
                 },
                 "dafny.compilationArgs": {
-                    "type": "array", 
-                    "default": ["/compile:1", "/nologo"] , 
+                    "type": "array",
+                    "default": [
+                        "/compile:1",
+                        "/nologo"
+                    ],
                     "description": "Optional array of strings as Dafny compilation arguments"
                 },
                 "dafny.useMono": {
@@ -150,12 +153,12 @@
                 "dafny.monoExecutable": {
                     "type": "string",
                     "description": "Mono executable with absolute path. Only necessary if mono is not in system PATH (you'll get an error if that's the case). Ignored on Windows when useMono is false."
-                }, 
+                },
                 "dafny.colorCounterExamples": {
                     "type": "object",
                     "default": {
-                        "backgroundColor": null, 
-                        "fontColor": null 
+                        "backgroundColor": null,
+                        "fontColor": null
                     },
                     "description": "Customize the color (HEX) of Counter Examples. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults."
                 }
