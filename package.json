@@ -1,24 +1,17 @@
 {
-    "name": "dafny-vscode",
-    "displayName": "Dafny",
-    "description": "Dafny for Visual Studio Code",
-    "version": "1.0.1",
+    "name": "dafny-vscode-preview",
+    "displayName": "Dafny (Preview)",
+    "description": "Dafny for Visual Studio Code (Preview Release)",
+    "version": "1.0.3",
     "publisher": "correctnessLab",
     "homepage": "https://github.com/DafnyVSCode/",
     "repository": {
         "type": "git",
-        "url": "https://github.com/DafnyVSCode/Dafny-VSCode.git"
+        "url": "https://github.com/DafnyVSCode/ide-vscode.git"
     },
     "bugs": {
-        "url": "https://github.com/DafnyVSCode/Dafny-VSCode/issues"
+        "url": "https://github.com/DafnyVSCode/ide-vscode/issues"
     },
-    "badges": [
-        {
-            "url": "https://travis-ci.com/DafnyVSCode/Dafny-VSCode.svg?branch=master",
-            "href": "https://travis-ci.com/DafnyVSCode/Dafny-VSCode",
-            "description": "Continuous integration (Travis)"
-        }
-    ],
     "qna": false,
     "license": "MIT",
     "galleryBanner": {
@@ -201,7 +194,10 @@
     ],
     "scripts": {
         "vscode:compile-typescript": "tsc -p ./",
+        "build": "tsc -p ./",
         "compile": "tsc -watch -p ./",
+        "package": "vsce package --out dist/",
+        "publish": "vsce publish",
         "postinstall": "node ./node_modules/vscode/bin/install",
         "update-vscode": "node ./node_modules/vscode/bin/install"
     },
@@ -211,7 +207,7 @@
         "mocha": "^5.2.0",
         "tslint": "^5.20.1",
         "typescript": "^3.6.4",
-        "vsce": "^1.69.0",
+        "vsce": "^1.75.0",
         "vscode": "^1.1.36"
     },
     "dependencies": {
