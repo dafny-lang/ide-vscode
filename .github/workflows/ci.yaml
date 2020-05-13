@@ -40,45 +40,45 @@ jobs:
           path: dist/*.vsix
 
 
-#  release-github:
-#    needs: build
-#    if: startsWith(github.ref, 'refs/tags/v')
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: "Prepare: Get Build Artifact"
-#        uses: actions/download-artifact@v2
-#        with:
-#          name: package
-#          path: dist/
-#
-#      - name: "Prepare: Get the version"
-#        id: get_version
-#        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
-#
-#      - name: "Check for valid release package"
-#        run: test -e ./dist/${PACKAGE_NAME}-${{ steps.get_version.outputs.VERSION }}.vsix
-#
-#      - name: Create Release
-#        id: create_release
-#        uses: actions/create-release@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          tag_name: ${{ github.ref }}
-#          release_name: Release ${{ github.ref }}
-#          draft: false
-#          prerelease: false
-#
-#      - name: Upload Release Asset
-#        id: upload-release-asset
-#        uses: actions/upload-release-asset@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ steps.create_release.outputs.upload_url }}
-#          asset_path: ./dist/${{ env.PACKAGE_NAME }}-${{ steps.get_version.outputs.VERSION }}.vsix
-#          asset_name: ${{ env.PACKAGE_NAME }}-${{ steps.get_version.outputs.VERSION }}.vsix
-#          asset_content_type: application/zip
+  release-github:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Prepare: Get Build Artifact"
+        uses: actions/download-artifact@v2
+        with:
+          name: package
+          path: dist/
+
+      - name: "Prepare: Get the version"
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
+
+      - name: "Check for valid release package"
+        run: test -e ./dist/${PACKAGE_NAME}-${{ steps.get_version.outputs.VERSION }}.vsix
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/${{ env.PACKAGE_NAME }}-${{ steps.get_version.outputs.VERSION }}.vsix
+          asset_name: ${{ env.PACKAGE_NAME }}-${{ steps.get_version.outputs.VERSION }}.vsix
+          asset_content_type: application/zip
 
   release-marketplace:
     needs: build
