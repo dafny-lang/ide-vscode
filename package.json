@@ -136,12 +136,15 @@
             "properties": {
                 "dafny.languageServerExePath": {
                     "type": "string",
-                    "default": "../../../../dafny-language-server/Binaries/DafnyLanguageServer.exe", 
+                    "default": "../../../../dafny-language-server/Binaries/DafnyLanguageServer.exe",
                     "description": "Relative path to the DafnyServer.exe"
                 },
                 "dafny.compilationArgs": {
-                    "type": "array", 
-                    "default": ["/compile:1", "/nologo"] , 
+                    "type": "array",
+                    "default": [
+                        "/compile:1",
+                        "/nologo"
+                    ],
                     "description": "Optional array of strings as Dafny compilation arguments"
                 },
                 "dafny.useMono": {
@@ -157,12 +160,12 @@
                 "dafny.monoExecutable": {
                     "type": "string",
                     "description": "Mono executable with absolute path. Only necessary if mono is not in system PATH (you'll get an error if that's the case). Ignored on Windows when useMono is false."
-                }, 
+                },
                 "dafny.colorCounterExamples": {
                     "type": "object",
                     "default": {
-                        "backgroundColor": null, 
-                        "fontColor": null 
+                        "backgroundColor": null,
+                        "fontColor": null
                     },
                     "description": "Customize the color (HEX) of Counter Examples. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults."
                 }
@@ -207,12 +210,12 @@
     },
     "devDependencies": {
         "@types/mocha": "^2.2.32",
-        "@types/node": "^6.14.9",
+        "@types/node": "^6.14.10",
         "mocha": "^5.2.0",
         "tslint": "^5.20.1",
-        "typescript": "^3.6.4",
-        "vsce": "^1.69.0",
-        "vscode": "^1.1.36"
+        "typescript": "^3.9.2",
+        "vsce": "^1.75.0",
+        "vscode": "^1.1.37"
     },
     "dependencies": {
         "vscode-languageclient": "^3.5.1"
