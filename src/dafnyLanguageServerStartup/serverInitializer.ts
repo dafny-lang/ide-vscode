@@ -80,7 +80,7 @@ export class ServerInitializer implements ILanguageServer {
         async () => {
           vscode.window.showErrorMessage(Error.ServerStopped);
           await this.languageServer?.stop();
-          this.languageServerDisposable?.dispose();
+          this.languageServerDisposable = this.languageServerDisposable?.dispose();
 
           vscode.window.showInformationMessage(Information.StartingServer);
           this.startLanguageServer();
