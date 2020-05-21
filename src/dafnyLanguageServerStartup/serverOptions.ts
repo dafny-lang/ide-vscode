@@ -28,7 +28,7 @@ export default class ServerOptions extends LanguageClient {
     );
     if (serverExePath === undefined) {
       window.showErrorMessage(Error.ServerExeNotDefined);
-      return;
+      throw Error.ServerExeNotDefined;
     }
 
     const dafnyLangServerExe = path.join(__dirname, serverExePath);
