@@ -1,22 +1,29 @@
 "use strict";
 import * as vscode from "vscode";
+import { LanguageClient } from "vscode-languageclient";
+
 import {
   ICounterExamples,
   ICounterExample,
-} from "../typeInterfaces/ICounterExampleResult";
-import { Warning } from "../stringRessources/messages";
-import { CounterExample } from "../server/serverRequests/counterExample";
-import { LanguageClient } from "vscode-languageclient";
-import { DafnyUiManager } from "./dafnyUiManager";
-import { EnvironmentConfig } from "../stringRessources/commands";
-import { DafnyFileChecker } from "./dafnyFileChecker";
+} from "../../typeInterfaces/_TypeInterfacesModule";
+import {
+  Warning,
+  EnvironmentConfig,
+} from "../../stringRessources/_StringRessourcesModule";
+import {
+  CounterExample as RequestCounterExample,
+  ICounterExample as IRequestCounterExample,
+} from "../../serverRequests/_ServerRequestsModule";
+
+import { ICounterModelProvider } from "./ICounterModelProvider";
+import { DafnyFileChecker } from "../dafnyFileChecker";
 
 /**
  * This is the general UI element provider for counter models.
  * There is one instance (created in the dafnyUiManager) of this compnent and for every file the counter model is handled in this instance.
  * This component is responsible for show and hide counter examples in case one is closing and repoening a file.
  */
-export class CounterModelProvider {
+export class CounterModelProvider implements ICounterModelProvider {
   private fileHasVisibleCounterModel: { [docPathName: string]: boolean } = {};
   private decorators: {
     [docPathName: string]: vscode.TextEditorDecorationType;
@@ -102,20 +109,23 @@ export class CounterModelProvider {
     editor.setDecorations(shownTextTemplate, arrayOfDecorations);
   }
 
-  public update(
-    languageServer: LanguageClient,
-    provider: DafnyUiManager
-  ): void {
+  public update(languageServer: LanguageClient): void {
     if (
       this.fileHasVisibleCounterModel[DafnyFileChecker.getActiveFileName()] ===
       true
     ) {
       this.hideCounterModel();
-      CounterExample.createCounterExample(
-        languageServer,
-        provider.getCounterModelProvider(),
-        true
+
+      const counterExample: IRequestCounterExample = new RequestCounterExample(
+        languageServer
       );
+      var callback = (
+        allCounterExamples: ICounterExamples,
+        autoTriggered: Boolean
+      ): void => {
+        this.showCounterModel(allCounterExamples, autoTriggered);
+      };
+      counterExample.getCounterExample(callback, true);
     }
   }
 

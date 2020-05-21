@@ -2,7 +2,6 @@
 
 export class CommandStrings {
   public static RestartServer: string = "dafny.restartDafnyServer";
-  public static EditText: string = "dafny.editText"; // 2do needed?? #1245
   public static Compile: string = "dafny.compile";
   public static CompileCustomArgs: string = "dafny.compileCustomArgs";
   public static CompileAndRun: string = "dafny.compileAndRun";

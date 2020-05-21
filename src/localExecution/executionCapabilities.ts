@@ -1,15 +1,19 @@
+"use strict";
 import { execFileSync } from "child_process";
 import * as os from "os";
 import { log } from "util";
 import { workspace } from "vscode";
-import { Config, EnvironmentConfig } from "../stringRessources/commands";
+
+import {
+  Config,
+  EnvironmentConfig,
+} from "../stringRessources/_StringRessourcesModule";
 
 /**
  * Check for supported capabilities (mono/.net runtime, dafny etc.)
  */
-export default class ExecutionCapabilities {
+export class ExecutionCapabilities {
   private static config = workspace.getConfiguration(EnvironmentConfig.Dafny);
-
   public static hasSupportedMonoVersion(): boolean {
     const useMono = ExecutionCapabilities.config.get<boolean>(Config.UseMono);
 
@@ -21,10 +25,9 @@ export default class ExecutionCapabilities {
       return true;
     }
 
-    const monoPath = ExecutionCapabilities.config.get<string>(Config.MonoPath);
     const monoExecutable =
       ExecutionCapabilities.config.get<string>(Config.MonoExecutable) ||
-      monoPath ||
+      ExecutionCapabilities.config.get<string>(Config.MonoPath) ||
       "mono";
 
     try {

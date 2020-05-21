@@ -2,21 +2,19 @@
 import * as vscode from "vscode";
 import { Trace } from "vscode-jsonrpc";
 
-import DafnyLanguageServerClient from "./dafnyLanguageClient";
-import DafnyLanguageClient from "./dafnyLanguageClient";
-import Commands from "../ui/commands";
-import Notifications from "../ui/notifications";
+import { Commands, Notifications, DafnyUiManager } from "../ui/_UiModule";
+import { DafnyRunner } from "../localExecution/_LocalExecutionModule";
+import { CommandStrings } from "../stringRessources/_StringRessourcesModule";
 
-import { DafnyUiManager } from "../ui/dafnyUiManager";
-import { DafnyRunner } from "../localExecutionHelpers/dafnyRunner";
-import { CommandStrings } from "../stringRessources/commands";
+import { ILanguageServer } from "./ILanguageServer";
+import ServerOptions from "./serverOptions";
 
 /*
  * This starts basicly the Dafny language server and has been extracted from the extension.ts ("Main").
  * It does also provide command registration for "restart language server".
  */
-export default class DafnyLanguageServer {
-  private languageServer: DafnyLanguageClient | undefined;
+export class ServerInitializer implements ILanguageServer {
+  private languageServer: ServerOptions | undefined;
   private languageServerDisposable: vscode.Disposable | undefined;
   private runner: DafnyRunner;
   private extensionContext: vscode.ExtensionContext;
@@ -27,7 +25,7 @@ export default class DafnyLanguageServer {
   }
 
   public startLanguageServer(): void {
-    this.languageServer = new DafnyLanguageServerClient();
+    this.languageServer = new ServerOptions();
     this.languageServer.trace = Trace.Verbose;
 
     this.languageServer.onReady().then(() => {
