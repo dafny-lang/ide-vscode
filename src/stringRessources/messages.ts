@@ -34,6 +34,7 @@ export class Error {
     "Mono version could not be parsed from version output.";
   public static MonoBinaryNotExecuted: string =
     "Mono binary could not be executed.";
+  public static ServerStopped: string = "Server stopped.";
 }
 
 export class Information {
