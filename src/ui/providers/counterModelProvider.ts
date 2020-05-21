@@ -52,7 +52,7 @@ export class CounterModelProvider implements ICounterModelProvider {
 
   public showCounterModel(
     allCounterExamples: ICounterExamples,
-    autoTriggered: Boolean = false
+    isAutoTriggered: Boolean = false
   ): void {
     const editor: vscode.TextEditor = vscode.window.activeTextEditor!;
     const arrayOfDecorations: vscode.DecorationOptions[] = [];
@@ -94,11 +94,11 @@ export class CounterModelProvider implements ICounterModelProvider {
       arrayOfDecorations.push(decorator);
     }
 
-    if (!autoTriggered && hasReferences) {
+    if (!isAutoTriggered && hasReferences) {
       vscode.window.showWarningMessage(Warning.ReferencesInCounterExample);
     }
 
-    if (!autoTriggered && allCounterExamples.counterExamples.length == 0) {
+    if (!isAutoTriggered && allCounterExamples.counterExamples.length == 0) {
       vscode.window.showWarningMessage(Warning.NoCounterExamples);
     }
 
@@ -122,9 +122,9 @@ export class CounterModelProvider implements ICounterModelProvider {
       );
       var callback = (
         allCounterExamples: ICounterExamples,
-        autoTriggered: Boolean
+        isAutoTriggered: Boolean
       ): void => {
-        this.showCounterModel(allCounterExamples, autoTriggered);
+        this.showCounterModel(allCounterExamples, isAutoTriggered);
       };
       counterExample.getCounterExample(callback, true);
     }

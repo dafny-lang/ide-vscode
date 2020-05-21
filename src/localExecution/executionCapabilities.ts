@@ -54,8 +54,8 @@ export class ExecutionCapabilities implements IExecutionCapabilities {
     }
   }
 
-  public getMono(selection: string | undefined): void {
-    if (selection === Error.GetMono) {
+  public getMono(monoVersionSelection: string | undefined): void {
+    if (monoVersionSelection === Error.GetMono) {
       vscode.commands.executeCommand(
         VSCodeCommandStrings.Open,
         vscode.Uri.parse(Error.GetMonoUri)
@@ -70,7 +70,7 @@ export class ExecutionCapabilities implements IExecutionCapabilities {
       vscode.window.showWarningMessage(restartMessage);
     }
 
-    if (selection === Error.ConfigureMonoExecutable) {
+    if (monoVersionSelection === Error.ConfigureMonoExecutable) {
       vscode.commands.executeCommand(VSCodeCommandStrings.ConfigSettings);
     }
   }

@@ -27,7 +27,10 @@ export class CounterExample implements ICounterExample {
     this.languageServer = languageServer;
   }
 
-  public getCounterExample(callback: Function, autoTriggered: Boolean = false) {
+  public getCounterExample(
+    callback: Function,
+    isAutoTriggered: Boolean = false
+  ) {
     if (!vscode.window.activeTextEditor) {
       return;
     }
@@ -48,7 +51,7 @@ export class CounterExample implements ICounterExample {
             )
             .then(
               (allCounterExamples: ICounterExamples) => {
-                callback(allCounterExamples, autoTriggered);
+                callback(allCounterExamples, isAutoTriggered);
               },
               (error: ResponseError<void>) => {
                 vscode.window.showErrorMessage(
@@ -57,7 +60,7 @@ export class CounterExample implements ICounterExample {
               }
             );
         },
-        autoTriggered ? this.oneSecInMs / this.maxRequestsPerSecond : 1
+        isAutoTriggered ? this.oneSecInMs / this.maxRequestsPerSecond : 1
       );
     });
   }

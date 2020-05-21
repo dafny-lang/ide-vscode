@@ -1,5 +1,5 @@
 "use strict";
 export interface IExecutionCapabilities {
   hasSupportedMonoVersion(): boolean;
-  getMono(selection: string | undefined): void;
+  getMono(monoVersionSelection: string | undefined): void;
 }

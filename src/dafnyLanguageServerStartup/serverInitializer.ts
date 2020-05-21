@@ -2,8 +2,18 @@
 import * as vscode from "vscode";
 import { Trace } from "vscode-jsonrpc";
 
-import { Commands, Notifications, DafnyUiManager } from "../ui/_UiModule";
-import { DafnyRunner } from "../localExecution/_LocalExecutionModule";
+import {
+  Commands,
+  Notifications,
+  DafnyUiManager,
+  ICommands,
+  IDafnyUiManager,
+  INotifications,
+} from "../ui/_UiModule";
+import {
+  DafnyRunner,
+  IDafnyRunner,
+} from "../localExecution/_LocalExecutionModule";
 import {
   CommandStrings,
   Error,
@@ -20,7 +30,7 @@ import ServerOptions from "./serverOptions";
 export class ServerInitializer implements ILanguageServer {
   private languageServer: ServerOptions | undefined;
   private languageServerDisposable: vscode.Disposable | undefined;
-  private runner: DafnyRunner;
+  private runner: IDafnyRunner;
   private extensionContext: vscode.ExtensionContext;
 
   constructor(extensionContext: vscode.ExtensionContext) {
@@ -34,12 +44,12 @@ export class ServerInitializer implements ILanguageServer {
 
     this.languageServer.onReady().then(() => {
       if (this.languageServer) {
-        const provider = new DafnyUiManager(
+        const provider: IDafnyUiManager = new DafnyUiManager(
           this.extensionContext,
           this.languageServer
         );
 
-        const commands = new Commands(
+        const commands: ICommands = new Commands(
           this.extensionContext,
           this.languageServer,
           provider,
@@ -47,7 +57,9 @@ export class ServerInitializer implements ILanguageServer {
         );
         commands.registerCommands();
 
-        const notifications = new Notifications(this.languageServer);
+        const notifications: INotifications = new Notifications(
+          this.languageServer
+        );
         notifications.registerNotifications();
 
         provider.registerEventListener();

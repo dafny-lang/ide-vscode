@@ -57,11 +57,11 @@ export class Commands implements ICommands {
         );
         var callback = (
           allCounterExamples: ICounterExamples,
-          autoTriggered: Boolean
+          isAutoTriggered: Boolean
         ): void => {
           this.provider
             .getCounterModelProvider()
-            .showCounterModel(allCounterExamples, autoTriggered);
+            .showCounterModel(allCounterExamples, isAutoTriggered);
         };
         counterExample.getCounterExample(callback, false);
       },
