@@ -39,7 +39,7 @@ export class CounterExample implements ICounterExample {
     };
     vscode.window.activeTextEditor.document.save().then(() => {
       // This timeout makes sure, that max 2 server requests each second were sent.
-      // Otherwise - if a user would tipping verry fast - there would be a huge, unnecessary request overhead.
+      // Otherwise - if a user would tipping verry fast - there would be a request overhead.
       clearTimeout(CounterExample.timeout);
       const boundThis = this;
       CounterExample.timeout = setTimeout(
