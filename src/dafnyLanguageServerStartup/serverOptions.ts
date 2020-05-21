@@ -1,24 +1,30 @@
-import { workspace, WorkspaceConfiguration } from "vscode";
-import { LanguageClient, ServerOptions } from "vscode-languageclient";
+"use strict";
+import { workspace, WorkspaceConfiguration, window } from "vscode";
+import {
+  LanguageClient,
+  ServerOptions as ClientServerOptions,
+} from "vscode-languageclient";
 import { LanguageClientOptions } from "vscode-languageclient/lib/client";
-import { window } from "vscode";
 import * as path from "path";
 import * as fs from "fs";
 
-import { EnvironmentConfig } from "../stringRessources/commands";
-import { Error } from "../stringRessources/messages";
+import {
+  EnvironmentConfig,
+  Error,
+  Config,
+} from "../stringRessources/_StringRessourcesModule";
 
-/*
+/**
  * Extends LanguageClient - provides basic config constructor for server initialize
  * This class is used by dafnyLanguageServer and is basicly just an extraction.
  */
-export default class DafnyLanguageClient extends LanguageClient {
+export default class ServerOptions extends LanguageClient {
   constructor() {
     const config: WorkspaceConfiguration = workspace.getConfiguration(
       EnvironmentConfig.Dafny
     );
-    const serverExePath: string | undefined = config.get(
-      "languageServerExePath"
+    const serverExePath: string | undefined = config.get<string>(
+      Config.LanguageServerExePath
     );
     if (serverExePath === undefined) {
       window.showErrorMessage(Error.ServerExeNotDefined);
@@ -35,7 +41,7 @@ export default class DafnyLanguageClient extends LanguageClient {
       }
     });
 
-    const serverOptions: ServerOptions = {
+    const serverOptions: ClientServerOptions = {
       run: { command: dafnyLangServerExe, args: [] },
       debug: { command: dafnyLangServerExe, args: [] },
     };
@@ -43,22 +49,24 @@ export default class DafnyLanguageClient extends LanguageClient {
     const clientOptions: LanguageClientOptions = {
       documentSelector: [
         {
-          pattern: "**/*.dfy",
+          pattern: EnvironmentConfig.DafnyFileExtension,
         },
         {
-          language: "dafny",
-          scheme: "file",
+          language: EnvironmentConfig.Dafny,
+          scheme: EnvironmentConfig.DocumentSelector,
         },
       ],
       synchronize: {
-        fileEvents: workspace.createFileSystemWatcher("**/*.dfy"),
-        configurationSection: "dafny",
+        fileEvents: workspace.createFileSystemWatcher(
+          EnvironmentConfig.DafnyFileExtension
+        ),
+        configurationSection: EnvironmentConfig.Dafny,
       },
     };
 
     super(
-      "dafny-vscode",
-      "Dafny Language Server",
+      EnvironmentConfig.DafnyLanguageServerID,
+      EnvironmentConfig.DafnyLanguageServerName,
       serverOptions,
       clientOptions
     );

@@ -2,23 +2,35 @@
 import * as vscode from "vscode";
 import { Trace } from "vscode-jsonrpc";
 
-import DafnyLanguageServerClient from "./dafnyLanguageClient";
-import DafnyLanguageClient from "./dafnyLanguageClient";
-import Commands from "../ui/commands";
-import Notifications from "../ui/notifications";
+import {
+  Commands,
+  Notifications,
+  DafnyUiManager,
+  ICommands,
+  IDafnyUiManager,
+  INotifications,
+} from "../ui/_UiModule";
+import {
+  DafnyRunner,
+  IDafnyRunner,
+} from "../localExecution/_LocalExecutionModule";
+import {
+  CommandStrings,
+  Error,
+  Information,
+} from "../stringRessources/_StringRessourcesModule";
 
-import { DafnyUiManager } from "../ui/dafnyUiManager";
-import { DafnyRunner } from "../localExecutionHelpers/dafnyRunner";
-import { CommandStrings } from "../stringRessources/commands";
+import { ILanguageServer } from "./ILanguageServer";
+import ServerOptions from "./serverOptions";
 
-/*
+/**
  * This starts basicly the Dafny language server and has been extracted from the extension.ts ("Main").
  * It does also provide command registration for "restart language server".
  */
-export default class DafnyLanguageServer {
-  private languageServer: DafnyLanguageClient | undefined;
+export class ServerInitializer implements ILanguageServer {
+  private languageServer: ServerOptions | undefined;
   private languageServerDisposable: vscode.Disposable | undefined;
-  private runner: DafnyRunner;
+  private runner: IDafnyRunner;
   private extensionContext: vscode.ExtensionContext;
 
   constructor(extensionContext: vscode.ExtensionContext) {
@@ -27,17 +39,17 @@ export default class DafnyLanguageServer {
   }
 
   public startLanguageServer(): void {
-    this.languageServer = new DafnyLanguageServerClient();
+    this.languageServer = new ServerOptions();
     this.languageServer.trace = Trace.Verbose;
 
     this.languageServer.onReady().then(() => {
       if (this.languageServer) {
-        const provider = new DafnyUiManager(
+        const provider: IDafnyUiManager = new DafnyUiManager(
           this.extensionContext,
           this.languageServer
         );
 
-        const commands = new Commands(
+        const commands: ICommands = new Commands(
           this.extensionContext,
           this.languageServer,
           provider,
@@ -45,7 +57,9 @@ export default class DafnyLanguageServer {
         );
         commands.registerCommands();
 
-        const notifications = new Notifications(this.languageServer);
+        const notifications: INotifications = new Notifications(
+          this.languageServer
+        );
         notifications.registerNotifications();
 
         provider.registerEventListener();
@@ -64,11 +78,11 @@ export default class DafnyLanguageServer {
       vscode.commands.registerCommand(
         CommandStrings.RestartServer,
         async () => {
-          vscode.window.showErrorMessage("Server stopped");
+          vscode.window.showErrorMessage(Error.ServerStopped);
           await this.languageServer?.stop();
           this.languageServerDisposable?.dispose();
 
-          vscode.window.showInformationMessage("Starting Server...");
+          vscode.window.showInformationMessage(Information.StartingServer);
           this.startLanguageServer();
         }
       )

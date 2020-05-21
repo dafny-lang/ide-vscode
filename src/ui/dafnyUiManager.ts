@@ -1,24 +1,35 @@
 "use strict";
 import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient";
-import { CounterModelProvider } from "./counterModelProvider";
-import { Statusbar } from "./statusbar";
+
+import {
+  ICounterModelProvider,
+  CounterModelProvider,
+  ICodeLensProvider,
+  CodeLensProvider,
+  IStatusbarProvider,
+  StatusbarProvider,
+} from "./providers/_ProvidersModule";
+
+import { IDafnyUiManager } from "./IDafnyUiManager";
 import { DafnyFileChecker } from "./dafnyFileChecker";
 
 /*
  * This is kinda the "main ui manager" for basic instances like statusbar and a filewatcher.
  * Instance is created on server start and passed to many components.
  */
-export class DafnyUiManager {
-  private dafnyStatusbar: Statusbar;
-  private counterModelProvider: CounterModelProvider;
+export class DafnyUiManager implements IDafnyUiManager {
+  private dafnyStatusbar: IStatusbarProvider;
+  private counterModelProvider: ICounterModelProvider;
+  private codeLensProvider: ICodeLensProvider;
 
   constructor(
     public vsCodeContext: vscode.ExtensionContext,
     public languageServer: LanguageClient
   ) {
-    this.dafnyStatusbar = new Statusbar(this.languageServer);
+    this.dafnyStatusbar = new StatusbarProvider(this.languageServer);
     this.counterModelProvider = new CounterModelProvider();
+    this.codeLensProvider = new CodeLensProvider();
   }
 
   public registerEventListener(): void {
@@ -32,8 +43,12 @@ export class DafnyUiManager {
     );
   }
 
-  public getCounterModelProvider() {
+  public getCounterModelProvider(): ICounterModelProvider {
     return this.counterModelProvider;
+  }
+
+  public getCodeLensProvider(): ICodeLensProvider {
+    return this.codeLensProvider;
   }
 
   private activeDocumentTabChanged(editor: vscode.TextEditor | undefined) {
@@ -55,7 +70,7 @@ export class DafnyUiManager {
       DafnyFileChecker.isDafnyFile(documentreference.document)
     ) {
       this.dafnyStatusbar.update();
-      this.counterModelProvider.update(this.languageServer, this);
+      this.counterModelProvider.update(this.languageServer);
     }
   }
 }

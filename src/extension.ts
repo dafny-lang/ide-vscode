@@ -1,12 +1,9 @@
 "use strict";
-
-import { platform } from "os";
 import * as vscode from "vscode";
 
-import DafnyLanguageServer from "./server/dafnyLanguageServer";
-import Capabilities from "./localExecutionHelpers/executionCapabilities";
-import { Warning, Error } from "./stringRessources/messages";
-import { EnvironmentConfig } from "./stringRessources/commands";
+import { ServerInitializer } from "./dafnyLanguageServerStartup/_DafnyLanguageServerStartupModule";
+import { ExecutionCapabilities } from "./localExecution/_LocalExecutionModule";
+import { Warning, Error } from "./stringRessources/_StringRessourcesModule";
 
 /**
  * This is the plugins entry point (the "main" function)
@@ -18,7 +15,8 @@ export function activate(extensionContext: vscode.ExtensionContext) {
     vscode.window.showWarningMessage(Warning.NoWorkspace);
   }
 
-  if (!Capabilities.hasSupportedMonoVersion()) {
+  const exeCapabilities = new ExecutionCapabilities();
+  if (!exeCapabilities.hasSupportedMonoVersion()) {
     // Promt the user to install Mono and stop extension execution.
     vscode.window
       .showErrorMessage(
@@ -27,31 +25,12 @@ export function activate(extensionContext: vscode.ExtensionContext) {
         Error.GetMono
       )
       .then((selection) => {
-        if (selection === Error.GetMono) {
-          vscode.commands.executeCommand(
-            "vscode.open",
-            vscode.Uri.parse(Error.GetMonoUri)
-          );
-          let restartMessage;
-          if (platform() === EnvironmentConfig.OSX) {
-            // Mono adds a new folder to PATH; so give the easiest advice
-            restartMessage = Error.RestartMacAfterMonoInstall;
-          } else {
-            restartMessage = Error.RestartCodeAfterMonoInstall;
-          }
-          vscode.window.showWarningMessage(restartMessage);
-        }
-
-        if (selection === Error.ConfigureMonoExecutable) {
-          vscode.commands.executeCommand(
-            "workbench.action.configureLanguageBasedSettings"
-          );
-        }
+        exeCapabilities.getMono(selection);
       });
     return;
   }
 
-  const dafnyLanguageServer = new DafnyLanguageServer(extensionContext);
+  const dafnyLanguageServer = new ServerInitializer(extensionContext);
   dafnyLanguageServer.startLanguageServer();
   dafnyLanguageServer.registerServerRestartCommand();
 }
