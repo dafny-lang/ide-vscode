@@ -1,18 +1,23 @@
-import { workspace, WorkspaceConfiguration } from "vscode";
-import { LanguageClient, ServerOptions } from "vscode-languageclient";
+"use strict";
+import { workspace, WorkspaceConfiguration, window } from "vscode";
+import {
+  LanguageClient,
+  ServerOptions as ClientServerOptions,
+} from "vscode-languageclient";
 import { LanguageClientOptions } from "vscode-languageclient/lib/client";
-import { window } from "vscode";
 import * as path from "path";
 import * as fs from "fs";
 
-import { EnvironmentConfig } from "../stringRessources/commands";
-import { Error } from "../stringRessources/messages";
+import {
+  EnvironmentConfig,
+  Error,
+} from "../stringRessources/_StringRessourcesModule";
 
 /*
  * Extends LanguageClient - provides basic config constructor for server initialize
  * This class is used by dafnyLanguageServer and is basicly just an extraction.
  */
-export default class DafnyLanguageClient extends LanguageClient {
+export default class ServerOptions extends LanguageClient {
   constructor() {
     const config: WorkspaceConfiguration = workspace.getConfiguration(
       EnvironmentConfig.Dafny
@@ -35,7 +40,7 @@ export default class DafnyLanguageClient extends LanguageClient {
       }
     });
 
-    const serverOptions: ServerOptions = {
+    const serverOptions: ClientServerOptions = {
       run: { command: dafnyLangServerExe, args: [] },
       debug: { command: dafnyLangServerExe, args: [] },
     };

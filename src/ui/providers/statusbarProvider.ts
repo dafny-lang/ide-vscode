@@ -2,10 +2,14 @@
 import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient";
 
-import { LanguageServerNotification } from "../stringRessources/languageServer";
-import { StatusbarStrings } from "../stringRessources/messages";
-import { EnvironmentConfig } from "../stringRessources/commands";
-import { DafnyFileChecker } from "./dafnyFileChecker";
+import {
+  LanguageServerNotification,
+  StatusbarStrings,
+  EnvironmentConfig,
+} from "../../stringRessources/_StringRessourcesModule";
+
+import { DafnyFileChecker } from "../dafnyFileChecker";
+import { IStatusbarProvider } from "./IStatusbarProvider";
 
 /**
  * This component adds additional information to the status bare like
@@ -13,7 +17,7 @@ import { DafnyFileChecker } from "./dafnyFileChecker";
  * It shows also the information if the server has been startet and the Dafny version received from the server.
  * There exists only one instance of this component (created in the dafnyUiManager).
  */
-export class Statusbar {
+export class StatusbarProvider implements IStatusbarProvider {
   private dafnyerrors: { [docPathName: string]: number } = {};
   private dafnyversion: string | undefined;
   private activeDocument: vscode.Uri | undefined;

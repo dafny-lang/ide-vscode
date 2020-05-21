@@ -1,4 +1,5 @@
 // tslint:disable:max-classes-per-file
+
 export class Warning {
   public static NoWorkspace: string =
     "Please use a workspace (File - Open Folder). Otherwise some features may not work properly";
