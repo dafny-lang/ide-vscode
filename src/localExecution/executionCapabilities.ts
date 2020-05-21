@@ -30,8 +30,7 @@ export class ExecutionCapabilities implements IExecutionCapabilities {
     }
 
     const monoExecutable =
-      this.config.get<string>(Config.MonoExecutable) ||
-      this.config.get<string>(Config.MonoPath) ||
+      this.config.get<string>(Config.MonoExecutablePath) ||
       EnvironmentConfig.Mono;
 
     try {

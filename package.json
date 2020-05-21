@@ -1,223 +1,219 @@
 {
-    "name": "dafny-vscode",
-    "displayName": "Dafny",
-    "description": "Dafny for Visual Studio Code",
-    "version": "1.0.1",
-    "publisher": "correctnessLab",
-    "homepage": "https://github.com/DafnyVSCode/",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/DafnyVSCode/Dafny-VSCode.git"
-    },
-    "bugs": {
-        "url": "https://github.com/DafnyVSCode/Dafny-VSCode/issues"
-    },
-    "badges": [
-        {
-            "url": "https://travis-ci.com/DafnyVSCode/Dafny-VSCode.svg?branch=master",
-            "href": "https://travis-ci.com/DafnyVSCode/Dafny-VSCode",
-            "description": "Continuous integration (Travis)"
-        }
-    ],
-    "qna": false,
-    "license": "MIT",
-    "galleryBanner": {
-        "color": "#FFEC50",
-        "theme": "light"
-    },
-    "icon": "logo.png",
-    "engines": {
-        "vscode": "^1.25.1"
-    },
-    "categories": [
-        "Programming Languages"
-    ],
-    "main": "./out/src/extension",
-    "contributes": {
-        "menus": {
-            "editor/context": [
-                {
-                    "when": "editorTextFocus && editorLangId == dafny",
-                    "command": "dafny.restartDafnyServer",
-                    "group": "7_Dafny@4"
-                },
-                {
-                    "when": "editorTextFocus && editorLangId == dafny",
-                    "command": "dafny.compile",
-                    "group": "7_Dafny@5"
-                },
-                {
-                    "when": "editorTextFocus && editorLangId == dafny",
-                    "command": "dafny.compileCustomArgs",
-                    "group": "7_Dafny@6"
-                },
-                {
-                    "when": "editorTextFocus && editorLangId == dafny",
-                    "command": "dafny.compileAndRun",
-                    "group": "7_Dafny@7"
-                },
-                {
-                    "when": "editorTextFocus && editorLangId == dafny",
-                    "command": "dafny.showCounterExample",
-                    "group": "7_Dafny@1"
-                },
-                {
-                    "when": "editorTextFocus && editorLangId == dafny",
-                    "command": "dafny.hideCounterExample",
-                    "group": "7_Dafny@2"
-                }
-            ]
-        },
-        "keybindings": [
-            {
-                "command": "dafny.compile",
-                "key": "ctrl+shift+b",
-                "mac": "⇧⌘B",
-                "when": "editorTextFocus && editorLangId == dafny"
-            },
-            {
-                "command": "dafny.compileAndRun",
-                "key": "f5",
-                "mac": "f5",
-                "when": "editorTextFocus && editorLangId == dafny"
-            },
-            {
-                "command": "dafny.compileCustomArgs",
-                "key": "f6",
-                "mac": "f6",
-                "when": "editorTextFocus && editorLangId == dafny"
-            },
-            {
-                "command": "dafny.showCounterExample",
-                "key": "f7",
-                "when": "editorTextFocus && editorLangId == dafny"
-            },
-            {
-                "command": "dafny.hideCounterExample",
-                "key": "f8",
-                "when": "editorTextFocus && editorLangId == dafny"
-            },
-            {
-                "command": "dafny.restartDafnyServer",
-                "key": "f9",
-                "when": "editorTextFocus && editorLangId == dafny"
-            }
-        ],
-        "snippets": [
-            {
-                "language": "dafny",
-                "path": "./snippets/dafny.json"
-            }
-        ],
-        "languages": [
-            {
-                "id": "dafny",
-                "aliases": [
-                    "Dafny",
-                    "dafny"
-                ],
-                "extensions": [
-                    ".dfy",
-                    ".dfyi"
-                ],
-                "configuration": "./language-configuration.json"
-            }
-        ],
-        "grammars": [
-            {
-                "language": "dafny",
-                "scopeName": "text.dfy.dafny",
-                "path": "./syntaxes/Dafny.tmLanguage"
-            }
-        ],
-        "configuration": {
-            "type": "object",
-            "title": "Dafny extension configuration",
-            "properties": {
-                "dafny.languageServerExePath": {
-                    "type": "string",
-                    "default": "../../../../dafny-language-server/Binaries/DafnyLanguageServer.exe",
-                    "description": "Relative path to the DafnyServer.exe"
-                },
-                "dafny.compilationArgs": {
-                    "type": "array",
-                    "default": [
-                        "/compile:1",
-                        "/nologo"
-                    ],
-                    "description": "Optional array of strings as Dafny compilation arguments"
-                },
-                "dafny.useMono": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Only applicable to _Windows_! Requires _.NET_ 4.5 or higher when set to `false`."
-                },
-                "dafny.monoPath": {
-                    "type": "string",
-                    "description": "Mono binary with absolute path. Only necessary if mono is not in system PATH. Ignored on Windows when useMono is set to false.",
-                    "deprecationMessage": "Please use the dafny.monoExecutable property in the future."
-                },
-                "dafny.monoExecutable": {
-                    "type": "string",
-                    "description": "Mono executable with absolute path. Only necessary if mono is not in system PATH (you'll get an error if that's the case). Ignored on Windows when useMono is false."
-                },
-                "dafny.colorCounterExamples": {
-                    "type": "object",
-                    "default": {
-                        "backgroundColor": null,
-                        "fontColor": null
-                    },
-                    "description": "Customize the color (HEX) of Counter Examples. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults."
-                }
-            }
-        },
-        "commands": [
-            {
-                "command": "dafny.restartDafnyServer",
-                "icon": "$(issue-reopened)",
-                "title": "Dafny: Restart DafnyServer"
-            },
-            {
-                "command": "dafny.compile",
-                "title": "Dafny: Compile"
-            },
-            {
-                "command": "dafny.compileCustomArgs",
-                "title": "Dafny: Compile with Custom Arguments"
-            },
-            {
-                "command": "dafny.compileAndRun",
-                "title": "Dafny: Compile and Run"
-            },
-            {
-                "command": "dafny.showCounterExample",
-                "title": "Dafny: Show CounterExample"
-            },
-            {
-                "command": "dafny.hideCounterExample",
-                "title": "Dafny: Hide CounterExample"
-            }
-        ]
-    },
-    "activationEvents": [
-        "onLanguage:dafny"
-    ],
-    "scripts": {
-        "vscode:compile-typescript": "tsc -p ./",
-        "compile": "tsc -watch -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install",
-        "update-vscode": "node ./node_modules/vscode/bin/install"
-    },
-    "devDependencies": {
-        "@types/mocha": "^2.2.32",
-        "@types/node": "^6.14.10",
-        "mocha": "^5.2.0",
-        "tslint": "^5.20.1",
-        "typescript": "^3.9.2",
-        "vsce": "^1.75.0",
-        "vscode": "^1.1.37"
-    },
-    "dependencies": {
-        "vscode-languageclient": "^3.5.1"
+  "name": "dafny-vscode",
+  "displayName": "Dafny",
+  "description": "Dafny for Visual Studio Code",
+  "version": "1.0.1",
+  "publisher": "correctnessLab",
+  "homepage": "https://github.com/DafnyVSCode/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DafnyVSCode/Dafny-VSCode.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DafnyVSCode/Dafny-VSCode/issues"
+  },
+  "badges": [
+    {
+      "url": "https://travis-ci.com/DafnyVSCode/Dafny-VSCode.svg?branch=master",
+      "href": "https://travis-ci.com/DafnyVSCode/Dafny-VSCode",
+      "description": "Continuous integration (Travis)"
     }
+  ],
+  "qna": false,
+  "license": "MIT",
+  "galleryBanner": {
+    "color": "#FFEC50",
+    "theme": "light"
+  },
+  "icon": "logo.png",
+  "engines": {
+    "vscode": "^1.25.1"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "main": "./out/src/extension",
+  "contributes": {
+    "menus": {
+      "editor/context": [
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.restartDafnyServer",
+          "group": "7_Dafny@4"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.compile",
+          "group": "7_Dafny@5"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.compileCustomArgs",
+          "group": "7_Dafny@6"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.compileAndRun",
+          "group": "7_Dafny@7"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.showCounterExample",
+          "group": "7_Dafny@1"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.hideCounterExample",
+          "group": "7_Dafny@2"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "dafny.compile",
+        "key": "ctrl+shift+b",
+        "mac": "⇧⌘B",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      {
+        "command": "dafny.compileAndRun",
+        "key": "f5",
+        "mac": "f5",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      {
+        "command": "dafny.compileCustomArgs",
+        "key": "f6",
+        "mac": "f6",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      {
+        "command": "dafny.showCounterExample",
+        "key": "f7",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      {
+        "command": "dafny.hideCounterExample",
+        "key": "f8",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      {
+        "command": "dafny.restartDafnyServer",
+        "key": "f9",
+        "when": "editorTextFocus && editorLangId == dafny"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "dafny",
+        "path": "./snippets/dafny.json"
+      }
+    ],
+    "languages": [
+      {
+        "id": "dafny",
+        "aliases": [
+          "Dafny",
+          "dafny"
+        ],
+        "extensions": [
+          ".dfy",
+          ".dfyi"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "dafny",
+        "scopeName": "text.dfy.dafny",
+        "path": "./syntaxes/Dafny.tmLanguage"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Dafny extension configuration",
+      "properties": {
+        "dafny.languageServerExePath": {
+          "type": "string",
+          "default": "../../../../dafny-language-server/Binaries/DafnyLanguageServer.exe",
+          "description": "Relative path to the DafnyServer.exe"
+        },
+        "dafny.compilationArgs": {
+          "type": "array",
+          "default": [
+            "/compile:1",
+            "/nologo"
+          ],
+          "description": "Optional array of strings as Dafny compilation arguments"
+        },
+        "dafny.useMono": {
+          "type": "boolean",
+          "default": false,
+          "description": "Only applicable to _Windows_! Requires _.NET_ 4.5 or higher when set to `false`."
+        },
+        "dafny.MonoExecutablePath": {
+          "type": "string",
+          "description": "Monos absolute path. Only necessary if mono is not in system PATH (you'll get an error if that's the case). Ignored on Windows when useMono is set to false.",
+          "deprecationMessage": "Please use the dafny.monoExecutable property in the future."
+        },
+        "dafny.colorCounterExamples": {
+          "type": "object",
+          "default": {
+            "backgroundColor": null,
+            "fontColor": null
+          },
+          "description": "Customize the color (HEX) of Counter Examples. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "dafny.restartDafnyServer",
+        "icon": "$(issue-reopened)",
+        "title": "Dafny: Restart DafnyServer"
+      },
+      {
+        "command": "dafny.compile",
+        "title": "Dafny: Compile"
+      },
+      {
+        "command": "dafny.compileCustomArgs",
+        "title": "Dafny: Compile with Custom Arguments"
+      },
+      {
+        "command": "dafny.compileAndRun",
+        "title": "Dafny: Compile and Run"
+      },
+      {
+        "command": "dafny.showCounterExample",
+        "title": "Dafny: Show CounterExample"
+      },
+      {
+        "command": "dafny.hideCounterExample",
+        "title": "Dafny: Hide CounterExample"
+      }
+    ]
+  },
+  "activationEvents": [
+    "onLanguage:dafny"
+  ],
+  "scripts": {
+    "vscode:compile-typescript": "tsc -p ./",
+    "compile": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "update-vscode": "node ./node_modules/vscode/bin/install"
+  },
+  "devDependencies": {
+    "@types/mocha": "^2.2.32",
+    "@types/node": "^6.14.10",
+    "mocha": "^5.2.0",
+    "tslint": "^5.20.1",
+    "typescript": "^3.9.2",
+    "vsce": "^1.75.0",
+    "vscode": "^1.1.37"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^3.5.1"
+  }
 }

@@ -41,8 +41,7 @@ export class DafnyRunner implements IDafnyRunner {
       return `& "${executable}"`;
     }
     const monoExecutable =
-      this.config.get<string>(Config.MonoExecutable) ||
-      this.config.get<string>(Config.MonoPath) ||
+      this.config.get<string>(Config.MonoExecutablePath) ||
       EnvironmentConfig.Mono;
     return `${monoExecutable} "${executable}"`;
   }

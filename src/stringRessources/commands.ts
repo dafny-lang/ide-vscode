@@ -14,13 +14,14 @@ export class VSCodeCommandStrings {
   public static Open: string = "vscode.open";
   public static ConfigSettings: string =
     "workbench.action.configureLanguageBasedSettings";
+  public static ShowReferences: string = "editor.action.showReferences";
 }
 
 export class Config {
-  public static MonoPath: string = "monoPath"; // deprecated monoPath configuration option #40
-  public static MonoExecutable: string = "monoExecutable";
+  public static MonoExecutablePath: string = "monoExecutablePath";
   public static UseMono: string = "useMono";
   public static LanguageServerExePath: string = "languageServerExePath";
+  public static ColorCounterExamples: string = "colorCounterExamples";
   public static CompilationArguments: string = "compilationArgs";
 }
 
@@ -30,6 +31,8 @@ export class EnvironmentConfig {
   public static DafnySuffix: string = ".dfy";
   public static ExeSuffix: string = ".dfy";
   public static DocumentSelector: string = "file";
+  public static CounterModelObjectReference: string = "[Object Reference]";
+
   public static DafnyLanguageServerID: string = "dafny-vscode";
   public static DafnyLanguageServerName: string = "Dafny Language Server";
 
