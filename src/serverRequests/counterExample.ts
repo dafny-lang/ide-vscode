@@ -29,7 +29,7 @@ export class CounterExample implements ICounterExample {
 
   public getCounterExample(
     callback: Function,
-    isAutoTriggered: Boolean = false
+    isAutoTriggered: boolean = false
   ) {
     if (!vscode.window.activeTextEditor) {
       return;

@@ -6,7 +6,7 @@ export interface ICounterModelProvider {
   hideCounterModel(): void;
   showCounterModel(
     allCounterExamples: ICounterExamples,
-    isAutoTriggered: Boolean
+    isAutoTriggered: boolean
   ): void;
   update(languageServer: LanguageClient): void;
 }

@@ -57,7 +57,7 @@ export class Commands implements ICommands {
         );
         var callback = (
           allCounterExamples: ICounterExamples,
-          isAutoTriggered: Boolean
+          isAutoTriggered: boolean
         ): void => {
           this.provider
             .getCounterModelProvider()

@@ -52,7 +52,7 @@ export class CounterModelProvider implements ICounterModelProvider {
 
   public showCounterModel(
     allCounterExamples: ICounterExamples,
-    isAutoTriggered: Boolean = false
+    isAutoTriggered: boolean = false
   ): void {
     const editor: vscode.TextEditor = vscode.window.activeTextEditor!;
     const arrayOfDecorations: vscode.DecorationOptions[] = [];
@@ -122,7 +122,7 @@ export class CounterModelProvider implements ICounterModelProvider {
       );
       var callback = (
         allCounterExamples: ICounterExamples,
-        isAutoTriggered: Boolean
+        isAutoTriggered: boolean
       ): void => {
         this.showCounterModel(allCounterExamples, isAutoTriggered);
       };
