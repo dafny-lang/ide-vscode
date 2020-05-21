@@ -37,12 +37,12 @@ export class DafnyRunner implements IDafnyRunner {
     const useMono: boolean =
       this.config.get<boolean>(Config.UseMono) ||
       os.platform() !== EnvironmentConfig.Win32;
-    if (!useMono) {
-      return `& "${executable}"`;
+    if (useMono) {
+      const monoExecutable =
+        this.config.get<string>(Config.MonoExecutablePath) ||
+        EnvironmentConfig.Mono;
+      return `${monoExecutable} "${executable}"`;
     }
-    const monoExecutable =
-      this.config.get<string>(Config.MonoExecutablePath) ||
-      EnvironmentConfig.Mono;
-    return `${monoExecutable} "${executable}"`;
+    return `& "${executable}"`;
   }
 }
