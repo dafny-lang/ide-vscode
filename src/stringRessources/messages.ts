@@ -30,14 +30,22 @@ export class Error {
     "Counter Example Request failed";
   public static NoAdditionalArgsGiven: string =
     "No additionaly arguments given";
+  public static MonoVersionNotParsed: string =
+    "Mono version could not be parsed from version output.";
+  public static MonoBinaryNotExecuted: string =
+    "Mono binary could not be executed.";
 }
 
 export class Information {
+  public static StartingServer: string = "Starting Dafny Language Server...";
+
   public static CompilationStarted: string = "Compilation started";
   public static CompilationFinished: string = "Compilation finished";
   public static CompilationStartRunner: string = "Running program...";
   public static CompilationFailed: string = "Compilation failed";
   public static CustomCompileArgsLabel: string = "Dafny Compilation Arguments";
+  public static Run: string = "Run";
+  public static Arguments: string = "Args";
 }
 
 export class StatusbarStrings {

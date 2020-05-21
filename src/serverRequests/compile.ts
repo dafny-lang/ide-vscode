@@ -9,6 +9,7 @@ import {
 import {
   Information,
   Error,
+  Config,
   EnvironmentConfig,
   LanguageServerRequest,
 } from "../stringRessources/_StringRessourcesModule";
@@ -16,7 +17,7 @@ import { IDafnyRunner } from "../localExecution/_LocalExecutionModule";
 
 import { ICompile } from "./ICompile";
 
-/*
+/**
 * Request the DafnyServer to compile Dafny code. 
 * Compiled files can be executed through the DafnyRunner (a helper class 
     that can be injected with the "runner" argument)
@@ -39,7 +40,8 @@ export class Compile implements ICompile {
       const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(
         EnvironmentConfig.Dafny
       );
-      const compilationArgs: string[] = config.get("compilationArgs") || [];
+      const compilationArgs: string[] =
+        config.get(Config.CompilationArguments) || [];
       if (customArgs === true) {
         const opt: vscode.InputBoxOptions = {
           value: compilationArgs.join(" "),
@@ -47,7 +49,9 @@ export class Compile implements ICompile {
         };
         vscode.window.showInputBox(opt).then((args) => {
           if (args) {
-            vscode.window.showInformationMessage("Args: " + args);
+            vscode.window.showInformationMessage(
+              `${Information.Arguments}: ${args}`
+            );
             this.sendServerRequest(document.fileName, args.split(" "));
           } else {
             vscode.window.showErrorMessage(Error.NoAdditionalArgsGiven);

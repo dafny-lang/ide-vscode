@@ -13,12 +13,13 @@ import {
 
 import { ICounterExample } from "./ICounterExample";
 
-/*
+/**
  * Provides Counter Example provided by the Dafny language server.
  */
 export class CounterExample implements ICounterExample {
   private static timeout: NodeJS.Timer;
-  private readonly maxRequestsPerSecond: number = 2;
+  private readonly maxRequestsPerSecond: number = 2; // todo config?
+  private readonly oneSecInMs: number = 1000;
 
   private languageServer: LanguageClient;
 
@@ -56,7 +57,7 @@ export class CounterExample implements ICounterExample {
               }
             );
         },
-        autoTriggered ? 1000 / this.maxRequestsPerSecond : 1
+        autoTriggered ? this.oneSecInMs / this.maxRequestsPerSecond : 1
       );
     });
   }

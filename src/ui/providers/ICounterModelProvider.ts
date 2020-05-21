@@ -1,5 +1,5 @@
+"use strict";
 import { LanguageClient } from "vscode-languageclient";
-
 import { ICounterExamples } from "../../typeInterfaces/_TypeInterfacesModule";
 
 export interface ICounterModelProvider {

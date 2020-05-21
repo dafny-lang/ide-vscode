@@ -1,3 +1,4 @@
+"use strict";
 /*
  * Module for Dafny Language Server Requests.
  * Use this to program against the interface.

@@ -2,6 +2,7 @@
 import * as vscode from "vscode";
 
 import { ICodeLensProvider } from "./ICodeLensProvider";
+import { VSCodeCommandStrings } from "../../stringRessources/commands";
 
 export class CodeLensProvider implements ICodeLensProvider {
   // todo rm any
@@ -39,7 +40,7 @@ export class CodeLensProvider implements ICodeLensProvider {
     }
 
     vscode.commands.executeCommand(
-      "editor.action.showReferences",
+      VSCodeCommandStrings.ShowReferences,
       parsedUri,
       parsedPosition,
       parsedLocations

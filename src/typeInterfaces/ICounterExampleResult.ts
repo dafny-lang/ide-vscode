@@ -1,3 +1,4 @@
+"use strict";
 export interface ICounterExample {
   line: number;
   col: number;

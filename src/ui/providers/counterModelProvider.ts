@@ -8,6 +8,7 @@ import {
 } from "../../typeInterfaces/_TypeInterfacesModule";
 import {
   Warning,
+  Config,
   EnvironmentConfig,
 } from "../../stringRessources/_StringRessourcesModule";
 import {
@@ -72,7 +73,7 @@ export class CounterModelProvider implements ICounterModelProvider {
       )) {
         shownText += `${key} = ${value}; `;
 
-        if (value == "[Object Reference]") {
+        if (value == EnvironmentConfig.CounterModelObjectReference) {
           hasReferences = true;
         }
       }
@@ -139,7 +140,7 @@ export class CounterModelProvider implements ICounterModelProvider {
     );
     const customOptions:
       | { backgroundColor: string; fontColor: string }
-      | undefined = config.get("colorCounterExamples");
+      | undefined = config.get(Config.ColorCounterExamples);
 
     this.displayOptions = {
       dark: {

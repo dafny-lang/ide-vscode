@@ -4,12 +4,16 @@ import { Trace } from "vscode-jsonrpc";
 
 import { Commands, Notifications, DafnyUiManager } from "../ui/_UiModule";
 import { DafnyRunner } from "../localExecution/_LocalExecutionModule";
-import { CommandStrings } from "../stringRessources/_StringRessourcesModule";
+import {
+  CommandStrings,
+  Error,
+  Information,
+} from "../stringRessources/_StringRessourcesModule";
 
 import { ILanguageServer } from "./ILanguageServer";
 import ServerOptions from "./serverOptions";
 
-/*
+/**
  * This starts basicly the Dafny language server and has been extracted from the extension.ts ("Main").
  * It does also provide command registration for "restart language server".
  */
@@ -62,11 +66,11 @@ export class ServerInitializer implements ILanguageServer {
       vscode.commands.registerCommand(
         CommandStrings.RestartServer,
         async () => {
-          vscode.window.showErrorMessage("Server stopped");
+          vscode.window.showErrorMessage(Error.ServerStopped);
           await this.languageServer?.stop();
           this.languageServerDisposable?.dispose();
 
-          vscode.window.showInformationMessage("Starting Server...");
+          vscode.window.showInformationMessage(Information.StartingServer);
           this.startLanguageServer();
         }
       )

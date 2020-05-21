@@ -1,3 +1,4 @@
+"use strict";
 import { ICounterModelProvider } from "./providers/ICounterModelProvider";
 import { ICodeLensProvider } from "./providers/ICodeLensProvider";
 

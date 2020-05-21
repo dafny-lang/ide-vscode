@@ -2,20 +2,24 @@
 import { execFileSync } from "child_process";
 import * as os from "os";
 import { log } from "util";
-import { workspace } from "vscode";
+import * as vscode from "vscode";
 
 import {
   Config,
   EnvironmentConfig,
+  Error,
+  VSCodeCommandStrings,
 } from "../stringRessources/_StringRessourcesModule";
+
+import { IExecutionCapabilities } from "./IExecutionCapabilities";
 
 /**
  * Check for supported capabilities (mono/.net runtime, dafny etc.)
  */
-export class ExecutionCapabilities {
-  private static config = workspace.getConfiguration(EnvironmentConfig.Dafny);
-  public static hasSupportedMonoVersion(): boolean {
-    const useMono = ExecutionCapabilities.config.get<boolean>(Config.UseMono);
+export class ExecutionCapabilities implements IExecutionCapabilities {
+  private config = vscode.workspace.getConfiguration(EnvironmentConfig.Dafny);
+  public hasSupportedMonoVersion(): boolean {
+    const useMono = this.config.get<boolean>(Config.UseMono);
 
     if (os.platform() === EnvironmentConfig.Win32 && !useMono) {
       // Sadly, it is not easy to find out the .NET-version on Windows.
@@ -26,26 +30,49 @@ export class ExecutionCapabilities {
     }
 
     const monoExecutable =
-      ExecutionCapabilities.config.get<string>(Config.MonoExecutable) ||
-      ExecutionCapabilities.config.get<string>(Config.MonoPath) ||
-      "mono";
+      this.config.get<string>(Config.MonoExecutable) ||
+      this.config.get<string>(Config.MonoPath) ||
+      EnvironmentConfig.Mono;
 
     try {
-      const monoVersionOutput = execFileSync(monoExecutable, ["--version"]);
+      const monoVersionOutput = execFileSync(monoExecutable, [
+        EnvironmentConfig.MonoVersion,
+      ]);
       const monoVersion = /compiler version (\d+)\.(\d+)\.(\d+)/i
         .exec(monoVersionOutput)!
         .slice(1)
         .map((str) => Number(str));
 
       if (monoVersion.length !== 3 || monoVersion.some((num) => isNaN(num))) {
-        log("Mono version could not be parsed from version output.");
+        log(Error.MonoVersionNotParsed);
         return false;
       }
 
       return monoVersion[0] >= 4;
     } catch (exeception) {
-      log("Mono binary could not be executed.");
+      log(Error.MonoBinaryNotExecuted);
       return false;
+    }
+  }
+
+  public getMono(selection: string | undefined): void {
+    if (selection === Error.GetMono) {
+      vscode.commands.executeCommand(
+        VSCodeCommandStrings.Open,
+        vscode.Uri.parse(Error.GetMonoUri)
+      );
+      let restartMessage;
+      if (os.platform() === EnvironmentConfig.OSX) {
+        // Mono adds a new folder to PATH; so give the easiest advice
+        restartMessage = Error.RestartMacAfterMonoInstall;
+      } else {
+        restartMessage = Error.RestartCodeAfterMonoInstall;
+      }
+      vscode.window.showWarningMessage(restartMessage);
+    }
+
+    if (selection === Error.ConfigureMonoExecutable) {
+      vscode.commands.executeCommand(VSCodeCommandStrings.ConfigSettings);
     }
   }
 }

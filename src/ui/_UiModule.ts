@@ -1,3 +1,4 @@
+"use strict";
 export { Commands } from "./commands";
 export { ICommands } from "./ICommands";
 

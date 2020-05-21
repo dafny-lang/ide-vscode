@@ -11,9 +11,10 @@ import * as fs from "fs";
 import {
   EnvironmentConfig,
   Error,
+  Config,
 } from "../stringRessources/_StringRessourcesModule";
 
-/*
+/**
  * Extends LanguageClient - provides basic config constructor for server initialize
  * This class is used by dafnyLanguageServer and is basicly just an extraction.
  */
@@ -23,7 +24,7 @@ export default class ServerOptions extends LanguageClient {
       EnvironmentConfig.Dafny
     );
     const serverExePath: string | undefined = config.get(
-      "languageServerExePath"
+      Config.LanguageServerExePath
     );
     if (serverExePath === undefined) {
       window.showErrorMessage(Error.ServerExeNotDefined);
@@ -48,22 +49,24 @@ export default class ServerOptions extends LanguageClient {
     const clientOptions: LanguageClientOptions = {
       documentSelector: [
         {
-          pattern: "**/*.dfy",
+          pattern: EnvironmentConfig.DafnyFileExtension,
         },
         {
-          language: "dafny",
-          scheme: "file",
+          language: EnvironmentConfig.Dafny,
+          scheme: EnvironmentConfig.DocumentSelector,
         },
       ],
       synchronize: {
-        fileEvents: workspace.createFileSystemWatcher("**/*.dfy"),
-        configurationSection: "dafny",
+        fileEvents: workspace.createFileSystemWatcher(
+          EnvironmentConfig.DafnyFileExtension
+        ),
+        configurationSection: EnvironmentConfig.Dafny,
       },
     };
 
     super(
-      "dafny-vscode",
-      "Dafny Language Server",
+      EnvironmentConfig.DafnyLanguageServerID,
+      EnvironmentConfig.DafnyLanguageServerName,
       serverOptions,
       clientOptions
     );
