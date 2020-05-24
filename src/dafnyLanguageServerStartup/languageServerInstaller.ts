@@ -1,7 +1,8 @@
 "use strict";
 import * as path from "path";
 import * as semver from "semver";
-import * as fs from "fs-extra";
+import * as fs from "fs";
+import * as rimraf from "rimraf";
 import * as https from "https";
 import * as os from "os";
 import * as uri from "vscode-uri";
@@ -30,7 +31,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
   );
 
   private readonly tmpBinaryURL: string =
-    "https://gitlab.dev.ifs.hsr.ch/dafny-ba/dafny-language-server/-/jobs/180574/artifacts/download";
+    "https://gitlab.dev.ifs.hsr.ch/dafny-ba/dafny-language-server/-/jobs/artifacts/master/download?job=build_server_and_sonar";
   private readonly tmpReleaseVersion: string = "1.0.0";
 
   constructor() {}
@@ -38,19 +39,24 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     return fs.existsSync(this.basePath); // serverExePath
   }
 
-  public async installLatestVersion(): Promise<string> {
+  public async installLatestVersion(): Promise<boolean> {
     if (this.anyVersionInstalled()) {
       this.deleteInstalledVersion();
     }
-    this.downloadLatestServerRelease(this.tmpBinaryURL, this.downloadFile);
-
-    this.extractZip(this.downloadFile);
-    this.cleanupSetPermission();
-    return "version";
+    this.downloadLatestServerRelease(this.tmpBinaryURL, this.downloadFile).then(
+      () => {
+        this.extractZip(this.downloadFile).then(() => {
+          this.cleanupSetPermission().then(() => {
+            return true;
+          });
+        });
+      }
+    );
+    return false;
   }
 
   private deleteInstalledVersion(): void {
-    fs.removeSync(this.basePath);
+    rimraf.sync(this.basePath);
   }
 
   public async latestVersionInstalled(localVersion: string): Promise<boolean> {

@@ -122,9 +122,9 @@ export class ServerInitializer implements ILanguageServer {
       this.stopLanguageServer().then(() => {
         vscode.window.showErrorMessage(Error.ServerStopped);
 
-        installer.installLatestVersion().then((newVersion: string) => {
+        installer.installLatestVersion().then((success: boolean) => {
           vscode.window.showInformationMessage(
-            Information.StartingServer + newVersion
+            Information.StartingServer + success
           );
           this.startLanguageServer();
         });

@@ -11,5 +11,5 @@
 export interface ILanguageServerInstaller {
   anyVersionInstalled(): boolean;
   latestVersionInstalled(localVersion: string): Promise<boolean>;
-  installLatestVersion(): Promise<string>;
+  installLatestVersion(): Promise<boolean>;
 }
