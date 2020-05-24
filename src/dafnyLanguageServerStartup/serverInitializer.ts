@@ -18,10 +18,13 @@ import {
   CommandStrings,
   Error,
   Information,
+  LanguageServerNotification,
 } from "../stringRessources/_StringRessourcesModule";
 
 import { ILanguageServer } from "./ILanguageServer";
 import ServerOptions from "./serverOptions";
+import { ILanguageServerInstaller } from "./ILanguageServerInstaller";
+import { LanguageServerInstaller } from "./languageServerInstaller";
 
 /**
  * This starts basicly the Dafny language server and has been extracted from the extension.ts ("Main").
@@ -39,6 +42,8 @@ export class ServerInitializer implements ILanguageServer {
   }
 
   public startLanguageServer(): void {
+    this.getLanguageServerIfNotExists();
+
     this.languageServer = new ServerOptions();
     this.languageServer.trace = Trace.Verbose;
 
@@ -61,8 +66,8 @@ export class ServerInitializer implements ILanguageServer {
           this.languageServer
         );
         notifications.registerNotifications();
-
         provider.registerEventListener();
+        this.registerServerVersionNotification();
       }
     });
 
@@ -72,20 +77,58 @@ export class ServerInitializer implements ILanguageServer {
     this.extensionContext.subscriptions.push(this.languageServerDisposable);
   }
 
+  private async stopLanguageServer() {
+    await this.languageServer?.stop();
+    this.languageServerDisposable = this.languageServerDisposable?.dispose();
+  }
+
   // This function is not registered in commands.ts since it has a higher cohesion here
   public registerServerRestartCommand(): void {
     this.extensionContext.subscriptions.push(
       vscode.commands.registerCommand(
         CommandStrings.RestartServer,
         async () => {
-          vscode.window.showErrorMessage(Error.ServerStopped);
-          await this.languageServer?.stop();
-          this.languageServerDisposable = this.languageServerDisposable?.dispose();
-
-          vscode.window.showInformationMessage(Information.StartingServer);
-          this.startLanguageServer();
+          this.stopLanguageServer().then(() => {
+            vscode.window.showErrorMessage(Error.ServerStopped);
+            vscode.window.showInformationMessage(Information.StartingServer);
+            this.startLanguageServer();
+          });
         }
       )
     );
+  }
+
+  private registerServerVersionNotification(): void {
+    if (this.languageServer) {
+      this.languageServer.onNotification(
+        LanguageServerNotification.ServerStarted,
+        (serverversion: string) => {
+          this.installLatestLanguageServer(serverversion);
+        }
+      );
+    }
+  }
+
+  private getLanguageServerIfNotExists(): void {
+    const installer: ILanguageServerInstaller = new LanguageServerInstaller();
+    if (!installer.anyVersionInstalled()) {
+      installer.installLatestVersion();
+    }
+  }
+
+  private installLatestLanguageServer(serverversion: string): void {
+    const installer: ILanguageServerInstaller = new LanguageServerInstaller();
+    if (!installer.latestVersionInstalled(serverversion)) {
+      this.stopLanguageServer().then(() => {
+        vscode.window.showErrorMessage(Error.ServerStopped);
+
+        installer.installLatestVersion().then((newVersion: string) => {
+          vscode.window.showInformationMessage(
+            Information.StartingServer + newVersion
+          );
+          this.startLanguageServer();
+        });
+      });
+    }
   }
 }
