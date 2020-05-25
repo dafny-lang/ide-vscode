@@ -23,7 +23,7 @@ export default class ServerOptions extends LanguageClient {
     const config: WorkspaceConfiguration = workspace.getConfiguration(
       EnvironmentConfig.Dafny
     );
-    const serverExePath: string | undefined = config.get<string>(
+    let serverExePath: string | undefined = config.get<string>(
       Config.LanguageServerExePath
     );
     if (serverExePath === undefined) {
