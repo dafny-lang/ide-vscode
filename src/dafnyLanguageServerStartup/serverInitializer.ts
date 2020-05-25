@@ -115,8 +115,8 @@ export class ServerInitializer implements ILanguageServer {
       installer.installLatestVersion().then((success: boolean) => {
         vscode.window.showInformationMessage(
           Information.StartingServer + success
+          // async zeugs ist zu sehr durchmixt. fixen. blaSync() sonst nehmen/implementieren
         );
-        //this.startLanguageServer();
       });
     }
   }
