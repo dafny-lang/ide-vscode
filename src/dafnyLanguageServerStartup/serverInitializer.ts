@@ -112,7 +112,12 @@ export class ServerInitializer implements ILanguageServer {
   private getLanguageServerIfNotExists(): void {
     const installer: ILanguageServerInstaller = new LanguageServerInstaller();
     if (!installer.anyVersionInstalled()) {
-      installer.installLatestVersion();
+      installer.installLatestVersion().then((success: boolean) => {
+        vscode.window.showInformationMessage(
+          Information.StartingServer + success
+        );
+        //this.startLanguageServer();
+      });
     }
   }
 

@@ -31,7 +31,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
   );
 
   private readonly tmpBinaryURL: string =
-    "https://wuza.ch/specials/SA/artifacts.zip";
+    "https://wuza.ch/specials/SA/Server.zip";
   // "https://gitlab.dev.ifs.hsr.ch/dafny-ba/dafny-language-server/-/jobs/artifacts/master/download?job=build_server_and_sonar";
   private readonly tmpReleaseVersion: string = "1.0.0";
 
