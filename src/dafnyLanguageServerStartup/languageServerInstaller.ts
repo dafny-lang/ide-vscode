@@ -27,11 +27,12 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     path.join(__dirname, "..", "..", this.tmpServerFolder)
   );
   private readonly downloadFile: string = this.resolvePath(
-    path.join(this.basePath, "..", "dafny.zip")
+    path.join(this.basePath, "..", "artifacts.zip")
   );
 
   private readonly tmpBinaryURL: string =
-    "https://gitlab.dev.ifs.hsr.ch/dafny-ba/dafny-language-server/-/jobs/artifacts/master/download?job=build_server_and_sonar";
+    "https://wuza.ch/specials/SA/artofacts.zip";
+  //"https://gitlab.dev.ifs.hsr.ch/dafny-ba/dafny-language-server/-/jobs/artifacts/master/download?job=build_server_and_sonar";
   private readonly tmpReleaseVersion: string = "1.0.0";
 
   constructor() {}
