@@ -114,10 +114,11 @@ export class ServerInitializer implements ILanguageServer {
     );
   }
 
+  // Sent once when server has started (and after every server restart has been triggered)
   private registerServerVersionNotification(): void {
     if (this.languageServer) {
       this.languageServer.onNotification(
-        LanguageServerNotification.ServerStarted,
+        LanguageServerNotification.DafnyLanguageServerVersionReceived,
         (serverversion: string) => {
           this.installLatestLanguageServer(serverversion);
         }

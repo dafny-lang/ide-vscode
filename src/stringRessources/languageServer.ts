@@ -20,6 +20,9 @@ export class LanguageServerNotification {
   public static Info: string = "INFO";
   public static UpdateStatusbar: string = "updateStatusbar";
   public static ServerStarted: string = "serverStarted";
+  public static DafnyLanguageServerVersionReceived: string =
+    "dafnyLanguageServerVersionReceived";
+
   public static ActiveVerifiyingDocument: string = "activeVerifiyingDocument";
   public static Verify: string = "verify";
   public static Ready: string = "ready";

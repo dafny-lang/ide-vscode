@@ -19,7 +19,7 @@ import { IStatusbarProvider } from "./IStatusbarProvider";
  */
 export class StatusbarProvider implements IStatusbarProvider {
   private dafnyerrors: { [docPathName: string]: number } = {};
-  private dafnyversion: string | undefined;
+  private dafnyLanguageServerVersion: string | undefined;
   private activeDocument: vscode.Uri | undefined;
   private serverStatusBar: vscode.StatusBarItem;
   private currentDocumentStatucBar: vscode.StatusBarItem;
@@ -40,7 +40,7 @@ export class StatusbarProvider implements IStatusbarProvider {
       LanguageServerNotification.ServerStarted,
       (serverversion: string) => {
         vscode.window.showInformationMessage(StatusbarStrings.Started);
-        this.dafnyversion = serverversion;
+        this.dafnyLanguageServerVersion = serverversion;
         this.update();
       }
     );
@@ -80,10 +80,10 @@ export class StatusbarProvider implements IStatusbarProvider {
           ? `${StatusbarStrings.NotVerified} - ${StatusbarStrings.Errors}: ${errors}`
           : StatusbarStrings.Verified;
 
-      if (this.dafnyversion) {
+      if (this.dafnyLanguageServerVersion) {
         this.serverStatusBar.text = `${
           StatusbarStrings.DafnyVersion
-        }: ${this.dafnyversion.trim()}`;
+        }: ${this.dafnyLanguageServerVersion.trim()}`;
         this.serverStatusBar.tooltip = this.activeDocument
           ? `${
               StatusbarStrings.CurrentDocument
