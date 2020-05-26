@@ -42,42 +42,59 @@ export class ServerInitializer implements ILanguageServer {
   }
 
   public startLanguageServer(): void {
-    this.getLanguageServerIfNotExists();
+    this.installLanguageServerIfNotExists().then(() => {
+      vscode.window.showInformationMessage(Information.StartingServer);
 
-    this.languageServer = new ServerOptions();
-    this.languageServer.trace = Trace.Verbose;
+      this.languageServer = new ServerOptions();
+      this.languageServer.trace = Trace.Verbose;
 
-    this.languageServer.onReady().then(() => {
-      if (this.languageServer) {
-        const provider: IDafnyUiManager = new DafnyUiManager(
-          this.extensionContext,
-          this.languageServer
-        );
+      this.languageServer
+        .onReady()
+        .then(() => {
+          vscode.window.showInformationMessage(
+            "Dafny Language Server started."
+          );
 
-        const commands: ICommands = new Commands(
-          this.extensionContext,
-          this.languageServer,
-          provider,
-          this.runner
-        );
-        commands.registerCommands();
+          if (this.languageServer) {
+            const provider: IDafnyUiManager = new DafnyUiManager(
+              this.extensionContext,
+              this.languageServer
+            );
 
-        const notifications: INotifications = new Notifications(
-          this.languageServer
-        );
-        notifications.registerNotifications();
-        provider.registerEventListener();
-        this.registerServerVersionNotification();
-      }
+            const commands: ICommands = new Commands(
+              this.extensionContext,
+              this.languageServer,
+              provider,
+              this.runner
+            );
+            commands.registerCommands();
+
+            const notifications: INotifications = new Notifications(
+              this.languageServer
+            );
+            notifications.registerNotifications();
+            provider.registerEventListener();
+            this.registerServerVersionNotification();
+          }
+
+          vscode.window.showInformationMessage(
+            "Dafny Language Server is ready."
+          );
+        })
+        .catch((err) => {
+          vscode.window.showErrorMessage(
+            "Could not install Danfy Language Server. " + err
+          );
+        });
+
+      // Push the disposable to the context's subscriptions so that the
+      // client can be deactivated on extension deactivation
+      this.languageServerDisposable = this.languageServer.start();
+      this.extensionContext.subscriptions.push(this.languageServerDisposable);
     });
-
-    // Push the disposable to the context's subscriptions so that the
-    // client can be deactivated on extension deactivation
-    this.languageServerDisposable = this.languageServer.start();
-    this.extensionContext.subscriptions.push(this.languageServerDisposable);
   }
 
-  private async stopLanguageServer() {
+  private async stopLanguageServer(): Promise<void> {
     await this.languageServer?.stop();
     this.languageServerDisposable = this.languageServerDisposable?.dispose();
   }
@@ -90,7 +107,6 @@ export class ServerInitializer implements ILanguageServer {
         async () => {
           this.stopLanguageServer().then(() => {
             vscode.window.showErrorMessage(Error.ServerStopped);
-            vscode.window.showInformationMessage(Information.StartingServer);
             this.startLanguageServer();
           });
         }
@@ -109,16 +125,15 @@ export class ServerInitializer implements ILanguageServer {
     }
   }
 
-  private getLanguageServerIfNotExists(): void {
+  private async installLanguageServerIfNotExists(): Promise<boolean> {
     const installer: ILanguageServerInstaller = new LanguageServerInstaller();
     if (!installer.anyVersionInstalled()) {
-      installer.installLatestVersion().then((success: boolean) => {
-        vscode.window.showInformationMessage(
-          Information.StartingServer + success
-          // async zeugs ist zu sehr durchmixt. fixen. blaSync() sonst nehmen/implementieren
-        );
-      });
+      vscode.window.showInformationMessage(
+        "Installing latest Dafny Language Server..."
+      );
+      return await installer.installLatestVersion();
     }
+    return Promise.resolve(true);
   }
 
   private installLatestLanguageServer(serverversion: string): void {
@@ -127,10 +142,10 @@ export class ServerInitializer implements ILanguageServer {
       this.stopLanguageServer().then(() => {
         vscode.window.showErrorMessage(Error.ServerStopped);
 
-        installer.installLatestVersion().then((success: boolean) => {
-          vscode.window.showInformationMessage(
-            Information.StartingServer + success
-          );
+        vscode.window.showInformationMessage(
+          "Updating Dafny Language Server to latest version..."
+        );
+        installer.installLatestVersion().then(() => {
           this.startLanguageServer();
         });
       });

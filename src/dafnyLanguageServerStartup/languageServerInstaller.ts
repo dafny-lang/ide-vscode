@@ -9,6 +9,8 @@ import * as uri from "vscode-uri";
 import { https as redirect } from "follow-redirects";
 const DecompressZip = require("decompress-zip");
 
+import * as vscode from "vscode";
+
 import { EnvironmentConfig } from "../stringRessources/_StringRessourcesModule";
 
 import { ILanguageServerInstaller } from "./ILanguageServerInstaller";
@@ -44,16 +46,22 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     if (this.anyVersionInstalled()) {
       this.deleteInstalledVersion();
     }
-    this.downloadLatestServerRelease(this.tmpBinaryURL, this.downloadFile).then(
-      () => {
-        this.extractZip(this.downloadFile).then(() => {
-          this.cleanupSetPermission().then(() => {
-            return true;
-          });
-        });
-      }
+    vscode.window.showInformationMessage("Start download...");
+    const latestVersionInstalled: boolean = await this.downloadLatestServerRelease(
+      this.tmpBinaryURL,
+      this.downloadFile
     );
-    return false;
+    if (latestVersionInstalled) {
+      vscode.window.showInformationMessage("Start extracting...");
+
+      const extracted: boolean = await this.extractZip(this.downloadFile);
+      if (extracted) {
+        vscode.window.showInformationMessage("Start cleanup...");
+
+        return await this.cleanupSetPermission();
+      }
+    }
+    return Promise.reject(false);
   }
 
   private deleteInstalledVersion(): void {
@@ -136,13 +144,13 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
           throw err;
         });
       } catch (e) {
-        console.error("Error downloading Dafny: " + e);
+        console.error("Error downloading Dafny Language Server: " + e);
         return reject(false);
       }
     });
   }
 
-  private cleanupSetPermission(): Promise<string> {
+  private cleanupSetPermission(): Promise<boolean> {
     if (os.platform() !== EnvironmentConfig.Win32) {
       fs.chmodSync(
         path.join(this.basePath, this.tmpServerFolder, "z3", "bin", "z3"),
@@ -165,7 +173,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     });
     console.log("prepared dafny");
 
-    return Promise.resolve(path.join(this.basePath, this.tmpServerFolder));
+    return Promise.resolve(true);
   }
 
   private extractZip(filePath: string): Promise<boolean> {
@@ -179,7 +187,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
         unzipper.on("error", (e: any) => {
           if (e.code && e.code === "ENOENT") {
             console.error(
-              "Error updating Dafny, missing create file permission in the dafny directory: " +
+              "Error updating Dafny Language Server, missing create file permission in the Dafny directory: " +
                 e
             );
           } else if (e.code && e.code === "EACCES") {
@@ -189,18 +197,17 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
           } else {
             console.error("Error extracting " + filePath + ": " + e);
           }
-          return reject(e);
+          return reject(false);
         });
 
         unzipper.on("extract", () => {
-          return resolve();
+          return resolve(true);
         });
 
         if (!fs.existsSync(this.basePath)) {
           fs.mkdirSync(this.basePath);
         }
         unzipper.extract({
-          //filter: (file: any) => file.type !== "SymbolicLink",
           path: this.basePath,
         });
       } catch (e) {
