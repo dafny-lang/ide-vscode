@@ -1,6 +1,6 @@
 "use strict";
 import * as vscode from "vscode";
-import { LanguageClient, ResponseError } from "vscode-languageclient";
+import { LanguageClient } from "vscode-languageclient";
 
 import {
   ICompilerResult,
@@ -43,6 +43,7 @@ export class Compile implements ICompile {
     );
     const compilationArgs: string[] =
       config.get(Config.CompilationArguments) || [];
+    this.filename = document.fileName;
     if (customArgs === true) {
       const opt: vscode.InputBoxOptions = {
         value: compilationArgs.join(" "),
@@ -53,24 +54,21 @@ export class Compile implements ICompile {
         vscode.window.showInformationMessage(
           `${Information.Arguments}: ${args}`
         );
-        return this.sendServerRequest(document.fileName, args.split(" "));
+        return this.sendServerRequest(args.split(" "));
       } else {
         vscode.window.showErrorMessage(Error.NoAdditionalArgsGiven);
         return Promise.reject(false);
       }
     } else {
-      return this.sendServerRequest(document.fileName, compilationArgs);
+      return this.sendServerRequest(compilationArgs);
     }
   }
 
-  private async sendServerRequest(
-    filename: string,
-    args: string[]
-  ): Promise<boolean> {
+  private async sendServerRequest(args: string[]): Promise<boolean> {
     vscode.window.showInformationMessage(Information.CompilationStarted);
 
     const arg: ICompilerArguments = {
-      FileToCompile: filename,
+      FileToCompile: this.filename || "",
       CompilationArguments: args,
     };
 
@@ -81,7 +79,6 @@ export class Compile implements ICompile {
       );
 
       this.result = result;
-      this.filename = filename;
       if (result.error) {
         vscode.window.showErrorMessage(
           result.message || Information.CompilationFailed
