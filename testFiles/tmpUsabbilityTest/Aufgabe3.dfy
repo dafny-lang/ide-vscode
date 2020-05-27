@@ -1,6 +1,6 @@
-method MultipleReturns(inp1: int, inp2: int) returns (more: int, less: int)
-   ensures less < inp1 < more
+method MultipleReturns(number1: int, number2: int) returns (more: int, less: int)
+   ensures less < number1 < more
 {
-   more := inp1 + inp2;
-   less := inp1 - inp2;
+   more := number1 + number2;
+   less := number1 - number2;
 }
