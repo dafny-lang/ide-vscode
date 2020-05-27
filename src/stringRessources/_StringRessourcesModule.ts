@@ -12,5 +12,6 @@ export {
 export {
   LanguageServerRequest,
   LanguageServerNotification,
+  LanguageServerConfig,
 } from "./languageServer";
 export { Warning, Error, Information, StatusbarStrings } from "./messages";

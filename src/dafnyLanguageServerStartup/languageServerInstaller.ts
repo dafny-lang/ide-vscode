@@ -4,14 +4,13 @@ import * as semver from "semver";
 import * as fs from "fs";
 import * as rimraf from "rimraf";
 import * as https from "https";
-import * as os from "os";
 import * as uri from "vscode-uri";
 import { https as redirect } from "follow-redirects";
 const DecompressZip = require("decompress-zip");
 
 import * as vscode from "vscode";
 
-import { EnvironmentConfig } from "../stringRessources/_StringRessourcesModule";
+import { LanguageServerConfig } from "../stringRessources/_StringRessourcesModule";
 
 import { ILanguageServerInstaller } from "./ILanguageServerInstaller";
 /**
@@ -19,53 +18,58 @@ import { ILanguageServerInstaller } from "./ILanguageServerInstaller";
  * https://github.com/DafnyVSCode/Dafny-VSCode/blob/develop/server/src/backend/dafnyInstaller.ts
  * Some functions and code blocks were taken from the origin file.
  *
- * It simulates the online availability of the Dafny language server on our CI GitLab server.
- * In our version, the upload of the server can only be automated in a limited way and is only a temporary interim solution.
+ * It simulates the online availability of the Dafny language server on our server.
+ * In this version, the upload of the server can only be automated in a limited way and is only a temporary interim solution.
  */
 export class LanguageServerInstaller implements ILanguageServerInstaller {
-  private readonly tmpServerFolder: string = "dafnyTMPServer";
+  private readonly serverFolderName: string = LanguageServerConfig.ServerFolder;
 
-  private readonly basePath: string = this.resolvePath(
-    path.join(__dirname, "..", "..", this.tmpServerFolder)
+  private readonly basePathToOutFolder: string = this.resolvePath(
+    path.join(__dirname, "..", "..", this.serverFolderName)
   );
   private readonly downloadFile: string = this.resolvePath(
-    path.join(this.basePath, "..", "dafnyLanguageServer.zip")
+    path.join(this.basePathToOutFolder, "..", this.serverFolderName + ".zip")
   );
 
-  private readonly tmpBinaryURL: string =
-    "https://wuza.ch/specials/SA/Server.zip";
-  // "https://gitlab.dev.ifs.hsr.ch/dafny-ba/dafny-language-server/-/jobs/artifacts/master/download?job=build_server_and_sonar";
-  private readonly tmpReleaseVersion: string = "1.0.0";
+  private readonly serverURL: string =
+    LanguageServerConfig.ServerDownloadAddress;
+  private readonly serverReleaseVersion: string =
+    LanguageServerConfig.RequiredVersion;
 
   constructor() {}
   public anyVersionInstalled(): boolean {
-    return fs.existsSync(this.basePath); // serverExePath
+    return fs.existsSync(this.basePathToOutFolder); // serverExePath
   }
 
   public async installLatestVersion(): Promise<boolean> {
     if (this.anyVersionInstalled()) {
       this.deleteInstalledVersion();
     }
-    vscode.window.showInformationMessage("Start download...");
+    vscode.window.showInformationMessage(
+      "Download started. This will take a moment..."
+    );
     const latestVersionInstalled: boolean = await this.downloadLatestServerRelease(
-      this.tmpBinaryURL,
+      this.serverURL,
       this.downloadFile
     );
     if (latestVersionInstalled) {
-      vscode.window.showInformationMessage("Start extracting...");
-
       const extracted: boolean = await this.extractZip(this.downloadFile);
       if (extracted) {
-        vscode.window.showInformationMessage("Start cleanup...");
-
-        return await this.cleanupSetPermission();
+        return await this.cleanup();
       }
     }
     return Promise.reject(false);
   }
 
   private deleteInstalledVersion(): void {
-    rimraf.sync(this.basePath);
+    try {
+      rimraf.sync(this.basePathToOutFolder);
+    } catch (e) {
+      console.log("Could not remove old dafny language server: " + e);
+      vscode.window.showInformationMessage(
+        "Could not remove old Dafny Language Server"
+      );
+    }
   }
 
   public async latestVersionInstalled(localVersion: string): Promise<boolean> {
@@ -102,9 +106,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
 
   // this would be an http api request to the GitHub CI server.
   private getLatestVersion(): Promise<string> {
-    return new Promise<string>(() => {
-      this.tmpReleaseVersion;
-    });
+    return Promise.resolve(this.serverReleaseVersion);
   }
 
   private downloadLatestServerRelease(
@@ -113,7 +115,6 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
   ): Promise<boolean> {
     return new Promise<any>((resolve, reject) => {
       try {
-        //this.notificationService.startProgress();
         const options: https.RequestOptions = {
           headers: {
             "User-Agent":
@@ -126,13 +127,6 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
         const file = fs.createWriteStream(filePath);
         const request = redirect.get(options, (response: any) => {
           response.pipe(file);
-
-          //const len = parseInt(response.headers["content-length"], 10);
-          //let cur = 0;
-          //response.on("data", (chunk: string) => {
-          //cur += chunk.length;
-          //this.notificationService.progress("Downloading Dafny ", cur, len);
-          // });
 
           file.on("finish", () => {
             file.close();
@@ -150,29 +144,12 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     });
   }
 
-  private cleanupSetPermission(): Promise<boolean> {
-    if (os.platform() !== EnvironmentConfig.Win32) {
-      fs.chmodSync(
-        path.join(this.basePath, this.tmpServerFolder, "z3", "bin", "z3"),
-        "755"
-      );
-      fs.chmodSync(
-        path.join(this.basePath, this.tmpServerFolder, "DafnyServer.exe"),
-        "755"
-      );
-      fs.chmodSync(
-        path.join(this.basePath, this.tmpServerFolder, "Dafny.exe"),
-        "755"
-      );
-    }
-
+  private cleanup(): Promise<boolean> {
     fs.unlink(this.downloadFile, (err) => {
       if (err) {
         console.error("Error deleting archive: " + err);
       }
     });
-    console.log("prepared dafny");
-
     return Promise.resolve(true);
   }
 
@@ -180,7 +157,6 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     return new Promise<boolean>((resolve, reject) => {
       try {
         console.log("Extracting files...");
-        //this.notificationService.startProgress();
 
         const unzipper = new DecompressZip(filePath);
 
@@ -204,14 +180,14 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
           return resolve(true);
         });
 
-        if (!fs.existsSync(this.basePath)) {
-          fs.mkdirSync(this.basePath);
+        if (!fs.existsSync(this.basePathToOutFolder)) {
+          fs.mkdirSync(this.basePathToOutFolder);
         }
         unzipper.extract({
-          path: this.basePath,
+          path: this.basePathToOutFolder,
         });
       } catch (e) {
-        console.error("Error extracting Dafny: " + e);
+        console.error("Error extracting Dafny Language Server: " + e);
         return reject(false);
       }
     });

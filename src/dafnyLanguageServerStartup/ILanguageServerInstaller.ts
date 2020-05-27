@@ -5,8 +5,8 @@
  *
  * Once the new language server goes live, an installer based on the original code can be used. (for GitHub releases)
  * Until then, the current implementation "languageServerInstaller.ts" will be used.
- * It simulates the online availability of the Dafny language server on our GitLab CI server.
- * In our version, the upload of the server can only be automated in a limited way and is only a temporary interim solution.
+ * It simulates the online availability of the Dafny language server on our server.
+ * In this version, the upload of the server can only be automated in a limited way and is only a temporary interim solution.
  */
 export interface ILanguageServerInstaller {
   anyVersionInstalled(): boolean;

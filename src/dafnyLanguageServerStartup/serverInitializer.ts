@@ -139,17 +139,21 @@ export class ServerInitializer implements ILanguageServer {
 
   private installLatestLanguageServer(serverversion: string): void {
     const installer: ILanguageServerInstaller = new LanguageServerInstaller();
-    if (!installer.latestVersionInstalled(serverversion)) {
-      this.stopLanguageServer().then(() => {
-        vscode.window.showErrorMessage(Error.ServerStopped);
+    installer
+      .latestVersionInstalled(serverversion)
+      .then((latestVersionInstalled: boolean) => {
+        if (!latestVersionInstalled) {
+          this.stopLanguageServer().then(() => {
+            vscode.window.showErrorMessage(Error.ServerStopped);
 
-        vscode.window.showInformationMessage(
-          "Updating Dafny Language Server to latest version..."
-        );
-        installer.installLatestVersion().then(() => {
-          this.startLanguageServer();
-        });
+            vscode.window.showInformationMessage(
+              "Updating Dafny Language Server to latest version..."
+            );
+            installer.installLatestVersion().then(() => {
+              this.startLanguageServer();
+            });
+          });
+        }
       });
-    }
   }
 }

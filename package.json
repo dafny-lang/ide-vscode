@@ -129,8 +129,8 @@
       "properties": {
         "dafny.languageServerExePath": {
           "type": "string",
-          "default": "../../../out/dafnyTMPServer/Binaries/DafnyLanguageServer.exe",
-          "description": "Relative path to the DafnyServer.exe"
+          "default": "../../dafnyLanguageServer/Binaries/DafnyLanguageServer.exe",
+          "description": "Relative path to the DafnyLanguageServer.exe"
         },
         "dafny.compilationArgs": {
           "type": "array",

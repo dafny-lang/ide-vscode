@@ -28,3 +28,15 @@ export class LanguageServerNotification {
   public static Ready: string = "ready";
   public static CounterExample: string = "counterExample";
 }
+
+/**
+ * Configuration settings for the Dafny language server
+ * These settings are mostly no longer necessary
+ * with the later adepted languageServerInstaller for Github CI.
+ */
+export class LanguageServerConfig {
+  public static ServerFolder: string = "dafnyLanguageServer";
+  public static ServerDownloadAddress: string =
+    "https://wuza.ch/specials/SA/Server.zip";
+  public static RequiredVersion: string = "3.0.1";
+}
