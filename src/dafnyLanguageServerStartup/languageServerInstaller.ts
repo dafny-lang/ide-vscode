@@ -114,7 +114,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     url: string,
     filePath: string
   ): Promise<boolean> {
-    return new Promise<any>((resolve, reject) => {
+    return new Promise<boolean>((resolve, reject) => {
       try {
         const options: https.RequestOptions = {
           headers: {
