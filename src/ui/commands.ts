@@ -54,7 +54,7 @@ export class Commands implements ICommands {
         const counterExample: ICounterExample = new CounterExample(
           this.languageServer
         );
-        var callback = (
+        const callback: Function = (
           allCounterExamples: ICounterExamples,
           isAutoTriggered: boolean
         ): void => {
