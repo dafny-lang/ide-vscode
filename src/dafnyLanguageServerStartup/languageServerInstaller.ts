@@ -66,8 +66,9 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
       rimraf.sync(this.basePathToOutFolder);
     } catch (e) {
       console.log("Could not remove old dafny language server: " + e);
-      vscode.window.showInformationMessage(
-        "Could not remove old Dafny Language Server"
+      vscode.window.showErrorMessage(
+        "Could not remove old Dafny Language Server. Please delete this folder: " +
+          this.basePathToOutFolder
       );
     }
   }
