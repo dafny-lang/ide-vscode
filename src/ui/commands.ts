@@ -45,8 +45,7 @@ export class Commands implements ICommands {
       name: CommandStrings.CompileAndRun,
       callback: () => {
         const compile: ICompile = new Compile(this.languageServer);
-        compile.compile(false);
-        compile.run(this.runner);
+        compile.compile(false).then(() => compile.run(this.runner));
       },
     },
     {

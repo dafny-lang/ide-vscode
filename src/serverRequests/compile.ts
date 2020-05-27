@@ -32,76 +32,85 @@ export class Compile implements ICompile {
     this.languageServer = languageServer;
   }
 
-  private prepareAndSendCompileRequest(
+  private async prepareAndSendCompileRequest(
     document: vscode.TextDocument,
     customArgs: boolean
-  ): void {
-    document.save().then(() => {
-      const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(
-        EnvironmentConfig.Dafny
-      );
-      const compilationArgs: string[] =
-        config.get(Config.CompilationArguments) || [];
-      if (customArgs === true) {
-        const opt: vscode.InputBoxOptions = {
-          value: compilationArgs.join(" "),
-          prompt: Information.CustomCompileArgsLabel,
-        };
-        vscode.window.showInputBox(opt).then((args) => {
-          if (args) {
-            vscode.window.showInformationMessage(
-              `${Information.Arguments}: ${args}`
-            );
-            this.sendServerRequest(document.fileName, args.split(" "));
-          } else {
-            vscode.window.showErrorMessage(Error.NoAdditionalArgsGiven);
-          }
-        });
+  ): Promise<boolean> {
+    await document.save();
+
+    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(
+      EnvironmentConfig.Dafny
+    );
+    const compilationArgs: string[] =
+      config.get(Config.CompilationArguments) || [];
+    if (customArgs === true) {
+      const opt: vscode.InputBoxOptions = {
+        value: compilationArgs.join(" "),
+        prompt: Information.CustomCompileArgsLabel,
+      };
+      const args: string | undefined = await vscode.window.showInputBox(opt);
+      if (args) {
+        vscode.window.showInformationMessage(
+          `${Information.Arguments}: ${args}`
+        );
+        return this.sendServerRequest(document.fileName, args.split(" "));
       } else {
-        this.sendServerRequest(document.fileName, compilationArgs);
+        vscode.window.showErrorMessage(Error.NoAdditionalArgsGiven);
+        return Promise.reject(false);
       }
-    });
+    } else {
+      return this.sendServerRequest(document.fileName, compilationArgs);
+    }
   }
 
-  private sendServerRequest(filename: string, args: string[]) {
+  private async sendServerRequest(
+    filename: string,
+    args: string[]
+  ): Promise<boolean> {
     vscode.window.showInformationMessage(Information.CompilationStarted);
 
     const arg: ICompilerArguments = {
       FileToCompile: filename,
       CompilationArguments: args,
     };
-    this.languageServer
-      .sendRequest<ICompilerResult>(LanguageServerRequest.Compile, arg)
-      .then(
-        (result) => {
-          this.result = result;
-          if (result.error) {
-            vscode.window.showErrorMessage(
-              result.message || Information.CompilationFailed
-            );
-          }
-          vscode.window.showInformationMessage(
-            result.message || Information.CompilationFinished
-          );
-        },
-        (error: ResponseError<void>) => {
-          vscode.window.showErrorMessage(
-            `${Error.CanNotCompile}: ${error.message}`
-          );
-        }
+
+    try {
+      const result: ICompilerResult = await this.languageServer.sendRequest(
+        LanguageServerRequest.Compile,
+        arg
       );
+
+      this.result = result;
+      this.filename = filename;
+      if (result.error) {
+        vscode.window.showErrorMessage(
+          result.message || Information.CompilationFailed
+        );
+        return Promise.reject(false);
+      }
+      vscode.window.showInformationMessage(
+        result.message || Information.CompilationFinished
+      );
+      return Promise.resolve(true);
+    } catch (error) {
+      vscode.window.showErrorMessage(
+        `${Error.CanNotCompile}: ${error.message}`
+      );
+      return Promise.reject(false);
+    }
   }
 
-  public compile(customArgs: boolean = false): void {
+  public async compile(customArgs: boolean = false): Promise<boolean> {
     if (
       vscode.window.activeTextEditor &&
       vscode.window.activeTextEditor.document
     ) {
-      this.prepareAndSendCompileRequest(
+      return this.prepareAndSendCompileRequest(
         vscode.window.activeTextEditor.document,
         customArgs
       );
     }
+    return Promise.reject(false);
   }
 
   public run(runner: IDafnyRunner): void {

@@ -29,7 +29,7 @@ export class EnvironmentConfig {
   public static Dafny: string = "dafny";
   public static DafnyFileExtension: string = "**/*.dfy";
   public static DafnySuffix: string = ".dfy";
-  public static ExeSuffix: string = ".dfy";
+  public static ExeSuffix: string = ".exe";
   public static DocumentSelector: string = "file";
   public static CounterModelObjectReference: string = "[Object Reference]";
 
