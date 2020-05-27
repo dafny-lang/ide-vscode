@@ -38,5 +38,5 @@ export class LanguageServerConfig {
   public static ServerFolder: string = "dafnyLanguageServer";
   public static ServerDownloadAddress: string =
     "https://wuza.ch/specials/SA/Server.zip";
-  public static RequiredVersion: string = "3.0.1";
+  public static RequiredVersion: string = "1.2.1";
 }
