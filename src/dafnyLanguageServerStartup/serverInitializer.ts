@@ -94,6 +94,11 @@ export class ServerInitializer implements ILanguageServer {
 
   private async stopLanguageServer(): Promise<void> {
     await this.languageServer?.stop();
+
+    //this.extensionContext.subscriptions.forEach((e) => e.dispose());
+    // alles unregisterieren
+    // aber top mässiges restart muss hier wieder neu registeriert werden
+
     this.languageServerDisposable = this.languageServerDisposable?.dispose();
   }
 
