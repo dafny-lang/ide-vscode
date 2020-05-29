@@ -96,12 +96,6 @@
         "when": "editorTextFocus && editorLangId == dafny"
       }
     ],
-    "snippets": [
-      {
-        "language": "dafny",
-        "path": "./snippets/dafny.json"
-      }
-    ],
     "languages": [
       {
         "id": "dafny",
