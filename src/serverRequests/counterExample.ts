@@ -5,6 +5,7 @@ import { LanguageClient, ResponseError } from "vscode-languageclient";
 import {
   LanguageServerRequest,
   Error,
+  CounterExampleConfig,
 } from "../stringResources/_StringResourcesModule";
 import {
   ICounterExamples,
@@ -18,7 +19,8 @@ import { ICounterExample } from "./ICounterExample";
  */
 export class CounterExample implements ICounterExample {
   private static timeout: NodeJS.Timer;
-  private readonly maxRequestsPerSecond: number = 2; // todo config?
+  private readonly maxRequestsPerSecond: number =
+    CounterExampleConfig.MaxRequestsPerSecond;
   private readonly oneSecInMs: number = 1000;
 
   private languageServer: LanguageClient;

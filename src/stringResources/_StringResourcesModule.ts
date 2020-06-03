@@ -14,4 +14,5 @@ export {
   LanguageServerNotification,
   LanguageServerConfig,
 } from "./languageServer";
+export { CounterExampleConfig } from "./counterExample";
 export { Warning, Error, Information, StatusbarStrings } from "./messages";

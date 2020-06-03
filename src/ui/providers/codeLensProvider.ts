@@ -10,6 +10,10 @@ import {
   ICodeLensPosition,
 } from "../../typeInterfaces/_TypeInterfacesModule";
 
+/**
+ * This component redirects the data obtained from the language server CodeLens provider
+ * to the local IDE api to open CodeLens Popups.
+ */
 export class CodeLensProvider implements ICodeLensProvider {
   private parsePosition(p: ICodeLensPosition): vscode.Position {
     return new vscode.Position(p.Line, p.Character);

@@ -1,5 +1,3 @@
-// tslint:disable:max-classes-per-file
-
 export class CommandStrings {
   public static RestartServer: string = "dafny.restartDafnyServer";
   public static Compile: string = "dafny.compile";
@@ -31,8 +29,6 @@ export class EnvironmentConfig {
   public static DafnySuffix: string = ".dfy";
   public static ExeSuffix: string = ".exe";
   public static DocumentSelector: string = "file";
-  public static CounterModelObjectReference: string = "[Object Reference]";
-
   public static DafnyLanguageServerID: string = "dafny-vscode";
   public static DafnyLanguageServerName: string = "Dafny Language Server";
 

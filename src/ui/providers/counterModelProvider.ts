@@ -10,6 +10,7 @@ import {
   Warning,
   Config,
   EnvironmentConfig,
+  CounterExampleConfig,
 } from "../../stringResources/_StringResourcesModule";
 import {
   CounterExample as RequestCounterExample,
@@ -30,11 +31,15 @@ export class CounterModelProvider implements ICounterModelProvider {
     [docPathName: string]: vscode.TextEditorDecorationType;
   } = {};
   private displayOptions: vscode.DecorationRenderOptions = {};
-  private readonly defaultDarkBackgroundColor: string = "#0d47a1"; // todo defaults
-  private readonly defaultDarkFontColor = "#e3f2fd";
-  private readonly defaultLightBackgroundColor = "#bbdefb";
-  private readonly defaultLightFontColor = "#102027";
-  private readonly defaultMargin = "0 0 0 30px";
+  private readonly defaultDarkBackgroundColor: string =
+    CounterExampleConfig.DefaultDarkBackgroundColor;
+  private readonly defaultDarkFontColor =
+    CounterExampleConfig.DefaultDarkFontColor;
+  private readonly defaultLightBackgroundColor =
+    CounterExampleConfig.DefaultLightBackgroundColor;
+  private readonly defaultLightFontColor =
+    CounterExampleConfig.DefaultLightFontColor;
+  private readonly defaultMargin = CounterExampleConfig.DefaultMargin;
 
   constructor() {
     this.loadDisplayOptions();
@@ -73,7 +78,7 @@ export class CounterModelProvider implements ICounterModelProvider {
       )) {
         shownText += `${key} = ${value}; `;
 
-        if (value == EnvironmentConfig.CounterModelObjectReference) {
+        if (value == CounterExampleConfig.ObjectReference) {
           hasReferences = true;
         }
       }
