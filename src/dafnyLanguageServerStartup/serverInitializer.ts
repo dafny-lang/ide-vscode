@@ -75,7 +75,7 @@ export class ServerInitializer implements ILanguageServer {
           })
           .catch((errorStart) => {
             vscode.window.showErrorMessage(
-              "Could not start Danfy Language Server. " + errorStart
+              Error.CouldNotStartServer + " " + errorStart
             );
           });
 
@@ -86,7 +86,7 @@ export class ServerInitializer implements ILanguageServer {
       })
       .catch((errorInstall) => {
         vscode.window.showErrorMessage(
-          "Could not install Danfy Language Server. " + errorInstall
+          Error.CouldNotInstallServer + " " + errorInstall
         );
       });
   }
@@ -128,9 +128,7 @@ export class ServerInitializer implements ILanguageServer {
   private async installLanguageServerIfNotExists(): Promise<boolean> {
     const installer: ILanguageServerInstaller = new LanguageServerInstaller();
     if (!installer.anyVersionInstalled()) {
-      vscode.window.showInformationMessage(
-        "Installing latest Dafny Language Server..."
-      );
+      vscode.window.showInformationMessage(Information.InstallingServer);
       return await installer.installLatestVersion();
     }
     return Promise.resolve(true);
@@ -145,9 +143,7 @@ export class ServerInitializer implements ILanguageServer {
           this.stopLanguageServer().then(() => {
             vscode.window.showErrorMessage(Error.ServerStopped);
 
-            vscode.window.showInformationMessage(
-              "Updating Dafny Language Server to latest version..."
-            );
+            vscode.window.showInformationMessage(Information.UpdatingServer);
             installer.installLatestVersion().then(() => {
               this.startLanguageServer();
             });

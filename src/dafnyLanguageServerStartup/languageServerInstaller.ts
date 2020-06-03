@@ -20,6 +20,8 @@ import { ILanguageServerInstaller } from "./ILanguageServerInstaller";
  *
  * It simulates the online availability of the Dafny language server on our server.
  * In this version, the upload of the server can only be automated in a limited way and is only a temporary interim solution.
+ *
+ * Since this is a temporary solution, strings have not been outsourced to stringResources.
  */
 export class LanguageServerInstaller implements ILanguageServerInstaller {
   private readonly serverFolderName: string = LanguageServerConfig.ServerFolder;

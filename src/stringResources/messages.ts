@@ -33,10 +33,18 @@ export class Error {
   public static MonoBinaryNotExecuted: string =
     "Mono binary could not be executed.";
   public static ServerStopped: string = "Server stopped.";
+  public static CouldNotStartServer: string =
+    "Could not start Danfy Language Server.";
+  public static CouldNotInstallServer: string =
+    "Could not install Danfy Language Server.";
 }
 
 export class Information {
   public static StartingServer: string = "Starting Dafny Language Server...";
+  public static InstallingServer: string =
+    "Installing latest Dafny Language Server...";
+  public static UpdatingServer: string =
+    "Updating Dafny Language Server to latest version...";
 
   public static CompilationStarted: string = "Compilation started";
   public static CompilationFinished: string = "Compilation finished";
