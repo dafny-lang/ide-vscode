@@ -12,7 +12,7 @@ import {
   EnvironmentConfig,
   Error,
   Config,
-} from "../stringRessources/_StringRessourcesModule";
+} from "../stringResources/_StringResourcesModule";
 
 /**
  * Extends LanguageClient - provides basic config constructor for server initialize

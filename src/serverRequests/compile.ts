@@ -12,7 +12,7 @@ import {
   Config,
   EnvironmentConfig,
   LanguageServerRequest,
-} from "../stringRessources/_StringRessourcesModule";
+} from "../stringResources/_StringResourcesModule";
 import { IDafnyRunner } from "../localExecution/_LocalExecutionModule";
 
 import { ICompile } from "./ICompile";

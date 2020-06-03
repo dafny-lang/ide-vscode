@@ -1,6 +1,6 @@
 "use strict";
 /*
- * Module String Ressources.
+ * Module String Resources.
  * Use this to program against the interface.
  */
 export {

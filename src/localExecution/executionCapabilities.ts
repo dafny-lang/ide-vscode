@@ -9,7 +9,7 @@ import {
   EnvironmentConfig,
   Error,
   VSCodeCommandStrings,
-} from "../stringRessources/_StringRessourcesModule";
+} from "../stringResources/_StringResourcesModule";
 
 import { IExecutionCapabilities } from "./IExecutionCapabilities";
 

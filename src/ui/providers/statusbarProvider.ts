@@ -6,7 +6,7 @@ import {
   LanguageServerNotification,
   StatusbarStrings,
   EnvironmentConfig,
-} from "../../stringRessources/_StringRessourcesModule";
+} from "../../stringResources/_StringResourcesModule";
 
 import { DafnyFileChecker } from "../dafnyFileChecker";
 import { IStatusbarProvider } from "./IStatusbarProvider";

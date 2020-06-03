@@ -9,7 +9,7 @@ import {
   CounterExample,
 } from "../serverRequests/_ServerRequestsModule";
 import { IDafnyRunner } from "../localExecution/_LocalExecutionModule";
-import { CommandStrings } from "../stringRessources/_StringRessourcesModule";
+import { CommandStrings } from "../stringResources/_StringResourcesModule";
 
 import { ICommands } from "./ICommands";
 import { IDafnyUiManager } from "./IDafnyUiManager";

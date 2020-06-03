@@ -2,7 +2,7 @@
 import * as vscode from "vscode";
 
 import { ICodeLensProvider } from "./ICodeLensProvider";
-import { VSCodeCommandStrings } from "../../stringRessources/_StringRessourcesModule";
+import { VSCodeCommandStrings } from "../../stringResources/_StringResourcesModule";
 import {
   ICodeLensReferences,
   ICodeLensLocation,

@@ -1,7 +1,7 @@
 "use strict";
 import * as vscode from "vscode";
 
-import { EnvironmentConfig } from "../stringRessources/_StringRessourcesModule";
+import { EnvironmentConfig } from "../stringResources/_StringResourcesModule";
 
 /**
  * This is a helper class for UI components.

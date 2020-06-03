@@ -19,7 +19,7 @@ import {
   Error,
   Information,
   LanguageServerNotification,
-} from "../stringRessources/_StringRessourcesModule";
+} from "../stringResources/_StringResourcesModule";
 
 import { ILanguageServer } from "./ILanguageServer";
 import ServerOptions from "./serverOptions";

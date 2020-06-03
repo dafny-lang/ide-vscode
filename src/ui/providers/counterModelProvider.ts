@@ -10,7 +10,7 @@ import {
   Warning,
   Config,
   EnvironmentConfig,
-} from "../../stringRessources/_StringRessourcesModule";
+} from "../../stringResources/_StringResourcesModule";
 import {
   CounterExample as RequestCounterExample,
   ICounterExample as IRequestCounterExample,
@@ -30,7 +30,7 @@ export class CounterModelProvider implements ICounterModelProvider {
     [docPathName: string]: vscode.TextEditorDecorationType;
   } = {};
   private displayOptions: vscode.DecorationRenderOptions = {};
-  private readonly defaultDarkBackgroundColor: string = "#0d47a1";
+  private readonly defaultDarkBackgroundColor: string = "#0d47a1"; // todo defaults
   private readonly defaultDarkFontColor = "#e3f2fd";
   private readonly defaultLightBackgroundColor = "#bbdefb";
   private readonly defaultLightFontColor = "#102027";

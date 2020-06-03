@@ -10,7 +10,7 @@ const DecompressZip = require("decompress-zip");
 
 import * as vscode from "vscode";
 
-import { LanguageServerConfig } from "../stringRessources/_StringRessourcesModule";
+import { LanguageServerConfig } from "../stringResources/_StringResourcesModule";
 
 import { ILanguageServerInstaller } from "./ILanguageServerInstaller";
 /**

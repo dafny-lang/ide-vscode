@@ -5,7 +5,7 @@ import { LanguageClient, ResponseError } from "vscode-languageclient";
 import {
   LanguageServerRequest,
   Error,
-} from "../stringRessources/_StringRessourcesModule";
+} from "../stringResources/_StringResourcesModule";
 import {
   ICounterExamples,
   ICounterExampleArguments,

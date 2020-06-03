@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 
 import { ServerInitializer } from "./dafnyLanguageServerStartup/_DafnyLanguageServerStartupModule";
 import { ExecutionCapabilities } from "./localExecution/_LocalExecutionModule";
-import { Warning, Error } from "./stringRessources/_StringRessourcesModule";
+import { Warning, Error } from "./stringResources/_StringResourcesModule";
 
 /**
  * This is the plugins entry point (the "main" function)

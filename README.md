@@ -59,43 +59,43 @@ Please note that in this new plugin version "automatic verififaction" is always 
 
 On the first start the plugin asks you to install _Dafny_ automatically.
 
-![assertions animation](readmeRessources/installation.gif)
+![assertions animation](readmeResources/installation.gif)
 
 ### Syntax Error Underlining
 
-![Syntax](readmeRessources/Syntax.png)
+![Syntax](readmeResources/Syntax.png)
 Whenever a postcondition statement does not hold, the user will be informed.
 
 ### Compile and Run
 
 Pressed `F5` to compile and run the program.
 
-![Compile](readmeRessources/Compile.png)
+![Compile](readmeResources/Compile.png)
 
 ### Show Counter Example
 
 Pressed `F7` to show counter examples.
 
-![Counter](readmeRessources/Counter.png)
+![Counter](readmeResources/Counter.png)
 
 ### Auto Completion
 
 Pressed `control + space` to show auto completion suggestions.
 
-![Completion](readmeRessources/Completion.png)
+![Completion](readmeResources/Completion.png)
 
 ### Go to Definition
 
 Pressed `control + space` to show auto completion suggestions.
 
-![Go to Definition](readmeRessources/GoTo.png)
+![Go to Definition](readmeResources/GoTo.png)
 Press `F12` to jump to the definition.
 
 ### Add null check (coming soon)
 
 Some diagnostics can be directly inserted with a quickfix at the beginning of a line.
 
-![assertions animation](readmeRessources/addnullcheck.gif)
+![assertions animation](readmeResources/addnullcheck.gif)
 
 ## Contribute
 
