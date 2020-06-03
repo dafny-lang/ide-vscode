@@ -1,12 +1,12 @@
 "use strict";
 import * as vscode from "vscode";
 
-import { EnvironmentConfig } from "../stringRessources/_StringRessourcesModule";
+import { EnvironmentConfig } from "../stringResources/_StringResourcesModule";
 
 /**
  * This is a helper class for UI components.
- * Repeated used function like "is the current file a Dafny file"
- * and get the name of the current file are centralized in this class
+ * Repeated used function like "isDafnyFile"
+ * and "getActiveFileName" are centralized in this class
  * as static functions.
  */
 export class DafnyFileChecker {

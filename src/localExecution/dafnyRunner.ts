@@ -6,7 +6,7 @@ import {
   Config,
   EnvironmentConfig,
   Information,
-} from "../stringRessources/_StringRessourcesModule";
+} from "../stringResources/_StringResourcesModule";
 
 import { IDafnyRunner } from "./IDafnyRunner";
 

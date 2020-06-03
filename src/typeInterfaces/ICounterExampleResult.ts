@@ -10,5 +10,4 @@ export interface ICounterExample {
 
 export interface ICounterExamples {
   counterExamples: ICounterExample[];
-  length: number;
 }

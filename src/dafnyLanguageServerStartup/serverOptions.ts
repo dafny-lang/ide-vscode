@@ -12,18 +12,18 @@ import {
   EnvironmentConfig,
   Error,
   Config,
-} from "../stringRessources/_StringRessourcesModule";
+} from "../stringResources/_StringResourcesModule";
 
 /**
  * Extends LanguageClient - provides basic config constructor for server initialize
- * This class is used by dafnyLanguageServer and is basicly just an extraction.
+ * This class is used by dafnyLanguageServer and is basically just an extraction.
  */
 export default class ServerOptions extends LanguageClient {
   constructor() {
     const config: WorkspaceConfiguration = workspace.getConfiguration(
       EnvironmentConfig.Dafny
     );
-    const serverExePath: string | undefined = config.get<string>(
+    let serverExePath: string | undefined = config.get<string>(
       Config.LanguageServerExePath
     );
     if (serverExePath === undefined) {

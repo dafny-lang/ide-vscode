@@ -6,4 +6,5 @@ export interface IDafnyUiManager {
   registerEventListener(): void;
   getCounterModelProvider(): ICounterModelProvider;
   getCodeLensProvider(): ICodeLensProvider;
+  disposeUi(): void;
 }

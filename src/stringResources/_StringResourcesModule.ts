@@ -1,6 +1,6 @@
 "use strict";
 /*
- * Module String Ressources.
+ * Module String Resources.
  * Use this to program against the interface.
  */
 export {
@@ -12,5 +12,7 @@ export {
 export {
   LanguageServerRequest,
   LanguageServerNotification,
+  LanguageServerConfig,
 } from "./languageServer";
+export { CounterExampleConfig } from "./counterExample";
 export { Warning, Error, Information, StatusbarStrings } from "./messages";

@@ -3,11 +3,11 @@ import * as vscode from "vscode";
 
 import { ServerInitializer } from "./dafnyLanguageServerStartup/_DafnyLanguageServerStartupModule";
 import { ExecutionCapabilities } from "./localExecution/_LocalExecutionModule";
-import { Warning, Error } from "./stringRessources/_StringRessourcesModule";
+import { Warning, Error } from "./stringResources/_StringResourcesModule";
 
 /**
- * This is the plugins entry point (the "main" function)
- * It checks for the right way to start the language server (mono or not mono on windows)
+ * This is the plugin's entry point (the "main" function)
+ * It checks for the right way to start the language server (mono or not mono on Windows)
  * and starts the language server with the DafnyLanguageServer class.
  */
 export function activate(extensionContext: vscode.ExtensionContext) {

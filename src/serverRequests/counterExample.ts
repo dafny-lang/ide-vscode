@@ -5,7 +5,8 @@ import { LanguageClient, ResponseError } from "vscode-languageclient";
 import {
   LanguageServerRequest,
   Error,
-} from "../stringRessources/_StringRessourcesModule";
+  CounterExampleConfig,
+} from "../stringResources/_StringResourcesModule";
 import {
   ICounterExamples,
   ICounterExampleArguments,
@@ -14,11 +15,12 @@ import {
 import { ICounterExample } from "./ICounterExample";
 
 /**
- * Provides Counter Example provided by the Dafny language server.
+ * Provides Counter Examples provided by the Dafny language server.
  */
 export class CounterExample implements ICounterExample {
   private static timeout: NodeJS.Timer;
-  private readonly maxRequestsPerSecond: number = 2; // todo config?
+  private readonly maxRequestsPerSecond: number =
+    CounterExampleConfig.MaxRequestsPerSecond;
   private readonly oneSecInMs: number = 1000;
 
   private languageServer: LanguageClient;
@@ -38,8 +40,7 @@ export class CounterExample implements ICounterExample {
       DafnyFile: vscode.window.activeTextEditor.document.fileName,
     };
     vscode.window.activeTextEditor.document.save().then(() => {
-      // This timeout makes sure, that max 2 server requests each second were sent.
-      // Otherwise - if a user would tipping verry fast - there would be a request overhead.
+      // This timeout makes sure, that server requests per second were capped.
       clearTimeout(CounterExample.timeout);
       const boundThis = this;
       CounterExample.timeout = setTimeout(

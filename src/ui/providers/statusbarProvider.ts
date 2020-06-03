@@ -6,20 +6,19 @@ import {
   LanguageServerNotification,
   StatusbarStrings,
   EnvironmentConfig,
-} from "../../stringRessources/_StringRessourcesModule";
+} from "../../stringResources/_StringResourcesModule";
 
 import { DafnyFileChecker } from "../dafnyFileChecker";
 import { IStatusbarProvider } from "./IStatusbarProvider";
 
 /**
- * This component adds additional information to the status bare like
+ * This component adds additional information to the status bar like
  * if the Dafny file is valid or not and how many errors were found.
- * It shows also the information if the server has been startet and the Dafny version received from the server.
- * There exists only one instance of this component (created in the dafnyUiManager).
+ * It shows also the information if the server has been started and the Dafny version received from the server.
  */
 export class StatusbarProvider implements IStatusbarProvider {
   private dafnyerrors: { [docPathName: string]: number } = {};
-  private dafnyversion: string | undefined;
+  private dafnyLanguageServerVersion: string | undefined;
   private activeDocument: vscode.Uri | undefined;
   private serverStatusBar: vscode.StatusBarItem;
   private currentDocumentStatucBar: vscode.StatusBarItem;
@@ -40,12 +39,12 @@ export class StatusbarProvider implements IStatusbarProvider {
       LanguageServerNotification.ServerStarted,
       (serverversion: string) => {
         vscode.window.showInformationMessage(StatusbarStrings.Started);
-        this.dafnyversion = serverversion;
+        this.dafnyLanguageServerVersion = serverversion;
         this.update();
       }
     );
 
-    // Set from the verifiaction service; this gets triggered by every server side buffer update
+    // Set from the verifiaction service; this gets triggered by every server side Dafny file buffer update
     languageServer.onNotification(
       LanguageServerNotification.ActiveVerifiyingDocument,
       (activeDocument: vscode.Uri) => {
@@ -54,7 +53,7 @@ export class StatusbarProvider implements IStatusbarProvider {
       }
     );
 
-    // This update gets called by server-side events when new dafny file error informations are available
+    // This update gets called by server-side events when new Dafny file error informations are available
     languageServer.onNotification(
       LanguageServerNotification.UpdateStatusbar,
       (countedErrors: number) => {
@@ -62,6 +61,11 @@ export class StatusbarProvider implements IStatusbarProvider {
         this.update();
       }
     );
+  }
+
+  public dispose(): void {
+    this.serverStatusBar.dispose();
+    this.currentDocumentStatucBar.dispose();
   }
 
   public update(): void {
@@ -80,10 +84,10 @@ export class StatusbarProvider implements IStatusbarProvider {
           ? `${StatusbarStrings.NotVerified} - ${StatusbarStrings.Errors}: ${errors}`
           : StatusbarStrings.Verified;
 
-      if (this.dafnyversion) {
+      if (this.dafnyLanguageServerVersion) {
         this.serverStatusBar.text = `${
           StatusbarStrings.DafnyVersion
-        }: ${this.dafnyversion.trim()}`;
+        }: ${this.dafnyLanguageServerVersion.trim()}`;
         this.serverStatusBar.tooltip = this.activeDocument
           ? `${
               StatusbarStrings.CurrentDocument
