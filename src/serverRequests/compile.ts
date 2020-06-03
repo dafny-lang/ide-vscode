@@ -18,10 +18,10 @@ import { IDafnyRunner } from "../localExecution/_LocalExecutionModule";
 import { ICompile } from "./ICompile";
 
 /**
-* Request the DafnyServer to compile Dafny code. 
-* Compiled files can be executed through the DafnyRunner (a helper class 
-    that can be injected with the "runner" argument)
-*/
+ * Request the DafnyServer to compile Dafny code.
+ * Compiled files can be executed through the DafnyRunner
+ * (class can be injected with the "runner" argument).
+ */
 export class Compile implements ICompile {
   private languageServer: LanguageClient;
 

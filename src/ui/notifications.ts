@@ -5,9 +5,7 @@ import { INotifications } from "./INotifications";
 import { LanguageClient } from "vscode-languageclient";
 
 /**
- * VSCode UI Notifications
- * This notifications are triggerable by the server
- * If you need client side notifications, use vscde.window
+ * Registers notifications that can are triggerable by the server.
  */
 export class Notifications implements INotifications {
   private languageClient: LanguageClient;

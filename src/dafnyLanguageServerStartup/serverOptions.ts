@@ -16,7 +16,7 @@ import {
 
 /**
  * Extends LanguageClient - provides basic config constructor for server initialize
- * This class is used by dafnyLanguageServer and is basicly just an extraction.
+ * This class is used by dafnyLanguageServer and is basically just an extraction.
  */
 export default class ServerOptions extends LanguageClient {
   constructor() {

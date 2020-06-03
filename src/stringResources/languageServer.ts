@@ -1,7 +1,5 @@
-// tslint:disable:max-classes-per-file
-
 /**
- * Strings in this class have to match the command strings on the Language Server side!
+ * Strings in this class have to match the command strings on the Language Server side.
  * LSP extended commands.
  */
 export class LanguageServerRequest {
@@ -24,15 +22,12 @@ export class LanguageServerNotification {
     "dafnyLanguageServerVersionReceived";
 
   public static ActiveVerifiyingDocument: string = "activeVerifiyingDocument";
-  public static Verify: string = "verify";
-  public static Ready: string = "ready";
-  public static CounterExample: string = "counterExample";
 }
 
 /**
  * Configuration settings for the Dafny language server
  * These settings are mostly no longer necessary
- * with the later adepted languageServerInstaller for Github CI.
+ * with the later adapted languageServerInstaller for the Dafny language server Github CI.
  */
 export class LanguageServerConfig {
   public static ServerFolder: string = "dafnyLanguageServer";

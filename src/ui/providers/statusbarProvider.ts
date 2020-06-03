@@ -12,10 +12,9 @@ import { DafnyFileChecker } from "../dafnyFileChecker";
 import { IStatusbarProvider } from "./IStatusbarProvider";
 
 /**
- * This component adds additional information to the status bare like
+ * This component adds additional information to the status bar like
  * if the Dafny file is valid or not and how many errors were found.
- * It shows also the information if the server has been startet and the Dafny version received from the server.
- * There exists only one instance of this component (created in the dafnyUiManager).
+ * It shows also the information if the server has been started and the Dafny version received from the server.
  */
 export class StatusbarProvider implements IStatusbarProvider {
   private dafnyerrors: { [docPathName: string]: number } = {};
@@ -45,7 +44,7 @@ export class StatusbarProvider implements IStatusbarProvider {
       }
     );
 
-    // Set from the verifiaction service; this gets triggered by every server side buffer update
+    // Set from the verifiaction service; this gets triggered by every server side Dafny file buffer update
     languageServer.onNotification(
       LanguageServerNotification.ActiveVerifiyingDocument,
       (activeDocument: vscode.Uri) => {
@@ -54,7 +53,7 @@ export class StatusbarProvider implements IStatusbarProvider {
       }
     );
 
-    // This update gets called by server-side events when new dafny file error informations are available
+    // This update gets called by server-side events when new Dafny file error informations are available
     languageServer.onNotification(
       LanguageServerNotification.UpdateStatusbar,
       (countedErrors: number) => {

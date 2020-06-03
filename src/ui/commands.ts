@@ -16,9 +16,9 @@ import { IDafnyUiManager } from "./IDafnyUiManager";
 import { ICounterExamples } from "../typeInterfaces/_TypeInterfacesModule";
 
 /**
- * Registers commands for VSCode UI. Actual logic is contained in /server/commandsLogic/<feature>
+ * Register commands for VS Code UI. Actual logic is contained in /server/commandsLogic/<feature>
  * to keep this file as simple as possible.
- * Only register UI commands in this file and delgate logic to a command-class-file.
+ * Only register UI commands in this file and delegate logic to a command-class-file.
  */
 export class Commands implements ICommands {
   private extensionContext: vscode.ExtensionContext;
@@ -103,7 +103,6 @@ export class Commands implements ICommands {
   }
 
   public unregisterCommands(): void {
-    //this.extensionContext.subscriptions.forEach((e) => e.dispose());
     this.disposables.forEach((e) => e.dispose());
     this.disposables = [];
   }

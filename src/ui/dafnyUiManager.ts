@@ -15,18 +15,14 @@ import { IDafnyUiManager } from "./IDafnyUiManager";
 import { DafnyFileChecker } from "./dafnyFileChecker";
 
 /*
- * This is kinda the "main ui manager" for basic instances like statusbar and a filewatcher.
- * Instance is created on server start and passed to many components.
+ * This is the ui manager for basic instances like statusbar and a filewatcher.
  */
 export class DafnyUiManager implements IDafnyUiManager {
   private dafnyStatusbar: IStatusbarProvider;
   private counterModelProvider: ICounterModelProvider;
   private codeLensProvider: ICodeLensProvider;
 
-  constructor(
-    public vsCodeContext: vscode.ExtensionContext,
-    public languageServer: LanguageClient
-  ) {
+  constructor(public languageServer: LanguageClient) {
     this.dafnyStatusbar = new StatusbarProvider(this.languageServer);
     this.counterModelProvider = new CounterModelProvider();
     this.codeLensProvider = new CodeLensProvider();

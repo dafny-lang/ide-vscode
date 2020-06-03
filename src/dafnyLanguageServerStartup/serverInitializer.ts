@@ -55,10 +55,7 @@ export class ServerInitializer implements ILanguageServer {
           .onReady()
           .then(() => {
             if (this.languageServer) {
-              this.provider = new DafnyUiManager(
-                this.extensionContext,
-                this.languageServer
-              );
+              this.provider = new DafnyUiManager(this.languageServer);
 
               this.commands = new Commands(
                 this.extensionContext,
