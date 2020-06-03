@@ -1,5 +1,3 @@
-// tslint:disable:max-classes-per-file
-
 export class Warning {
   public static NoWorkspace: string =
     "Please use a workspace (File - Open Folder). Otherwise some features may not work properly";
@@ -35,10 +33,18 @@ export class Error {
   public static MonoBinaryNotExecuted: string =
     "Mono binary could not be executed.";
   public static ServerStopped: string = "Server stopped.";
+  public static CouldNotStartServer: string =
+    "Could not start Danfy Language Server.";
+  public static CouldNotInstallServer: string =
+    "Could not install Danfy Language Server.";
 }
 
 export class Information {
   public static StartingServer: string = "Starting Dafny Language Server...";
+  public static InstallingServer: string =
+    "Installing latest Dafny Language Server...";
+  public static UpdatingServer: string =
+    "Updating Dafny Language Server to latest version...";
 
   public static CompilationStarted: string = "Compilation started";
   public static CompilationFinished: string = "Compilation finished";
@@ -54,7 +60,7 @@ export class StatusbarStrings {
   public static NotVerified: string = "$(thumbsdown) Not verified";
   public static Errors: string = "Errors";
   public static Pending: string = "$(issue-opened) Server answer pending";
-  public static DafnyVersion: string = "Servers Dafny Version";
+  public static DafnyVersion: string = "Dafny Language Server Version";
   public static CurrentDocument: string = "Current Document";
   public static NoDocumentSelected: string = "No document selected yet.";
   public static Started: string = "Server started";

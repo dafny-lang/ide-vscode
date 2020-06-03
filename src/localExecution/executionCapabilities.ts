@@ -9,12 +9,12 @@ import {
   EnvironmentConfig,
   Error,
   VSCodeCommandStrings,
-} from "../stringRessources/_StringRessourcesModule";
+} from "../stringResources/_StringResourcesModule";
 
 import { IExecutionCapabilities } from "./IExecutionCapabilities";
 
 /**
- * Check for supported capabilities (mono/.net runtime, dafny etc.)
+ * Check for supported capabilities (mono/.net runtime, Dafny)
  */
 export class ExecutionCapabilities implements IExecutionCapabilities {
   private config = vscode.workspace.getConfiguration(EnvironmentConfig.Dafny);
@@ -22,10 +22,6 @@ export class ExecutionCapabilities implements IExecutionCapabilities {
     const useMono = this.config.get<boolean>(Config.UseMono);
 
     if (os.platform() === EnvironmentConfig.Win32 && !useMono) {
-      // Sadly, it is not easy to find out the .NET-version on Windows.
-      // We assume that a supported Windows Version has a recent enough .NET version preinstalled.
-      // See https://docs.microsoft.com/en-us/windows/desktop/api/winnt/ns-winnt-_osversioninfoa
-      // and https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed
       return true;
     }
 
@@ -62,7 +58,6 @@ export class ExecutionCapabilities implements IExecutionCapabilities {
       );
       let restartMessage;
       if (os.platform() === EnvironmentConfig.OSX) {
-        // Mono adds a new folder to PATH; so give the easiest advice
         restartMessage = Error.RestartMacAfterMonoInstall;
       } else {
         restartMessage = Error.RestartCodeAfterMonoInstall;

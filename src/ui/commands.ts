@@ -9,22 +9,23 @@ import {
   CounterExample,
 } from "../serverRequests/_ServerRequestsModule";
 import { IDafnyRunner } from "../localExecution/_LocalExecutionModule";
-import { CommandStrings } from "../stringRessources/_StringRessourcesModule";
+import { CommandStrings } from "../stringResources/_StringResourcesModule";
 
 import { ICommands } from "./ICommands";
 import { IDafnyUiManager } from "./IDafnyUiManager";
 import { ICounterExamples } from "../typeInterfaces/_TypeInterfacesModule";
 
 /**
- * Registers commands for VSCode UI. Actual logic is contained in /server/commandsLogic/<feature>
+ * Register commands for VS Code UI. Actual logic is contained in /server/commandsLogic/<feature>
  * to keep this file as simple as possible.
- * Only register UI commands in this file and delgate logic to a command-class-file.
+ * Only register UI commands in this file and delegate logic to a command-class-file.
  */
 export class Commands implements ICommands {
   private extensionContext: vscode.ExtensionContext;
   private languageServer: LanguageClient;
   private provider: IDafnyUiManager;
   private runner: IDafnyRunner;
+  private disposables: Array<vscode.Disposable> = [];
 
   private commands = [
     {
@@ -45,8 +46,7 @@ export class Commands implements ICommands {
       name: CommandStrings.CompileAndRun,
       callback: () => {
         const compile: ICompile = new Compile(this.languageServer);
-        compile.compile(false);
-        compile.run(this.runner);
+        compile.compile(false).then(() => compile.run(this.runner));
       },
     },
     {
@@ -55,7 +55,7 @@ export class Commands implements ICommands {
         const counterExample: ICounterExample = new CounterExample(
           this.languageServer
         );
-        var callback = (
+        const callback: Function = (
           allCounterExamples: ICounterExamples,
           isAutoTriggered: boolean
         ): void => {
@@ -98,6 +98,12 @@ export class Commands implements ICommands {
         cmd.callback
       );
       this.extensionContext.subscriptions.push(disposable);
+      this.disposables.push(disposable);
     }
+  }
+
+  public unregisterCommands(): void {
+    this.disposables.forEach((e) => e.dispose());
+    this.disposables = [];
   }
 }
