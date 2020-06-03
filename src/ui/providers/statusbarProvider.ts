@@ -42,10 +42,6 @@ export class StatusbarProvider implements IStatusbarProvider {
         vscode.window.showInformationMessage(StatusbarStrings.Started);
         this.dafnyLanguageServerVersion = serverversion;
         this.update();
-
-        // todo dispose on delete... to fix komisches verhalten.
-        // this.serverStatusBar.dispose();
-        // this.currentDocumentStatucBar.dispose();
       }
     );
 
@@ -66,6 +62,11 @@ export class StatusbarProvider implements IStatusbarProvider {
         this.update();
       }
     );
+  }
+
+  public dispose(): void {
+    this.serverStatusBar.dispose();
+    this.currentDocumentStatucBar.dispose();
   }
 
   public update(): void {

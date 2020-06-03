@@ -25,6 +25,7 @@ export class Commands implements ICommands {
   private languageServer: LanguageClient;
   private provider: IDafnyUiManager;
   private runner: IDafnyRunner;
+  private disposables: Array<vscode.Disposable> = [];
 
   private commands = [
     {
@@ -97,6 +98,13 @@ export class Commands implements ICommands {
         cmd.callback
       );
       this.extensionContext.subscriptions.push(disposable);
+      this.disposables.push(disposable);
     }
+  }
+
+  public unregisterCommands(): void {
+    //this.extensionContext.subscriptions.forEach((e) => e.dispose());
+    this.disposables.forEach((e) => e.dispose());
+    this.disposables = [];
   }
 }

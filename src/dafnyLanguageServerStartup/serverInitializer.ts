@@ -35,6 +35,8 @@ export class ServerInitializer implements ILanguageServer {
   private languageServerDisposable: vscode.Disposable | undefined;
   private runner: IDafnyRunner;
   private extensionContext: vscode.ExtensionContext;
+  private provider: IDafnyUiManager | undefined;
+  private commands: ICommands | undefined;
 
   constructor(extensionContext: vscode.ExtensionContext) {
     this.runner = new DafnyRunner();
@@ -53,24 +55,24 @@ export class ServerInitializer implements ILanguageServer {
           .onReady()
           .then(() => {
             if (this.languageServer) {
-              const provider: IDafnyUiManager = new DafnyUiManager(
+              this.provider = new DafnyUiManager(
                 this.extensionContext,
                 this.languageServer
               );
 
-              const commands: ICommands = new Commands(
+              this.commands = new Commands(
                 this.extensionContext,
                 this.languageServer,
-                provider,
+                this.provider,
                 this.runner
               );
-              commands.registerCommands();
+              this.commands.registerCommands();
 
               const notifications: INotifications = new Notifications(
                 this.languageServer
               );
               notifications.registerNotifications();
-              provider.registerEventListener();
+              this.provider.registerEventListener();
               this.registerServerVersionNotification();
             }
           })
@@ -94,11 +96,8 @@ export class ServerInitializer implements ILanguageServer {
 
   private async stopLanguageServer(): Promise<void> {
     await this.languageServer?.stop();
-
-    //this.extensionContext.subscriptions.forEach((e) => e.dispose());
-    // alles unregisterieren
-    // aber top mässiges restart muss hier wieder neu registeriert werden
-
+    this.provider?.disposeUi();
+    this.commands?.unregisterCommands();
     this.languageServerDisposable = this.languageServerDisposable?.dispose();
   }
 

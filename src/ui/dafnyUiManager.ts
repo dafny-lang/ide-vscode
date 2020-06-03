@@ -51,6 +51,10 @@ export class DafnyUiManager implements IDafnyUiManager {
     return this.codeLensProvider;
   }
 
+  public disposeUi(): void {
+    this.dafnyStatusbar.dispose();
+  }
+
   private activeDocumentTabChanged(editor: vscode.TextEditor | undefined) {
     this.triggerUIupdates(editor);
   }
