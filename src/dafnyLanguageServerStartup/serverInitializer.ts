@@ -93,8 +93,12 @@ export class ServerInitializer implements ILanguageServer {
 
   private async stopLanguageServer(): Promise<void> {
     await this.languageServer?.stop();
-    this.provider?.disposeUi();
-    this.commands?.unregisterCommands();
+    if (this.provider) {
+      this.provider.disposeUi();
+    }
+    if (this.commands) {
+      this.commands.unregisterCommands();
+    }
     this.languageServerDisposable = this.languageServerDisposable?.dispose();
   }
 
