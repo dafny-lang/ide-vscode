@@ -15,8 +15,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: v12.x
-      - name: "Prepare: Setup sonarqube"
-        uses: warchant/setup-sonar-scanner@v1
+      # - name: "Prepare: Setup sonarqube"
+      #  uses: warchant/setup-sonar-scanner@v1
 
       - run: npm install
       - run: npm run prettier
