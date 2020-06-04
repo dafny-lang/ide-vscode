@@ -26,12 +26,12 @@ jobs:
       #        env:
       #          CI: true
 
-      - name: "Run sonar-scanner"
-        env:
+      # - name: "Run sonar-scanner"
+      #  env:
           # to get access to secrets.SONAR_TOKEN, provide GITHUB_TOKEN
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: sonar-scanner
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #  run: sonar-scanner
+      #    -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
       - name: "Upload Artifact: VSIX Packages"
         uses: actions/upload-artifact@v2
