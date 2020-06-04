@@ -14,7 +14,7 @@ import {
 import { IDafnyUiManager } from "./IDafnyUiManager";
 import { DafnyFileChecker } from "./dafnyFileChecker";
 
-/*
+/**
  * This is the ui manager for basic instances like statusbar and a filewatcher.
  */
 export class DafnyUiManager implements IDafnyUiManager {

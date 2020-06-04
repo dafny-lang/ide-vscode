@@ -34,7 +34,7 @@ export class Compile implements ICompile {
 
   private async prepareAndSendCompileRequest(
     document: vscode.TextDocument,
-    customArgs: boolean
+    useCustomArgs: boolean
   ): Promise<boolean> {
     await document.save();
 
@@ -44,7 +44,7 @@ export class Compile implements ICompile {
     const compilationArgs: string[] =
       config.get(Config.CompilationArguments) || [];
     this.filename = document.fileName;
-    if (customArgs === true) {
+    if (useCustomArgs) {
       const opt: vscode.InputBoxOptions = {
         value: compilationArgs.join(" "),
         prompt: Information.CustomCompileArgsLabel,
@@ -97,14 +97,14 @@ export class Compile implements ICompile {
     }
   }
 
-  public async compile(customArgs: boolean = false): Promise<boolean> {
+  public async compile(useCustomArgs: boolean = false): Promise<boolean> {
     if (
       vscode.window.activeTextEditor &&
       vscode.window.activeTextEditor.document
     ) {
       return this.prepareAndSendCompileRequest(
         vscode.window.activeTextEditor.document,
-        customArgs
+        useCustomArgs
       );
     }
     return Promise.reject(false);
