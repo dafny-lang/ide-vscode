@@ -3,13 +3,14 @@ variables:
 
 stages:
   - prebuild
+  - test
   - build
   - sonar
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
-  - node_modules/
+    - node_modules/
 
 build_image:
   stage: prebuild
@@ -24,6 +25,13 @@ build_image:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker build --tag $BUILD_IMAGE:latest - < Dockerfile
     - docker push $BUILD_IMAGE:latest
+
+test_format:
+  stage: test
+  image: $BUILD_IMAGE:latest
+  script:
+    - npm install
+    - npm run prettier
 
 build_client:
   stage: build

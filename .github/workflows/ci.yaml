@@ -4,7 +4,6 @@ on: [push]
 env:
   PACKAGE_NAME: dafny-vscode-preview
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,29 +15,29 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: v12.x
-      - name: "Prepare: Setup sonarqube"
-        uses: warchant/setup-sonar-scanner@v1
+      # - name: "Prepare: Setup sonarqube"
+      #  uses: warchant/setup-sonar-scanner@v1
 
       - run: npm install
+      - run: npm run prettier
       - run: npm run build
       - run: npm run package
-#      - run: npm test
-#        env:
-#          CI: true
+      #      - run: npm test
+      #        env:
+      #          CI: true
 
-      - name: "Run sonar-scanner"
-        env:
+      # - name: "Run sonar-scanner"
+      #  env:
           # to get access to secrets.SONAR_TOKEN, provide GITHUB_TOKEN
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: sonar-scanner
-             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #  run: sonar-scanner
+      #    -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
       - name: "Upload Artifact: VSIX Packages"
         uses: actions/upload-artifact@v2
         with:
           name: package
           path: dist/*.vsix
-
 
   release-github:
     needs: build
@@ -57,7 +56,6 @@ jobs:
       - name: "Prepare: Get the version"
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
-
 
       - name: "Prepare: Get changelog for current version"
         id: get_changelog

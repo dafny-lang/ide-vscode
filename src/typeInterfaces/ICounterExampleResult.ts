@@ -1,3 +1,4 @@
+"use strict";
 export interface ICounterExample {
   line: number;
   col: number;
@@ -9,5 +10,4 @@ export interface ICounterExample {
 
 export interface ICounterExamples {
   counterExamples: ICounterExample[];
-  length: number;
 }

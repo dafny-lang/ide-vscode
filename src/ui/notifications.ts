@@ -1,14 +1,14 @@
+"use strict";
 import * as vscode from "vscode";
-import DafnyLanguageServer from "../server/dafnyLanguageClient";
-import { LanguageServerNotification } from "../stringRessources/languageServer";
+import { LanguageServerNotification } from "../stringResources/_StringResourcesModule";
+import { INotifications } from "./INotifications";
+import { LanguageClient } from "vscode-languageclient";
 
 /**
- * VSCode UI Notifications
- * This notifications are triggerable by the server
- * If you need client side notifications, use vscde.window
+ * Registers notifications that can are triggerable by the server.
  */
-export default class Notifications {
-  private languageServer: DafnyLanguageServer;
+export class Notifications implements INotifications {
+  private languageClient: LanguageClient;
 
   private notifications = [
     {
@@ -25,13 +25,13 @@ export default class Notifications {
     },
   ];
 
-  constructor(languageServer: DafnyLanguageServer) {
-    this.languageServer = languageServer;
+  constructor(languageServer: LanguageClient) {
+    this.languageClient = languageServer;
   }
 
   public registerNotifications() {
     for (const notification of this.notifications) {
-      this.languageServer.onNotification(
+      this.languageClient.onNotification(
         notification.method,
         notification.handler
       );
