@@ -24,8 +24,10 @@ export function activate(extensionContext: vscode.ExtensionContext) {
         Error.ConfigureMonoExecutable,
         Error.GetMono
       )
-      .then((selection) => {
-        exeCapabilities.getMono(selection);
+      .then((selection: string | undefined) => {
+        if(selection !== undefined){
+          exeCapabilities.getMono(selection);
+        }
       });
     return;
   }

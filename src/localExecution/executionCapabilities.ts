@@ -50,7 +50,7 @@ export class ExecutionCapabilities implements IExecutionCapabilities {
     }
   }
 
-  public getMono(monoVersionSelection: string | undefined): void {
+  public getMono(monoVersionSelection: string): void {
     if (monoVersionSelection === Error.GetMono) {
       vscode.commands.executeCommand(
         VSCodeCommandStrings.Open,
