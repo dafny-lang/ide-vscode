@@ -116,10 +116,7 @@ export class CounterModelProvider implements ICounterModelProvider {
   }
 
   public update(languageServer: LanguageClient): void {
-    if (
-      this.fileHasVisibleCounterModel[DafnyFileChecker.getActiveFileName()] ===
-      true
-    ) {
+    if (this.fileHasVisibleCounterModel[DafnyFileChecker.getActiveFileName()]) {
       this.hideCounterModel();
 
       const counterExample: IRequestCounterExample = new RequestCounterExample(
