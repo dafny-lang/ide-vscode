@@ -1,5 +1,11 @@
 "use strict";
-import { ide, LanguageClient } from "../../ideApi/_IdeApi";
+import {
+  window,
+  Uri,
+  StatusBarItem,
+  StatusBarAlignment,
+  LanguageClient,
+} from "../../ideApi/_IdeApi";
 import {
   LanguageServerNotification,
   StatusbarStrings,
@@ -17,18 +23,18 @@ import { IStatusbarProvider } from "./IStatusbarProvider";
 export class StatusbarProvider implements IStatusbarProvider {
   private dafnyerrors: { [docPathName: string]: number } = {};
   private dafnyLanguageServerVersion: string | undefined;
-  private activeDocument: ide.Uri | undefined;
-  private serverStatusBar: ide.StatusBarItem;
-  private currentDocumentStatucBar: ide.StatusBarItem;
+  private activeDocument: Uri | undefined;
+  private serverStatusBar: StatusBarItem;
+  private currentDocumentStatucBar: StatusBarItem;
 
   constructor(languageServer: LanguageClient) {
     const priority: number = 10;
-    this.currentDocumentStatucBar = ide.window.createStatusBarItem(
-      ide.StatusBarAlignment.Left,
+    this.currentDocumentStatucBar = window.createStatusBarItem(
+      StatusBarAlignment.Left,
       priority
     );
-    this.serverStatusBar = ide.window.createStatusBarItem(
-      ide.StatusBarAlignment.Right,
+    this.serverStatusBar = window.createStatusBarItem(
+      StatusBarAlignment.Right,
       priority
     );
 
@@ -36,7 +42,7 @@ export class StatusbarProvider implements IStatusbarProvider {
     languageServer.onNotification(
       LanguageServerNotification.ServerStarted,
       (serverversion: string) => {
-        ide.window.showInformationMessage(StatusbarStrings.Started);
+        window.showInformationMessage(StatusbarStrings.Started);
         this.dafnyLanguageServerVersion = serverversion;
         this.update();
       }
@@ -45,7 +51,7 @@ export class StatusbarProvider implements IStatusbarProvider {
     // Set from the verifiaction service; this gets triggered by every server side Dafny file buffer update
     languageServer.onNotification(
       LanguageServerNotification.ActiveVerifiyingDocument,
-      (activeDocument: ide.Uri) => {
+      (activeDocument: Uri) => {
         this.activeDocument = activeDocument;
         this.update();
       }
@@ -67,8 +73,8 @@ export class StatusbarProvider implements IStatusbarProvider {
   }
 
   public update(): void {
-    const editor = ide.window.activeTextEditor;
-    const editorsOpen: number = ide.window.visibleTextEditors.length;
+    const editor = window.activeTextEditor;
+    const editorsOpen: number = window.visibleTextEditors.length;
     if (
       !editor ||
       editorsOpen === 0 ||

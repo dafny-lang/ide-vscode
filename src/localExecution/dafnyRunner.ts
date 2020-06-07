@@ -1,7 +1,7 @@
 "use strict";
 import * as os from "os";
 
-import { ide } from "../ideApi/_IdeApi";
+import { WorkspaceConfiguration, workspace, window } from "../ideApi/_IdeApi";
 import {
   Config,
   EnvironmentConfig,
@@ -15,14 +15,12 @@ import { IDafnyRunner } from "./IDafnyRunner";
  * Therefore it also supports mono for macOS / Linux
  */
 export class DafnyRunner implements IDafnyRunner {
-  private config: ide.WorkspaceConfiguration = ide.workspace.getConfiguration(
+  private config: WorkspaceConfiguration = workspace.getConfiguration(
     EnvironmentConfig.Dafny
   );
 
   public run(filename: string) {
-    const terminal = ide.window.createTerminal(
-      `${Information.Run} ${filename}`
-    );
+    const terminal = window.createTerminal(`${Information.Run} ${filename}`);
     const command = this.getCommand(filename);
     console.log(command);
     terminal.show();

@@ -1,5 +1,5 @@
 "use strict";
-import { ide, LanguageClient, ResponseError } from "../ideApi/_IdeApi";
+import { window, LanguageClient, ResponseError } from "../ideApi/_IdeApi";
 import {
   LanguageServerRequest,
   Error,
@@ -31,13 +31,13 @@ export class CounterExample implements ICounterExample {
     callback: Function,
     isAutoTriggered: boolean = false
   ) {
-    if (!ide.window.activeTextEditor) {
+    if (!window.activeTextEditor) {
       return;
     }
     const arg: ICounterExampleArguments = {
-      DafnyFile: ide.window.activeTextEditor.document.fileName,
+      DafnyFile: window.activeTextEditor.document.fileName,
     };
-    ide.window.activeTextEditor.document.save().then(() => {
+    window.activeTextEditor.document.save().then(() => {
       // This timeout makes sure, that server requests per second were capped.
       clearTimeout(CounterExample.timeout);
       const boundThis = this;
@@ -53,7 +53,7 @@ export class CounterExample implements ICounterExample {
                 callback(allCounterExamples, isAutoTriggered);
               },
               (error: ResponseError<void>) => {
-                ide.window.showErrorMessage(
+                window.showErrorMessage(
                   `${Error.CanNotGetCounterExample}: ${error.message}`
                 );
               }

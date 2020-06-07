@@ -1,5 +1,5 @@
 "use strict";
-import { ide } from "../ideApi/_IdeApi";
+import { window, TextDocument } from "../ideApi/_IdeApi";
 import { EnvironmentConfig } from "../stringResources/_StringResourcesModule";
 
 /**
@@ -10,11 +10,11 @@ import { EnvironmentConfig } from "../stringResources/_StringResourcesModule";
  */
 export class DafnyFileChecker {
   static getActiveFileName(): string {
-    return ide.window.activeTextEditor
-      ? ide.window.activeTextEditor.document?.uri?.toString()
+    return window.activeTextEditor
+      ? window.activeTextEditor.document?.uri?.toString()
       : "";
   }
-  static isDafnyFile(document: ide.TextDocument): boolean {
+  static isDafnyFile(document: TextDocument): boolean {
     return document !== null && document.languageId === EnvironmentConfig.Dafny;
   }
 }

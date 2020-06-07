@@ -7,7 +7,7 @@ import * as https from "https";
 import { https as redirect } from "follow-redirects";
 const DecompressZip = require("decompress-zip");
 
-import { ide, uri } from "../ideApi/_IdeApi";
+import { window, uri } from "../ideApi/_IdeApi";
 import { LanguageServerConfig } from "../stringResources/_StringResourcesModule";
 
 import { ILanguageServerInstaller } from "./ILanguageServerInstaller";
@@ -45,7 +45,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     if (this.anyVersionInstalled()) {
       this.deleteInstalledVersion();
     }
-    ide.window.showInformationMessage(
+    window.showInformationMessage(
       "Download started. This will take a moment..."
     );
     const latestVersionInstalled: boolean = await this.downloadLatestServerRelease(
@@ -66,7 +66,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
       rimraf.sync(this.basePathToOutFolder);
     } catch (e) {
       console.log("Could not remove old dafny language server: " + e);
-      ide.window.showErrorMessage(
+      window.showErrorMessage(
         "Could not remove old Dafny Language Server. Please delete this folder: " +
           this.basePathToOutFolder
       );

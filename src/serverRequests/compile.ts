@@ -1,5 +1,12 @@
 "use strict";
-import { ide, LanguageClient } from "../ideApi/_IdeApi";
+import {
+  workspace,
+  window,
+  InputBoxOptions,
+  TextDocument,
+  WorkspaceConfiguration,
+  LanguageClient,
+} from "../ideApi/_IdeApi";
 import {
   ICompilerResult,
   ICompilerArguments,
@@ -31,28 +38,28 @@ export class Compile implements ICompile {
   }
 
   private async prepareAndSendCompileRequest(
-    document: ide.TextDocument,
+    document: TextDocument,
     useCustomArgs: boolean
   ): Promise<boolean> {
     await document.save();
 
-    const config: ide.WorkspaceConfiguration = ide.workspace.getConfiguration(
+    const config: WorkspaceConfiguration = workspace.getConfiguration(
       EnvironmentConfig.Dafny
     );
     const compilationArgs: string[] =
       config.get(Config.CompilationArguments) || [];
     this.filename = document.fileName;
     if (useCustomArgs) {
-      const opt: ide.InputBoxOptions = {
+      const opt: InputBoxOptions = {
         value: compilationArgs.join(" "),
         prompt: Information.CustomCompileArgsLabel,
       };
-      const args: string | undefined = await ide.window.showInputBox(opt);
+      const args: string | undefined = await window.showInputBox(opt);
       if (args) {
-        ide.window.showInformationMessage(`${Information.Arguments}: ${args}`);
+        window.showInformationMessage(`${Information.Arguments}: ${args}`);
         return this.sendServerRequest(args.split(" "));
       } else {
-        ide.window.showErrorMessage(Error.NoAdditionalArgsGiven);
+        window.showErrorMessage(Error.NoAdditionalArgsGiven);
         return Promise.reject(false);
       }
     } else {
@@ -61,7 +68,7 @@ export class Compile implements ICompile {
   }
 
   private async sendServerRequest(args: string[]): Promise<boolean> {
-    ide.window.showInformationMessage(Information.CompilationStarted);
+    window.showInformationMessage(Information.CompilationStarted);
 
     const arg: ICompilerArguments = {
       FileToCompile: this.filename || "",
@@ -76,25 +83,25 @@ export class Compile implements ICompile {
 
       this.result = result;
       if (result.error) {
-        ide.window.showErrorMessage(
+        window.showErrorMessage(
           result.message || Information.CompilationFailed
         );
         return Promise.reject(false);
       }
-      ide.window.showInformationMessage(
+      window.showInformationMessage(
         result.message || Information.CompilationFinished
       );
       return Promise.resolve(true);
     } catch (error) {
-      ide.window.showErrorMessage(`${Error.CanNotCompile}: ${error.message}`);
+      window.showErrorMessage(`${Error.CanNotCompile}: ${error.message}`);
       return Promise.reject(false);
     }
   }
 
   public async compile(useCustomArgs: boolean = false): Promise<boolean> {
-    if (ide.window.activeTextEditor && ide.window.activeTextEditor.document) {
+    if (window.activeTextEditor && window.activeTextEditor.document) {
       return this.prepareAndSendCompileRequest(
-        ide.window.activeTextEditor.document,
+        window.activeTextEditor.document,
         useCustomArgs
       );
     }
@@ -103,10 +110,10 @@ export class Compile implements ICompile {
 
   public run(runner: IDafnyRunner): void {
     if (this.result && this.filename && this.result.executable) {
-      ide.window.showInformationMessage(Information.CompilationStartRunner);
+      window.showInformationMessage(Information.CompilationStartRunner);
       runner.run(this.filename);
     } else {
-      ide.window.showInformationMessage(Error.NoMainMethod);
+      window.showInformationMessage(Error.NoMainMethod);
     }
   }
 }

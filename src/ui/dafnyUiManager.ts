@@ -1,5 +1,11 @@
 "use strict";
-import { ide, LanguageClient } from "../ideApi/_IdeApi";
+import {
+  window,
+  workspace,
+  LanguageClient,
+  TextEditor,
+  TextDocumentChangeEvent,
+} from "../ideApi/_IdeApi";
 import {
   ICounterModelProvider,
   CounterModelProvider,
@@ -27,11 +33,11 @@ export class DafnyUiManager implements IDafnyUiManager {
   }
 
   public registerEventListener(): void {
-    ide.window.onDidChangeActiveTextEditor(
+    window.onDidChangeActiveTextEditor(
       (editor) => this.activeDocumentTabChanged(editor),
       this
     );
-    ide.workspace.onDidChangeTextDocument(
+    workspace.onDidChangeTextDocument(
       (arg) => this.openDocumentChanged(arg),
       this
     );
@@ -49,16 +55,16 @@ export class DafnyUiManager implements IDafnyUiManager {
     this.dafnyStatusbar.dispose();
   }
 
-  private activeDocumentTabChanged(editor: ide.TextEditor | undefined) {
+  private activeDocumentTabChanged(editor: TextEditor | undefined) {
     this.triggerUIupdates(editor);
   }
 
-  private openDocumentChanged(change: ide.TextDocumentChangeEvent): void {
+  private openDocumentChanged(change: TextDocumentChangeEvent): void {
     this.triggerUIupdates(change);
   }
 
   private triggerUIupdates(
-    documentreference: ide.TextEditor | ide.TextDocumentChangeEvent | undefined
+    documentreference: TextEditor | TextDocumentChangeEvent | undefined
   ): void {
     if (
       documentreference &&

@@ -1,5 +1,16 @@
 "use strict";
-import { ide, LanguageClient } from "../../ideApi/_IdeApi";
+import {
+  workspace,
+  window,
+  WorkspaceConfiguration,
+  TextEditor,
+  TextEditorDecorationType,
+  DecorationOptions,
+  DecorationRenderOptions,
+  Range,
+  Position,
+  LanguageClient,
+} from "../../ideApi/_IdeApi";
 import {
   ICounterExamples,
   ICounterExample,
@@ -26,9 +37,9 @@ import { DafnyFileChecker } from "../dafnyFileChecker";
 export class CounterModelProvider implements ICounterModelProvider {
   private fileHasVisibleCounterModel: { [docPathName: string]: boolean } = {};
   private decorators: {
-    [docPathName: string]: ide.TextEditorDecorationType;
+    [docPathName: string]: TextEditorDecorationType;
   } = {};
-  private displayOptions: ide.DecorationRenderOptions = {};
+  private displayOptions: DecorationRenderOptions = {};
   private readonly defaultDarkBackgroundColor: string =
     CounterExampleConfig.DefaultDarkBackgroundColor;
   private readonly defaultDarkFontColor =
@@ -41,7 +52,7 @@ export class CounterModelProvider implements ICounterModelProvider {
 
   constructor() {
     this.loadDisplayOptions();
-    ide.workspace.onDidChangeConfiguration(this.loadDisplayOptions, this);
+    workspace.onDidChangeConfiguration(this.loadDisplayOptions, this);
   }
 
   public hideCounterModel(): void {
@@ -57,8 +68,8 @@ export class CounterModelProvider implements ICounterModelProvider {
     allCounterExamples: ICounterExamples,
     isAutoTriggered: boolean = false
   ): void {
-    const editor: ide.TextEditor = ide.window.activeTextEditor!;
-    const arrayOfDecorations: ide.DecorationOptions[] = [];
+    const editor: TextEditor = window.activeTextEditor!;
+    const arrayOfDecorations: DecorationOptions[] = [];
     let hasReferences: boolean = false;
 
     for (let i = 0; i < allCounterExamples.counterExamples.length; i++) {
@@ -80,29 +91,28 @@ export class CounterModelProvider implements ICounterModelProvider {
           hasReferences = true;
         }
       }
-      const renderOptions: ide.DecorationRenderOptions = {
+      const renderOptions: DecorationRenderOptions = {
         after: {
           contentText: shownText,
         },
       };
 
-      let decorator: ide.DecorationOptions = {
-        range: new ide.Range(
-          new ide.Position(line, col + 1),
-          new ide.Position(line, Number.MAX_VALUE)
+      let decorator: DecorationOptions = {
+        range: new Range(
+          new Position(line, col + 1),
+          new Position(line, Number.MAX_VALUE)
         ),
         renderOptions,
       };
-
       arrayOfDecorations.push(decorator);
     }
 
     if (!isAutoTriggered && hasReferences) {
-      ide.window.showWarningMessage(Warning.ReferencesInCounterExample);
+      window.showWarningMessage(Warning.ReferencesInCounterExample);
     }
 
     if (!isAutoTriggered && allCounterExamples.counterExamples.length == 0) {
-      ide.window.showWarningMessage(Warning.NoCounterExamples);
+      window.showWarningMessage(Warning.NoCounterExamples);
     }
 
     this.fileHasVisibleCounterModel[
@@ -130,12 +140,12 @@ export class CounterModelProvider implements ICounterModelProvider {
     }
   }
 
-  private getDisplay(): ide.TextEditorDecorationType {
-    return ide.window.createTextEditorDecorationType(this.displayOptions);
+  private getDisplay(): TextEditorDecorationType {
+    return window.createTextEditorDecorationType(this.displayOptions);
   }
 
   private loadDisplayOptions(): void {
-    const config: ide.WorkspaceConfiguration = ide.workspace.getConfiguration(
+    const config: WorkspaceConfiguration = workspace.getConfiguration(
       EnvironmentConfig.Dafny
     );
     const customOptions:
