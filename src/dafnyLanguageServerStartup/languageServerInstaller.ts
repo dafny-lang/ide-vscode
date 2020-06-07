@@ -4,12 +4,10 @@ import * as semver from "semver";
 import * as fs from "fs";
 import * as rimraf from "rimraf";
 import * as https from "https";
-import * as uri from "vscode-uri";
 import { https as redirect } from "follow-redirects";
 const DecompressZip = require("decompress-zip");
 
-import * as vscode from "vscode";
-
+import { window, uri } from "../ideApi/_IdeApi";
 import { LanguageServerConfig } from "../stringResources/_StringResourcesModule";
 
 import { ILanguageServerInstaller } from "./ILanguageServerInstaller";
@@ -47,7 +45,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     if (this.anyVersionInstalled()) {
       this.deleteInstalledVersion();
     }
-    vscode.window.showInformationMessage(
+    window.showInformationMessage(
       "Download started. This will take a moment..."
     );
     const latestVersionInstalled: boolean = await this.downloadLatestServerRelease(
@@ -68,7 +66,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
       rimraf.sync(this.basePathToOutFolder);
     } catch (e) {
       console.log("Could not remove old dafny language server: " + e);
-      vscode.window.showErrorMessage(
+      window.showErrorMessage(
         "Could not remove old Dafny Language Server. Please delete this folder: " +
           this.basePathToOutFolder
       );

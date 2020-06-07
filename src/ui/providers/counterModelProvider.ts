@@ -1,7 +1,16 @@
 "use strict";
-import * as vscode from "vscode";
-import { LanguageClient } from "vscode-languageclient";
-
+import {
+  workspace,
+  window,
+  WorkspaceConfiguration,
+  TextEditor,
+  TextEditorDecorationType,
+  DecorationOptions,
+  DecorationRenderOptions,
+  Range,
+  Position,
+  LanguageClient,
+} from "../../ideApi/_IdeApi";
 import {
   ICounterExamples,
   ICounterExample,
@@ -28,9 +37,9 @@ import { DafnyFileChecker } from "../dafnyFileChecker";
 export class CounterModelProvider implements ICounterModelProvider {
   private fileHasVisibleCounterModel: { [docPathName: string]: boolean } = {};
   private decorators: {
-    [docPathName: string]: vscode.TextEditorDecorationType;
+    [docPathName: string]: TextEditorDecorationType;
   } = {};
-  private displayOptions: vscode.DecorationRenderOptions = {};
+  private displayOptions: DecorationRenderOptions = {};
   private readonly defaultDarkBackgroundColor: string =
     CounterExampleConfig.DefaultDarkBackgroundColor;
   private readonly defaultDarkFontColor =
@@ -43,7 +52,7 @@ export class CounterModelProvider implements ICounterModelProvider {
 
   constructor() {
     this.loadDisplayOptions();
-    vscode.workspace.onDidChangeConfiguration(this.loadDisplayOptions, this);
+    workspace.onDidChangeConfiguration(this.loadDisplayOptions, this);
   }
 
   public hideCounterModel(): void {
@@ -59,8 +68,8 @@ export class CounterModelProvider implements ICounterModelProvider {
     allCounterExamples: ICounterExamples,
     isAutoTriggered: boolean = false
   ): void {
-    const editor: vscode.TextEditor = vscode.window.activeTextEditor!;
-    const arrayOfDecorations: vscode.DecorationOptions[] = [];
+    const editor: TextEditor = window.activeTextEditor!;
+    const arrayOfDecorations: DecorationOptions[] = [];
     let hasReferences: boolean = false;
 
     for (let i = 0; i < allCounterExamples.counterExamples.length; i++) {
@@ -82,29 +91,28 @@ export class CounterModelProvider implements ICounterModelProvider {
           hasReferences = true;
         }
       }
-      const renderOptions: vscode.DecorationRenderOptions = {
+      const renderOptions: DecorationRenderOptions = {
         after: {
           contentText: shownText,
         },
       };
 
-      let decorator: vscode.DecorationOptions = {
-        range: new vscode.Range(
-          new vscode.Position(line, col + 1),
-          new vscode.Position(line, Number.MAX_VALUE)
+      let decorator: DecorationOptions = {
+        range: new Range(
+          new Position(line, col + 1),
+          new Position(line, Number.MAX_VALUE)
         ),
         renderOptions,
       };
-
       arrayOfDecorations.push(decorator);
     }
 
     if (!isAutoTriggered && hasReferences) {
-      vscode.window.showWarningMessage(Warning.ReferencesInCounterExample);
+      window.showWarningMessage(Warning.ReferencesInCounterExample);
     }
 
     if (!isAutoTriggered && allCounterExamples.counterExamples.length == 0) {
-      vscode.window.showWarningMessage(Warning.NoCounterExamples);
+      window.showWarningMessage(Warning.NoCounterExamples);
     }
 
     this.fileHasVisibleCounterModel[
@@ -116,10 +124,7 @@ export class CounterModelProvider implements ICounterModelProvider {
   }
 
   public update(languageServer: LanguageClient): void {
-    if (
-      this.fileHasVisibleCounterModel[DafnyFileChecker.getActiveFileName()] ===
-      true
-    ) {
+    if (this.fileHasVisibleCounterModel[DafnyFileChecker.getActiveFileName()]) {
       this.hideCounterModel();
 
       const counterExample: IRequestCounterExample = new RequestCounterExample(
@@ -135,12 +140,12 @@ export class CounterModelProvider implements ICounterModelProvider {
     }
   }
 
-  private getDisplay(): vscode.TextEditorDecorationType {
-    return vscode.window.createTextEditorDecorationType(this.displayOptions);
+  private getDisplay(): TextEditorDecorationType {
+    return window.createTextEditorDecorationType(this.displayOptions);
   }
 
   private loadDisplayOptions(): void {
-    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(
+    const config: WorkspaceConfiguration = workspace.getConfiguration(
       EnvironmentConfig.Dafny
     );
     const customOptions:

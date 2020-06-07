@@ -1,7 +1,11 @@
 "use strict";
-import * as vscode from "vscode";
-import { LanguageClient } from "vscode-languageclient";
-
+import {
+  window,
+  Uri,
+  StatusBarItem,
+  StatusBarAlignment,
+  LanguageClient,
+} from "../../ideApi/_IdeApi";
 import {
   LanguageServerNotification,
   StatusbarStrings,
@@ -19,18 +23,18 @@ import { IStatusbarProvider } from "./IStatusbarProvider";
 export class StatusbarProvider implements IStatusbarProvider {
   private dafnyerrors: { [docPathName: string]: number } = {};
   private dafnyLanguageServerVersion: string | undefined;
-  private activeDocument: vscode.Uri | undefined;
-  private serverStatusBar: vscode.StatusBarItem;
-  private currentDocumentStatucBar: vscode.StatusBarItem;
+  private activeDocument: Uri | undefined;
+  private serverStatusBar: StatusBarItem;
+  private currentDocumentStatucBar: StatusBarItem;
 
   constructor(languageServer: LanguageClient) {
     const priority: number = 10;
-    this.currentDocumentStatucBar = vscode.window.createStatusBarItem(
-      vscode.StatusBarAlignment.Left,
+    this.currentDocumentStatucBar = window.createStatusBarItem(
+      StatusBarAlignment.Left,
       priority
     );
-    this.serverStatusBar = vscode.window.createStatusBarItem(
-      vscode.StatusBarAlignment.Right,
+    this.serverStatusBar = window.createStatusBarItem(
+      StatusBarAlignment.Right,
       priority
     );
 
@@ -38,7 +42,7 @@ export class StatusbarProvider implements IStatusbarProvider {
     languageServer.onNotification(
       LanguageServerNotification.ServerStarted,
       (serverversion: string) => {
-        vscode.window.showInformationMessage(StatusbarStrings.Started);
+        window.showInformationMessage(StatusbarStrings.Started);
         this.dafnyLanguageServerVersion = serverversion;
         this.update();
       }
@@ -47,7 +51,7 @@ export class StatusbarProvider implements IStatusbarProvider {
     // Set from the verifiaction service; this gets triggered by every server side Dafny file buffer update
     languageServer.onNotification(
       LanguageServerNotification.ActiveVerifiyingDocument,
-      (activeDocument: vscode.Uri) => {
+      (activeDocument: Uri) => {
         this.activeDocument = activeDocument;
         this.update();
       }
@@ -69,8 +73,8 @@ export class StatusbarProvider implements IStatusbarProvider {
   }
 
   public update(): void {
-    const editor = vscode.window.activeTextEditor;
-    const editorsOpen: number = vscode.window.visibleTextEditors.length;
+    const editor = window.activeTextEditor;
+    const editorsOpen: number = window.visibleTextEditors.length;
     if (
       !editor ||
       editorsOpen === 0 ||

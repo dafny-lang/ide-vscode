@@ -1,13 +1,15 @@
 "use strict";
-import { workspace, WorkspaceConfiguration, window } from "vscode";
-import {
-  LanguageClient,
-  ServerOptions as ClientServerOptions,
-} from "vscode-languageclient";
-import { LanguageClientOptions } from "vscode-languageclient/lib/client";
 import * as path from "path";
 import * as fs from "fs";
 
+import {
+  workspace,
+  WorkspaceConfiguration,
+  window,
+  LanguageClientOptions,
+  LanguageClient,
+  ClientServerOptions,
+} from "../ideApi/_IdeApi";
 import {
   EnvironmentConfig,
   Error,

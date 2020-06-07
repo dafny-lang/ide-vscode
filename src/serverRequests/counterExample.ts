@@ -1,7 +1,5 @@
 "use strict";
-import * as vscode from "vscode";
-import { LanguageClient, ResponseError } from "vscode-languageclient";
-
+import { window, LanguageClient, ResponseError } from "../ideApi/_IdeApi";
 import {
   LanguageServerRequest,
   Error,
@@ -33,13 +31,13 @@ export class CounterExample implements ICounterExample {
     callback: Function,
     isAutoTriggered: boolean = false
   ) {
-    if (!vscode.window.activeTextEditor) {
+    if (!window.activeTextEditor) {
       return;
     }
     const arg: ICounterExampleArguments = {
-      DafnyFile: vscode.window.activeTextEditor.document.fileName,
+      DafnyFile: window.activeTextEditor.document.fileName,
     };
-    vscode.window.activeTextEditor.document.save().then(() => {
+    window.activeTextEditor.document.save().then(() => {
       // This timeout makes sure, that server requests per second were capped.
       clearTimeout(CounterExample.timeout);
       const boundThis = this;
@@ -55,7 +53,7 @@ export class CounterExample implements ICounterExample {
                 callback(allCounterExamples, isAutoTriggered);
               },
               (error: ResponseError<void>) => {
-                vscode.window.showErrorMessage(
+                window.showErrorMessage(
                   `${Error.CanNotGetCounterExample}: ${error.message}`
                 );
               }

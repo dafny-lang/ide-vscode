@@ -1,7 +1,11 @@
 "use strict";
-import * as vscode from "vscode";
-import { Trace } from "vscode-jsonrpc";
-
+import {
+  Disposable,
+  ExtensionContext,
+  Trace,
+  window,
+  commands,
+} from "../ideApi/_IdeApi";
 import {
   Commands,
   Notifications,
@@ -32,13 +36,13 @@ import { LanguageServerInstaller } from "./languageServerInstaller";
  */
 export class ServerInitializer implements ILanguageServer {
   private languageServer: ServerOptions | undefined;
-  private languageServerDisposable: vscode.Disposable | undefined;
+  private languageServerDisposable: Disposable | undefined;
   private runner: IDafnyRunner;
-  private extensionContext: vscode.ExtensionContext;
+  private extensionContext: ExtensionContext;
   private provider: IDafnyUiManager | undefined;
   private commands: ICommands | undefined;
 
-  constructor(extensionContext: vscode.ExtensionContext) {
+  constructor(extensionContext: ExtensionContext) {
     this.runner = new DafnyRunner();
     this.extensionContext = extensionContext;
   }
@@ -46,7 +50,7 @@ export class ServerInitializer implements ILanguageServer {
   public startLanguageServer(): void {
     this.installLanguageServerIfNotExists()
       .then(() => {
-        vscode.window.showInformationMessage(Information.StartingServer);
+        window.showInformationMessage(Information.StartingServer);
 
         this.languageServer = new ServerOptions();
         this.languageServer.trace = Trace.Verbose;
@@ -74,7 +78,7 @@ export class ServerInitializer implements ILanguageServer {
             }
           })
           .catch((errorStart) => {
-            vscode.window.showErrorMessage(
+            window.showErrorMessage(
               Error.CouldNotStartServer + " " + errorStart
             );
           });
@@ -85,7 +89,7 @@ export class ServerInitializer implements ILanguageServer {
         this.extensionContext.subscriptions.push(this.languageServerDisposable);
       })
       .catch((errorInstall) => {
-        vscode.window.showErrorMessage(
+        window.showErrorMessage(
           Error.CouldNotInstallServer + " " + errorInstall
         );
       });
@@ -105,15 +109,12 @@ export class ServerInitializer implements ILanguageServer {
   // This function is not registered in commands.ts since it has a higher cohesion here
   public registerServerRestartCommand(): void {
     this.extensionContext.subscriptions.push(
-      vscode.commands.registerCommand(
-        CommandStrings.RestartServer,
-        async () => {
-          this.stopLanguageServer().then(() => {
-            vscode.window.showErrorMessage(Error.ServerStopped);
-            this.startLanguageServer();
-          });
-        }
-      )
+      commands.registerCommand(CommandStrings.RestartServer, async () => {
+        this.stopLanguageServer().then(() => {
+          window.showErrorMessage(Error.ServerStopped);
+          this.startLanguageServer();
+        });
+      })
     );
   }
 
@@ -132,7 +133,7 @@ export class ServerInitializer implements ILanguageServer {
   private async installLanguageServerIfNotExists(): Promise<boolean> {
     const installer: ILanguageServerInstaller = new LanguageServerInstaller();
     if (!installer.anyVersionInstalled()) {
-      vscode.window.showInformationMessage(Information.InstallingServer);
+      window.showInformationMessage(Information.InstallingServer);
       return await installer.installLatestVersion();
     }
     return Promise.resolve(true);
@@ -145,9 +146,9 @@ export class ServerInitializer implements ILanguageServer {
       .then((latestVersionInstalled: boolean) => {
         if (!latestVersionInstalled) {
           this.stopLanguageServer().then(() => {
-            vscode.window.showErrorMessage(Error.ServerStopped);
+            window.showErrorMessage(Error.ServerStopped);
 
-            vscode.window.showInformationMessage(Information.UpdatingServer);
+            window.showInformationMessage(Information.UpdatingServer);
             installer.installLatestVersion().then(() => {
               this.startLanguageServer();
             });
