@@ -60,11 +60,11 @@ Here are a few impressions of the features.
 
 On the first start the plugin will install the _Dafny_ language server automatically.
 
-![assertions animation](readmeResources/installation.gif)
+![Installation](readmeResources/Installation.PNG)
 
 ### Syntax Error Underlining
 
-![Syntax](readmeResources/Syntax.png)
+![Syntax](readmeResources/Syntax.PNG)
 Whenever a postcondition statement does not hold, the user will be informed.
 
 ### Compile and Run
@@ -77,37 +77,31 @@ Press `F5` to compile and run the program.
 
 Press `F7` to show counter examples.
 
-![Counter](readmeResources/Counter.png)
+![Counter](readmeResources/Counter.PNG)
 
 ### CodeLens
 
 Counted references will automatically be displayed. Click on one of those reference to open the CodeLens popup.
 
-![Counter](readmeResources/Counter.png)
+![Counter](readmeResources/CodeLens.PNG)
 
 ### Auto Completion
 
 Press `CTRL+Space` to show auto completion suggestions.
 
-![Completion](readmeResources/Completion.png)
+![Completion](readmeResources/Completion.PNG)
 
 ### Hover Information
 
 Hover a symbol to get information about that symbol.
 
-![Completion](readmeResources/Completion.png)
-
-### GoToDefinition
-
-Press `F12` to jump to a symbols declaration.
-
-![Go to Definition](readmeResources/GoTo.png)
+![Completion](readmeResources/Hover.PNG)
 
 ### Rename
 
 Press `F2` to rename a symbol.
 
-![Go to Definition](readmeResources/GoTo.png)
+![Go to Definition](readmeResources/Rename.png)
 
 ## Contribute
 
