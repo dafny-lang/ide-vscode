@@ -187,6 +187,9 @@
   ],
   "scripts": {
     "vscode:compile-typescript": "tsc -p ./",
+    "build": "tsc -p ./",
+    "package": "vsce package --out dist/",
+    "publish": "vsce publish",
     "compile": "tsc -watch -p ./",
     "prettier": "prettier --check \"**/*.ts\"",
     "postinstall": "node ./node_modules/vscode/bin/install",
