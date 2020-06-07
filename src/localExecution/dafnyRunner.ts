@@ -1,7 +1,7 @@
 "use strict";
 import * as os from "os";
-import * as vscode from "vscode";
 
+import { ide } from "../ideApi/_IdeApi";
 import {
   Config,
   EnvironmentConfig,
@@ -15,12 +15,12 @@ import { IDafnyRunner } from "./IDafnyRunner";
  * Therefore it also supports mono for macOS / Linux
  */
 export class DafnyRunner implements IDafnyRunner {
-  private config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(
+  private config: ide.WorkspaceConfiguration = ide.workspace.getConfiguration(
     EnvironmentConfig.Dafny
   );
 
   public run(filename: string) {
-    const terminal = vscode.window.createTerminal(
+    const terminal = ide.window.createTerminal(
       `${Information.Run} ${filename}`
     );
     const command = this.getCommand(filename);

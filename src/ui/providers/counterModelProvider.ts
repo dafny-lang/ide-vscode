@@ -1,7 +1,5 @@
 "use strict";
-import * as vscode from "vscode";
-import { LanguageClient } from "vscode-languageclient";
-
+import { ide, LanguageClient } from "../../ideApi/_IdeApi";
 import {
   ICounterExamples,
   ICounterExample,
@@ -28,9 +26,9 @@ import { DafnyFileChecker } from "../dafnyFileChecker";
 export class CounterModelProvider implements ICounterModelProvider {
   private fileHasVisibleCounterModel: { [docPathName: string]: boolean } = {};
   private decorators: {
-    [docPathName: string]: vscode.TextEditorDecorationType;
+    [docPathName: string]: ide.TextEditorDecorationType;
   } = {};
-  private displayOptions: vscode.DecorationRenderOptions = {};
+  private displayOptions: ide.DecorationRenderOptions = {};
   private readonly defaultDarkBackgroundColor: string =
     CounterExampleConfig.DefaultDarkBackgroundColor;
   private readonly defaultDarkFontColor =
@@ -43,7 +41,7 @@ export class CounterModelProvider implements ICounterModelProvider {
 
   constructor() {
     this.loadDisplayOptions();
-    vscode.workspace.onDidChangeConfiguration(this.loadDisplayOptions, this);
+    ide.workspace.onDidChangeConfiguration(this.loadDisplayOptions, this);
   }
 
   public hideCounterModel(): void {
@@ -59,8 +57,8 @@ export class CounterModelProvider implements ICounterModelProvider {
     allCounterExamples: ICounterExamples,
     isAutoTriggered: boolean = false
   ): void {
-    const editor: vscode.TextEditor = vscode.window.activeTextEditor!;
-    const arrayOfDecorations: vscode.DecorationOptions[] = [];
+    const editor: ide.TextEditor = ide.window.activeTextEditor!;
+    const arrayOfDecorations: ide.DecorationOptions[] = [];
     let hasReferences: boolean = false;
 
     for (let i = 0; i < allCounterExamples.counterExamples.length; i++) {
@@ -82,16 +80,16 @@ export class CounterModelProvider implements ICounterModelProvider {
           hasReferences = true;
         }
       }
-      const renderOptions: vscode.DecorationRenderOptions = {
+      const renderOptions: ide.DecorationRenderOptions = {
         after: {
           contentText: shownText,
         },
       };
 
-      let decorator: vscode.DecorationOptions = {
-        range: new vscode.Range(
-          new vscode.Position(line, col + 1),
-          new vscode.Position(line, Number.MAX_VALUE)
+      let decorator: ide.DecorationOptions = {
+        range: new ide.Range(
+          new ide.Position(line, col + 1),
+          new ide.Position(line, Number.MAX_VALUE)
         ),
         renderOptions,
       };
@@ -100,11 +98,11 @@ export class CounterModelProvider implements ICounterModelProvider {
     }
 
     if (!isAutoTriggered && hasReferences) {
-      vscode.window.showWarningMessage(Warning.ReferencesInCounterExample);
+      ide.window.showWarningMessage(Warning.ReferencesInCounterExample);
     }
 
     if (!isAutoTriggered && allCounterExamples.counterExamples.length == 0) {
-      vscode.window.showWarningMessage(Warning.NoCounterExamples);
+      ide.window.showWarningMessage(Warning.NoCounterExamples);
     }
 
     this.fileHasVisibleCounterModel[
@@ -132,12 +130,12 @@ export class CounterModelProvider implements ICounterModelProvider {
     }
   }
 
-  private getDisplay(): vscode.TextEditorDecorationType {
-    return vscode.window.createTextEditorDecorationType(this.displayOptions);
+  private getDisplay(): ide.TextEditorDecorationType {
+    return ide.window.createTextEditorDecorationType(this.displayOptions);
   }
 
   private loadDisplayOptions(): void {
-    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(
+    const config: ide.WorkspaceConfiguration = ide.workspace.getConfiguration(
       EnvironmentConfig.Dafny
     );
     const customOptions:

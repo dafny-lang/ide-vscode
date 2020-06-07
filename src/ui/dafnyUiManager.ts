@@ -1,7 +1,5 @@
 "use strict";
-import * as vscode from "vscode";
-import { LanguageClient } from "vscode-languageclient";
-
+import { ide, LanguageClient } from "../ideApi/_IdeApi";
 import {
   ICounterModelProvider,
   CounterModelProvider,
@@ -29,11 +27,11 @@ export class DafnyUiManager implements IDafnyUiManager {
   }
 
   public registerEventListener(): void {
-    vscode.window.onDidChangeActiveTextEditor(
+    ide.window.onDidChangeActiveTextEditor(
       (editor) => this.activeDocumentTabChanged(editor),
       this
     );
-    vscode.workspace.onDidChangeTextDocument(
+    ide.workspace.onDidChangeTextDocument(
       (arg) => this.openDocumentChanged(arg),
       this
     );
@@ -51,19 +49,16 @@ export class DafnyUiManager implements IDafnyUiManager {
     this.dafnyStatusbar.dispose();
   }
 
-  private activeDocumentTabChanged(editor: vscode.TextEditor | undefined) {
+  private activeDocumentTabChanged(editor: ide.TextEditor | undefined) {
     this.triggerUIupdates(editor);
   }
 
-  private openDocumentChanged(change: vscode.TextDocumentChangeEvent): void {
+  private openDocumentChanged(change: ide.TextDocumentChangeEvent): void {
     this.triggerUIupdates(change);
   }
 
   private triggerUIupdates(
-    documentreference:
-      | vscode.TextEditor
-      | vscode.TextDocumentChangeEvent
-      | undefined
+    documentreference: ide.TextEditor | ide.TextDocumentChangeEvent | undefined
   ): void {
     if (
       documentreference &&

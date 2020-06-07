@@ -1,6 +1,5 @@
 "use strict";
-import * as vscode from "vscode";
-
+import { ide } from "./ideApi/_IdeApi";
 import { ServerInitializer } from "./dafnyLanguageServerStartup/_DafnyLanguageServerStartupModule";
 import { ExecutionCapabilities } from "./localExecution/_LocalExecutionModule";
 import { Warning, Error } from "./stringResources/_StringResourcesModule";
@@ -10,15 +9,15 @@ import { Warning, Error } from "./stringResources/_StringResourcesModule";
  * It checks for the right way to start the language server (mono or not mono on Windows)
  * and starts the language server with the DafnyLanguageServer class.
  */
-export function activate(extensionContext: vscode.ExtensionContext) {
-  if (vscode.workspace.workspaceFolders === undefined) {
-    vscode.window.showWarningMessage(Warning.NoWorkspace);
+export function activate(extensionContext: ide.ExtensionContext) {
+  if (ide.workspace.workspaceFolders === undefined) {
+    ide.window.showWarningMessage(Warning.NoWorkspace);
   }
 
   const exeCapabilities = new ExecutionCapabilities();
   if (!exeCapabilities.hasSupportedMonoVersion()) {
     // Promt the user to install Mono and stop extension execution.
-    vscode.window
+    ide.window
       .showErrorMessage(
         Error.NoSupportedMono,
         Error.ConfigureMonoExecutable,

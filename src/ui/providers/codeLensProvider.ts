@@ -1,6 +1,5 @@
 "use strict";
-import * as vscode from "vscode";
-
+import { ide } from "../../ideApi/_IdeApi";
 import { ICodeLensProvider } from "./ICodeLensProvider";
 import { VSCodeCommandStrings } from "../../stringResources/_StringResourcesModule";
 import {
@@ -15,34 +14,34 @@ import {
  * to the local IDE api to open CodeLens Popups.
  */
 export class CodeLensProvider implements ICodeLensProvider {
-  private parsePosition(p: ICodeLensPosition): vscode.Position {
-    return new vscode.Position(p.Line, p.Character);
+  private parsePosition(p: ICodeLensPosition): ide.Position {
+    return new ide.Position(p.Line, p.Character);
   }
-  private parseRange(r: ICodeLensRange): vscode.Range {
-    return new vscode.Range(
+  private parseRange(r: ICodeLensRange): ide.Range {
+    return new ide.Range(
       this.parsePosition(r.Start),
       this.parsePosition(r.End)
     );
   }
-  private parseLocation(l: ICodeLensLocation): vscode.Location {
-    return new vscode.Location(this.parseUri(l.Uri), this.parseRange(l.Range));
+  private parseLocation(l: ICodeLensLocation): ide.Location {
+    return new ide.Location(this.parseUri(l.Uri), this.parseRange(l.Range));
   }
-  private parseUri(u: string): vscode.Uri {
-    return vscode.Uri.parse(u);
+  private parseUri(u: string): ide.Uri {
+    return ide.Uri.parse(u);
   }
 
   public showReferences(jsonArgs: string): void {
     let obj: ICodeLensReferences = JSON.parse(jsonArgs);
 
-    const parsedUri: vscode.Uri = this.parseUri(obj.Uri);
-    const parsedPosition: vscode.Position = this.parsePosition(obj.Position);
-    const parsedLocations: Array<vscode.Location> = [];
+    const parsedUri: ide.Uri = this.parseUri(obj.Uri);
+    const parsedPosition: ide.Position = this.parsePosition(obj.Position);
+    const parsedLocations: Array<ide.Location> = [];
 
     for (const location of obj.Locations) {
       parsedLocations.push(this.parseLocation(location));
     }
 
-    vscode.commands.executeCommand(
+    ide.commands.executeCommand(
       VSCodeCommandStrings.ShowReferences,
       parsedUri,
       parsedPosition,

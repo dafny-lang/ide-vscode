@@ -1,7 +1,5 @@
 "use strict";
-import * as vscode from "vscode";
-import { LanguageClient } from "vscode-languageclient";
-
+import { ide, LanguageClient } from "../ideApi/_IdeApi";
 import {
   ICompilerResult,
   ICompilerArguments,
@@ -33,30 +31,28 @@ export class Compile implements ICompile {
   }
 
   private async prepareAndSendCompileRequest(
-    document: vscode.TextDocument,
+    document: ide.TextDocument,
     useCustomArgs: boolean
   ): Promise<boolean> {
     await document.save();
 
-    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration(
+    const config: ide.WorkspaceConfiguration = ide.workspace.getConfiguration(
       EnvironmentConfig.Dafny
     );
     const compilationArgs: string[] =
       config.get(Config.CompilationArguments) || [];
     this.filename = document.fileName;
     if (useCustomArgs) {
-      const opt: vscode.InputBoxOptions = {
+      const opt: ide.InputBoxOptions = {
         value: compilationArgs.join(" "),
         prompt: Information.CustomCompileArgsLabel,
       };
-      const args: string | undefined = await vscode.window.showInputBox(opt);
+      const args: string | undefined = await ide.window.showInputBox(opt);
       if (args) {
-        vscode.window.showInformationMessage(
-          `${Information.Arguments}: ${args}`
-        );
+        ide.window.showInformationMessage(`${Information.Arguments}: ${args}`);
         return this.sendServerRequest(args.split(" "));
       } else {
-        vscode.window.showErrorMessage(Error.NoAdditionalArgsGiven);
+        ide.window.showErrorMessage(Error.NoAdditionalArgsGiven);
         return Promise.reject(false);
       }
     } else {
@@ -65,7 +61,7 @@ export class Compile implements ICompile {
   }
 
   private async sendServerRequest(args: string[]): Promise<boolean> {
-    vscode.window.showInformationMessage(Information.CompilationStarted);
+    ide.window.showInformationMessage(Information.CompilationStarted);
 
     const arg: ICompilerArguments = {
       FileToCompile: this.filename || "",
@@ -80,30 +76,25 @@ export class Compile implements ICompile {
 
       this.result = result;
       if (result.error) {
-        vscode.window.showErrorMessage(
+        ide.window.showErrorMessage(
           result.message || Information.CompilationFailed
         );
         return Promise.reject(false);
       }
-      vscode.window.showInformationMessage(
+      ide.window.showInformationMessage(
         result.message || Information.CompilationFinished
       );
       return Promise.resolve(true);
     } catch (error) {
-      vscode.window.showErrorMessage(
-        `${Error.CanNotCompile}: ${error.message}`
-      );
+      ide.window.showErrorMessage(`${Error.CanNotCompile}: ${error.message}`);
       return Promise.reject(false);
     }
   }
 
   public async compile(useCustomArgs: boolean = false): Promise<boolean> {
-    if (
-      vscode.window.activeTextEditor &&
-      vscode.window.activeTextEditor.document
-    ) {
+    if (ide.window.activeTextEditor && ide.window.activeTextEditor.document) {
       return this.prepareAndSendCompileRequest(
-        vscode.window.activeTextEditor.document,
+        ide.window.activeTextEditor.document,
         useCustomArgs
       );
     }
@@ -112,10 +103,10 @@ export class Compile implements ICompile {
 
   public run(runner: IDafnyRunner): void {
     if (this.result && this.filename && this.result.executable) {
-      vscode.window.showInformationMessage(Information.CompilationStartRunner);
+      ide.window.showInformationMessage(Information.CompilationStartRunner);
       runner.run(this.filename);
     } else {
-      vscode.window.showInformationMessage(Error.NoMainMethod);
+      ide.window.showInformationMessage(Error.NoMainMethod);
     }
   }
 }

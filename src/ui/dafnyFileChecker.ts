@@ -1,6 +1,5 @@
 "use strict";
-import * as vscode from "vscode";
-
+import { ide } from "../ideApi/_IdeApi";
 import { EnvironmentConfig } from "../stringResources/_StringResourcesModule";
 
 /**
@@ -11,11 +10,11 @@ import { EnvironmentConfig } from "../stringResources/_StringResourcesModule";
  */
 export class DafnyFileChecker {
   static getActiveFileName(): string {
-    return vscode.window.activeTextEditor
-      ? vscode.window.activeTextEditor.document?.uri?.toString()
+    return ide.window.activeTextEditor
+      ? ide.window.activeTextEditor.document?.uri?.toString()
       : "";
   }
-  static isDafnyFile(document: vscode.TextDocument): boolean {
+  static isDafnyFile(document: ide.TextDocument): boolean {
     return document !== null && document.languageId === EnvironmentConfig.Dafny;
   }
 }

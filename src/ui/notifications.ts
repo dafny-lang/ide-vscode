@@ -1,8 +1,7 @@
 "use strict";
-import * as vscode from "vscode";
+import { window, LanguageClient } from "../ideApi/_IdeApi";
 import { LanguageServerNotification } from "../stringResources/_StringResourcesModule";
 import { INotifications } from "./INotifications";
-import { LanguageClient } from "vscode-languageclient";
 
 /**
  * Registers notifications that can are triggerable by the server.
@@ -13,15 +12,15 @@ export class Notifications implements INotifications {
   private notifications = [
     {
       method: LanguageServerNotification.Error,
-      handler: vscode.window.showErrorMessage,
+      handler: window.showErrorMessage,
     },
     {
       method: LanguageServerNotification.Warning,
-      handler: vscode.window.showWarningMessage,
+      handler: window.showWarningMessage,
     },
     {
       method: LanguageServerNotification.Info,
-      handler: vscode.window.showInformationMessage,
+      handler: window.showInformationMessage,
     },
   ];
 

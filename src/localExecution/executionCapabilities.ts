@@ -2,8 +2,8 @@
 import { execFileSync } from "child_process";
 import * as os from "os";
 import { log } from "util";
-import * as vscode from "vscode";
 
+import { ide } from "../ideApi/_IdeApi";
 import {
   Config,
   EnvironmentConfig,
@@ -17,7 +17,7 @@ import { IExecutionCapabilities } from "./IExecutionCapabilities";
  * Check for supported capabilities (mono/.net runtime, Dafny)
  */
 export class ExecutionCapabilities implements IExecutionCapabilities {
-  private config = vscode.workspace.getConfiguration(EnvironmentConfig.Dafny);
+  private config = ide.workspace.getConfiguration(EnvironmentConfig.Dafny);
   public hasSupportedMonoVersion(): boolean {
     const useMono = this.config.get<boolean>(Config.UseMono);
 
@@ -52,9 +52,9 @@ export class ExecutionCapabilities implements IExecutionCapabilities {
 
   public getMono(monoVersionSelection: string): void {
     if (monoVersionSelection === Error.GetMono) {
-      vscode.commands.executeCommand(
+      ide.commands.executeCommand(
         VSCodeCommandStrings.Open,
-        vscode.Uri.parse(Error.GetMonoUri)
+        ide.Uri.parse(Error.GetMonoUri)
       );
       let restartMessage;
       if (os.platform() === EnvironmentConfig.OSX) {
@@ -62,11 +62,11 @@ export class ExecutionCapabilities implements IExecutionCapabilities {
       } else {
         restartMessage = Error.RestartCodeAfterMonoInstall;
       }
-      vscode.window.showWarningMessage(restartMessage);
+      ide.window.showWarningMessage(restartMessage);
     }
 
     if (monoVersionSelection === Error.ConfigureMonoExecutable) {
-      vscode.commands.executeCommand(VSCodeCommandStrings.ConfigSettings);
+      ide.commands.executeCommand(VSCodeCommandStrings.ConfigSettings);
     }
   }
 }

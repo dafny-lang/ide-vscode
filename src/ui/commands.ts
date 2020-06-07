@@ -1,7 +1,5 @@
 "use strict";
-import * as vscode from "vscode";
-import { LanguageClient } from "vscode-languageclient";
-
+import { ide, LanguageClient } from "../ideApi/_IdeApi";
 import {
   ICompile,
   Compile,
@@ -21,11 +19,11 @@ import { ICounterExamples } from "../typeInterfaces/_TypeInterfacesModule";
  * Only register UI commands in this file and delegate logic to a command-class-file.
  */
 export class Commands implements ICommands {
-  private extensionContext: vscode.ExtensionContext;
+  private extensionContext: ide.ExtensionContext;
   private languageServer: LanguageClient;
   private provider: IDafnyUiManager;
   private runner: IDafnyRunner;
-  private disposables: Array<vscode.Disposable> = [];
+  private disposables: Array<ide.Disposable> = [];
 
   private commands = [
     {
@@ -80,7 +78,7 @@ export class Commands implements ICommands {
   ];
 
   constructor(
-    extensionContext: vscode.ExtensionContext,
+    extensionContext: ide.ExtensionContext,
     languageServer: LanguageClient,
     provider: IDafnyUiManager,
     runner: IDafnyRunner
@@ -93,10 +91,7 @@ export class Commands implements ICommands {
 
   public registerCommands(): void {
     for (const cmd of this.commands) {
-      const disposable = vscode.commands.registerCommand(
-        cmd.name,
-        cmd.callback
-      );
+      const disposable = ide.commands.registerCommand(cmd.name, cmd.callback);
       this.extensionContext.subscriptions.push(disposable);
       this.disposables.push(disposable);
     }
