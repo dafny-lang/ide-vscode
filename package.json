@@ -2,7 +2,7 @@
   "name": "dafny-vscode-preview",
   "displayName": "Dafny (Preview)",
   "description": "Dafny for Visual Studio Code (Preview Release)",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "publisher": "correctnessLab",
   "homepage": "https://github.com/DafnyVSCode/",
   "repository": {
