@@ -83,7 +83,7 @@ Press `F7` to show counter examples.
 
 Counted references will automatically be displayed. Click on one of those reference to open the CodeLens popup.
 
-![Counter](readmeResources/CodeLens.png)
+![CodeLens](readmeResources/CodeLens.png)
 
 ### Auto Completion
 
@@ -95,13 +95,13 @@ Press `CTRL+Space` to show auto completion suggestions.
 
 Hover a symbol to get information about that symbol.
 
-![Completion](readmeResources/Hover.png)
+![Hover](readmeResources/Hover.png)
 
 ### Rename
 
 Press `F2` to rename a symbol.
 
-![Go to Definition](readmeResources/Rename.png)
+![Rename](readmeResources/Rename.png)
 
 ## Contribute
 
