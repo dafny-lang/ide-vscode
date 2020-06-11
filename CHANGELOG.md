@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.0.5
+
+- Addes support for the Dafny language server version 1.2.3
+
 ## 1.0.4
 
 - Code refactorings and README updated.
