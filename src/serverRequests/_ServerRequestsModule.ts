@@ -1,6 +1,6 @@
 "use strict";
 /*
- * Module for Dafny Language Server Requests.
+ * Module for Dafny language server requests.
  * Use this to program against the interface.
  */
 export { Compile } from "./compile";
