@@ -7,7 +7,7 @@ import * as https from "https";
 import { https as redirect } from "follow-redirects";
 const DecompressZip = require("decompress-zip");
 
-import { window, uri } from "../ideApi/_IdeApi";
+import { window, URI } from "../ideApi/_IdeApi";
 import { LanguageServerConfig } from "../stringResources/_StringResourcesModule";
 
 import { ILanguageServerInstaller } from "./ILanguageServerInstaller";
@@ -121,8 +121,8 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
             "User-Agent":
               "Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0",
           },
-          host: uri.URI.parse(url).authority,
-          path: uri.URI.parse(url).path,
+          host: URI.parse(url).authority,
+          path: URI.parse(url).path,
         };
 
         const file = fs.createWriteStream(filePath);

@@ -4,10 +4,10 @@
  * Allows simple to implement adapter components for other IDEs.
  */
 export {
-  workspace,
-  WorkspaceConfiguration,
   window,
   commands,
+  workspace,
+  WorkspaceConfiguration,
   ExtensionContext,
   Disposable,
   Uri,
@@ -25,12 +25,12 @@ export {
   StatusBarAlignment,
 } from "vscode";
 
-export { LanguageClientOptions } from "vscode-languageclient/lib/client";
 export {
   LanguageClient,
+  LanguageClientOptions,
   ResponseError,
   ServerOptions as ClientServerOptions,
 } from "vscode-languageclient";
 
-export * as uri from "vscode-uri";
+export { URI } from "vscode-uri";
 export { Trace } from "vscode-jsonrpc";
