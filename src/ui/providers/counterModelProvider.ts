@@ -31,7 +31,8 @@ import { DafnyFileChecker } from "../dafnyFileChecker";
 
 /**
  * This is the general UI element provider for counter models.
- * There is one instance (created in the dafnyUiManager) of this compnent and for every file the counter model is handled in this instance.
+ * There is only one instance (created in the dafnyUiManager) of this compnent.
+ * For every file, the counter model is handled in this instance.
  * This component is responsible for show and hide counter examples in case one is closing and repoening a file.
  */
 export class CounterModelProvider implements ICounterModelProvider {

@@ -4,7 +4,7 @@ import { LanguageServerNotification } from "../stringResources/_StringResourcesM
 import { INotifications } from "./INotifications";
 
 /**
- * Registers notifications that can are triggerable by the server.
+ * Registers notifications that can be received from the server.
  */
 export class Notifications implements INotifications {
   private languageClient: LanguageClient;

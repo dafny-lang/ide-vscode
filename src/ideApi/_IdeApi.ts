@@ -1,7 +1,7 @@
 "use strict";
 /*
  * Module for encapsulation of the IDE API.
- * Allows simple to implement adapter components for other IDEs.
+ * Allows simple implementation of adapter components for other IDEs.
  */
 export {
   window,

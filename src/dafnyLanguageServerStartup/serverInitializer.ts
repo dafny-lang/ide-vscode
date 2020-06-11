@@ -31,7 +31,7 @@ import { ILanguageServerInstaller } from "./ILanguageServerInstaller";
 import { LanguageServerInstaller } from "./languageServerInstaller";
 
 /**
- * This starts basicly the Dafny language server and has been extracted from the extension.ts ("Main").
+ * This basically starts the Dafny language server and has been extracted from extension.ts ("Main").
  * It does also provide command registration for "restart language server".
  */
 export class ServerInitializer implements ILanguageServer {

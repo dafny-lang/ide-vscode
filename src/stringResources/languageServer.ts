@@ -1,5 +1,5 @@
 /**
- * Strings in this class have to match the command strings on the Language Server side.
+ * Strings in this class have to match the command strings registered in the language server.
  * LSP extended commands.
  */
 export class LanguageServerRequest {
@@ -8,7 +8,7 @@ export class LanguageServerRequest {
 }
 
 /**
- * Strings in this file have to match the command strings on the Language Server side!
+ * Strings in this file have to match the command strings registered in the language server.
  * Server side send commands that the client should listen to.
  * LSP extended notifications.
  */

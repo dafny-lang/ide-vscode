@@ -17,7 +17,7 @@ import {
 } from "../stringResources/_StringResourcesModule";
 
 /**
- * Extends LanguageClient - provides basic config constructor for server initialize
+ * Extends LanguageClient - provides basic config constructor for server initialization.
  * This class is used by dafnyLanguageServer and is basically just an extraction.
  */
 export default class ServerOptions extends LanguageClient {

@@ -11,8 +11,8 @@ import {
 import { IDafnyRunner } from "./IDafnyRunner";
 
 /**
- * This class is used for running dafny files after they are compiled
- * Therefore it also supports mono for macOS / Linux
+ * This class is used for running Dafny files after they were compiled.
+ * Therefore it also supports mono for macOS / Linux.
  */
 export class DafnyRunner implements IDafnyRunner {
   private config: WorkspaceConfiguration = workspace.getConfiguration(

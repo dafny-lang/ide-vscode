@@ -1,6 +1,6 @@
 "use strict";
 /*
- * Module for Dafny Language Server Startup.
+ * Module for Dafny language server startup.
  * Use this to program against the interface.
  */
 export { ServerInitializer } from "./serverInitializer";

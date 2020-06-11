@@ -9,9 +9,9 @@ export class Warning {
 
 export class Error {
   public static NoSupportedMono: string =
-    "Could not find compatible Mono. Dafny requires Mono >= 4.0. ";
+    "Could not find a compatible Mono version. Dafny requires Mono >= 4.0. ";
   public static RestartCodeAfterMonoInstall: string =
-    "Please restart Code after the Mono installation.";
+    "Please restart VSCode after the Mono installation.";
   public static RestartMacAfterMonoInstall: string =
     "Please restart your Mac after the Mono installation.";
   public static GetMono: string = "Get Mono";
@@ -19,13 +19,13 @@ export class Error {
     "https://www.mono-project.com/download/stable/";
   public static ConfigureMonoExecutable: string = "Change dafny.monoExecutable";
   public static NoMainMethod: string =
-    "Can't start a program without a Main method";
+    "Cannot start a program without a Main method";
   public static ServerExeNotDefined: string =
-    "Server Executable not defined: please check your config for languageServerExePath";
-  public static ServerExeNotFound: string = "Server Executable not found";
+    "Server executable not defined: please check your config for languageServerExePath";
+  public static ServerExeNotFound: string = "Server executable not found";
   public static CanNotCompile: string = "Compilation failed";
   public static CanNotGetCounterExample: string =
-    "Counter Example Request failed";
+    "CounterExample request failed";
   public static NoAdditionalArgsGiven: string =
     "No additionaly arguments given";
   public static MonoVersionNotParsed: string =

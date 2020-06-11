@@ -13,7 +13,7 @@ import {
 import { ICounterExample } from "./ICounterExample";
 
 /**
- * Provides Counter Examples provided by the Dafny language server.
+ * Provides counter examples received from the Dafny language server.
  */
 export class CounterExample implements ICounterExample {
   private static timeout: NodeJS.Timer;
@@ -38,7 +38,7 @@ export class CounterExample implements ICounterExample {
       DafnyFile: window.activeTextEditor.document.fileName,
     };
     window.activeTextEditor.document.save().then(() => {
-      // This timeout makes sure, that server requests per second were capped.
+      // This timeout makes sure that the maximal amount of requests per second is capped.
       clearTimeout(CounterExample.timeout);
       const boundThis = this;
       CounterExample.timeout = setTimeout(
