@@ -18,7 +18,7 @@ import { IStatusbarProvider } from "./IStatusbarProvider";
 /**
  * This component adds additional information to the status bar like
  * if the Dafny file is valid or not and how many errors were found.
- * It shows also the information if the server has been started and the Dafny version received from the server.
+ * It also shows the information if the server has been started and the Dafny version received from the server.
  */
 export class StatusbarProvider implements IStatusbarProvider {
   private dafnyerrors: { [docPathName: string]: number } = {};

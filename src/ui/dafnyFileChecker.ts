@@ -4,7 +4,7 @@ import { EnvironmentConfig } from "../stringResources/_StringResourcesModule";
 
 /**
  * This is a helper class for UI components.
- * Repeated used function like "isDafnyFile"
+ * Functions often used like "isDafnyFile"
  * and "getActiveFileName" are centralized in this class
  * as static functions.
  */

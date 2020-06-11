@@ -10,7 +10,7 @@ import {
 } from "../../typeInterfaces/_TypeInterfacesModule";
 
 /**
- * This component redirects the data obtained from the language server CodeLens provider
+ * This component redirects data obtained from the CodeLens provider of the language server
  * to the local IDE api to open CodeLens Popups.
  */
 export class CodeLensProvider implements ICodeLensProvider {

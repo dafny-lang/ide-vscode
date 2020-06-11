@@ -23,7 +23,7 @@ import { IDafnyRunner } from "../localExecution/_LocalExecutionModule";
 import { ICompile } from "./ICompile";
 
 /**
- * Request the DafnyServer to compile Dafny code.
+ * Requests the language server to compile Dafny code.
  * Compiled files can be executed through the DafnyRunner
  * (class can be injected with the "runner" argument).
  */

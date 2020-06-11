@@ -6,7 +6,7 @@ import { Warning, Error } from "./stringResources/_StringResourcesModule";
 
 /**
  * This is the plugin's entry point (the "main" function)
- * It checks for the right way to start the language server (mono or not mono on Windows)
+ * It checks for the proper way to start the language server (mono or not mono on Windows)
  * and starts the language server with the DafnyLanguageServer class.
  */
 export function activate(extensionContext: ExtensionContext) {
