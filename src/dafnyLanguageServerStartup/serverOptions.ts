@@ -33,7 +33,7 @@ export default class ServerOptions extends LanguageClient {
       throw Error.ServerExeNotDefined;
     }
 
-    const dafnyLangServerExe = path.join(__dirname, serverExePath);
+    const dafnyLangServerExe = path.isAbsolute(serverExePath) ? serverExePath : path.join(__dirname, serverExePath);
 
     fs.exists(dafnyLangServerExe, (exist) => {
       if (!exist) {
