@@ -126,6 +126,11 @@
           "default": "../../dafnyLanguageServer/DafnyLS.exe",
           "description": "Relative or absolute path to the DafnyLS.exe"
         },
+        "dafny.compilerExePath": {
+          "type": "string",
+          "default": "../../dafnyLanguageServer/Dafny.exe",
+          "description": "Relative or absolute path to the Dafny.exe"
+        },
         "dafny.compilationArgs": {
           "type": "array",
           "default": [
@@ -201,11 +206,11 @@
     "@types/node": "^6.14.10",
     "@types/rimraf": "^3.0.0",
     "@types/semver": "^7.2.0",
+    "@types/vscode": "^1.41.0",
     "mocha": "^5.2.0",
     "tslint": "^5.20.1",
     "typescript": "^3.9.2",
-    "vsce": "^1.75.0",
-    "vscode": "^1.1.37"
+    "vsce": "^1.75.0"
   },
   "dependencies": {
     "decompress-zip": "^0.2.2",
