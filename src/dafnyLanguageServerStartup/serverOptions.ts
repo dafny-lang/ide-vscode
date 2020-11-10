@@ -45,9 +45,12 @@ export default class ServerOptions extends LanguageClient {
       }
     });
 
+    const launchArguments: string[] | undefined = config.get<string[]>(
+      Config.LanguageServerLaunchArgs
+    );
     const serverOptions: ClientServerOptions = {
-      run: { command: dafnyLangServerExe, args: [] },
-      debug: { command: dafnyLangServerExe, args: [] },
+      run: { command: dafnyLangServerExe, args: launchArguments || [] },
+      debug: { command: dafnyLangServerExe, args: launchArguments || [] },
     };
 
     const clientOptions: LanguageClientOptions = {

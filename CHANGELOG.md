@@ -1,5 +1,10 @@
 # Release Notes
 
+## 1.0.6
+
+- Replaced the backing Dafny language server
+- Added configuration options to specify the launch arguments of the language server
+
 ## 1.0.5
 
 - Addes support for the Dafny language server version 1.2.3

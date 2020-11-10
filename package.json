@@ -2,7 +2,7 @@
   "name": "dafny-vscode-preview",
   "displayName": "Dafny (Preview)",
   "description": "Dafny for Visual Studio Code (Preview Release)",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "publisher": "correctnessLab",
   "homepage": "https://github.com/DafnyVSCode/",
   "repository": {
@@ -72,6 +72,10 @@
           "type": "string",
           "default": "../../dafnyLanguageServer/DafnyLS.exe",
           "description": "Relative or absolute path to the DafnyLS.exe"
+        },
+        "dafny.languageServerLaunchArgs": {
+          "type": "array",
+          "default": []
         },
         "dafny.compilationArgs": {
           "type": "array",
