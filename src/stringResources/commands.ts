@@ -19,6 +19,7 @@ export class Config {
   public static MonoExecutablePath: string = "monoExecutablePath";
   public static UseMono: string = "useMono";
   public static LanguageServerExePath: string = "languageServerExePath";
+  public static LanguageServerLaunchArgs: string = "languageServerLaunchArgs";
   public static ColorCounterExamples: string = "colorCounterExamples";
   public static CompilationArguments: string = "compilationArgs";
 }

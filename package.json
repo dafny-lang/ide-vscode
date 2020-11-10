@@ -73,6 +73,10 @@
           "default": "../../dafnyLanguageServer/DafnyLS.exe",
           "description": "Relative or absolute path to the DafnyLS.exe"
         },
+        "dafny.languageServerLaunchArgs": {
+          "type": "array",
+          "default": []
+        },
         "dafny.compilationArgs": {
           "type": "array",
           "default": [
