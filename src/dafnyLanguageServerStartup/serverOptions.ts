@@ -23,12 +23,15 @@ function getDotnetExecutablePath(config: WorkspaceConfiguration): string {
     Config.DotnetExecutablePath
   );
   // TODO Somehow and empty string is returned if this setting is not configured?
-  if(dotnetExecutablePath !== undefined && dotnetExecutablePath.trim().length > 0) {
+  if (
+    dotnetExecutablePath !== undefined &&
+    dotnetExecutablePath.trim().length > 0
+  ) {
     return dotnetExecutablePath;
   }
   const resolvedDotnetPath = which.sync("dotnet", { nothrow: true });
   console.log("Resolved dotnet at: " + resolvedDotnetPath);
-  return resolvedDotnetPath || 'dotnet';
+  return resolvedDotnetPath || "dotnet";
 }
 
 /**
@@ -52,12 +55,15 @@ export default class ServerOptions extends LanguageClient {
     let languageServerRuntimePath = config.get<string>(
       Config.LanguageServerRuntimePath
     );
-    if(languageServerRuntimePath === undefined) {
+    if (languageServerRuntimePath === undefined) {
       window.showErrorMessage(Error.ServerRuntimeNotDefined);
       throw Error.ServerRuntimeNotDefined;
     }
-    if(!path.isAbsolute(languageServerRuntimePath)) {
-      languageServerRuntimePath = path.join(__dirname, languageServerRuntimePath);
+    if (!path.isAbsolute(languageServerRuntimePath)) {
+      languageServerRuntimePath = path.join(
+        __dirname,
+        languageServerRuntimePath
+      );
     }
     fs.exists(languageServerRuntimePath, (exist) => {
       if (!exist) {
@@ -67,9 +73,8 @@ export default class ServerOptions extends LanguageClient {
       }
     });
 
-    const launchArguments: string[] | undefined = config.get<string[]>(
-      Config.LanguageServerLaunchArgs
-    ) || [];
+    const launchArguments: string[] | undefined =
+      config.get<string[]>(Config.LanguageServerLaunchArgs) || [];
     launchArguments.splice(0, 0, languageServerRuntimePath);
     const serverOptions: ClientServerOptions = {
       run: { command: dotnetExecutablePath, args: launchArguments },

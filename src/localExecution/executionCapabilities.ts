@@ -32,7 +32,10 @@ export class ExecutionCapabilities implements IExecutionCapabilities {
         .slice(1)
         .map((str) => Number(str));
 
-      if (dotnetVersion.length !== 3 || dotnetVersion.some((num) => isNaN(num))) {
+      if (
+        dotnetVersion.length !== 3 ||
+        dotnetVersion.some((num) => isNaN(num))
+      ) {
         log(Error.DotnetVersionNotParsed);
         return false;
       }

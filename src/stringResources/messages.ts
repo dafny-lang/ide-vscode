@@ -15,9 +15,9 @@ export class Error {
   public static RestartMacAfterDotnetInstall: string =
     "Please restart your Mac after the dotnet installation.";
   public static GetDotnet: string = "Get dotnet";
-  public static GetDotnetUri: string =
-    "https://dotnet.microsoft.com/";
-  public static ConfigureDotnetExecutable: string = "Change dafny.dotnetExecutablePath";
+  public static GetDotnetUri: string = "https://dotnet.microsoft.com/";
+  public static ConfigureDotnetExecutable: string =
+    "Change dafny.dotnetExecutablePath";
   public static NoMainMethod: string =
     "Cannot start a program without a Main method";
   public static ServerRuntimeNotDefined: string =
