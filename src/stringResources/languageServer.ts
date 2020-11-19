@@ -33,8 +33,9 @@ export class LanguageServerConfig {
   public static ServerFolder: string = "dafnyLanguageServer";
   public static RequiredVersion: string = "2.0.0";
 
-  private static DownloadBaseUri: string = "https://github.com/DafnyVSCode/language-server-csharp/releases/download";
+  private static DownloadBaseUri: string =
+    "https://github.com/DafnyVSCode/language-server-csharp/releases/download";
   public static getServerDownloadAddress(platformSuffix: string): string {
-    return `${this.DownloadBaseUri}/v${LanguageServerConfig.RequiredVersion}/DafnyLS-${platformSuffix}.zip`
+    return `${this.DownloadBaseUri}/v${LanguageServerConfig.RequiredVersion}/DafnyLS-${platformSuffix}.zip`;
   }
 }
