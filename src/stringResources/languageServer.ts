@@ -31,10 +31,10 @@ export class LanguageServerNotification {
  */
 export class LanguageServerConfig {
   public static ServerFolder: string = "dafnyLanguageServer";
-  public static RequiredVersion: string = "2.0.0";
+  public static RequiredVersion: string = "2.1.0";
 
   private static DownloadBaseUri: string =
-    "https://github.com/DafnyVSCode/language-server-csharp/releases/download";
+    "https://github.com/dafny-lang/language-server-csharp/releases/download";
   public static getServerDownloadAddress(platformSuffix: string): string {
     return `${this.DownloadBaseUri}/v${LanguageServerConfig.RequiredVersion}/DafnyLS-${platformSuffix}.zip`;
   }
