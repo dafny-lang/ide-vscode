@@ -1,6 +1,8 @@
 "use strict";
-import * as path from "path";
+
 import * as fs from "fs";
+import * as path from "path";
+import * as which from "which";
 
 import {
   workspace,
@@ -16,6 +18,19 @@ import {
   Config,
 } from "../stringResources/_StringResourcesModule";
 
+function getDotnetExecutablePath(config: WorkspaceConfiguration): string {
+  let dotnetExecutablePath: string | undefined = config.get<string>(
+    Config.DotnetExecutablePath
+  );
+  // TODO Somehow and empty string is returned if this setting is not configured?
+  if(dotnetExecutablePath !== undefined && dotnetExecutablePath.trim().length > 0) {
+    return dotnetExecutablePath;
+  }
+  const resolvedDotnetPath = which.sync("dotnet", { nothrow: true });
+  console.log("Resolved dotnet at: " + resolvedDotnetPath);
+  return resolvedDotnetPath || 'dotnet';
+}
+
 /**
  * Extends LanguageClient - provides basic config constructor for server initialization.
  * This class is used by dafnyLanguageServer and is basically just an extraction.
@@ -25,32 +40,40 @@ export default class ServerOptions extends LanguageClient {
     const config: WorkspaceConfiguration = workspace.getConfiguration(
       EnvironmentConfig.Dafny
     );
-    let serverExePath: string | undefined = config.get<string>(
-      Config.LanguageServerExePath
-    );
-    if (serverExePath === undefined) {
-      window.showErrorMessage(Error.ServerExeNotDefined);
-      throw Error.ServerExeNotDefined;
-    }
-
-    const dafnyLangServerExe = path.isAbsolute(serverExePath)
-      ? serverExePath
-      : path.join(__dirname, serverExePath);
-
-    fs.exists(dafnyLangServerExe, (exist) => {
+    const dotnetExecutablePath = getDotnetExecutablePath(config);
+    fs.exists(dotnetExecutablePath, (exist) => {
       if (!exist) {
         window.showErrorMessage(
-          `${Error.ServerExeNotFound}: ${dafnyLangServerExe}`
+          `${Error.DotnetExeNotFound}: ${dotnetExecutablePath}`
+        );
+      }
+    });
+
+    let languageServerRuntimePath = config.get<string>(
+      Config.LanguageServerRuntimePath
+    );
+    if(languageServerRuntimePath === undefined) {
+      window.showErrorMessage(Error.ServerRuntimeNotDefined);
+      throw Error.ServerRuntimeNotDefined;
+    }
+    if(!path.isAbsolute(languageServerRuntimePath)) {
+      languageServerRuntimePath = path.join(__dirname, languageServerRuntimePath);
+    }
+    fs.exists(languageServerRuntimePath, (exist) => {
+      if (!exist) {
+        window.showErrorMessage(
+          `${Error.ServerRuntimeNotDefined}: ${languageServerRuntimePath}`
         );
       }
     });
 
     const launchArguments: string[] | undefined = config.get<string[]>(
       Config.LanguageServerLaunchArgs
-    );
+    ) || [];
+    launchArguments.splice(0, 0, languageServerRuntimePath);
     const serverOptions: ClientServerOptions = {
-      run: { command: dafnyLangServerExe, args: launchArguments || [] },
-      debug: { command: dafnyLangServerExe, args: launchArguments || [] },
+      run: { command: dotnetExecutablePath, args: launchArguments },
+      debug: { command: dotnetExecutablePath, args: launchArguments },
     };
 
     const clientOptions: LanguageClientOptions = {
