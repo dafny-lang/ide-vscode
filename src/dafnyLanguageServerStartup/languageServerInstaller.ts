@@ -6,8 +6,8 @@ import * as semver from "semver";
 import * as fs from "fs";
 import * as rimraf from "rimraf";
 import * as https from "https";
-import * as child_process from 'child_process';
-import * as util from 'util';
+import * as child_process from "child_process";
+import * as util from "util";
 import { https as redirect } from "follow-redirects";
 const DecompressZip = require("decompress-zip");
 
@@ -27,13 +27,14 @@ import { ILanguageServerInstaller } from "./ILanguageServerInstaller";
  * Since this is a temporary solution, strings have not been outsourced to stringResources.
  */
 
-
-
 function getLanguageServerPlatformSuffix(): string {
-  switch(os.platform()) {
-  case "win32": return "win";
-  case "darwin": return "osx-10.14.1";
-  default: return "ubuntu-16.04";
+  switch (os.platform()) {
+    case "win32":
+      return "win";
+    case "darwin":
+      return "osx-10.14.1";
+    default:
+      return "ubuntu-16.04";
   }
 }
 
@@ -50,8 +51,9 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     path.join(this.basePathToOutFolder, "z3", "bin", "z3")
   );
 
-  private readonly serverURL: string =
-    LanguageServerConfig.getServerDownloadAddress(getLanguageServerPlatformSuffix());
+  private readonly serverURL: string = LanguageServerConfig.getServerDownloadAddress(
+    getLanguageServerPlatformSuffix()
+  );
   private readonly serverReleaseVersion: string =
     LanguageServerConfig.RequiredVersion;
 
@@ -87,25 +89,27 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
   }
 
   private async makeZ3ExecutableIfNecessary(): Promise<void> {
-    if(!this.requiresExecutionPermissions()) {
+    if (!this.requiresExecutionPermissions()) {
       return;
     }
     const yesResponse = "Yes";
     const promtResponse = await window.showInformationMessage(
-      "The z3 executable bundled with the language server requires execution permissions. " + 
+      "The z3 executable bundled with the language server requires execution permissions. " +
         "Automatically apply `chmod +x`?",
-      yesResponse, 
+      yesResponse,
       "No"
     );
-    if(promtResponse === yesResponse) {
+    if (promtResponse === yesResponse) {
       await this.makeZ3Executable();
     }
   }
 
   private async makeZ3Executable(): Promise<void> {
     try {
-      await util.promisify(child_process.exec)(`chmod +x "${this.z3ExecutablePath}"`);
-    } catch(e) {
+      await util.promisify(child_process.exec)(
+        `chmod +x "${this.z3ExecutablePath}"`
+      );
+    } catch (e) {
       console.log("Could not set the execution permissions for z3: " + e);
       window.showErrorMessage(
         "Could not set the execution permissions for z3. Please set it manually to " +
