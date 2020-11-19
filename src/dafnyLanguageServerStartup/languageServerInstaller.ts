@@ -92,7 +92,8 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     }
     const yesResponse = "Yes";
     const promtResponse = await window.showInformationMessage(
-      "The z3 executable bundled with the language server requires execution permissions. Automatically apply `chmod +x`?",
+      "The z3 executable bundled with the language server requires execution permissions. " + 
+        "Automatically apply `chmod +x`?",
       yesResponse, 
       "No"
     );
