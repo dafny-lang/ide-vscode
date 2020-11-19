@@ -28,10 +28,10 @@ import { ILanguageServerInstaller } from "./ILanguageServerInstaller";
  */
 
 function getLanguageServerPlatformSuffix(): string {
-  switch (os.platform()) {
-    case "win32":
+  switch (os.type()) {
+    case "Windows_NT":
       return "win";
-    case "darwin":
+    case "Darwin":
       return "osx-10.14.1";
     default:
       return "ubuntu-16.04";
@@ -64,7 +64,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
   }
 
   private requiresExecutionPermissions(): boolean {
-    return os.platform() != "win32";
+    return os.type() != "Windows_NT";
   }
 
   public async installLatestVersion(): Promise<boolean> {
