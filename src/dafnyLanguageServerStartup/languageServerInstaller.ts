@@ -95,7 +95,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     const yesResponse = "Yes";
     const promtResponse = await window.showInformationMessage(
       "The z3 executable bundled with the language server requires execution permissions. " +
-        "Automatically apply `chmod +x`?",
+        "Automatically apply `chmod u+x`?",
       yesResponse,
       "No"
     );
@@ -107,7 +107,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
   private async makeZ3Executable(): Promise<void> {
     try {
       await util.promisify(child_process.exec)(
-        `chmod +x "${this.z3ExecutablePath}"`
+        `chmod u+x "${this.z3ExecutablePath}"`
       );
     } catch (e) {
       console.log("Could not set the execution permissions for z3: " + e);
