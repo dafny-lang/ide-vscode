@@ -33,5 +33,6 @@ export class EnvironmentConfig {
   public static DafnyLanguageServerName: string = "Dafny Language Server";
 
   public static Dotnet: string = "dotnet";
-  public static DotnetVersion: string = "--version";
+  public static DotnetListRuntimes: string = "--list-runtimes";
+  public static DotnetSupportedRuntimePattern: RegExp = /Microsoft\.AspNetCore\.App\s*3\.2/i;
 }

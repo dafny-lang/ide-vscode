@@ -24,36 +24,16 @@ export class ExecutionCapabilities implements IExecutionCapabilities {
       EnvironmentConfig.Dotnet;
 
     try {
-      const dotnetVersionOutput = execFileSync(dotnetExecutable, [
-        EnvironmentConfig.DotnetVersion,
+      const dotnetRuntimeListOutput = execFileSync(dotnetExecutable, [
+        EnvironmentConfig.DotnetListRuntimes,
       ]);
-      const dotnetVersion = /(\d+)\.(\d+)\.(\d+).*/i
-        .exec(dotnetVersionOutput)!
-        .slice(1)
-        .map((str) => Number(str));
-
-      if (
-        dotnetVersion.length !== 3 ||
-        dotnetVersion.some((num) => isNaN(num))
-      ) {
-        log(Error.DotnetVersionNotParsed);
-        return false;
-      }
-
-      return this.isRequiredDotnetVersionOrHigher(dotnetVersion);
+      return EnvironmentConfig.DotnetSupportedRuntimePattern.test(
+        dotnetRuntimeListOutput
+      );
     } catch (exeception) {
       log(Error.DotnetBinaryNotExecuted);
       return false;
     }
-  }
-
-  private isRequiredDotnetVersionOrHigher(semanticVersion: number[]): boolean {
-    const major = semanticVersion[0];
-    if (major > 3) {
-      return true;
-    }
-    const minor = semanticVersion[1];
-    return major == 3 && minor >= 1;
   }
 
   public getDotnet(dotnetVersionSelection: string): void {

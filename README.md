@@ -36,7 +36,7 @@ You can find [examples below](#examples).
 
 ## Requirements
 
-The plugin requires at least .NET Core SDK 3.1 to run the _Dafny Language Server_. Please download a distribution from [Microsoft](https://dotnet.microsoft.com/download).
+The plugin requires at least .NET Core 3.1 (the ASP.NET Core 3.1 runtime to be more specifiec) to run the _Dafny Language Server_. Please download a distribution from [Microsoft](https://dotnet.microsoft.com/download).
 When you first open a _Dafny_ file, the extension will prompt you to manually install .NET Core. The language server gets installed automatically.
 
 ## Extension Settings
