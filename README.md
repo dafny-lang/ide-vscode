@@ -36,19 +36,17 @@ You can find [examples below](#examples).
 
 ## Requirements
 
-- The plugin needs a _.NET_ runtime to run the _Dafny Language Server_. If you are not on Windows, please download a distribution from [Mono](http://www.mono-project.com).
-  - Note: When you first open a _Dafny_ file, the extension will prompt you to automatically install Mono. The language server gets installed automatically.
-- In case you would like the plugin to use a different _Dafny Language Server_ distribution, set the path to the `DafnyServer.exe` file via the `dafny.languageServerExePath` in the user setting.
+The plugin requires at least .NET Core 3.1 (the ASP.NET Core 3.1 runtime to be more specifiec) to run the _Dafny Language Server_. Please download a distribution from [Microsoft](https://dotnet.microsoft.com/download).
+When you first open a _Dafny_ file, the extension will prompt you to manually install .NET Core. The language server gets installed automatically.
 
 ## Extension Settings
 
 | Setting                           | Description                                                                                                                                                                                        | Default                                                        |
 | :-------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------- |
-| `dafny.languageServerExePath`     | Relative path to the _Dafny_ language server executable (`DafnyServer.exe`).                                                                                                                       | `../../dafny-language-server/Binaries/DafnyLanguageServer.exe` |
+| `dafny.languageServerRuntimePath` | Absolute or relative path to the _Dafny_ language server runtime (`DafnyLS.dll`).                                                                                                                  | `../../dafnyLanguageServer/DafnyLS.dll`                        |
 | `dafny.languageServerLaunchArgs`  | Optional array of strings as _Dafny_ language server arguments.                                                                                                                                    | `[ ]`                                                          |
 | `dafny.compilationArgs`           | Optional array of strings as _Dafny_ compilation arguments.                                                                                                                                        | `[ "/compile:1", "/nologo" ]`                                  |
-| `dafny.monoExecutablePath`        | Monos absolute path. Only necessary if mono is not in system PATH (you'll get an error if that's the case). Ignored on Windows when `useMono` is `false`.                                          |                                                                |
-| `dafny.useMono`                   | Only applicable to _Windows_! Requires _.NET_ 4.6 or higher when set to `false`.                                                                                                                   | `false`                                                        |
+| `dafny.dotnetExecutablePath`      | Dotnets absolute path. Only necessary if dotnet is not in system PATH (you'll get an error if that's the case).                                                                                    |                                                                |
 | `dafny.colorCounterExamples`      | Customize the color (HEX) of Counter Examples. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults. | `{ "backgroundColor": null, "fontColor": null }`               |
 
 Please note that in this new plugin version "automatic verififaction" is always on and a language server side feature.

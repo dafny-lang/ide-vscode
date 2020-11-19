@@ -1,6 +1,6 @@
 "use strict";
 /*
- * Module for local execution. Checks Mono support as well for Unix based operating system.
+ * Module for local execution. Checks dotnet support as well for Unix based operating system.
  * Use this to program against the interface.
  */
 export { DafnyRunner } from "./dafnyRunner";

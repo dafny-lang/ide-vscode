@@ -16,9 +16,8 @@ export class VSCodeCommandStrings {
 }
 
 export class Config {
-  public static MonoExecutablePath: string = "monoExecutablePath";
-  public static UseMono: string = "useMono";
-  public static LanguageServerExePath: string = "languageServerExePath";
+  public static DotnetExecutablePath: string = "dotnetExecutablePath";
+  public static LanguageServerRuntimePath: string = "languageServerRuntimePath";
   public static LanguageServerLaunchArgs: string = "languageServerLaunchArgs";
   public static ColorCounterExamples: string = "colorCounterExamples";
   public static CompilationArguments: string = "compilationArgs";
@@ -33,9 +32,7 @@ export class EnvironmentConfig {
   public static DafnyLanguageServerID: string = "dafny-vscode";
   public static DafnyLanguageServerName: string = "Dafny Language Server";
 
-  public static Mono: string = "mono";
-  public static MonoVersion: string = "--version";
-
-  public static Win32: string = "win32";
-  public static OSX: string = "darwin";
+  public static Dotnet: string = "dotnet";
+  public static DotnetListRuntimes: string = "--list-runtimes";
+  public static DotnetSupportedRuntimePattern: RegExp = /Microsoft\.AspNetCore\.App\s*3\.1/i;
 }

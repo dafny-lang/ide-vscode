@@ -6,8 +6,7 @@ import { Warning, Error } from "./stringResources/_StringResourcesModule";
 
 /**
  * This is the plugin's entry point (the "main" function)
- * It checks for the proper way to start the language server (mono or not mono on Windows)
- * and starts the language server with the DafnyLanguageServer class.
+ * It starts the language server with the DafnyLanguageServer class.
  */
 export function activate(extensionContext: ExtensionContext) {
   if (workspace.workspaceFolders === undefined) {
@@ -15,17 +14,17 @@ export function activate(extensionContext: ExtensionContext) {
   }
 
   const exeCapabilities = new ExecutionCapabilities();
-  if (!exeCapabilities.hasSupportedMonoVersion()) {
-    // Promt the user to install Mono and stop extension execution.
+  if (!exeCapabilities.hasSupportedDotnetVersion()) {
+    // Promt the user to install dotnet and stop extension execution.
     window
       .showErrorMessage(
-        Error.NoSupportedMono,
-        Error.ConfigureMonoExecutable,
-        Error.GetMono
+        Error.NoSupportedDotnet,
+        Error.ConfigureDotnetExecutable,
+        Error.GetDotnet
       )
       .then((selection: string | undefined) => {
         if (selection !== undefined) {
-          exeCapabilities.getMono(selection);
+          exeCapabilities.getDotnet(selection);
         }
       });
     return;

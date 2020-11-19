@@ -1,5 +1,5 @@
 "use strict";
 export interface IExecutionCapabilities {
-  hasSupportedMonoVersion(): boolean;
-  getMono(monoVersionSelection: string): void;
+  hasSupportedDotnetVersion(): boolean;
+  getDotnet(dotnetVersionSelection: string): void;
 }
