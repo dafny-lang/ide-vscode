@@ -149,7 +149,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
           });
         });
         request.on("error", (err: Error) => {
-          fs.unlink(filePath);
+          fs.unlink(filePath, () => {});
           throw err;
         });
       } catch (e) {
