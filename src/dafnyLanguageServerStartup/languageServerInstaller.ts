@@ -6,6 +6,8 @@ import * as semver from "semver";
 import * as fs from "fs";
 import * as rimraf from "rimraf";
 import * as https from "https";
+import * as child_process from 'child_process';
+import * as util from 'util';
 import { https as redirect } from "follow-redirects";
 const DecompressZip = require("decompress-zip");
 
@@ -44,6 +46,9 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
   private readonly downloadFile: string = this.resolvePath(
     path.join(this.basePathToOutFolder, "..", this.serverFolderName + ".zip")
   );
+  private readonly z3ExecutablePath = this.resolvePath(
+    path.join(this.basePathToOutFolder, "z3", "bin", "z3")
+  );
 
   private readonly serverURL: string =
     LanguageServerConfig.getServerDownloadAddress(getLanguageServerPlatformSuffix());
@@ -51,8 +56,13 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     LanguageServerConfig.RequiredVersion;
 
   constructor() {}
+
   public anyVersionInstalled(): boolean {
     return fs.existsSync(this.basePathToOutFolder); // serverExePath
+  }
+
+  private requiresExecutionPermissions(): boolean {
+    return os.platform() != "win32";
   }
 
   public async installLatestVersion(): Promise<boolean> {
@@ -69,10 +79,38 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     if (latestVersionInstalled) {
       const extracted: boolean = await this.extractZip(this.downloadFile);
       if (extracted) {
+        await this.makeZ3ExecutableIfNecessary();
         return await this.cleanup();
       }
     }
     return Promise.reject(false);
+  }
+
+  private async makeZ3ExecutableIfNecessary(): Promise<void> {
+    if(!this.requiresExecutionPermissions()) {
+      return;
+    }
+    const yesResponse = "Yes";
+    const promtResponse = await window.showInformationMessage(
+      "The z3 executable bundled with the language server requires execution permissions. Automatically apply `chmod +x`?",
+      yesResponse, 
+      "No"
+    );
+    if(promtResponse === yesResponse) {
+      await this.makeZ3Executable();
+    }
+  }
+
+  private async makeZ3Executable(): Promise<void> {
+    try {
+      await util.promisify(child_process.exec)(`chmod +x "${this.z3ExecutablePath}"`);
+    } catch(e) {
+      console.log("Could not set the execution permissions for z3: " + e);
+      window.showErrorMessage(
+        "Could not set the execution permissions for z3. Please set it manually to "
+          + this.z3ExecutablePath
+      );
+    }
   }
 
   private deleteInstalledVersion(): void {
