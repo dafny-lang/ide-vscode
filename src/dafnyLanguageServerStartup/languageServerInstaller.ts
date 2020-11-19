@@ -107,8 +107,8 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     } catch(e) {
       console.log("Could not set the execution permissions for z3: " + e);
       window.showErrorMessage(
-        "Could not set the execution permissions for z3. Please set it manually to "
-          + this.z3ExecutablePath
+        "Could not set the execution permissions for z3. Please set it manually to " +
+          this.z3ExecutablePath
       );
     }
   }
