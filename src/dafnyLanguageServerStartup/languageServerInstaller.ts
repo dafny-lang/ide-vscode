@@ -1,4 +1,6 @@
 "use strict";
+
+import * as os from "os";
 import * as path from "path";
 import * as semver from "semver";
 import * as fs from "fs";
@@ -11,6 +13,7 @@ import { window, URI } from "../ideApi/_IdeApi";
 import { LanguageServerConfig } from "../stringResources/_StringResourcesModule";
 
 import { ILanguageServerInstaller } from "./ILanguageServerInstaller";
+
 /**
  * This is a fake implementation for the origin dafnyInstaller.ts:
  * https://github.com/DafnyVSCode/Dafny-VSCode/blob/develop/server/src/backend/dafnyInstaller.ts
@@ -21,6 +24,17 @@ import { ILanguageServerInstaller } from "./ILanguageServerInstaller";
  *
  * Since this is a temporary solution, strings have not been outsourced to stringResources.
  */
+
+
+
+function getLanguageServerPlatformSuffix(): string {
+  switch(os.platform()) {
+  case "win32": return "win";
+  case "darwin": return "osx-10.14.1";
+  default: return "ubuntu-16.04";
+  }
+}
+
 export class LanguageServerInstaller implements ILanguageServerInstaller {
   private readonly serverFolderName: string = LanguageServerConfig.ServerFolder;
 
@@ -32,7 +46,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
   );
 
   private readonly serverURL: string =
-    LanguageServerConfig.ServerDownloadAddress;
+    LanguageServerConfig.getServerDownloadAddress(getLanguageServerPlatformSuffix());
   private readonly serverReleaseVersion: string =
     LanguageServerConfig.RequiredVersion;
 
