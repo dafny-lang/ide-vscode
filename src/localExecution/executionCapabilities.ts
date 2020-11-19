@@ -40,11 +40,20 @@ export class ExecutionCapabilities implements IExecutionCapabilities {
         return false;
       }
 
-      return dotnetVersion[0] >= 4;
+      return this.isRequiredDotnetVersionOrHigher(dotnetVersion);
     } catch (exeception) {
       log(Error.DotnetBinaryNotExecuted);
       return false;
     }
+  }
+
+  private isRequiredDotnetVersionOrHigher(semanticVersion: number[]): boolean {
+    const major = semanticVersion[0];
+    if(major > 3) {
+      return true;
+    }
+    const minor = semanticVersion[1];
+    return major == 3 && minor >= 1;
   }
 
   public getDotnet(dotnetVersionSelection: string): void {
