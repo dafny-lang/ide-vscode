@@ -49,7 +49,7 @@ export class ExecutionCapabilities implements IExecutionCapabilities {
 
   private isRequiredDotnetVersionOrHigher(semanticVersion: number[]): boolean {
     const major = semanticVersion[0];
-    if(major > 3) {
+    if (major > 3) {
       return true;
     }
     const minor = semanticVersion[1];
