@@ -11,9 +11,7 @@ import {
   Position,
   LanguageClient,
 } from "../../ideApi/_IdeApi";
-import {
-  ICounterExampleItem,
-} from "../../typeInterfaces/_TypeInterfacesModule";
+import { ICounterExampleItem } from "../../typeInterfaces/_TypeInterfacesModule";
 import {
   Warning,
   Config,
@@ -73,8 +71,7 @@ export class CounterModelProvider implements ICounterModelProvider {
     let hasReferences: boolean = false;
 
     for (let i = 0; i < allCounterExamples.length; i++) {
-      let currentCounterExample: ICounterExampleItem =
-        allCounterExamples[i];
+      let currentCounterExample: ICounterExampleItem = allCounterExamples[i];
       let line = currentCounterExample.position.line;
       let col = currentCounterExample.position.character;
       if (line < 0) {
