@@ -1,7 +1,9 @@
 "use strict";
 export interface ICounterExampleItem {
-  line: number;
-  col: number;
+  position: {
+    line: number;
+    character: number;
+  },
   variables: {
     key: string;
     value: string;

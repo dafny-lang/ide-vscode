@@ -75,8 +75,8 @@ export class CounterModelProvider implements ICounterModelProvider {
     for (let i = 0; i < allCounterExamples.length; i++) {
       let currentCounterExample: ICounterExampleItem =
         allCounterExamples[i];
-      let line = currentCounterExample.line;
-      let col = currentCounterExample.col;
+      let line = currentCounterExample.position.line;
+      let col = currentCounterExample.position.character;
       if (line < 0) {
         return;
       }
