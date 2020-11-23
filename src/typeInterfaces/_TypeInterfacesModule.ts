@@ -8,7 +8,7 @@
 export { ICompilerArguments } from "./ICompilerArguments";
 export { ICompilerResult } from "./ICompilerResult";
 export { ICounterExampleArguments } from "./ICounterExampleArguments";
-export { ICounterExampleItem } from "./ICounterExampleResult";
+export { ICounterExampleItem } from "./ICounterExampleItem";
 export {
   ICodeLensReferences,
   ICodeLensLocation,
