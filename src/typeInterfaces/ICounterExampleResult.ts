@@ -1,13 +1,9 @@
 "use strict";
-export interface ICounterExample {
+export interface ICounterExampleItem {
   line: number;
   col: number;
   variables: {
     key: string;
     value: string;
   };
-}
-
-export interface ICounterExamples {
-  counterExamples: ICounterExample[];
 }

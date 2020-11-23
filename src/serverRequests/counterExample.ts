@@ -6,7 +6,7 @@ import {
   CounterExampleConfig,
 } from "../stringResources/_StringResourcesModule";
 import {
-  ICounterExamples,
+  ICounterExampleItem,
   ICounterExampleArguments,
 } from "../typeInterfaces/_TypeInterfacesModule";
 
@@ -44,12 +44,12 @@ export class CounterExample implements ICounterExample {
       CounterExample.timeout = setTimeout(
         function () {
           boundThis.languageServer
-            .sendRequest<ICounterExamples>(
+            .sendRequest<ICounterExampleItem[]>(
               LanguageServerRequest.CounterExample,
               arg
             )
             .then(
-              (allCounterExamples: ICounterExamples) => {
+              (allCounterExamples: ICounterExampleItem[]) => {
                 callback(allCounterExamples, isAutoTriggered);
               },
               (error: ResponseError<void>) => {

@@ -1,11 +1,11 @@
 "use strict";
 import { LanguageClient } from "../../ideApi/_IdeApi";
-import { ICounterExamples } from "../../typeInterfaces/_TypeInterfacesModule";
+import { ICounterExampleItem } from "../../typeInterfaces/_TypeInterfacesModule";
 
 export interface ICounterModelProvider {
   hideCounterModel(): void;
   showCounterModel(
-    allCounterExamples: ICounterExamples,
+    allCounterExamples: ICounterExampleItem[],
     isAutoTriggered: boolean
   ): void;
   update(languageServer: LanguageClient): void;

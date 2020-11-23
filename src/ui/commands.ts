@@ -16,7 +16,7 @@ import { CommandStrings } from "../stringResources/_StringResourcesModule";
 
 import { ICommands } from "./ICommands";
 import { IDafnyUiManager } from "./IDafnyUiManager";
-import { ICounterExamples } from "../typeInterfaces/_TypeInterfacesModule";
+import { ICounterExampleItem } from "../typeInterfaces/_TypeInterfacesModule";
 
 /**
  * Register commands for VS Code UI. Actual logic is contained in /server/commandsLogic/<feature>
@@ -59,7 +59,7 @@ export class Commands implements ICommands {
           this.languageServer
         );
         const callback: Function = (
-          allCounterExamples: ICounterExamples,
+          allCounterExamples: ICounterExampleItem[],
           isAutoTriggered: boolean
         ): void => {
           this.provider
