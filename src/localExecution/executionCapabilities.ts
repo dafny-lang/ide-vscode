@@ -14,58 +14,44 @@ import {
 import { IExecutionCapabilities } from "./IExecutionCapabilities";
 
 /**
- * Check for supported capabilities (mono/.net runtime, Dafny)
+ * Check for supported capabilities (dotnet runtime, Dafny)
  */
 export class ExecutionCapabilities implements IExecutionCapabilities {
   private config = workspace.getConfiguration(EnvironmentConfig.Dafny);
-  public hasSupportedMonoVersion(): boolean {
-    const useMono = this.config.get<boolean>(Config.UseMono);
-
-    if (os.platform() === EnvironmentConfig.Win32 && !useMono) {
-      return true;
-    }
-
-    const monoExecutable =
-      this.config.get<string>(Config.MonoExecutablePath) ||
-      EnvironmentConfig.Mono;
+  public hasSupportedDotnetVersion(): boolean {
+    const dotnetExecutable =
+      this.config.get<string>(Config.DotnetExecutablePath) ||
+      EnvironmentConfig.Dotnet;
 
     try {
-      const monoVersionOutput = execFileSync(monoExecutable, [
-        EnvironmentConfig.MonoVersion,
+      const dotnetRuntimeListOutput = execFileSync(dotnetExecutable, [
+        EnvironmentConfig.DotnetListRuntimes,
       ]);
-      const monoVersion = /compiler version (\d+)\.(\d+)\.(\d+)/i
-        .exec(monoVersionOutput)!
-        .slice(1)
-        .map((str) => Number(str));
-
-      if (monoVersion.length !== 3 || monoVersion.some((num) => isNaN(num))) {
-        log(Error.MonoVersionNotParsed);
-        return false;
-      }
-
-      return monoVersion[0] >= 4;
+      return EnvironmentConfig.DotnetSupportedRuntimePattern.test(
+        dotnetRuntimeListOutput
+      );
     } catch (exeception) {
-      log(Error.MonoBinaryNotExecuted);
+      log(Error.DotnetBinaryNotExecuted);
       return false;
     }
   }
 
-  public getMono(monoVersionSelection: string): void {
-    if (monoVersionSelection === Error.GetMono) {
+  public getDotnet(dotnetVersionSelection: string): void {
+    if (dotnetVersionSelection === Error.GetDotnet) {
       commands.executeCommand(
         VSCodeCommandStrings.Open,
-        Uri.parse(Error.GetMonoUri)
+        Uri.parse(Error.GetDotnetUri)
       );
       let restartMessage;
-      if (os.platform() === EnvironmentConfig.OSX) {
-        restartMessage = Error.RestartMacAfterMonoInstall;
+      if (os.type() === "Darwin") {
+        restartMessage = Error.RestartMacAfterDotnetInstall;
       } else {
-        restartMessage = Error.RestartCodeAfterMonoInstall;
+        restartMessage = Error.RestartCodeAfterDotnetInstall;
       }
       window.showWarningMessage(restartMessage);
     }
 
-    if (monoVersionSelection === Error.ConfigureMonoExecutable) {
+    if (dotnetVersionSelection === Error.ConfigureDotnetExecutable) {
       commands.executeCommand(VSCodeCommandStrings.ConfigSettings);
     }
   }

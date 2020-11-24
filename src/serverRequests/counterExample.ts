@@ -1,12 +1,17 @@
 "use strict";
-import { window, LanguageClient, ResponseError } from "../ideApi/_IdeApi";
+import {
+  window,
+  LanguageClient,
+  ResponseError,
+  TextDocumentIdentifier,
+} from "../ideApi/_IdeApi";
 import {
   LanguageServerRequest,
   Error,
   CounterExampleConfig,
 } from "../stringResources/_StringResourcesModule";
 import {
-  ICounterExamples,
+  ICounterExampleItem,
   ICounterExampleArguments,
 } from "../typeInterfaces/_TypeInterfacesModule";
 
@@ -35,7 +40,9 @@ export class CounterExample implements ICounterExample {
       return;
     }
     const arg: ICounterExampleArguments = {
-      DafnyFile: window.activeTextEditor.document.fileName,
+      TextDocument: TextDocumentIdentifier.create(
+        window.activeTextEditor.document.uri.toString()
+      ),
     };
     window.activeTextEditor.document.save().then(() => {
       // This timeout makes sure that the maximal amount of requests per second is capped.
@@ -44,12 +51,12 @@ export class CounterExample implements ICounterExample {
       CounterExample.timeout = setTimeout(
         function () {
           boundThis.languageServer
-            .sendRequest<ICounterExamples>(
+            .sendRequest<ICounterExampleItem[]>(
               LanguageServerRequest.CounterExample,
               arg
             )
             .then(
-              (allCounterExamples: ICounterExamples) => {
+              (allCounterExamples: ICounterExampleItem[]) => {
                 callback(allCounterExamples, isAutoTriggered);
               },
               (error: ResponseError<void>) => {

@@ -8,30 +8,30 @@ export class Warning {
 }
 
 export class Error {
-  public static NoSupportedMono: string =
-    "Could not find a compatible Mono version. Dafny requires Mono >= 4.0. ";
-  public static RestartCodeAfterMonoInstall: string =
-    "Please restart VSCode after the Mono installation.";
-  public static RestartMacAfterMonoInstall: string =
-    "Please restart your Mac after the Mono installation.";
-  public static GetMono: string = "Get Mono";
-  public static GetMonoUri: string =
-    "https://www.mono-project.com/download/stable/";
-  public static ConfigureMonoExecutable: string = "Change dafny.monoExecutable";
+  public static NoSupportedDotnet: string =
+    "There is no compatible dotnet runtime installed. Dafny requires the ASP.NET Core Runtime 3.1.";
+  public static RestartCodeAfterDotnetInstall: string =
+    "Please restart VSCode after the dotnet installation.";
+  public static RestartMacAfterDotnetInstall: string =
+    "Please restart your Mac after the dotnet installation.";
+  public static GetDotnet: string = "Get dotnet";
+  public static GetDotnetUri: string = "https://dotnet.microsoft.com/";
+  public static ConfigureDotnetExecutable: string =
+    "Change dafny.dotnetExecutablePath";
   public static NoMainMethod: string =
     "Cannot start a program without a Main method";
-  public static ServerExeNotDefined: string =
-    "Server executable not defined: please check your config for languageServerExePath";
-  public static ServerExeNotFound: string = "Server executable not found";
+  public static ServerRuntimeNotDefined: string =
+    "Server executable not defined: please check your config for dafny.languageServerRuntimePath";
+  public static DotnetExeNotFound: string = "dotnet executable not found";
   public static CanNotCompile: string = "Compilation failed";
   public static CanNotGetCounterExample: string =
     "CounterExample request failed";
   public static NoAdditionalArgsGiven: string =
     "No additionaly arguments given";
-  public static MonoVersionNotParsed: string =
-    "Mono version could not be parsed from version output.";
-  public static MonoBinaryNotExecuted: string =
-    "Mono binary could not be executed.";
+  public static DotnetVersionNotParsed: string =
+    "Dotnet version could not be parsed from version output.";
+  public static DotnetBinaryNotExecuted: string =
+    "Dotnet binary could not be executed.";
   public static ServerStopped: string = "Server stopped.";
   public static CouldNotStartServer: string =
     "Could not start Danfy Language Server.";

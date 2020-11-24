@@ -11,10 +11,7 @@ import {
   Position,
   LanguageClient,
 } from "../../ideApi/_IdeApi";
-import {
-  ICounterExamples,
-  ICounterExample,
-} from "../../typeInterfaces/_TypeInterfacesModule";
+import { ICounterExampleItem } from "../../typeInterfaces/_TypeInterfacesModule";
 import {
   Warning,
   Config,
@@ -65,19 +62,28 @@ export class CounterModelProvider implements ICounterModelProvider {
     }
   }
 
+  private isShowingCounterModel(): boolean {
+    return this.fileHasVisibleCounterModel[
+      DafnyFileChecker.getActiveFileName()
+    ];
+  }
+
   public showCounterModel(
-    allCounterExamples: ICounterExamples,
+    allCounterExamples: ICounterExampleItem[],
     isAutoTriggered: boolean = false
   ): void {
+    if (this.isShowingCounterModel()) {
+      return;
+    }
+
     const editor: TextEditor = window.activeTextEditor!;
     const arrayOfDecorations: DecorationOptions[] = [];
     let hasReferences: boolean = false;
 
-    for (let i = 0; i < allCounterExamples.counterExamples.length; i++) {
-      let currentCounterExample: ICounterExample =
-        allCounterExamples.counterExamples[i];
-      let line = currentCounterExample.line;
-      let col = currentCounterExample.col;
+    for (let i = 0; i < allCounterExamples.length; i++) {
+      let currentCounterExample: ICounterExampleItem = allCounterExamples[i];
+      let line = currentCounterExample.position.line;
+      let col = currentCounterExample.position.character;
       if (line < 0) {
         return;
       }
@@ -112,7 +118,7 @@ export class CounterModelProvider implements ICounterModelProvider {
       window.showWarningMessage(Warning.ReferencesInCounterExample);
     }
 
-    if (!isAutoTriggered && allCounterExamples.counterExamples.length == 0) {
+    if (!isAutoTriggered && allCounterExamples.length == 0) {
       window.showWarningMessage(Warning.NoCounterExamples);
     }
 
@@ -132,7 +138,7 @@ export class CounterModelProvider implements ICounterModelProvider {
         languageServer
       );
       var callback = (
-        allCounterExamples: ICounterExamples,
+        allCounterExamples: ICounterExampleItem[],
         isAutoTriggered: boolean
       ): void => {
         this.showCounterModel(allCounterExamples, isAutoTriggered);

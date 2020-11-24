@@ -1,9 +1,13 @@
 "use strict";
+
+import * as os from "os";
 import * as path from "path";
 import * as semver from "semver";
 import * as fs from "fs";
 import * as rimraf from "rimraf";
 import * as https from "https";
+import * as child_process from "child_process";
+import * as util from "util";
 import { https as redirect } from "follow-redirects";
 const DecompressZip = require("decompress-zip");
 
@@ -11,6 +15,7 @@ import { window, URI } from "../ideApi/_IdeApi";
 import { LanguageServerConfig } from "../stringResources/_StringResourcesModule";
 
 import { ILanguageServerInstaller } from "./ILanguageServerInstaller";
+
 /**
  * This is a fake implementation for the origin dafnyInstaller.ts:
  * https://github.com/DafnyVSCode/Dafny-VSCode/blob/develop/server/src/backend/dafnyInstaller.ts
@@ -21,6 +26,18 @@ import { ILanguageServerInstaller } from "./ILanguageServerInstaller";
  *
  * Since this is a temporary solution, strings have not been outsourced to stringResources.
  */
+
+function getLanguageServerPlatformSuffix(): string {
+  switch (os.type()) {
+    case "Windows_NT":
+      return "win";
+    case "Darwin":
+      return "osx-10.14.1";
+    default:
+      return "ubuntu-16.04";
+  }
+}
+
 export class LanguageServerInstaller implements ILanguageServerInstaller {
   private readonly serverFolderName: string = LanguageServerConfig.ServerFolder;
 
@@ -30,15 +47,24 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
   private readonly downloadFile: string = this.resolvePath(
     path.join(this.basePathToOutFolder, "..", this.serverFolderName + ".zip")
   );
+  private readonly z3ExecutablePath = this.resolvePath(
+    path.join(this.basePathToOutFolder, "z3", "bin", "z3")
+  );
 
-  private readonly serverURL: string =
-    LanguageServerConfig.ServerDownloadAddress;
+  private readonly serverURL: string = LanguageServerConfig.getServerDownloadAddress(
+    getLanguageServerPlatformSuffix()
+  );
   private readonly serverReleaseVersion: string =
     LanguageServerConfig.RequiredVersion;
 
   constructor() {}
+
   public anyVersionInstalled(): boolean {
     return fs.existsSync(this.basePathToOutFolder); // serverExePath
+  }
+
+  private requiresExecutionPermissions(): boolean {
+    return os.type() != "Windows_NT";
   }
 
   public async installLatestVersion(): Promise<boolean> {
@@ -55,10 +81,41 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     if (latestVersionInstalled) {
       const extracted: boolean = await this.extractZip(this.downloadFile);
       if (extracted) {
+        await this.makeZ3ExecutableIfNecessary();
         return await this.cleanup();
       }
     }
     return Promise.reject(false);
+  }
+
+  private async makeZ3ExecutableIfNecessary(): Promise<void> {
+    if (!this.requiresExecutionPermissions()) {
+      return;
+    }
+    const yesResponse = "Yes";
+    const promtResponse = await window.showInformationMessage(
+      "The z3 executable bundled with the language server requires execution permissions. " +
+        "Automatically apply `chmod u+x`?",
+      yesResponse,
+      "No"
+    );
+    if (promtResponse === yesResponse) {
+      await this.makeZ3Executable();
+    }
+  }
+
+  private async makeZ3Executable(): Promise<void> {
+    try {
+      await util.promisify(child_process.exec)(
+        `chmod u+x "${this.z3ExecutablePath}"`
+      );
+    } catch (e) {
+      console.log("Could not set the execution permissions for z3: " + e);
+      window.showErrorMessage(
+        "Could not set the execution permissions for z3. Please set it manually to " +
+          this.z3ExecutablePath
+      );
+    }
   }
 
   private deleteInstalledVersion(): void {
@@ -135,7 +192,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
           });
         });
         request.on("error", (err: Error) => {
-          fs.unlink(filePath);
+          fs.unlink(filePath, () => {});
           throw err;
         });
       } catch (e) {

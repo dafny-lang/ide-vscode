@@ -1,5 +1,25 @@
 # Release Notes
 
+## 1.1.0
+
+- Re-added the possibility to show counter examples.
+
+## 1.0.7
+
+- Replaced the language server runtime with .NET Core.
+- Added automatic installation of the language server for OSX and Linux.
+- Updated the language server.
+
+## 1.0.6
+
+- Replaced the backing Dafny language server
+- Added configuration options to specify the launch arguments of the language server
+
+## 1.0.6
+
+- Replaced the backing Dafny language server
+- Added configuration options to specify the launch arguments of the language server
+
 ## 1.0.5
 
 - Addes support for the Dafny language server version 1.2.3
