@@ -62,10 +62,20 @@ export class CounterModelProvider implements ICounterModelProvider {
     }
   }
 
+  private isShowingCounterModel(): boolean {
+    return this.fileHasVisibleCounterModel[
+      DafnyFileChecker.getActiveFileName()
+    ];
+  }
+
   public showCounterModel(
     allCounterExamples: ICounterExampleItem[],
     isAutoTriggered: boolean = false
   ): void {
+    if (this.isShowingCounterModel()) {
+      return;
+    }
+
     const editor: TextEditor = window.activeTextEditor!;
     const arrayOfDecorations: DecorationOptions[] = [];
     let hasReferences: boolean = false;
