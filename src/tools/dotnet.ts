@@ -1,7 +1,9 @@
 import * as which from "which";
 import { workspace, WorkspaceConfiguration } from "../ideApi/_IdeApi";
-import { Config, EnvironmentConfig } from "../stringResources/_StringResourcesModule";
-
+import {
+  Config,
+  EnvironmentConfig,
+} from "../stringResources/_StringResourcesModule";
 
 export function getDotnetExecutablePath(): string {
   const config: WorkspaceConfiguration = workspace.getConfiguration(

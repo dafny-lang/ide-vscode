@@ -72,10 +72,7 @@ export class Compile implements ICompile {
       throw Error.ServerRuntimeNotDefined;
     }
     if (!path.isAbsolute(compilerRuntimePath)) {
-      compilerRuntimePath = path.join(
-        __dirname,
-        compilerRuntimePath
-      );
+      compilerRuntimePath = path.join(__dirname, compilerRuntimePath);
     }
     const command = `& "${getDotnetExecutablePath()}" "${compilerRuntimePath}" "${filename}"`;
     const configuredArgs = this.getConfiguredArguments(run);

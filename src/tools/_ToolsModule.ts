@@ -1,5 +1,3 @@
 "use strict";
 
-export {
-  getDotnetExecutablePath,
-} from "./dotnet";
+export { getDotnetExecutablePath } from "./dotnet";
