@@ -36,6 +36,21 @@
         },
         {
           "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.compile",
+          "group": "7_Dafny@5"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.compileCustomArgs",
+          "group": "7_Dafny@6"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.compileAndRun",
+          "group": "7_Dafny@7"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
           "command": "dafny.showCounterExample",
           "group": "7_Dafny@1"
         },
@@ -50,6 +65,24 @@
       {
         "command": "dafny.restartDafnyServer",
         "key": "f9",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      {
+        "command": "dafny.compile",
+        "key": "ctrl+shift+b",
+        "mac": "⇧⌘B",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      {
+        "command": "dafny.compileAndRun",
+        "key": "f5",
+        "mac": "f5",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      {
+        "command": "dafny.compileCustomArgs",
+        "key": "f6",
+        "mac": "f6",
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
@@ -130,6 +163,18 @@
         "command": "dafny.restartDafnyServer",
         "icon": "$(issue-reopened)",
         "title": "Dafny: Restart DafnyServer"
+      },
+      {
+        "command": "dafny.compile",
+        "title": "Dafny: Compile"
+      },
+      {
+        "command": "dafny.compileCustomArgs",
+        "title": "Dafny: Compile with Custom Arguments"
+      },
+      {
+        "command": "dafny.compileAndRun",
+        "title": "Dafny: Compile and Run"
       },
       {
         "command": "dafny.showCounterExample",
