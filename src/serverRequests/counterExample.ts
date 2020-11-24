@@ -1,5 +1,5 @@
 "use strict";
-import { window, LanguageClient, ResponseError } from "../ideApi/_IdeApi";
+import { window, LanguageClient, ResponseError, TextDocumentIdentifier } from "../ideApi/_IdeApi";
 import {
   LanguageServerRequest,
   Error,
@@ -35,7 +35,7 @@ export class CounterExample implements ICounterExample {
       return;
     }
     const arg: ICounterExampleArguments = {
-      DafnyFile: window.activeTextEditor.document.fileName,
+      TextDocument: TextDocumentIdentifier.create(window.activeTextEditor.document.uri.toString()),
     };
     window.activeTextEditor.document.save().then(() => {
       // This timeout makes sure that the maximal amount of requests per second is capped.
