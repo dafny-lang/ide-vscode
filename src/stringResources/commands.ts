@@ -21,7 +21,7 @@ export class Config {
   public static LanguageServerLaunchArgs: string = "languageServerLaunchArgs";
   public static ColorCounterExamples: string = "colorCounterExamples";
   public static CompilationArguments: string = "compilationArgs";
-  public static CompilerExePath: string = "compilerExePath"
+  public static CompilerExePath: string = "compilerExePath";
 }
 
 export class EnvironmentConfig {
