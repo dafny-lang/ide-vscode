@@ -43,6 +43,7 @@ export class Compile implements ICompile {
       return false;
     }
     const terminal = window.activeTerminal ?? window.createTerminal();
+    terminal.show();
     console.log(command);
     terminal.sendText(command);
     return true;
