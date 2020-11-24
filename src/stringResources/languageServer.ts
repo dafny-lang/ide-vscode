@@ -4,7 +4,7 @@
  */
 export class LanguageServerRequest {
   public static Compile: string = "compile";
-  public static CounterExample: string = "counterExample";
+  public static CounterExample: string = "dafny/counterExample";
 }
 
 /**

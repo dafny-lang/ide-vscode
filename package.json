@@ -2,7 +2,7 @@
   "name": "dafny-vscode-preview",
   "displayName": "Dafny (Preview)",
   "description": "Dafny for Visual Studio Code (Preview Release)",
-  "version": "1.0.7",
+  "version": "1.1.0",
   "publisher": "correctnessLab",
   "homepage": "https://github.com/DafnyVSCode/",
   "repository": {
@@ -33,6 +33,16 @@
           "when": "editorTextFocus && editorLangId == dafny",
           "command": "dafny.restartDafnyServer",
           "group": "7_Dafny@4"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.showCounterExample",
+          "group": "7_Dafny@1"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.hideCounterExample",
+          "group": "7_Dafny@2"
         }
       ]
     },
@@ -40,6 +50,16 @@
       {
         "command": "dafny.restartDafnyServer",
         "key": "f9",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      {
+        "command": "dafny.showCounterExample",
+        "key": "f7",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      {
+        "command": "dafny.hideCounterExample",
+        "key": "f8",
         "when": "editorTextFocus && editorLangId == dafny"
       }
     ],
@@ -105,6 +125,14 @@
         "command": "dafny.restartDafnyServer",
         "icon": "$(issue-reopened)",
         "title": "Dafny: Restart DafnyServer"
+      },
+      {
+        "command": "dafny.showCounterExample",
+        "title": "Dafny: Show CounterExample"
+      },
+      {
+        "command": "dafny.hideCounterExample",
+        "title": "Dafny: Hide CounterExample"
       }
     ]
   },

@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.1.0
+
+- Re-added the possibility to show counter examples.
+
 ## 1.0.7
 
 - Replaced the language server runtime with .NET Core.
