@@ -145,14 +145,12 @@
     "onLanguage:dafny"
   ],
   "scripts": {
-    "vscode:compile-typescript": "tsc -p ./",
-    "build": "tsc -p ./",
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
     "package": "vsce package --out dist/",
     "publish": "vsce publish",
-    "compile": "tsc -watch -p ./",
-    "prettier": "prettier --check \"**/*.ts\"",
-    "postinstall": "node ./node_modules/vscode/bin/install",
-    "update-vscode": "node ./node_modules/vscode/bin/install"
+    "watch": "tsc -watch -p ./",
+    "prettier": "prettier --check \"**/*.ts\""
   },
   "devDependencies": {
     "@types/follow-redirects": "^1.8.0",
