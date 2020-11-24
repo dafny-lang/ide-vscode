@@ -146,7 +146,7 @@
   ],
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
+    "build": "tsc -p ./",
     "package": "vsce package --out dist/",
     "publish": "vsce publish",
     "watch": "tsc -watch -p ./",
