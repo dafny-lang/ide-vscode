@@ -87,7 +87,7 @@ export class Compile implements ICompile {
       this.config.get(Config.CompilationArguments) || [];
     if (run) {
       configuredArgs = configuredArgs.map((argument) => {
-        if (argument.indexOf("/compile") !== -1) {
+        if (!argument.includes("/compile")) {
           return "/compile:3";
         }
         return argument;
