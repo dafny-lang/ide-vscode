@@ -68,8 +68,8 @@ export class Compile implements ICompile {
       Config.CompilerRuntimePath
     );
     if (compilerRuntimePath === undefined) {
-      window.showErrorMessage(Error.ServerRuntimeNotDefined);
-      throw Error.ServerRuntimeNotDefined;
+      window.showErrorMessage(Error.CompilerRuntimeNotDefined);
+      throw Error.CompilerRuntimeNotDefined;
     }
     if (!path.isAbsolute(compilerRuntimePath)) {
       compilerRuntimePath = path.join(__dirname, compilerRuntimePath);
