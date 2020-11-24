@@ -22,6 +22,8 @@ export class Error {
     "Cannot start a program without a Main method";
   public static ServerRuntimeNotDefined: string =
     "Server executable not defined: please check your config for dafny.languageServerRuntimePath";
+    public static CompilerRuntimeNotDefined: string =
+      "Compiler executable not defined: please check your config for dafny.compilerRuntimePath";
   public static DotnetExeNotFound: string = "dotnet executable not found";
   public static CanNotCompile: string = "Compilation failed";
   public static CanNotGetCounterExample: string =

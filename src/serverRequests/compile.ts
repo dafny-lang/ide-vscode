@@ -1,4 +1,6 @@
 "use strict";
+import * as path from "path";
+import * as fs from "fs";
 import {
   workspace,
   window,
@@ -12,6 +14,7 @@ import {
   Config,
   EnvironmentConfig,
 } from "../stringResources/_StringResourcesModule";
+import { getDotnetExecutablePath } from "../tools/dotnet";
 
 import { ICompile } from "./ICompile";
 
@@ -61,9 +64,20 @@ export class Compile implements ICompile {
     useCustomArgs: boolean,
     run: boolean
   ): Promise<string | null> {
-    const command = `& "${this.config.get(
-      Config.CompilerExePath
-    )}" "${filename}"`;
+    let compilerRuntimePath = this.config.get<string>(
+      Config.CompilerRuntimePath
+    );
+    if (compilerRuntimePath === undefined) {
+      window.showErrorMessage(Error.ServerRuntimeNotDefined);
+      throw Error.ServerRuntimeNotDefined;
+    }
+    if (!path.isAbsolute(compilerRuntimePath)) {
+      compilerRuntimePath = path.join(
+        __dirname,
+        compilerRuntimePath
+      );
+    }
+    const command = `& "${getDotnetExecutablePath()}" "${compilerRuntimePath}" "${filename}"`;
     const configuredArgs = this.getConfiguredArguments(run);
     let compilationArgs = configuredArgs.join(" ");
     if (useCustomArgs) {
@@ -88,7 +102,7 @@ export class Compile implements ICompile {
       this.config.get(Config.CompilationArguments) || [];
     if (run) {
       configuredArgs = configuredArgs.map((argument) => {
-        if (!argument.includes("/compile")) {
+        if (argument.includes("/compile")) {
           return "/compile:3";
         }
         return argument;

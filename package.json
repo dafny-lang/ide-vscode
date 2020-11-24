@@ -131,10 +131,10 @@
           "default": [],
           "description": "Optional array of strings to pass to the language server runtime."
         },
-        "dafny.compilerExePath": {
+        "dafny.compilerRuntimePath": {
           "type": "string",
-          "default": "../../dafnyLanguageServer/Dafny.exe",
-          "description": "Relative or absolute path to the Dafny.exe"
+          "default": "../../dafnyLanguageServer/Dafny.dll",
+          "description": "Absolute or relative path to the Dafny.dll"
         },
         "dafny.compilationArgs": {
           "type": "array",
