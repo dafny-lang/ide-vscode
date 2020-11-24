@@ -11,7 +11,6 @@ import {
   ICounterExample,
   CounterExample,
 } from "../serverRequests/_ServerRequestsModule";
-import { IDafnyRunner } from "../localExecution/_LocalExecutionModule";
 import { CommandStrings } from "../stringResources/_StringResourcesModule";
 
 import { ICommands } from "./ICommands";
@@ -84,8 +83,7 @@ export class Commands implements ICommands {
   constructor(
     extensionContext: ExtensionContext,
     languageServer: LanguageClient,
-    provider: IDafnyUiManager,
-    runner: IDafnyRunner
+    provider: IDafnyUiManager
   ) {
     this.languageServer = languageServer;
     this.provider = provider;
