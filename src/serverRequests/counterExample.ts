@@ -1,5 +1,10 @@
 "use strict";
-import { window, LanguageClient, ResponseError, TextDocumentIdentifier } from "../ideApi/_IdeApi";
+import {
+  window,
+  LanguageClient,
+  ResponseError,
+  TextDocumentIdentifier,
+} from "../ideApi/_IdeApi";
 import {
   LanguageServerRequest,
   Error,
@@ -35,7 +40,9 @@ export class CounterExample implements ICounterExample {
       return;
     }
     const arg: ICounterExampleArguments = {
-      TextDocument: TextDocumentIdentifier.create(window.activeTextEditor.document.uri.toString()),
+      TextDocument: TextDocumentIdentifier.create(
+        window.activeTextEditor.document.uri.toString()
+      ),
     };
     window.activeTextEditor.document.save().then(() => {
       // This timeout makes sure that the maximal amount of requests per second is capped.

@@ -30,7 +30,7 @@ export {
   LanguageClientOptions,
   ResponseError,
   ServerOptions as ClientServerOptions,
-  TextDocumentIdentifier
+  TextDocumentIdentifier,
 } from "vscode-languageclient";
 
 export { URI } from "vscode-uri";
