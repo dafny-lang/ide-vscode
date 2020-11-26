@@ -136,10 +136,16 @@
           "default": "../../dafnyLanguageServer/Dafny.dll",
           "description": "Absolute or relative path to the Dafny.dll"
         },
+        "dafny.compilerOutputDir": {
+          "type": "string",
+          "default": "bin",
+          "description": "Absolute or relative path to the compilation output directory."
+        },
         "dafny.compilationArgs": {
           "type": "array",
           "default": [
             "/compile:1",
+            "/spillTargetCode:1",
             "/nologo"
           ],
           "description": "Optional array of strings as Dafny compilation arguments"

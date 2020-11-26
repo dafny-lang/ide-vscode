@@ -22,6 +22,7 @@ export class Config {
   public static ColorCounterExamples: string = "colorCounterExamples";
   public static CompilationArguments: string = "compilationArgs";
   public static CompilerRuntimePath: string = "compilerRuntimePath";
+  public static CompilerOutputDir: string = "compilerOutputDir";
 }
 
 export class EnvironmentConfig {
