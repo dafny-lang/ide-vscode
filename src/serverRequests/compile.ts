@@ -73,14 +73,16 @@ export class Compile implements ICompile {
     if (!path.isAbsolute(compilerRuntimePath)) {
       compilerRuntimePath = path.join(__dirname, compilerRuntimePath);
     }
-    const compilerOutputDir = this.config.get<string>(
-      Config.CompilerOutputDir
-    );
-    if(compilerOutputDir === undefined) {
+    const compilerOutputDir = this.config.get<string>(Config.CompilerOutputDir);
+    if (compilerOutputDir === undefined) {
       throw Error.CompilerOutputDirNotDefined;
     }
     const command = `& "${getDotnetExecutablePath()}" "${compilerRuntimePath}" "${filename}"`;
-    const configuredArgs = this.getConfiguredArguments(run, compilerOutputDir, filename);
+    const configuredArgs = this.getConfiguredArguments(
+      run,
+      compilerOutputDir,
+      filename
+    );
     let compilationArgs = configuredArgs.join(" ");
     if (useCustomArgs) {
       const opt: InputBoxOptions = {
@@ -99,7 +101,11 @@ export class Compile implements ICompile {
     return `${command} ${compilationArgs}`;
   }
 
-  private getConfiguredArguments(run: boolean, compilerOutputDir: string, filename: string): string[] {
+  private getConfiguredArguments(
+    run: boolean,
+    compilerOutputDir: string,
+    filename: string
+  ): string[] {
     let configuredArgs: string[] =
       this.config.get(Config.CompilationArguments) || [];
     if (run) {
@@ -110,8 +116,11 @@ export class Compile implements ICompile {
         return argument;
       });
     }
-    if(!configuredArgs.some(argument => argument.includes("/out"))) {
-      const compilerOutput = path.join(compilerOutputDir, path.parse(filename).name);
+    if (!configuredArgs.some((argument) => argument.includes("/out"))) {
+      const compilerOutput = path.join(
+        compilerOutputDir,
+        path.parse(filename).name
+      );
       configuredArgs.push(`/out:${compilerOutput}`);
     }
     return configuredArgs;
