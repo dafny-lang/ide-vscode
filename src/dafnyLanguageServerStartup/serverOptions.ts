@@ -2,7 +2,6 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import * as which from "which";
 
 import {
   workspace,
@@ -17,22 +16,7 @@ import {
   Error,
   Config,
 } from "../stringResources/_StringResourcesModule";
-
-function getDotnetExecutablePath(config: WorkspaceConfiguration): string {
-  let dotnetExecutablePath: string | undefined = config.get<string>(
-    Config.DotnetExecutablePath
-  );
-  // TODO Somehow and empty string is returned if this setting is not configured?
-  if (
-    dotnetExecutablePath !== undefined &&
-    dotnetExecutablePath.trim().length > 0
-  ) {
-    return dotnetExecutablePath;
-  }
-  const resolvedDotnetPath = which.sync("dotnet", { nothrow: true });
-  console.log("Resolved dotnet at: " + resolvedDotnetPath);
-  return resolvedDotnetPath || "dotnet";
-}
+import { getDotnetExecutablePath } from "../tools/_ToolsModule";
 
 /**
  * Extends LanguageClient - provides basic config constructor for server initialization.
@@ -43,7 +27,7 @@ export default class ServerOptions extends LanguageClient {
     const config: WorkspaceConfiguration = workspace.getConfiguration(
       EnvironmentConfig.Dafny
     );
-    const dotnetExecutablePath = getDotnetExecutablePath(config);
+    const dotnetExecutablePath = getDotnetExecutablePath();
     fs.exists(dotnetExecutablePath, (exist) => {
       if (!exist) {
         window.showErrorMessage(

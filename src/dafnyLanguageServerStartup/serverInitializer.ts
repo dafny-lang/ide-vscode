@@ -15,10 +15,6 @@ import {
   INotifications,
 } from "../ui/_UiModule";
 import {
-  DafnyRunner,
-  IDafnyRunner,
-} from "../localExecution/_LocalExecutionModule";
-import {
   CommandStrings,
   Error,
   Information,
@@ -37,13 +33,11 @@ import { LanguageServerInstaller } from "./languageServerInstaller";
 export class ServerInitializer implements ILanguageServer {
   private languageServer: ServerOptions | undefined;
   private languageServerDisposable: Disposable | undefined;
-  private runner: IDafnyRunner;
   private extensionContext: ExtensionContext;
   private provider: IDafnyUiManager | undefined;
   private commands: ICommands | undefined;
 
   constructor(extensionContext: ExtensionContext) {
-    this.runner = new DafnyRunner();
     this.extensionContext = extensionContext;
   }
 
@@ -64,8 +58,7 @@ export class ServerInitializer implements ILanguageServer {
               this.commands = new Commands(
                 this.extensionContext,
                 this.languageServer,
-                this.provider,
-                this.runner
+                this.provider
               );
               this.commands.registerCommands();
 

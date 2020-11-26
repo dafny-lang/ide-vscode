@@ -31,7 +31,7 @@ export class LanguageServerNotification {
  */
 export class LanguageServerConfig {
   public static ServerFolder: string = "dafnyLanguageServer";
-  public static RequiredVersion: string = "2.1.0";
+  public static RequiredVersion: string = "2.2.0";
 
   private static DownloadBaseUri: string =
     "https://github.com/dafny-lang/language-server-csharp/releases/download";

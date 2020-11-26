@@ -11,7 +11,6 @@ import {
   ICounterExample,
   CounterExample,
 } from "../serverRequests/_ServerRequestsModule";
-import { IDafnyRunner } from "../localExecution/_LocalExecutionModule";
 import { CommandStrings } from "../stringResources/_StringResourcesModule";
 
 import { ICommands } from "./ICommands";
@@ -27,29 +26,28 @@ export class Commands implements ICommands {
   private extensionContext: ExtensionContext;
   private languageServer: LanguageClient;
   private provider: IDafnyUiManager;
-  private runner: IDafnyRunner;
   private disposables: Array<Disposable> = [];
 
   private commands = [
     {
       name: CommandStrings.Compile,
       callback: () => {
-        const compile: ICompile = new Compile(this.languageServer);
-        compile.compile(false);
+        const compile: ICompile = new Compile();
+        compile.compileAndRun(false, false);
       },
     },
     {
       name: CommandStrings.CompileCustomArgs,
       callback: () => {
-        const compile: ICompile = new Compile(this.languageServer);
-        compile.compile(true);
+        const compile: ICompile = new Compile();
+        compile.compileAndRun(true, false);
       },
     },
     {
       name: CommandStrings.CompileAndRun,
       callback: () => {
-        const compile: ICompile = new Compile(this.languageServer);
-        compile.compile(false).then(() => compile.run(this.runner));
+        const compile: ICompile = new Compile();
+        compile.compileAndRun(false, true);
       },
     },
     {
@@ -85,12 +83,10 @@ export class Commands implements ICommands {
   constructor(
     extensionContext: ExtensionContext,
     languageServer: LanguageClient,
-    provider: IDafnyUiManager,
-    runner: IDafnyRunner
+    provider: IDafnyUiManager
   ) {
     this.languageServer = languageServer;
     this.provider = provider;
-    this.runner = runner;
     this.extensionContext = extensionContext;
   }
 

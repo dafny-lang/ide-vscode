@@ -20,7 +20,7 @@
   },
   "icon": "logo.png",
   "engines": {
-    "vscode": "^1.25.1"
+    "vscode": "^1.41.0"
   },
   "categories": [
     "Programming Languages"
@@ -33,6 +33,21 @@
           "when": "editorTextFocus && editorLangId == dafny",
           "command": "dafny.restartDafnyServer",
           "group": "7_Dafny@4"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.compile",
+          "group": "7_Dafny@5"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.compileCustomArgs",
+          "group": "7_Dafny@6"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.compileAndRun",
+          "group": "7_Dafny@7"
         },
         {
           "when": "editorTextFocus && editorLangId == dafny",
@@ -50,6 +65,24 @@
       {
         "command": "dafny.restartDafnyServer",
         "key": "f9",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      {
+        "command": "dafny.compile",
+        "key": "ctrl+shift+b",
+        "mac": "⇧⌘B",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      {
+        "command": "dafny.compileAndRun",
+        "key": "f5",
+        "mac": "f5",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      {
+        "command": "dafny.compileCustomArgs",
+        "key": "f6",
+        "mac": "f6",
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
@@ -98,11 +131,22 @@
           "default": [],
           "description": "Optional array of strings to pass to the language server runtime."
         },
-        "dafny.compilationArgs": {
+        "dafny.compilerRuntimePath": {
+          "type": "string",
+          "default": "../../dafnyLanguageServer/Dafny.dll",
+          "description": "Absolute or relative path to the Dafny.dll"
+        },
+        "dafny.compilerOutputDir": {
+          "type": "string",
+          "default": "bin",
+          "description": "Absolute or relative path to the compilation output directory."
+        },
+        "dafny.compilerArgs": {
           "type": "array",
           "default": [
+            "/verifyAllModules",
             "/compile:1",
-            "/nologo"
+            "/spillTargetCode:1"
           ],
           "description": "Optional array of strings as Dafny compilation arguments"
         },
@@ -127,6 +171,18 @@
         "title": "Dafny: Restart DafnyServer"
       },
       {
+        "command": "dafny.compile",
+        "title": "Dafny: Compile"
+      },
+      {
+        "command": "dafny.compileCustomArgs",
+        "title": "Dafny: Compile with Custom Arguments"
+      },
+      {
+        "command": "dafny.compileAndRun",
+        "title": "Dafny: Compile and Run"
+      },
+      {
         "command": "dafny.showCounterExample",
         "title": "Dafny: Show CounterExample"
       },
@@ -141,13 +197,12 @@
   ],
   "scripts": {
     "vscode:compile-typescript": "tsc -p ./",
+    "vscode:prepublish": "npm run build",
     "build": "tsc -p ./",
     "package": "vsce package --out dist/",
     "publish": "vsce publish",
     "compile": "tsc -watch -p ./",
-    "prettier": "prettier --check \"**/*.ts\"",
-    "postinstall": "node ./node_modules/vscode/bin/install",
-    "update-vscode": "node ./node_modules/vscode/bin/install"
+    "prettier": "prettier --check \"**/*.ts\""
   },
   "devDependencies": {
     "@types/follow-redirects": "^1.8.0",
@@ -155,12 +210,12 @@
     "@types/node": "^10.17.45",
     "@types/rimraf": "^3.0.0",
     "@types/semver": "^7.2.0",
+    "@types/vscode": "^1.41.0",
     "@types/which": "^1.3.2",
     "mocha": "^5.2.0",
     "tslint": "^5.20.1",
     "typescript": "^3.9.2",
-    "vsce": "^1.75.0",
-    "vscode": "^1.1.37"
+    "vsce": "^1.75.0"
   },
   "dependencies": {
     "decompress-zip": "^0.2.2",

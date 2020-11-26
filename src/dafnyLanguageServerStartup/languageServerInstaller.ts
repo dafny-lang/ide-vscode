@@ -64,7 +64,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
   }
 
   private requiresExecutionPermissions(): boolean {
-    return os.type() != "Windows_NT";
+    return os.type() !== "Windows_NT";
   }
 
   public async installLatestVersion(): Promise<boolean> {

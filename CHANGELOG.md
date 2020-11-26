@@ -3,6 +3,7 @@
 ## 1.1.0
 
 - Re-added the possibility to show counter examples.
+- Re-added the compiler related commands.
 
 ## 1.0.7
 
