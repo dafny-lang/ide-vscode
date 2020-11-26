@@ -190,11 +190,12 @@
     "onLanguage:dafny"
   ],
   "scripts": {
+    "vscode:compile-typescript": "tsc -p ./",
     "vscode:prepublish": "npm run build",
     "build": "tsc -p ./",
     "package": "vsce package --out dist/",
     "publish": "vsce publish",
-    "watch": "tsc -watch -p ./",
+    "compile": "tsc -watch -p ./",
     "prettier": "prettier --check \"**/*.ts\""
   },
   "devDependencies": {
