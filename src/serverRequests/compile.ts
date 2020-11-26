@@ -121,7 +121,7 @@ export class Compile implements ICompile {
         compilerOutputDir,
         path.parse(filename).name
       );
-      configuredArgs.push(`/out:${compilerOutput}`);
+      configuredArgs = [...configuredArgs, `/out:${compilerOutput}`];
     }
     return configuredArgs;
   }

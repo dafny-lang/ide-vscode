@@ -146,8 +146,7 @@
           "default": [
             "/verifyAllModules",
             "/compile:1",
-            "/spillTargetCode:1",
-            "/nologo"
+            "/spillTargetCode:1"
           ],
           "description": "Optional array of strings as Dafny compilation arguments"
         },
