@@ -144,6 +144,7 @@
         "dafny.compilationArgs": {
           "type": "array",
           "default": [
+            "/verifyAllModules",
             "/compile:1",
             "/spillTargetCode:1",
             "/nologo"
