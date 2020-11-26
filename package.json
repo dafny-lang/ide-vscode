@@ -141,7 +141,7 @@
           "default": "bin",
           "description": "Absolute or relative path to the compilation output directory."
         },
-        "dafny.compilationArgs": {
+        "dafny.compilerArgs": {
           "type": "array",
           "default": [
             "/verifyAllModules",

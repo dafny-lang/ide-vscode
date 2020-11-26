@@ -20,7 +20,7 @@ export class Config {
   public static LanguageServerRuntimePath: string = "languageServerRuntimePath";
   public static LanguageServerLaunchArgs: string = "languageServerLaunchArgs";
   public static ColorCounterExamples: string = "colorCounterExamples";
-  public static CompilationArguments: string = "compilationArgs";
+  public static CompilerArgs: string = "compilerArgs";
   public static CompilerRuntimePath: string = "compilerRuntimePath";
   public static CompilerOutputDir: string = "compilerOutputDir";
 }

@@ -107,7 +107,7 @@ export class Compile implements ICompile {
     filename: string
   ): string[] {
     let configuredArgs: string[] =
-      this.config.get(Config.CompilationArguments) || [];
+      this.config.get(Config.CompilerArgs) || [];
     if (run) {
       configuredArgs = configuredArgs.map((argument) => {
         if (argument.includes("/compile")) {
