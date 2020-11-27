@@ -4,6 +4,7 @@
 
 - Re-added the possibility to show counter examples.
 - Re-added the compiler related commands.
+- Updated the language server to [v2.2.0](https://github.com/dafny-lang/language-server-csharp/releases/tag/v2.2.0).
 
 ## 1.0.7
 
