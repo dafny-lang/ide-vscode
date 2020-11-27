@@ -82,6 +82,12 @@ Hover a symbol to get information about that symbol.
 
 ![Hover](readmeResources/Hover.png)
 
+### IntelliSense
+
+Type a dot to get a list of possible members of the accessed symbol.
+
+![IntelliSense](readmeResources/IntelliSense.png)
+
 ## Contribute
 
 Dafny for Visual Studio Code is an MIT licensed open-source project that lives from code contributions.
