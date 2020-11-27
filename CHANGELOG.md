@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.1.1
+
+- Fixed the compile command invocation for ubuntu and osx installations.
+
 ## 1.1.0
 
 - Re-added the possibility to show counter examples.
