@@ -87,7 +87,7 @@ export class StatusbarProvider implements IStatusbarProvider {
         this.dafnyerrors && errors > 0
           ? `${StatusbarStrings.NotVerified} - ${StatusbarStrings.Errors}: ${errors}`
           : StatusbarStrings.Verified;*/
-      
+
       if (this.dafnyLanguageServerVersion) {
         this.serverStatusBar.text = `${
           StatusbarStrings.DafnyVersion
