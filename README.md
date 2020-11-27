@@ -43,10 +43,10 @@ When you first open a _Dafny_ file, the extension will prompt you to install .NE
 | `dafny.compilerRuntimePath`       | Absolute or relative path to the _Dafny_ compiler (`Dafny.dll`).                                                                                                                                   | `../../dafnyLanguageServer/Dafny.dll`                          |
 | `dafny.compilerArgs`              | Optional array of strings as _Dafny_ compilation arguments.                                                                                                                                        | `[ "/verifyAllModules", "/compile:1", "/spillTargetCode:1" ]`  |
 | `dafny.compilerOutputDir`         | Absolute or relative path to the compilation output directory.                                                                                                                                     | `bin`                                                          |
-| `dafny.dotnetExecutablePath`      | Dotnets absolute path. Only necessary if dotnet is not in system PATH (you'll get an error if that's the case).                                                                                    |                                                                |
+| `dafny.dotnetExecutablePath`      | Absolute path to the dotnet executable. Only necessary if dotnet is not in system PATH (you'll get an error if that's the case).                                                                   |                                                                |
 | `dafny.colorCounterExamples`      | Customize the color (HEX) of Counter Examples. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults. | `{ "backgroundColor": null, "fontColor": null }`               |
 
-Please note that in this new plugin version "automatic verififaction" is always on and a language server side feature.
+Please note that in this new plugin version "automatic verification" is always on and a language server side feature.
 
 ## Examples
 
@@ -58,7 +58,7 @@ On the first start, the plugin will install the _Dafny_ language server automati
 
 ![Installation](readmeResources/Installation.png)
 
-### Error Underlining
+### Error Highlighting
 
 ![Syntax](readmeResources/Syntax.png)
 
