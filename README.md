@@ -1,10 +1,9 @@
 # Dafny for Visual Studio Code (Preview Release)
 
-⚠️ Warning: This is a **Preview Release** for extension development purposes. Please us the stable version if you just want to use Dafny. Please note that only one of the two plugins may be active.
-The Dafny language server supports only Windows at this moment.
+⚠️ Warning: This is a **Preview Release** for extension development purposes. Please use the stable version if you want to use Dafny. Please note that only one of the two plugins may be active.
 
 This extension adds _Dafny_ support to Visual Studio Code.
-This VSCode plugin needs the Dafny language server, which is placed in a [separate git repository](https://gitlab.dev.ifs.hsr.ch/dafny-ba/dafny-language-server).
+This VSCode plugin requires the [Dafny language server](). The plugin will install it automatically upon first use.
 
 ## Features
 
@@ -32,8 +31,8 @@ You can find [examples below](#examples).
 
 ## Requirements
 
-The plugin requires at least .NET Core 3.1 (the ASP.NET Core 3.1 runtime to be more specifiec) to run the _Dafny Language Server_. Please download a distribution from [Microsoft](https://dotnet.microsoft.com/download).
-When you first open a _Dafny_ file, the extension will prompt you to manually install .NET Core. The language server gets installed automatically.
+The plugin requires at least .NET Core 3.1 (the ASP.NET Core 3.1 runtime to be more specific) to run the _Dafny Language Server_. Please download a distribution from [Microsoft](https://dotnet.microsoft.com/download).
+When you first open a _Dafny_ file, the extension will prompt you to install .NET Core manually. The language server gets installed automatically.
 
 ## Extension Settings
 
@@ -55,14 +54,15 @@ Here are a few impressions of the features.
 
 ### Installation
 
-On the first start the plugin will install the _Dafny_ language server automatically.
+On the first start, the plugin will install the _Dafny_ language server automatically.
 
 ![Installation](readmeResources/Installation.png)
 
-### Syntax Error Underlining
+### Error Underlining
 
 ![Syntax](readmeResources/Syntax.png)
-Whenever a postcondition statement does not hold, the user will be informed.
+
+Whenever a syntax, semantic, or verification error is present, the plugin will inform the user.
 
 ### Compile and Run
 
@@ -72,7 +72,7 @@ Press `F5` to compile and run the program.
 
 ### Show Counter Example
 
-Press `F7` to show counter examples.
+Press `F7` to show counterexamples.
 
 ![Counter](readmeResources/Counter.png)
 
@@ -84,6 +84,6 @@ Hover a symbol to get information about that symbol.
 
 ## Contribute
 
-This is a MIT licensed open-source project that lives from code contributions.
+Dafny for Visual Studio Code is an MIT licensed open-source project that lives from code contributions.
 
 We welcome your help! For a description of how you can contribute, as well as a list of issues you can work on, please visit the [Dafny-VSCode GitHub repository](https://github.com/DafnyVSCode/ide-vscode).
