@@ -1,4 +1,5 @@
 "use strict";
+import * as os from "os";
 import * as path from "path";
 import {
   workspace,
@@ -58,6 +59,10 @@ export class Compile implements ICompile {
     return null;
   }
 
+  private getCommandPrefix(): string {
+    return os.type() === "Windows_NT" ? "& " : "";
+  }
+
   private async createCompileCommand(
     filename: string,
     useCustomArgs: boolean,
@@ -77,7 +82,7 @@ export class Compile implements ICompile {
     if (compilerOutputDir === undefined) {
       throw Error.CompilerOutputDirNotDefined;
     }
-    const command = `& "${getDotnetExecutablePath()}" "${compilerRuntimePath}" "${filename}"`;
+    const command = `${this.getCommandPrefix()}"${getDotnetExecutablePath()}" "${compilerRuntimePath}" "${filename}"`;
     const configuredArgs = this.getConfiguredArguments(
       run,
       compilerOutputDir,
