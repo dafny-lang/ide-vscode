@@ -82,11 +82,11 @@ export class StatusbarProvider implements IStatusbarProvider {
     ) {
       this.hide();
     } else {
-      const errors = this.dafnyerrors[DafnyFileChecker.getActiveFileName()];
+      /*const errors = this.dafnyerrors[DafnyFileChecker.getActiveFileName()];
       this.currentDocumentStatucBar.text =
         this.dafnyerrors && errors > 0
           ? `${StatusbarStrings.NotVerified} - ${StatusbarStrings.Errors}: ${errors}`
-          : StatusbarStrings.Verified;
+          : StatusbarStrings.Verified;*/
 
       if (this.dafnyLanguageServerVersion) {
         this.serverStatusBar.text = `${
