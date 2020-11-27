@@ -10,15 +10,11 @@ This VSCode plugin needs the Dafny language server, which is placed in a [separa
 
 - **Compile and Run** `.dfy` files.
 - **Verification** as one types.
-  - Errors, warnings and hints are shown through the VSCode interface.
-  - When there are no errors, you get a 👍 on the status bar.
 - **Syntax highlighting** thanks to [sublime-dafny](https://github.com/erggo/sublime-dafny). See file `LICENSE_sublime-dafny.rst` for license.
 - Display **CounterExample** for failing proof.
-- **_AutoCompletion_** to suggest symbols.
-- **_CodeLens_** showing method references.
+- **IntelliSense** to suggest symbols.
 - **GoToDefinition** to quickly navigate.
 - **Hover Information** for symbols.
-- **Rename** for code refactoring.
 
 You can find [examples below](#examples).
 
@@ -80,29 +76,11 @@ Press `F7` to show counter examples.
 
 ![Counter](readmeResources/Counter.png)
 
-### CodeLens
-
-Counted references will automatically be displayed. Click on one of those reference to open the CodeLens popup.
-
-![CodeLens](readmeResources/CodeLens.png)
-
-### Auto Completion
-
-Press `CTRL+Space` to show auto completion suggestions.
-
-![Completion](readmeResources/Completion.png)
-
 ### Hover Information
 
 Hover a symbol to get information about that symbol.
 
 ![Hover](readmeResources/Hover.png)
-
-### Rename
-
-Press `F2` to rename a symbol.
-
-![Rename](readmeResources/Rename.png)
 
 ## Contribute
 
