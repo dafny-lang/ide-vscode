@@ -42,7 +42,6 @@ export class StatusbarProvider implements IStatusbarProvider {
     languageServer.onNotification(
       LanguageServerNotification.ServerStarted,
       (serverversion: string) => {
-        window.showInformationMessage(StatusbarStrings.Started);
         this.dafnyLanguageServerVersion = serverversion;
         this.update();
       }
