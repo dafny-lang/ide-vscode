@@ -44,8 +44,6 @@ export class ServerInitializer implements ILanguageServer {
   public startLanguageServer(): void {
     this.installLanguageServerIfNotExists()
       .then(() => {
-        window.showInformationMessage(Information.StartingServer);
-
         this.languageServer = new ServerOptions();
         this.languageServer.trace = Trace.Verbose;
 
