@@ -1,6 +1,4 @@
-# Dafny for Visual Studio Code (Preview Release)
-
-⚠️ Warning: This is a **Preview Release** for extension development purposes. Please use the stable version if you want to use Dafny. Please note that only one of the two plugins may be active.
+# Dafny for Visual Studio Code
 
 This extension adds _Dafny_ support to Visual Studio Code.
 This VSCode plugin requires the [Dafny language server](https://github.com/dafny-lang/language-server-csharp). The plugin will install it automatically upon first use.
