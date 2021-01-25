@@ -1,6 +1,6 @@
 # Dafny for Visual Studio Code
 
-This extension adds _Dafny 3.0.0_ support to Visual Studio Code. If you require _Dafny 2_ support, consider using the [legacy extension](https://github.com/DafnyVSCode/Dafny-VSCode).
+This extension adds _Dafny 3.0.0_ support to Visual Studio Code. If you require _Dafny 2_ support, consider using the [legacy extension](https://marketplace.visualstudio.com/items?itemName=correctnessLab.dafny-vscode).
 This VSCode plugin requires the [Dafny language server](https://github.com/dafny-lang/language-server-csharp). The plugin will install it automatically upon first use.
 
 ## Features
