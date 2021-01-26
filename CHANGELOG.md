@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.3.0
+
+- Dropped the Preview notes
+
 ## 1.2.0
 
 - Updated the language server to [v2.3.0](https://github.com/dafny-lang/language-server-csharp/releases/tag/v2.3.0) ([Dafny 3.0.0 PreRelease2](https://github.com/dafny-lang/dafny/releases/tag/v3.0.0-PreRelease2)).
