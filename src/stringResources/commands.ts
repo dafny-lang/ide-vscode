@@ -36,5 +36,5 @@ export class EnvironmentConfig {
 
   public static Dotnet: string = "dotnet";
   public static DotnetListRuntimes: string = "--list-runtimes";
-  public static DotnetSupportedRuntimePattern: RegExp = /Microsoft\.AspNetCore\.App\s*3\.1/i;
+  public static DotnetSupportedRuntimePattern: RegExp = /Microsoft\.AspNetCore\.App\s*5\.0/i;
 }

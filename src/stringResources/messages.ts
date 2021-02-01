@@ -9,7 +9,7 @@ export class Warning {
 
 export class Error {
   public static NoSupportedDotnet: string =
-    "There is no compatible dotnet runtime installed. Dafny requires the ASP.NET Core Runtime 3.1.";
+    "There is no compatible dotnet runtime installed. Dafny requires the ASP.NET Core Runtime 5.0.";
   public static RestartCodeAfterDotnetInstall: string =
     "Please restart VSCode after the dotnet installation.";
   public static RestartMacAfterDotnetInstall: string =
