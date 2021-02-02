@@ -64,7 +64,7 @@ export class StatusbarStrings {
   public static NotVerified: string = "$(thumbsdown) Not verified";
   public static Errors: string = "Errors";
   public static Pending: string = "$(issue-opened) Server answer pending";
-  public static DafnyVersion: string = "Dafny Language Server Version";
+  public static DafnyVersion: string = "DafnyLS";
   public static CurrentDocument: string = "Current Document";
   public static NoDocumentSelected: string = "No document selected yet.";
   public static Started: string = "Server started";
