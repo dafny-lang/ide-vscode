@@ -60,11 +60,11 @@ export default class ServerOptions extends LanguageClient {
     const launchArguments: string[] =
       config.get<string[]>(Config.LanguageServerLaunchArgs) || [];
     const autoVerification: string =
-      config.get<string>(Config.AutomaticVerification) || 'onchange';
+      config.get<string>(Config.AutomaticVerification) || "onchange";
     const dotnetArguments = [
       languageServerRuntimePath,
       `--documents:verify=${autoVerification}`,
-      ...launchArguments
+      ...launchArguments,
     ];
     const serverOptions: ClientServerOptions = {
       run: { command: dotnetExecutablePath, args: dotnetArguments },
