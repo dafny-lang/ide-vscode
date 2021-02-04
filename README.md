@@ -5,7 +5,7 @@ This VSCode plugin requires the [Dafny language server](https://github.com/dafny
 
 ## Features
 
-- Compatible to **Dafny 3.0.0 PreRelease2**.
+- Compatible to **Dafny 3.0.0**.
 - **Compile and Run** `.dfy` files.
 - **Verification** as one types.
 - **Syntax highlighting** thanks to [sublime-dafny](https://github.com/erggo/sublime-dafny). See file `LICENSE_sublime-dafny.rst` for license.
@@ -30,7 +30,7 @@ You can find [examples below](#examples).
 
 ## Requirements
 
-The plugin requires at least .NET Core 3.1 (the ASP.NET Core 3.1 runtime to be more specific) to run the _Dafny Language Server_. Please download a distribution from [Microsoft](https://dotnet.microsoft.com/download).
+The plugin requires at least .NET Core 5.0 (the ASP.NET Core 5.0 runtime to be more specific) to run the _Dafny Language Server_. Please download a distribution from [Microsoft](https://dotnet.microsoft.com/download).
 When you first open a _Dafny_ file, the extension will prompt you to install .NET Core manually. The language server gets installed automatically.
 
 ## Extension Settings
@@ -38,6 +38,7 @@ When you first open a _Dafny_ file, the extension will prompt you to install .NE
 | Setting                           | Description                                                                                                                                                                                        | Default                                                        |
 | :-------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------- |
 | `dafny.languageServerRuntimePath` | Absolute or relative path to the _Dafny_ language server runtime (`DafnyLS.dll`).                                                                                                                  | `../../dafnyLanguageServer/DafnyLS.dll`                        |
+| `dafny.automaticVerification`     | Optional string to control when the document should be verified (choose between `never`, `onchange`, and `onsave`.                                                                                 | `onchange`                                                     |
 | `dafny.languageServerLaunchArgs`  | Optional array of strings as _Dafny_ language server arguments.                                                                                                                                    | `[ ]`                                                          |
 | `dafny.compilerRuntimePath`       | Absolute or relative path to the _Dafny_ compiler (`Dafny.dll`).                                                                                                                                   | `../../dafnyLanguageServer/Dafny.dll`                          |
 | `dafny.compilerArgs`              | Optional array of strings as _Dafny_ compilation arguments.                                                                                                                                        | `[ "/verifyAllModules", "/compile:1", "/spillTargetCode:1" ]`  |
@@ -86,6 +87,12 @@ Hover a symbol to get information about that symbol.
 Type a dot to get a list of possible members of the accessed symbol.
 
 ![IntelliSense](readmeResources/IntelliSense.png)
+
+### Automatic Verification
+
+If VSCode appears unresponsive, you may lower the verification frequency or disable it entirely.
+
+![Automatic Verification](readmeResources/automaticVerificationOption.png)
 
 ## Contribute
 

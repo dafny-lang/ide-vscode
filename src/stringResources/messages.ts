@@ -9,7 +9,7 @@ export class Warning {
 
 export class Error {
   public static NoSupportedDotnet: string =
-    "There is no compatible dotnet runtime installed. Dafny requires the ASP.NET Core Runtime 3.1.";
+    "There is no compatible dotnet runtime installed. Dafny requires the ASP.NET Core Runtime 5.0.";
   public static RestartCodeAfterDotnetInstall: string =
     "Please restart VSCode after the dotnet installation.";
   public static RestartMacAfterDotnetInstall: string =
@@ -64,7 +64,7 @@ export class StatusbarStrings {
   public static NotVerified: string = "$(thumbsdown) Not verified";
   public static Errors: string = "Errors";
   public static Pending: string = "$(issue-opened) Server answer pending";
-  public static DafnyVersion: string = "Dafny Language Server Version";
+  public static DafnyVersion: string = "DafnyLS";
   public static CurrentDocument: string = "Current Document";
   public static NoDocumentSelected: string = "No document selected yet.";
   public static Started: string = "Server started";

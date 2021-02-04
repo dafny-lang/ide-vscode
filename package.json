@@ -2,7 +2,7 @@
   "name": "dafny-vscode",
   "displayName": "Dafny",
   "description": "Dafny for Visual Studio Code",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "publisher": "correctnessLab",
   "homepage": "https://github.com/DafnyVSCode/",
   "repository": {
@@ -125,6 +125,12 @@
           "type": "string",
           "default": "../../dafnyLanguageServer/DafnyLS.dll",
           "description": "Absolute or relative path to the DafnyLS.dll"
+        },
+        "dafny.automaticVerification": {
+          "type": "string",
+          "default": "onchange",
+          "enum": [ "never", "onchange", "onsave" ],
+          "description": "When to apply the automatic verification (requires restart)"
         },
         "dafny.languageServerLaunchArgs": {
           "type": "array",
