@@ -38,6 +38,7 @@ When you first open a _Dafny_ file, the extension will prompt you to install .NE
 | Setting                           | Description                                                                                                                                                                                        | Default                                                        |
 | :-------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------- |
 | `dafny.languageServerRuntimePath` | Absolute or relative path to the _Dafny_ language server runtime (`DafnyLS.dll`).                                                                                                                  | `../../dafnyLanguageServer/DafnyLS.dll`                        |
+| `dafny.automaticVerification`     | Optional string to control when the document should be verified (choose between `never`, `onchange`, and `onsave`.                                                                                 | `onchange`                                                     |
 | `dafny.languageServerLaunchArgs`  | Optional array of strings as _Dafny_ language server arguments.                                                                                                                                    | `[ ]`                                                          |
 | `dafny.compilerRuntimePath`       | Absolute or relative path to the _Dafny_ compiler (`Dafny.dll`).                                                                                                                                   | `../../dafnyLanguageServer/Dafny.dll`                          |
 | `dafny.compilerArgs`              | Optional array of strings as _Dafny_ compilation arguments.                                                                                                                                        | `[ "/verifyAllModules", "/compile:1", "/spillTargetCode:1" ]`  |
@@ -86,6 +87,12 @@ Hover a symbol to get information about that symbol.
 Type a dot to get a list of possible members of the accessed symbol.
 
 ![IntelliSense](readmeResources/IntelliSense.png)
+
+### Automatic Verification
+
+If VSCode appears unresponsive, you may lower the verification frequency or disable it entirely.
+
+![Automatic Verification](readmeResources/automaticVerificationOption.png)
 
 ## Contribute
 
