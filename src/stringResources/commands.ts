@@ -19,6 +19,7 @@ export class Config {
   public static DotnetExecutablePath: string = "dotnetExecutablePath";
   public static LanguageServerRuntimePath: string = "languageServerRuntimePath";
   public static LanguageServerLaunchArgs: string = "languageServerLaunchArgs";
+  public static AutomaticVerification: string = "automaticVerification";
   public static ColorCounterExamples: string = "colorCounterExamples";
   public static CompilerArgs: string = "compilerArgs";
   public static CompilerRuntimePath: string = "compilerRuntimePath";

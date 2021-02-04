@@ -4,6 +4,7 @@
 
 - Updated the required .NET runtime to ASP.NET Core 5.0.
 - Updated the language server to [v3.0.0](https://github.com/dafny-lang/language-server-csharp/releases/tag/v3.0.0).
+- Added configuration for the automatic verification.
 
 ## 1.3.0
 

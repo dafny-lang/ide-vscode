@@ -126,6 +126,12 @@
           "default": "../../dafnyLanguageServer/DafnyLS.dll",
           "description": "Absolute or relative path to the DafnyLS.dll"
         },
+        "dafny.automaticVerification": {
+          "type": "string",
+          "default": "onchange",
+          "enum": [ "never", "onchange", "onsave" ],
+          "description": "When to apply the automatic verification (requires restart)"
+        },
         "dafny.languageServerLaunchArgs": {
           "type": "array",
           "default": [],

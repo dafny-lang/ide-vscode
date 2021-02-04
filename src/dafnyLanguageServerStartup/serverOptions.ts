@@ -57,12 +57,18 @@ export default class ServerOptions extends LanguageClient {
       }
     });
 
-    const launchArguments: string[] | undefined =
+    const launchArguments: string[] =
       config.get<string[]>(Config.LanguageServerLaunchArgs) || [];
-    launchArguments.splice(0, 0, languageServerRuntimePath);
+    const autoVerification: string =
+      config.get<string>(Config.AutomaticVerification) || 'onchange';
+    const dotnetArguments = [
+      languageServerRuntimePath,
+      `--documents:verify=${autoVerification}`,
+      ...launchArguments
+    ];
     const serverOptions: ClientServerOptions = {
-      run: { command: dotnetExecutablePath, args: launchArguments },
-      debug: { command: dotnetExecutablePath, args: launchArguments },
+      run: { command: dotnetExecutablePath, args: dotnetArguments },
+      debug: { command: dotnetExecutablePath, args: dotnetArguments },
     };
 
     const clientOptions: LanguageClientOptions = {
