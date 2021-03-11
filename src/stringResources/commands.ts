@@ -24,6 +24,7 @@ export class Config {
   public static CompilerArgs: string = "compilerArgs";
   public static CompilerRuntimePath: string = "compilerRuntimePath";
   public static CompilerOutputDir: string = "compilerOutputDir";
+  public static TerminalCommandPrefix: string = "terminalCommandPrefix";
 }
 
 export class EnvironmentConfig {

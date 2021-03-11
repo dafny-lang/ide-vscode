@@ -60,6 +60,10 @@ export class Compile implements ICompile {
   }
 
   private getCommandPrefix(): string {
+    const configuredPrefix = this.config.get<string>(Config.TerminalCommandPrefix);
+    if(configuredPrefix !== undefined) {
+      return configuredPrefix;
+    }
     return os.type() === "Windows_NT" ? "& " : "";
   }
 
