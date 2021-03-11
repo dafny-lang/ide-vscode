@@ -167,6 +167,10 @@
             "fontColor": null
           },
           "description": "Customize the color (HEX) of Counter Examples. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults."
+        },
+        "dafny.commandPrefix": {
+          "type": "string",
+          "description": "The prefix to use when executing a command in the VS Code terminal. Defaults to & on windows."
         }
       }
     },
