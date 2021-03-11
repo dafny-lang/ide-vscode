@@ -170,6 +170,7 @@
         },
         "dafny.terminalCommandPrefix": {
           "type": "string",
+          "default": null,
           "description": "The prefix to use when executing a command in the VS Code terminal. Defaults to & on windows."
         }
       }
