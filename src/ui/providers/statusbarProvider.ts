@@ -14,7 +14,6 @@ import {
 
 import { IStatusbarProvider } from "./IStatusbarProvider";
 
-
 /**
  * This component adds additional information to the status bar like
  * if the Dafny file is valid or not and how many errors were found.
@@ -49,8 +48,9 @@ export class StatusbarProvider implements IStatusbarProvider {
     // Sent when the verification of a document started
     languageServer.onNotification(
       LanguageServerNotification.VerificationStarted,
-      ({ uri } : { uri: string }) => {
-        this.verificationMessage[Uri.parse(uri).toString()] = StatusbarStrings.Verifying;
+      ({ uri }: { uri: string }) => {
+        this.verificationMessage[Uri.parse(uri).toString()] =
+          StatusbarStrings.Verifying;
         this.update();
       }
     );
@@ -58,7 +58,7 @@ export class StatusbarProvider implements IStatusbarProvider {
     // Sent when the verification of a document completed
     languageServer.onNotification(
       LanguageServerNotification.VerificationCompleted,
-      ({ uri, verified } : { uri: string, verified: boolean }) => {
+      ({ uri, verified }: { uri: string; verified: boolean }) => {
         this.verificationMessage[Uri.parse(uri).toString()] = verified
           ? StatusbarStrings.Verified
           : StatusbarStrings.NotVerified;
@@ -95,11 +95,11 @@ export class StatusbarProvider implements IStatusbarProvider {
   }
 
   private getVerificationText(): string {
-    if(!window.activeTextEditor) {
-      return '';
+    if (!window.activeTextEditor) {
+      return "";
     }
     const activeDocument = window.activeTextEditor?.document.uri.toString();
-    return this.verificationMessage[activeDocument] ?? '';
+    return this.verificationMessage[activeDocument] ?? "";
   }
 
   private hide(): void {
