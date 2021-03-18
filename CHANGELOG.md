@@ -1,5 +1,10 @@
 # Release Notes
 
+## 1.5.0
+
+- Made the terminal command prefix configurable.
+- Added verification activity indicator to the status bar.
+
 ## 1.4.0
 
 - Updated the required .NET runtime to ASP.NET Core 5.0.
