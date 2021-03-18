@@ -21,7 +21,8 @@ export class LanguageServerNotification {
   public static DafnyLanguageServerVersionReceived: string =
     "dafnyLanguageServerVersionReceived";
 
-  public static ActiveVerifiyingDocument: string = "activeVerifiyingDocument";
+  public static VerificationStarted: string = "dafny/verification/started";
+  public static VerificationCompleted: string = "dafny/verification/completed";
 }
 
 /**
