@@ -12,7 +12,6 @@ import {
   EnvironmentConfig,
 } from "../../stringResources/_StringResourcesModule";
 
-import { DafnyFileChecker } from "../dafnyFileChecker";
 import { IStatusbarProvider } from "./IStatusbarProvider";
 
 /**
@@ -21,9 +20,8 @@ import { IStatusbarProvider } from "./IStatusbarProvider";
  * It also shows the information if the server has been started and the Dafny version received from the server.
  */
 export class StatusbarProvider implements IStatusbarProvider {
-  private dafnyerrors: { [docPathName: string]: number } = {};
+  private verificationMessage: { [documentUri: string]: string } = {};
   private dafnyLanguageServerVersion: string | undefined;
-  private activeDocument: Uri | undefined;
   private serverStatusBar: StatusBarItem;
   private currentDocumentStatucBar: StatusBarItem;
 
@@ -47,20 +45,23 @@ export class StatusbarProvider implements IStatusbarProvider {
       }
     );
 
-    // Set from the verifiaction service; this gets triggered by every server side Dafny file buffer update
+    // Sent when the verification of a document started
     languageServer.onNotification(
-      LanguageServerNotification.ActiveVerifiyingDocument,
-      (activeDocument: Uri) => {
-        this.activeDocument = activeDocument;
+      LanguageServerNotification.VerificationStarted,
+      ({ uri }: { uri: string }) => {
+        this.verificationMessage[Uri.parse(uri).toString()] =
+          StatusbarStrings.Verifying;
         this.update();
       }
     );
 
-    // This update gets called by server-side events when new Dafny file error informations are available
+    // Sent when the verification of a document completed
     languageServer.onNotification(
-      LanguageServerNotification.UpdateStatusbar,
-      (countedErrors: number) => {
-        this.dafnyerrors[DafnyFileChecker.getActiveFileName()] = countedErrors;
+      LanguageServerNotification.VerificationCompleted,
+      ({ uri, verified }: { uri: string; verified: boolean }) => {
+        this.verificationMessage[Uri.parse(uri).toString()] = verified
+          ? StatusbarStrings.Verified
+          : StatusbarStrings.NotVerified;
         this.update();
       }
     );
@@ -81,26 +82,24 @@ export class StatusbarProvider implements IStatusbarProvider {
     ) {
       this.hide();
     } else {
-      /*const errors = this.dafnyerrors[DafnyFileChecker.getActiveFileName()];
-      this.currentDocumentStatucBar.text =
-        this.dafnyerrors && errors > 0
-          ? `${StatusbarStrings.NotVerified} - ${StatusbarStrings.Errors}: ${errors}`
-          : StatusbarStrings.Verified;*/
-
+      this.currentDocumentStatucBar.text = this.getVerificationText();
       if (this.dafnyLanguageServerVersion) {
         this.serverStatusBar.text = `${
           StatusbarStrings.DafnyVersion
         }: ${this.dafnyLanguageServerVersion.trim()}`;
-        this.serverStatusBar.tooltip = this.activeDocument
-          ? `${
-              StatusbarStrings.CurrentDocument
-            }: ${this.activeDocument.toString()}`
-          : StatusbarStrings.NoDocumentSelected;
       } else {
         this.currentDocumentStatucBar.text = StatusbarStrings.Pending;
       }
       this.show();
     }
+  }
+
+  private getVerificationText(): string {
+    if (!window.activeTextEditor) {
+      return "";
+    }
+    const activeDocument = window.activeTextEditor?.document.uri.toString();
+    return this.verificationMessage[activeDocument] ?? "";
   }
 
   private hide(): void {

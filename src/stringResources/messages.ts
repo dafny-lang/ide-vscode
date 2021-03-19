@@ -62,6 +62,7 @@ export class Information {
 export class StatusbarStrings {
   public static Verified: string = "$(thumbsup) Verified";
   public static NotVerified: string = "$(thumbsdown) Not verified";
+  public static Verifying: string = "$(sync~spin) Verifying...";
   public static Errors: string = "Errors";
   public static Pending: string = "$(issue-opened) Server answer pending";
   public static DafnyVersion: string = "DafnyLS";
