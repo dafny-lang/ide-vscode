@@ -32,7 +32,7 @@ function getLanguageServerPlatformSuffix(): string {
     case "Windows_NT":
       return "win";
     case "Darwin":
-      return "osx-10.14.1";
+      return "osx-10.14.2";
     default:
       return "ubuntu-16.04";
   }
