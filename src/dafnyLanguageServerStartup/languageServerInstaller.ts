@@ -39,7 +39,8 @@ function getLanguageServerPlatformSuffix(): string {
 }
 
 export class LanguageServerInstaller implements ILanguageServerInstaller {
-  private readonly resourcesFolderName: string = LanguageServerConfig.ResourcesFolder;
+  private readonly resourcesFolderName: string =
+    LanguageServerConfig.ResourcesFolder;
 
   private readonly basePathToOutFolder: string = this.resolvePath(
     path.join(__dirname, "..", "..", this.resourcesFolderName)

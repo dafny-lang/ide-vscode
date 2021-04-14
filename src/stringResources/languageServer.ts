@@ -37,6 +37,6 @@ export class LanguageServerConfig {
   private static DownloadBaseUri: string =
     "https://github.com/dafny-lang/dafny/releases/download";
   public static getServerDownloadAddress(platformSuffix: string): string {
-    return `${this.DownloadBaseUri}/v${LanguageServerConfig.RequiredVersion}/dafny-3.0.0-x64-${platformSuffix}.zip`;
+    return `${this.DownloadBaseUri}/v${LanguageServerConfig.RequiredVersion}/dafny-${LanguageServerConfig.RequiredVersion}-x64-${platformSuffix}.zip`;
   }
 }
