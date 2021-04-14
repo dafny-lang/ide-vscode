@@ -31,7 +31,7 @@ export class LanguageServerNotification {
  * with the later adapted languageServerInstaller for the Dafny language server Github CI.
  */
 export class LanguageServerConfig {
-  public static ServerFolder: string = "dafnyLanguageServer";
+  public static ResourcesFolder: string = "resources";
   public static RequiredVersion: string = "3.1.0";
 
   private static DownloadBaseUri: string =

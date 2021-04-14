@@ -123,8 +123,8 @@
       "properties": {
         "dafny.languageServerRuntimePath": {
           "type": "string",
-          "default": "../../dafnyLanguageServer/DafnyLS.dll",
-          "description": "Absolute or relative path to the DafnyLS.dll"
+          "default": "../../resources/dafny/DafnyLanguageServer.dll",
+          "description": "Absolute or relative path to the DafnyLanguageServer.dll"
         },
         "dafny.automaticVerification": {
           "type": "string",
@@ -139,7 +139,7 @@
         },
         "dafny.compilerRuntimePath": {
           "type": "string",
-          "default": "../../dafnyLanguageServer/Dafny.dll",
+          "default": "../../resources/dafny/Dafny.dll",
           "description": "Absolute or relative path to the Dafny.dll"
         },
         "dafny.compilerOutputDir": {
