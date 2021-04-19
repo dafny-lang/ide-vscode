@@ -129,7 +129,11 @@
         "dafny.automaticVerification": {
           "type": "string",
           "default": "onchange",
-          "enum": [ "never", "onchange", "onsave" ],
+          "enum": [
+            "never",
+            "onchange",
+            "onsave"
+          ],
           "description": "When to apply the automatic verification (requires restart)"
         },
         "dafny.languageServerLaunchArgs": {
@@ -229,7 +233,7 @@
     "vsce": "^1.75.0"
   },
   "dependencies": {
-    "decompress-zip": "^0.2.2",
+    "decompress-zip": "^0.3.3",
     "follow-redirects": "^1.11.0",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
