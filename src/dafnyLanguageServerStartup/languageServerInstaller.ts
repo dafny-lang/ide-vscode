@@ -135,7 +135,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     try {
       const latestVersion: string = await this.getLatestVersion();
 
-      const localVersionSemVer = localVersion.match(/(\d+\.\d+\.\d+)/);
+      const localVersionSemVer = localVersion.match(/(\d+\.\d+\.\d+).*/);
       const latestVersionSemVer = latestVersion.match(/(\d+\.\d+\.\d+)/);
 
       if (localVersionSemVer != null && latestVersionSemVer != null) {
