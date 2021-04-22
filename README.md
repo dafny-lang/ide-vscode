@@ -1,11 +1,11 @@
 # Dafny for Visual Studio Code
 
-This extension adds _Dafny 3.0.0_ support to Visual Studio Code. If you require _Dafny 2_ support, consider using the [legacy extension](https://marketplace.visualstudio.com/items?itemName=correctnessLab.dafny-vscode-legacy).
-This VSCode plugin requires the [Dafny language server](https://github.com/dafny-lang/language-server-csharp). The plugin will install it automatically upon first use.
+This extension adds _Dafny 3.1.0_ support to Visual Studio Code. If you require _Dafny 2_ support, consider using the [legacy extension](https://marketplace.visualstudio.com/items?itemName=correctnessLab.dafny-vscode-legacy).
+This VSCode plugin requires the Dafny language server (shipped with the Dafny release since v3.1.0). The plugin will install it automatically upon first use.
 
 ## Features
 
-- Compatible to **Dafny 3.0.0**.
+- Compatible to **Dafny 3.1.0**.
 - **Compile and Run** `.dfy` files.
 - **Verification** as one types.
 - **Syntax highlighting** thanks to [sublime-dafny](https://github.com/erggo/sublime-dafny). See file `LICENSE_sublime-dafny.rst` for license.

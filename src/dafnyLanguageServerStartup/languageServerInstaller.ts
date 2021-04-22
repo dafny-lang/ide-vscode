@@ -32,23 +32,24 @@ function getLanguageServerPlatformSuffix(): string {
     case "Windows_NT":
       return "win";
     case "Darwin":
-      return "osx-10.14.1";
+      return "osx-10.14.2";
     default:
       return "ubuntu-16.04";
   }
 }
 
 export class LanguageServerInstaller implements ILanguageServerInstaller {
-  private readonly serverFolderName: string = LanguageServerConfig.ServerFolder;
+  private readonly resourcesFolderName: string =
+    LanguageServerConfig.ResourcesFolder;
 
   private readonly basePathToOutFolder: string = this.resolvePath(
-    path.join(__dirname, "..", "..", this.serverFolderName)
+    path.join(__dirname, "..", "..", this.resourcesFolderName)
   );
   private readonly downloadFile: string = this.resolvePath(
-    path.join(this.basePathToOutFolder, "..", this.serverFolderName + ".zip")
+    path.join(this.basePathToOutFolder, "..", this.resourcesFolderName + ".zip")
   );
   private readonly z3ExecutablePath = this.resolvePath(
-    path.join(this.basePathToOutFolder, "z3", "bin", "z3")
+    path.join(this.basePathToOutFolder, "dafny", "z3", "bin", "z3")
   );
 
   private readonly serverURL: string = LanguageServerConfig.getServerDownloadAddress(
@@ -134,7 +135,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     try {
       const latestVersion: string = await this.getLatestVersion();
 
-      const localVersionSemVer = localVersion.match(/(\d+\.\d+\.\d+)/);
+      const localVersionSemVer = localVersion.match(/(\d+\.\d+\.\d+).*/);
       const latestVersionSemVer = latestVersion.match(/(\d+\.\d+\.\d+)/);
 
       if (localVersionSemVer != null && latestVersionSemVer != null) {

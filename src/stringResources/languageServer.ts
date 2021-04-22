@@ -31,12 +31,12 @@ export class LanguageServerNotification {
  * with the later adapted languageServerInstaller for the Dafny language server Github CI.
  */
 export class LanguageServerConfig {
-  public static ServerFolder: string = "dafnyLanguageServer";
-  public static RequiredVersion: string = "3.0.0";
+  public static ResourcesFolder: string = "resources";
+  public static RequiredVersion: string = "3.1.0";
 
   private static DownloadBaseUri: string =
-    "https://github.com/dafny-lang/language-server-csharp/releases/download";
+    "https://github.com/dafny-lang/dafny/releases/download";
   public static getServerDownloadAddress(platformSuffix: string): string {
-    return `${this.DownloadBaseUri}/v${LanguageServerConfig.RequiredVersion}/DafnyLS-${platformSuffix}.zip`;
+    return `${this.DownloadBaseUri}/v${LanguageServerConfig.RequiredVersion}/dafny-${LanguageServerConfig.RequiredVersion}-x64-${platformSuffix}.zip`;
   }
 }

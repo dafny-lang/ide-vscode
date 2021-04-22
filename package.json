@@ -123,13 +123,17 @@
       "properties": {
         "dafny.languageServerRuntimePath": {
           "type": "string",
-          "default": "../../dafnyLanguageServer/DafnyLS.dll",
-          "description": "Absolute or relative path to the DafnyLS.dll"
+          "default": "../../resources/dafny/DafnyLanguageServer.dll",
+          "description": "Absolute or relative path to the DafnyLanguageServer.dll"
         },
         "dafny.automaticVerification": {
           "type": "string",
           "default": "onchange",
-          "enum": [ "never", "onchange", "onsave" ],
+          "enum": [
+            "never",
+            "onchange",
+            "onsave"
+          ],
           "description": "When to apply the automatic verification (requires restart)"
         },
         "dafny.languageServerLaunchArgs": {
@@ -139,7 +143,7 @@
         },
         "dafny.compilerRuntimePath": {
           "type": "string",
-          "default": "../../dafnyLanguageServer/Dafny.dll",
+          "default": "../../resources/dafny/Dafny.dll",
           "description": "Absolute or relative path to the Dafny.dll"
         },
         "dafny.compilerOutputDir": {
@@ -229,7 +233,7 @@
     "vsce": "^1.75.0"
   },
   "dependencies": {
-    "decompress-zip": "^0.2.2",
+    "decompress-zip": "^0.3.3",
     "follow-redirects": "^1.11.0",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
