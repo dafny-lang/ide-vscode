@@ -49,7 +49,7 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
     path.join(this.basePathToOutFolder, "..", this.resourcesFolderName + ".zip")
   );
   private readonly z3ExecutablePath = this.resolvePath(
-    path.join(this.basePathToOutFolder, "z3", "bin", "z3")
+    path.join(this.basePathToOutFolder, "dafny", "z3", "bin", "z3")
   );
 
   private readonly serverURL: string = LanguageServerConfig.getServerDownloadAddress(
