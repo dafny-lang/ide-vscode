@@ -4,7 +4,7 @@
 
 - Made the terminal command prefix configurable.
 - Added verification activity indicator to the status bar.
-- Updated to Dafny and language server to [v3.1.0](https://github.com/dafny-lang/dafny/releases/tag/v3.1.0)
+- Updated Dafny and language server to [v3.1.0](https://github.com/dafny-lang/dafny/releases/tag/v3.1.0)
 
 ## 1.4.0
 
