@@ -58,11 +58,14 @@ export default class ServerOptions extends LanguageClient {
     });
 
     // TODO Temporary fix for Dafny 3.1.0
-    const nlogConfigPath = path.join(path.dirname(languageServerRuntimePath), 'nlog.config');
+    const nlogConfigPath = path.join(
+      path.dirname(languageServerRuntimePath),
+      "nlog.config"
+    );
     fs.exists(nlogConfigPath, (exists) => {
-      if(!exists) {
-        fs.writeFile(nlogConfigPath, '', (error) => {
-          if(error) {
+      if (!exists) {
+        fs.writeFile(nlogConfigPath, "", (error) => {
+          if (error) {
             window.showErrorMessage(
               `Failed to create nlog.config at ${nlogConfigPath}`
             );
