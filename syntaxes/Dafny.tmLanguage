@@ -37,7 +37,7 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(class|trait|datatype|codatatype|type|newtype|function|ghost|var|const|method|constructor|colemma|abstract|module|import|export|lemma|as|opened|static|protected|twostate|refines|witness|extends|returns|break|then|else|if|label|return|while|print|where|new|in|fresh|allocated|match|case|assert|by|assume|expect|reveal|modify|predicate|inductive|copredicate|forall|exists|false|true|null|old|unchanged|calc|iterator|yields|yield)\b</string>
+			<string>\b(class|trait|datatype|codatatype|type|newtype|function|ghost|nameonly|var|const|method|constructor|abstract|module|import|export|lemma|as|is|opened|static|twostate|refines|witness|extends|returns|break|then|else|if|label|return|while|for|to|downto|print|new|in|fresh|allocated|match|case|assert|by|assume|expect|reveal|modify|predicate|least|greatest|forall|exists|false|true|null|old|unchanged|calc|iterator|yields|yield)\b</string>
 			<key>name</key>
 			<string>keyword.control.dafny</string>
 		</dict>
@@ -158,7 +158,7 @@
 			<array>
 				<dict>
 					<key>match</key>
-					<string>\b(class|trait|datatype|codatatype|type|newtype|function|include|ghost|var|const|method|constructor|colemma|abstract|module|import|export|lemma|as|opened|static|protected|twostate|refines|witness|extends|returns|break|then|else|if|label|return|while|print|where|new|in|fresh|allocated|match|case|assert|by|assume|reveal|modify|predicate|inductive|copredicate|forall|exists|false|true|null|old|unchanged|calc|iterator|yields|yield)\b</string>
+					<string>\b(class|trait|datatype|codatatype|type|newtype|function|include|ghost|nameonly|var|const|method|constructor|abstract|module|import|export|lemma|as|is|opened|static|twostate|refines|witness|extends|returns|break|then|else|if|label|return|while|for|to|downto|print|new|in|fresh|allocated|match|case|assert|by|assume|expect|reveal|modify|predicate|least|greatest|forall|exists|false|true|null|old|unchanged|calc|iterator|yields|yield)\b</string>
 					<key>name</key>
 					<string>keyword.control.dafny</string>
 				</dict>
@@ -194,19 +194,13 @@
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>\b(try|catch|finally|throw)\b</string>
-					<key>name</key>
-					<string>keyword.control.catch-exception.dafny</string>
-				</dict>
-				<dict>
-					<key>match</key>
 					<string>\|:</string>
 					<key>name</key>
 					<string>keyword.control.dafny</string>
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(==|!=|&lt;=|&gt;=|&lt;&gt;|&lt;|&gt;)</string>
+					<string>(==|!=|&lt;=|&gt;=|&lt;|&gt;)</string>
 					<key>name</key>
 					<string>keyword.operator.comparison.dafny</string>
 				</dict>
@@ -218,27 +212,15 @@
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(\-\-|\+\+)</string>
-					<key>name</key>
-					<string>keyword.operator.increment-decrement.dafny</string>
-				</dict>
-				<dict>
-					<key>match</key>
 					<string>(\-|\+|\*|\/|%)</string>
 					<key>name</key>
 					<string>keyword.operator.arithmetic.dafny</string>
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(!|&amp;&amp;|\|\|)</string>
+					<string>(!|&amp;&amp;|\|\||&lt;==&gt;|==&gt;|&lt;==)</string>
 					<key>name</key>
 					<string>keyword.operator.logical.dafny</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>(?&lt;=\S)\.(?=\S)</string>
-					<key>name</key>
-					<string>keyword.operator.dereference.dafny</string>
 				</dict>
 			</array>
 		</dict>
