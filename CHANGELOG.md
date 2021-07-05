@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.6.0
+
+- Updated Dafny and language server to [v3.2.0](https://github.com/dafny-lang/dafny/releases/tag/v3.2.0)
+
 ## 1.5.0
 
 - Made the terminal command prefix configurable.
