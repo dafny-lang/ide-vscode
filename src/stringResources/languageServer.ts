@@ -32,7 +32,7 @@ export class LanguageServerNotification {
  */
 export class LanguageServerConfig {
   public static ResourcesFolder: string = "resources";
-  public static RequiredVersion: string = "3.1.0";
+  public static RequiredVersion: string = "3.2.0";
 
   private static DownloadBaseUri: string =
     "https://github.com/dafny-lang/dafny/releases/download";
