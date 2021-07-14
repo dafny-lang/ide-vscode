@@ -95,6 +95,21 @@ If VSCode appears unresponsive, you may lower the verification frequency or disa
 
 ![Automatic Verification](readmeResources/automaticVerificationOption.png)
 
+## Troubleshooting
+
+### Stuck at *Verifying...*
+
+Under certain circumstances, the extension appears to be stuck at *Verifying...*. Until now, this has only been observed for Mac OSX and occurs due to a [stack overflow](https://github.com/dafny-lang/dafny/issues/1213#issuecomment-870440082) in the language server.
+To overcome this issue, set the environment variable `COMPlus_DefaultStackSize` to a sufficiently large value before starting VSCode. For example:
+
+```sh
+# Increase the stack size
+export COMPlus_DefaultStackSize=100000
+
+# Launch VSCode
+code
+```
+
 ## Contribute
 
 Dafny for Visual Studio Code is an MIT licensed open-source project that lives from code contributions.
