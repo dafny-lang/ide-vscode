@@ -139,9 +139,9 @@ export class LanguageServerInstaller implements ILanguageServerInstaller {
       const latestVersionSemVer = latestVersion.match(/(\d+\.\d+\.\d+)/);
 
       if (localVersionSemVer != null && latestVersionSemVer != null) {
-        console.log("Local: " + localVersionSemVer[0]);
+        console.log("Local: " + localVersionSemVer[1]);
         console.log("Remote:" + latestVersionSemVer[0]);
-        return semver.gte(localVersionSemVer[0], latestVersionSemVer[0]);
+        return semver.gte(localVersionSemVer[1], latestVersionSemVer[0]);
       } else {
         console.log("Can not parse version numbers");
         return Promise.reject(false);
