@@ -19,7 +19,7 @@ jobs:
       #  uses: warchant/setup-sonar-scanner@v1
 
       - run: npm install
-      - run: npm run prettier
+      #- run: npm run prettier
       - run: npm run build
       - run: npm run package
       #      - run: npm test
