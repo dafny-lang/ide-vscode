@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.7.0
+
+- Now changing status to *Not Verified* as soon as a document is edited.
+
 ## 1.6.0
 
 - Updated Dafny and language server to [v3.2.0](https://github.com/dafny-lang/dafny/releases/tag/v3.2.0)
