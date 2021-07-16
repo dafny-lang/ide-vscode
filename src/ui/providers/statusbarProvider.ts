@@ -1,6 +1,7 @@
 "use strict";
 import {
   window,
+  workspace,
   Uri,
   StatusBarItem,
   StatusBarAlignment,
@@ -65,6 +66,10 @@ export class StatusbarProvider implements IStatusbarProvider {
         this.update();
       }
     );
+
+    workspace.onDidChangeTextDocument(event => {
+      this.verificationMessage[event.document.uri.toString()] = StatusbarStrings.NotVerified;
+    });
   }
 
   public dispose(): void {
