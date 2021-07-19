@@ -1,7 +1,6 @@
 "use strict";
 import {
   window,
-  workspace,
   Uri,
   StatusBarItem,
   StatusBarAlignment,
