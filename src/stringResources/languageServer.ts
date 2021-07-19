@@ -21,8 +21,19 @@ export class LanguageServerNotification {
   public static DafnyLanguageServerVersionReceived: string =
     "dafnyLanguageServerVersionReceived";
 
-  public static VerificationStarted: string = "dafny/verification/started";
-  public static VerificationCompleted: string = "dafny/verification/completed";
+  public static CompilationStatus: string = "dafny/compilation/status";
+}
+
+/**
+ * Statuses sent by the language server while processing a document.
+ */
+export enum CompilationStatus {
+  ParsingFailed = 0,
+  ResolutionFailed,
+  CompilationSucceeded,
+  VerificationStarted,
+  VerificationFailed,
+  VerificationSucceeded
 }
 
 /**

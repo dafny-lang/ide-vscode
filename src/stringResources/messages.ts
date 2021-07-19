@@ -60,9 +60,12 @@ export class Information {
 }
 
 export class StatusbarStrings {
-  public static Verified: string = "$(thumbsup) Verified";
-  public static NotVerified: string = "$(thumbsdown) Not verified";
+  public static ParsingFailed: string = "$(thumbsdown) Parsing Failed";
+  public static ResolutionFailed: string = "$(thumbsdown) Resolution Failed";
+  public static CompilationSucceeded: string = "$(thumbsup) Compilation Succeeded";
   public static Verifying: string = "$(sync~spin) Verifying...";
+  public static VerificationSucceeded: string = "$(thumbsup) Verification Succeeded";
+  public static VerificationFailed: string = "$(thumbsdown) Not verified";
   public static Errors: string = "Errors";
   public static Pending: string = "$(issue-opened) Server answer pending";
   public static DafnyVersion: string = "DafnyLS";

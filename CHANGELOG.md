@@ -2,7 +2,7 @@
 
 ## 1.7.0
 
-- Now changing status to *Not Verified* as soon as a document is edited.
+- Now showing parser and resolver errors in the status bar.
 
 ## 1.6.0
 

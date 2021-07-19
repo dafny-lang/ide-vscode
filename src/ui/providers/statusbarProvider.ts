@@ -7,6 +7,7 @@ import {
   StatusBarAlignment,
   LanguageClient,
 } from "../../ideApi/_IdeApi";
+import { CompilationStatus } from "../../stringResources/languageServer";
 import {
   LanguageServerNotification,
   StatusbarStrings,
@@ -14,6 +15,15 @@ import {
 } from "../../stringResources/_StringResourcesModule";
 
 import { IStatusbarProvider } from "./IStatusbarProvider";
+
+const COMPILATION_STATUS_MESSAGE_MAPPINGS = {
+  [CompilationStatus.ParsingFailed]: StatusbarStrings.ParsingFailed,
+  [CompilationStatus.ResolutionFailed]: StatusbarStrings.ResolutionFailed,
+  [CompilationStatus.CompilationSucceeded]: StatusbarStrings.CompilationSucceeded,
+  [CompilationStatus.VerificationStarted]: StatusbarStrings.Verifying,
+  [CompilationStatus.VerificationSucceeded]: StatusbarStrings.VerificationSucceeded,
+  [CompilationStatus.VerificationFailed]: StatusbarStrings.VerificationFailed
+};
 
 /**
  * This component adds additional information to the status bar like
@@ -46,30 +56,15 @@ export class StatusbarProvider implements IStatusbarProvider {
       }
     );
 
-    // Sent when the verification of a document started
+    // Sent when there are any changes to the compilation status of a document.
     languageServer.onNotification(
-      LanguageServerNotification.VerificationStarted,
-      ({ uri }: { uri: string }) => {
+      LanguageServerNotification.CompilationStatus,
+      ({ uri, status }: { uri: string, status: CompilationStatus }) => {
         this.verificationMessage[Uri.parse(uri).toString()] =
-          StatusbarStrings.Verifying;
+          COMPILATION_STATUS_MESSAGE_MAPPINGS[status];
         this.update();
       }
     );
-
-    // Sent when the verification of a document completed
-    languageServer.onNotification(
-      LanguageServerNotification.VerificationCompleted,
-      ({ uri, verified }: { uri: string; verified: boolean }) => {
-        this.verificationMessage[Uri.parse(uri).toString()] = verified
-          ? StatusbarStrings.Verified
-          : StatusbarStrings.NotVerified;
-        this.update();
-      }
-    );
-
-    workspace.onDidChangeTextDocument(event => {
-      this.verificationMessage[event.document.uri.toString()] = StatusbarStrings.NotVerified;
-    });
   }
 
   public dispose(): void {
