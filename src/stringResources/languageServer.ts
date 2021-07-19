@@ -28,12 +28,12 @@ export class LanguageServerNotification {
  * Statuses sent by the language server while processing a document.
  */
 export enum CompilationStatus {
-  ParsingFailed = 0,
-  ResolutionFailed,
-  CompilationSucceeded,
-  VerificationStarted,
-  VerificationFailed,
-  VerificationSucceeded
+  ParsingFailed = "ParsingFailed",
+  ResolutionFailed = "ResolutionFailed",
+  CompilationSucceeded = "CompilationSucceeded",
+  VerificationStarted = "VerificationStarted",
+  VerificationFailed = "VerificationFailed",
+  VerificationSucceeded = "VerificationSucceeded"
 }
 
 /**
