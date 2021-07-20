@@ -22,6 +22,9 @@ export class LanguageServerNotification {
     "dafnyLanguageServerVersionReceived";
 
   public static CompilationStatus: string = "dafny/compilation/status";
+  // TODO: Status messages for Dafny 3.2, remove in the future.
+  public static VerificationStarted: string = "dafny/verification/started";
+  public static VerificationCompleted: string = "dafny/verification/completed";
 }
 
 /**

@@ -72,4 +72,8 @@ export class StatusbarStrings {
   public static CurrentDocument: string = "Current Document";
   public static NoDocumentSelected: string = "No document selected yet.";
   public static Started: string = "Server started";
+  
+  // TODO: Status messages for Dafny 3.2, remove in the future.
+  public static Verified: string = "$(thumbsup) Verified";
+  public static NotVerified: string = StatusbarStrings.VerificationFailed;
 }

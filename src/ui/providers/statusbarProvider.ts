@@ -64,6 +64,29 @@ export class StatusbarProvider implements IStatusbarProvider {
         this.update();
       }
     );
+
+    // TODO: Status message for Dafny 3.2, remove in the future.
+    // Sent when the verification of a document started
+    languageServer.onNotification(
+      LanguageServerNotification.VerificationStarted,
+      ({ uri }: { uri: string }) => {
+        this.verificationMessage[Uri.parse(uri).toString()] =
+          StatusbarStrings.Verifying;
+        this.update();
+      }
+    );
+    
+    // TODO: Status messages for Dafny 3.2, remove in the future.
+    // Sent when the verification of a document completed
+    languageServer.onNotification(
+      LanguageServerNotification.VerificationCompleted,
+      ({ uri, verified }: { uri: string; verified: boolean }) => {
+        this.verificationMessage[Uri.parse(uri).toString()] = verified
+          ? StatusbarStrings.Verified
+          : StatusbarStrings.NotVerified;
+        this.update();
+      }
+    );
   }
 
   public dispose(): void {
