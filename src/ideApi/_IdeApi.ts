@@ -27,9 +27,12 @@ export {
 
 export {
   LanguageClient,
+  ServerOptions as ClientServerOptions,
+} from "vscode-languageclient/node";
+
+export {
   LanguageClientOptions,
   ResponseError,
-  ServerOptions as ClientServerOptions,
   TextDocumentIdentifier,
 } from "vscode-languageclient";
 
