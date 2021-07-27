@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.8.0
+
+- Group verification errors and their related locations by using the "Related Information" UI for diagnostics.
+  
 ## 1.7.0
 
 - Now changing status to *Not Verified* as soon as a document is edited.
