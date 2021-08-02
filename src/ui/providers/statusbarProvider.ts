@@ -1,12 +1,12 @@
 "use strict";
 import {
   window,
-  workspace,
   Uri,
   StatusBarItem,
   StatusBarAlignment,
   LanguageClient,
 } from "../../ideApi/_IdeApi";
+import { CompilationStatus } from "../../stringResources/languageServer";
 import {
   LanguageServerNotification,
   StatusbarStrings,
@@ -14,6 +14,15 @@ import {
 } from "../../stringResources/_StringResourcesModule";
 
 import { IStatusbarProvider } from "./IStatusbarProvider";
+
+const COMPILATION_STATUS_MESSAGE_MAPPINGS = {
+  [CompilationStatus.ParsingFailed]: StatusbarStrings.ParsingFailed,
+  [CompilationStatus.ResolutionFailed]: StatusbarStrings.ResolutionFailed,
+  [CompilationStatus.CompilationSucceeded]: StatusbarStrings.CompilationSucceeded,
+  [CompilationStatus.VerificationStarted]: StatusbarStrings.Verifying,
+  [CompilationStatus.VerificationSucceeded]: StatusbarStrings.VerificationSucceeded,
+  [CompilationStatus.VerificationFailed]: StatusbarStrings.VerificationFailed
+};
 
 /**
  * This component adds additional information to the status bar like
@@ -46,6 +55,17 @@ export class StatusbarProvider implements IStatusbarProvider {
       }
     );
 
+    // Sent when there are any changes to the compilation status of a document.
+    languageServer.onNotification(
+      LanguageServerNotification.CompilationStatus,
+      ({ uri, status }: { uri: string, status: CompilationStatus }) => {
+        this.verificationMessage[Uri.parse(uri).toString()] =
+          COMPILATION_STATUS_MESSAGE_MAPPINGS[status];
+        this.update();
+      }
+    );
+
+    // TODO: Status message for Dafny 3.2, remove in the future.
     // Sent when the verification of a document started
     languageServer.onNotification(
       LanguageServerNotification.VerificationStarted,
@@ -55,7 +75,8 @@ export class StatusbarProvider implements IStatusbarProvider {
         this.update();
       }
     );
-
+    
+    // TODO: Status messages for Dafny 3.2, remove in the future.
     // Sent when the verification of a document completed
     languageServer.onNotification(
       LanguageServerNotification.VerificationCompleted,
@@ -66,10 +87,6 @@ export class StatusbarProvider implements IStatusbarProvider {
         this.update();
       }
     );
-
-    workspace.onDidChangeTextDocument(event => {
-      this.verificationMessage[event.document.uri.toString()] = StatusbarStrings.NotVerified;
-    });
   }
 
   public dispose(): void {
