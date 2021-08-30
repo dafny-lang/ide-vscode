@@ -1,36 +1,27 @@
-"use strict";
-import { ExtensionContext, workspace, window } from "./ideApi/_IdeApi";
-import { ServerInitializer } from "./dafnyLanguageServerStartup/_DafnyLanguageServerStartupModule";
-import { ExecutionCapabilities } from "./localExecution/_LocalExecutionModule";
-import { Warning, Error } from "./stringResources/_StringResourcesModule";
 
-/**
- * This is the plugin's entry point (the "main" function)
- * It starts the language server with the DafnyLanguageServer class.
- */
-export function activate(extensionContext: ExtensionContext) {
-  if (workspace.workspaceFolders === undefined) {
-    window.showWarningMessage(Warning.NoWorkspace);
-  }
+import { DafnyLanguageClient } from './language/dafnyLanguageClient';
+import checkAndInformAboutInstallation from './startupCheck';
+import DafnyIntegration from './ui/dafnyIntegration';
 
-  const exeCapabilities = new ExecutionCapabilities();
-  if (!exeCapabilities.hasSupportedDotnetVersion()) {
-    // Promt the user to install dotnet and stop extension execution.
-    window
-      .showErrorMessage(
-        Error.NoSupportedDotnet,
-        Error.ConfigureDotnetExecutable,
-        Error.GetDotnet
-      )
-      .then((selection: string | undefined) => {
-        if (selection !== undefined) {
-          exeCapabilities.getDotnet(selection);
-        }
-      });
+let languageClient: DafnyLanguageClient | undefined;
+let dafnyIntegration: DafnyIntegration | undefined;
+
+export async function activate(): Promise<void> {
+  if(!await checkAndInformAboutInstallation()) {
     return;
   }
+  languageClient = await DafnyLanguageClient.create();
+  languageClient.start();
+  // TODO block all UI interactions or only the ones depending on the language client?
+  await languageClient.onReady();
+  dafnyIntegration = DafnyIntegration.createAndRegister(languageClient);
+}
 
-  const dafnyLanguageServer = new ServerInitializer(extensionContext);
-  dafnyLanguageServer.startLanguageServer();
-  dafnyLanguageServer.registerServerRestartCommand();
+export async function deactivate(): Promise<void> {
+  if(languageClient != null) {
+    await languageClient.stop();
+  }
+  if(dafnyIntegration != null) {
+    dafnyIntegration.dispose();
+  }
 }
