@@ -1,5 +1,3 @@
-import { Disposable } from 'vscode-languageclient';
-
 interface IPreviousRequest {
   timeout: NodeJS.Timeout;
   reject: (error?: any) => any;
@@ -7,8 +5,9 @@ interface IPreviousRequest {
 
 export class DebounceError extends Error {}
 
-export interface IDebouncedFunction<TParam extends readonly any[], TResult> extends Disposable {
-  (...args: TParam): Promise<TResult>,
+export interface IDebouncedFunction<TParam extends readonly any[], TResult> {
+  (...args: TParam): Promise<TResult>;
+  dispose(): void;
 }
 
 export function debounce<TParam extends readonly any[], TResult>(fn: (...args: TParam) => TResult, delayMs: number): IDebouncedFunction<TParam, TResult> {

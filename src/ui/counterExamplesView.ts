@@ -1,5 +1,4 @@
-import { DecorationOptions, Position, Range, TextEditor, TextEditorDecorationType, Uri, window as Window, workspace as Workspace, commands as Commands } from 'vscode';
-import { Disposable } from 'vscode-languageclient';
+import { DecorationOptions, Position, Range, TextEditor, TextEditorDecorationType, Uri, window as Window, workspace as Workspace, commands as Commands, Disposable } from 'vscode';
 
 import { DafnyCommands } from '../commands';
 import Configuration from '../configuration';
@@ -20,7 +19,7 @@ const DefaultDarkFontColor = '#e3f2fd';
 const DefaultLightBackgroundColor = '#bbdefb';
 const DefaultLightFontColor = '#102027';
 
-export default class CounterExamplesView implements Disposable {
+export default class CounterExamplesView {
   private readonly activeDecorations = new Map<Uri, TextEditorDecorationType>();
   private readonly documentsWithActiveCounterExamples = new Set<Uri>();
 
@@ -29,19 +28,19 @@ export default class CounterExamplesView implements Disposable {
     CounterExampleUpdateDelayMs
   );
 
-  private eventRegistrations: Disposable[] = [];
+  private eventRegistrations?: Disposable;
   private disposed: boolean = false;
 
   private constructor(private readonly languageClient: DafnyLanguageClient) {}
 
   public static createAndRegister(languageClient: DafnyLanguageClient): CounterExamplesView {
     const instance = new CounterExamplesView(languageClient);
-    instance.eventRegistrations = [
+    instance.eventRegistrations = Disposable.from(
       Window.onDidChangeActiveTextEditor(editor => instance.updateCounterExamples(editor)),
       Workspace.onDidChangeTextDocument(() => instance.updateCounterExamples(Window.activeTextEditor)),
       Commands.registerCommand(DafnyCommands.ShowCounterExample, () => instance.enableCounterExamplesForActiveEditor()),
       Commands.registerCommand(DafnyCommands.HideCounterExample, () => instance.disableCounterExamplesForActiveEditor())
-    ];
+    );
     return instance;
   }
 
@@ -153,8 +152,6 @@ export default class CounterExamplesView implements Disposable {
     for(const [_, decoration] of this.activeDecorations) {
       decoration.dispose();
     }
-    for(const registration of this.eventRegistrations) {
-      registration.dispose();
-    }
+    this.eventRegistrations?.dispose();
   }
 }

@@ -1,7 +1,6 @@
-import { StatusBarAlignment, StatusBarItem, TextDocument, Uri, window as Window, workspace as Workspace } from 'vscode';
-import { Disposable } from 'vscode-languageclient';
-import { LanguageConstants } from '../constants';
+import { StatusBarAlignment, StatusBarItem, TextDocument, Uri, window as Window, workspace as Workspace, Disposable } from 'vscode';
 
+import { LanguageConstants } from '../constants';
 import { CompilationStatus, ICompilationStatusParams } from '../language/api/compilationStatus';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { Messages } from './messages';
@@ -17,11 +16,11 @@ const COMPILATION_STATUS_MESSAGE_MAPPINGS = {
   [CompilationStatus.VerificationFailed]: Messages.CompilationStatus.VerificationFailed
 };
 
-export default class CompilationStatusView implements Disposable {
+export default class CompilationStatusView {
   // TODO legacy verification status for dafny <=3.2
   private readonly documentStatuses = new Map<string, CompilationStatus>();
 
-  private eventRegistrations: Disposable[] = [];
+  private eventRegistrations?: Disposable;
 
   private constructor(private readonly statusBarItem: StatusBarItem) {}
 
@@ -29,12 +28,12 @@ export default class CompilationStatusView implements Disposable {
     const view = new CompilationStatusView(
       Window.createStatusBarItem(StatusBarAlignment.Left, StatusBarPriority)
     );
-    view.eventRegistrations = [
+    view.eventRegistrations = Disposable.from(
       languageClient.onCompilationStatus(params => view.updateCompilationStatus(params)),
       Workspace.onDidCloseTextDocument(document => view.documentClosed(document)),
       Workspace.onDidChangeTextDocument(() => view.updateActiveDocumentStatus()),
       Window.onDidChangeActiveTextEditor(() => view.updateActiveDocumentStatus())
-    ];
+    );
     return view;
   }
 
@@ -72,8 +71,6 @@ export default class CompilationStatusView implements Disposable {
 
   dispose(): void {
     this.statusBarItem.dispose();
-    for(const registration of this.eventRegistrations) {
-      registration.dispose();
-    }
+    this.eventRegistrations?.dispose();
   }
 }

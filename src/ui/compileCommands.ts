@@ -1,8 +1,7 @@
 import * as os from 'os';
 import * as path from 'path';
 
-import { window as Window, commands as Commands } from 'vscode';
-import { Disposable } from 'vscode-languageclient';
+import { window as Window, commands as Commands, Disposable } from 'vscode';
 import { DafnyCommands } from '../commands';
 
 import Configuration from '../configuration';
@@ -13,23 +12,21 @@ import { Messages } from './messages';
 const CompileArg = '/compile';
 const OutputPathArg = '/out';
 
-export default class CompileCommands implements Disposable {
-  private constructor(private readonly commandRegistrations: Disposable[]) { }
+export default class CompileCommands {
+  private constructor(private readonly commandRegistrations: Disposable) { }
 
   public static createAndRegister() {
     return new CompileCommands(
-      [
+      Disposable.from(
         Commands.registerCommand(DafnyCommands.Compile, () => compileAndRun(false, false)),
         Commands.registerCommand(DafnyCommands.CompileCustomArgs, () => compileAndRun(true, false)),
         Commands.registerCommand(DafnyCommands.CompileAndRun, () => compileAndRun(false, true)),
-      ]
+      )
     );
   }
 
   dispose(): void {
-    for(const registration of this.commandRegistrations) {
-      registration.dispose();
-    }
+    this.commandRegistrations.dispose();
   }
 }
 
