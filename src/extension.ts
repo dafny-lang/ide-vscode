@@ -39,6 +39,7 @@ async function isAutomaticLanguageServerInstallationPresent(context: ExtensionCo
 }
 
 async function initializeLanguageClient(context: ExtensionContext): Promise<void> {
+  statusOutput!.appendLine('starting Dafny');
   languageClient = await DafnyLanguageClient.create(context);
   languageClient.start();
   await languageClient.onReady();
@@ -58,7 +59,11 @@ async function updateLanguageServerIfNecessary(context: ExtensionContext, instal
     return true;
   }
   await languageClient!.stop();
-  return await installLanguageServer(context);
+  if(!await installLanguageServer(context)) {
+    return false;
+  }
+  await initializeLanguageClient(context);
+  return true;
 }
 
 export function isMinimumRequiredLanguageServer(version: string): boolean {

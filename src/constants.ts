@@ -1,5 +1,3 @@
-import { window, workspace } from 'vscode';
-
 export namespace LanguageConstants {
   export const Id = 'dafny';
 }
