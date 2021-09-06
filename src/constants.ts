@@ -2,6 +2,10 @@ export namespace LanguageConstants {
   export const Id = 'dafny';
 }
 
+export namespace ExtensionConstants {
+  export const ChannelName = 'Dafny VSCode';
+}
+
 export namespace ConfigurationConstants {
   export const SectionName = 'dafny';
 
@@ -30,4 +34,9 @@ export namespace ConfigurationConstants {
 export namespace DotnetConstants {
   export const ExecutableName = 'dotnet';
   export const SupportedRuntimesPattern = /Microsoft\.AspNetCore\.App\s*5\.0/i;
+}
+
+export namespace LanguageServerConstants {
+  export const ResourceFolder = [ 'out', 'resources' ];
+  export const RequiredVersion = '3.2.0';
 }

@@ -1,15 +1,22 @@
 
+import { ExtensionContext, OutputChannel, window as Window } from 'vscode';
+import { ExtensionConstants } from './constants';
+
 import { DafnyLanguageClient } from './language/dafnyLanguageClient';
 import checkAndInformAboutInstallation from './startupCheck';
 import DafnyIntegration from './ui/dafnyIntegration';
+import LanguageServerInstaller from './ui/languageServerInstaller';
 
 let languageClient: DafnyLanguageClient | undefined;
 let dafnyIntegration: DafnyIntegration | undefined;
+let statusOutput: OutputChannel | undefined;
 
-export async function activate(): Promise<void> {
+export async function activate(context: ExtensionContext): Promise<void> {
   if(!await checkAndInformAboutInstallation()) {
     return;
   }
+  statusOutput = Window.createOutputChannel(ExtensionConstants.ChannelName);
+  await installLanguageServer(context);
   languageClient = await DafnyLanguageClient.create();
   languageClient.start();
   // TODO block all UI interactions or only the ones depending on the language client?
@@ -17,11 +24,14 @@ export async function activate(): Promise<void> {
   dafnyIntegration = DafnyIntegration.createAndRegister(languageClient);
 }
 
+async function installLanguageServer(context: ExtensionContext): Promise<void> {
+  const installer = LanguageServerInstaller.createAndRegister(context, statusOutput!);
+  await installer.install();
+  installer.dispose();
+}
+
 export async function deactivate(): Promise<void> {
-  if(languageClient != null) {
-    await languageClient.stop();
-  }
-  if(dafnyIntegration != null) {
-    dafnyIntegration.dispose();
-  }
+  await languageClient?.stop();
+  dafnyIntegration?.dispose();
+  statusOutput?.dispose();
 }
