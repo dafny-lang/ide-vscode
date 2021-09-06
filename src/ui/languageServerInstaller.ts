@@ -1,6 +1,6 @@
 import * as os from 'os';
 
-import { StatusBarAlignment, StatusBarItem, window as Window, workspace as Workspace, Disposable, ExtensionContext, Uri, OutputChannel, FileSystemError } from 'vscode';
+import { workspace as Workspace, ExtensionContext, Uri, OutputChannel, FileSystemError } from 'vscode';
 import { Utils } from 'vscode-uri';
 
 import { fetch } from 'cross-fetch';
@@ -8,7 +8,6 @@ import * as extract from 'extract-zip';
 
 import { LanguageServerConstants } from '../constants';
 
-const StatusBarPriority = 10;
 const ArchiveFileName = 'dafny.zip';
 
 function getDafnyPlatformSuffix(): string {
@@ -29,20 +28,11 @@ function getDafnyDownloadAddress(): string {
   return `${baseUri}/v${version}/dafny-${version}-x64-${suffix}.zip`;
 }
 
-export default class LanguageServerDownloadView implements Disposable {
-  private constructor(
+export default class LanguageServerDownloadView {
+  public constructor(
     private readonly context: ExtensionContext,
-    private readonly statusOutput: OutputChannel,
-    private readonly statusBarItem: StatusBarItem
+    private readonly statusOutput: OutputChannel
   ) {}
-
-  public static createAndRegister(context: ExtensionContext, statusOutput: OutputChannel): LanguageServerDownloadView {
-    return new LanguageServerDownloadView(
-      context,
-      statusOutput,
-      Window.createStatusBarItem(StatusBarAlignment.Left, StatusBarPriority)
-    );
-  }
 
   public async install(): Promise<boolean> {
     this.writeStatus('starting dafny installation');
@@ -110,9 +100,5 @@ export default class LanguageServerDownloadView implements Disposable {
 
   private writeStatus(message: string): void {
     this.statusOutput.appendLine(message);
-  }
-
-  dispose(): void {
-    this.statusBarItem.dispose();
   }
 }

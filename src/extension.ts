@@ -25,9 +25,8 @@ export async function activate(context: ExtensionContext): Promise<void> {
 }
 
 async function installLanguageServer(context: ExtensionContext): Promise<void> {
-  const installer = LanguageServerInstaller.createAndRegister(context, statusOutput!);
+  const installer = new LanguageServerInstaller(context, statusOutput!);
   await installer.install();
-  installer.dispose();
 }
 
 export async function deactivate(): Promise<void> {
