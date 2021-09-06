@@ -1,7 +1,7 @@
 import * as os from 'os';
 import * as path from 'path';
 
-import { window as Window, commands as Commands, Disposable } from 'vscode';
+import { window as Window, commands as Commands, Disposable, ExtensionContext } from 'vscode';
 import { DafnyCommands } from '../commands';
 
 import Configuration from '../configuration';
@@ -15,12 +15,12 @@ const OutputPathArg = '/out';
 export default class CompileCommands {
   private constructor(private readonly commandRegistrations: Disposable) { }
 
-  public static createAndRegister() {
+  public static createAndRegister(context: ExtensionContext) {
     return new CompileCommands(
       Disposable.from(
-        Commands.registerCommand(DafnyCommands.Compile, () => compileAndRun(false, false)),
-        Commands.registerCommand(DafnyCommands.CompileCustomArgs, () => compileAndRun(true, false)),
-        Commands.registerCommand(DafnyCommands.CompileAndRun, () => compileAndRun(false, true)),
+        Commands.registerCommand(DafnyCommands.Compile, () => compileAndRun(context, false, false)),
+        Commands.registerCommand(DafnyCommands.CompileCustomArgs, () => compileAndRun(context, true, false)),
+        Commands.registerCommand(DafnyCommands.CompileAndRun, () => compileAndRun(context, false, true)),
       )
     );
   }
@@ -30,12 +30,12 @@ export default class CompileCommands {
   }
 }
 
-async function compileAndRun(useCustomArgs: boolean, run: boolean): Promise<boolean> {
+async function compileAndRun(context: ExtensionContext, useCustomArgs: boolean, run: boolean): Promise<boolean> {
   const document = Window.activeTextEditor?.document;
   if(document == null || !await document.save()) {
     return false;
   }
-  const compilerCommand = await new CommandFactory(document.fileName, useCustomArgs, run).createCompilerCommand();
+  const compilerCommand = await new CommandFactory(context, document.fileName, useCustomArgs, run).createCompilerCommand();
   if(compilerCommand == null) {
     return false;
   }
@@ -52,6 +52,7 @@ function runCommandInTerminal(command: string) {
 
 class CommandFactory {
   constructor(
+    private readonly context: ExtensionContext,
     private readonly fileName: string,
     private readonly useCustomArgs: boolean,
     private readonly run: boolean
@@ -69,10 +70,10 @@ class CommandFactory {
   }
 
   private getCompilerRuntimePath(): string {
-    const configuredPath = Configuration.getOptional<string>(ConfigurationConstants.Compiler.RuntimePath)
+    const configuredPath = Configuration.get<string | null>(ConfigurationConstants.Compiler.RuntimePath)
       ?? LanguageServerConstants.DefaultCompilerPath;
     if(!path.isAbsolute(configuredPath)) {
-      return path.join(__dirname, configuredPath);
+      return path.join(this.context.extensionPath, configuredPath);
     }
     return configuredPath;
   }

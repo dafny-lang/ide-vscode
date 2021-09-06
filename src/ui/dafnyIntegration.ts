@@ -1,4 +1,4 @@
-import { Disposable } from 'vscode';
+import { Disposable, ExtensionContext } from 'vscode';
 
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import CompilationStatusView from './compilationStatusView';
@@ -10,11 +10,11 @@ export default class DafnyIntegration {
     private readonly registrations: Disposable
   ) {}
 
-  public static createAndRegister(languageClient: DafnyLanguageClient): DafnyIntegration {
+  public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): DafnyIntegration {
     return new DafnyIntegration(
       Disposable.from(
         CounterExamplesView.createAndRegister(languageClient),
-        CompileCommands.createAndRegister(),
+        CompileCommands.createAndRegister(context),
         CompilationStatusView.createAndRegister(languageClient)
       )
     );

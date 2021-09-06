@@ -1,3 +1,5 @@
+import { window, workspace } from 'vscode';
+
 export namespace LanguageConstants {
   export const Id = 'dafny';
 }
@@ -40,6 +42,6 @@ export namespace LanguageServerConstants {
   export const ResourceFolder = [ 'out', 'resources' ];
   export const RequiredVersion = '3.2.0';
   export const DownloadBaseUri = 'https://github.com/dafny-lang/dafny/releases/download';
-  export const DefaultPath = '../../resources/dafny/DafnyLanguageServer.dll';
-  export const DefaultCompilerPath = '../../resources/dafny/Dafny.dll';
+  export const DefaultPath = 'out/resources/dafny/DafnyLanguageServer.dll';
+  export const DefaultCompilerPath = 'out/resources/dafny/Dafny.dll';
 }

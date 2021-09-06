@@ -12,16 +12,17 @@ let dafnyIntegration: DafnyIntegration | undefined;
 let statusOutput: OutputChannel | undefined;
 
 export async function activate(context: ExtensionContext): Promise<void> {
-  if(!await checkAndInformAboutInstallation()) {
+  if(!await checkAndInformAboutInstallation(context)) {
     return;
   }
   statusOutput = Window.createOutputChannel(ExtensionConstants.ChannelName);
   await installLanguageServer(context);
-  languageClient = await DafnyLanguageClient.create();
+  languageClient = await DafnyLanguageClient.create(context);
+  languageClient.onServerVersion(version => console.log('received version: ' + version));
   languageClient.start();
   // TODO block all UI interactions or only the ones depending on the language client?
   await languageClient.onReady();
-  dafnyIntegration = DafnyIntegration.createAndRegister(languageClient);
+  dafnyIntegration = DafnyIntegration.createAndRegister(context, languageClient);
 }
 
 async function installLanguageServer(context: ExtensionContext): Promise<void> {

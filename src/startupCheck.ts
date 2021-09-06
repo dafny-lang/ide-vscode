@@ -1,11 +1,11 @@
-import { window as Window } from 'vscode';
+import { ExtensionContext, window as Window } from 'vscode';
 
 import { hasSupportedDotnetVersion } from './dotnet';
 import { isLanguageServerRuntimeAccessible } from './language/dafnyLanguageClient';
 
-export default async function checkAndInformAboutInstallation(): Promise<boolean> {
+export default async function checkAndInformAboutInstallation(context: ExtensionContext): Promise<boolean> {
   return await checkDotnetInstallation()
-    && await checkLanguageServerInstallation();
+    && await checkLanguageServerInstallation(context);
 }
 
 async function checkDotnetInstallation(): Promise<boolean> {
@@ -22,8 +22,8 @@ async function checkDotnetInstallation(): Promise<boolean> {
   return true;
 }
 
-async function checkLanguageServerInstallation(): Promise<boolean> {
-  if(!await isLanguageServerRuntimeAccessible()) {
+async function checkLanguageServerInstallation(context: ExtensionContext): Promise<boolean> {
+  if(!await isLanguageServerRuntimeAccessible(context)) {
     Window.showErrorMessage('Cannot access the language server runtime');
     return false;
   }

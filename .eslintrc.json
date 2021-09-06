@@ -24,7 +24,7 @@
         "indent": [ "warn", 2 ],
         "max-depth": [ "warn", 3 ],
         "linebreak-style": [ "warn", "unix" ],
-        "max-params": [ "warn", 3 ],
+        "max-params": [ "warn", 4 ],
         "quotes": [ "warn", "single" ],
         "require-await": "warn",
         "semi": [ "warn", "always" ],
