@@ -12,4 +12,14 @@ export namespace Messages {
     export const CustomArgumentsPrompt = 'Dafny Compilation Arguments';
     export const NoArgumentsGiven = 'No additional arguments given';
   }
+
+  export namespace Installation {
+    export const Error = 'An error occurred during the installation of Dafny.';
+  }
+
+  export namespace Dotnet {
+    export const NoCompatibleInstallation = 'There is no compatible dotnet runtime installed. Dafny requires the ASP.NET Core Runtime 5.0.';
+    export const ChangeConfiguration = 'Change dafny.dotnetExecutablePath';
+    export const VisitDownload = 'Get dotnet';
+  }
 }

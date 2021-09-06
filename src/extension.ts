@@ -1,33 +1,71 @@
 
 import { ExtensionContext, OutputChannel, window as Window } from 'vscode';
-import { ExtensionConstants } from './constants';
+import { ExtensionConstants, LanguageServerConstants } from './constants';
 
-import { DafnyLanguageClient } from './language/dafnyLanguageClient';
+import { DafnyLanguageClient, isCustomLanguageServerInstallation, isLanguageServerRuntimeAccessible } from './language/dafnyLanguageClient';
 import checkAndInformAboutInstallation from './startupCheck';
 import DafnyIntegration from './ui/dafnyIntegration';
 import LanguageServerInstaller from './ui/languageServerInstaller';
+import { Messages } from './ui/messages';
 
 let languageClient: DafnyLanguageClient | undefined;
 let dafnyIntegration: DafnyIntegration | undefined;
 let statusOutput: OutputChannel | undefined;
 
 export async function activate(context: ExtensionContext): Promise<void> {
-  if(!await checkAndInformAboutInstallation(context)) {
+  if(!await checkAndInformAboutInstallation()) {
     return;
   }
   statusOutput = Window.createOutputChannel(ExtensionConstants.ChannelName);
-  await installLanguageServer(context);
-  languageClient = await DafnyLanguageClient.create(context);
-  languageClient.onServerVersion(version => console.log('received version: ' + version));
-  languageClient.start();
-  // TODO block all UI interactions or only the ones depending on the language client?
-  await languageClient.onReady();
-  dafnyIntegration = DafnyIntegration.createAndRegister(context, languageClient);
+  if(!await isAutomaticLanguageServerInstallationPresent(context)) {
+    if(!await installLanguageServer(context)) {
+      await Window.showErrorMessage(Messages.Installation.Error);
+      return;
+    }
+  }
+  await initializeLanguageClient(context);
+  languageClient!.onServerVersion(async version => {
+    if(await updateLanguageServerIfNecessary(context, version)) {
+      dafnyIntegration = DafnyIntegration.createAndRegister(context, languageClient!);
+    } else {
+      await Window.showErrorMessage(Messages.Installation.Error);
+    }
+  });
 }
 
-async function installLanguageServer(context: ExtensionContext): Promise<void> {
+async function isAutomaticLanguageServerInstallationPresent(context: ExtensionContext): Promise<boolean> {
+  return !isCustomLanguageServerInstallation(context)
+    && await isLanguageServerRuntimeAccessible(context);
+}
+
+async function initializeLanguageClient(context: ExtensionContext): Promise<void> {
+  languageClient = await DafnyLanguageClient.create(context);
+  languageClient.start();
+  await languageClient.onReady();
+}
+
+async function installLanguageServer(context: ExtensionContext): Promise<boolean> {
   const installer = new LanguageServerInstaller(context, statusOutput!);
-  await installer.install();
+  return await installer.install();
+}
+
+async function updateLanguageServerIfNecessary(context: ExtensionContext, installedVersion: string): Promise<boolean> {
+  if(isMinimumRequiredLanguageServer(installedVersion)) {
+    return true;
+  }
+  if(isCustomLanguageServerInstallation(context)) {
+    await Window.showInformationMessage(`Your Dafny installation is outdated. Recommended=${LanguageServerConstants.RequiredVersion}, Yours=${installedVersion}`);
+    return true;
+  }
+  await languageClient!.stop();
+  return await installLanguageServer(context);
+}
+
+export function isMinimumRequiredLanguageServer(version: string): boolean {
+  const [ givenMajor, givenMinor ] = version.split('.');
+  const [ requiredMajor, requiredMinor ] = LanguageServerConstants.RequiredVersion.split('.');
+  return givenMajor > requiredMajor
+    || givenMajor === requiredMajor && givenMinor >= requiredMinor;
 }
 
 export async function deactivate(): Promise<void> {
