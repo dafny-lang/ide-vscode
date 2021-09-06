@@ -1,14 +1,33 @@
+import * as os from 'os';
+
 import { StatusBarAlignment, StatusBarItem, window as Window, workspace as Workspace, Disposable, ExtensionContext, Uri, OutputChannel, FileSystemError } from 'vscode';
 import { Utils } from 'vscode-uri';
 
 import { fetch } from 'cross-fetch';
 import * as extract from 'extract-zip';
 
-import { Messages } from './messages';
 import { LanguageServerConstants } from '../constants';
 
 const StatusBarPriority = 10;
 const ArchiveFileName = 'dafny.zip';
+
+function getDafnyPlatformSuffix(): string {
+  switch (os.type()) {
+  case 'Windows_NT':
+    return 'win';
+  case 'Darwin':
+    return 'osx-10.14.2';
+  default:
+    return 'ubuntu-16.04';
+  }
+}
+
+function getDafnyDownloadAddress(): string {
+  const baseUri = LanguageServerConstants.DownloadBaseUri;
+  const version = LanguageServerConstants.RequiredVersion;
+  const suffix = getDafnyPlatformSuffix();
+  return `${baseUri}/v${version}/dafny-${version}-x64-${suffix}.zip`;
+}
 
 export default class LanguageServerDownloadView implements Disposable {
   private constructor(
@@ -29,7 +48,7 @@ export default class LanguageServerDownloadView implements Disposable {
     this.writeStatus('starting dafny installation');
     this.statusOutput.show();
     await this.cleanInstallDir();
-    const archive = await this.downloadArchive('https://github.com/dafny-lang/dafny/releases/download/v3.2.0/dafny-3.2.0-x64-win.zip');
+    const archive = await this.downloadArchive(getDafnyDownloadAddress());
     if(archive == null) {
       return false;
     }
@@ -53,6 +72,7 @@ export default class LanguageServerDownloadView implements Disposable {
     } catch(error: unknown) {
       if(!(error instanceof FileSystemError) || error.code !== 'FileNotFound') {
         this.writeStatus(`error deleting folder: ${error}`);
+        throw error;
       }
     }
   }
@@ -61,11 +81,11 @@ export default class LanguageServerDownloadView implements Disposable {
     this.writeStatus(`downloading dafny from ${downloadUri}`);
     const response = await fetch(downloadUri);
     if(!response.ok) {
-      Window.showErrorMessage(Messages.LanguageServer.DownloadFailed + response.statusText);
+      this.writeStatus(`dafny download failed: ${response.status} (${response.statusText})`);
       return;
     }
     if(response.body == null) {
-      Window.showErrorMessage(Messages.LanguageServer.DownloadFailed + Messages.LanguageServer.NoContent);
+      this.writeStatus('dafny download failed: No Content');
       return;
     }
     const content = await response.arrayBuffer();

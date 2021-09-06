@@ -39,4 +39,5 @@ export namespace DotnetConstants {
 export namespace LanguageServerConstants {
   export const ResourceFolder = [ 'out', 'resources' ];
   export const RequiredVersion = '3.2.0';
+  export const DownloadBaseUri = 'https://github.com/dafny-lang/dafny/releases/download';
 }

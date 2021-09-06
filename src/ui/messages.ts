@@ -12,9 +12,4 @@ export namespace Messages {
     export const CustomArgumentsPrompt = 'Dafny Compilation Arguments';
     export const NoArgumentsGiven = 'No additional arguments given';
   }
-
-  export namespace LanguageServer {
-    export const DownloadFailed = 'Language server download failed: ';
-    export const NoContent = 'No content';
-  }
 }
