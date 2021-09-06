@@ -5,7 +5,7 @@ import { window as Window, commands as Commands, Disposable } from 'vscode';
 import { DafnyCommands } from '../commands';
 
 import Configuration from '../configuration';
-import { ConfigurationConstants } from '../constants';
+import { ConfigurationConstants, LanguageServerConstants } from '../constants';
 import { getDotnetExecutablePath } from '../dotnet';
 import { Messages } from './messages';
 
@@ -69,7 +69,8 @@ class CommandFactory {
   }
 
   private getCompilerRuntimePath(): string {
-    const configuredPath = Configuration.get<string>(ConfigurationConstants.Compiler.RuntimePath);
+    const configuredPath = Configuration.getOptional<string>(ConfigurationConstants.Compiler.RuntimePath)
+      ?? LanguageServerConstants.DefaultCompilerPath;
     if(!path.isAbsolute(configuredPath)) {
       return path.join(__dirname, configuredPath);
     }

@@ -3,13 +3,17 @@ import * as fs from 'fs';
 import { Disposable, LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
 
 import Configuration from '../configuration';
-import { ConfigurationConstants, LanguageConstants } from '../constants';
+import { ConfigurationConstants, LanguageConstants, LanguageServerConstants } from '../constants';
 import { getDotnetExecutablePath } from '../dotnet';
 import { ICompilationStatusParams } from './api/compilationStatus';
 import { ICounterExampleItem, ICounterExampleParams } from './api/counterExample';
 
 const LanguageServerId = 'dafny-vscode';
 const LanguageServerName = 'Dafny Language Server';
+
+export function isCustomLanguageServerInstallation(): boolean {
+  return getLanguageServerRuntimePath() == null;
+}
 
 export async function isLanguageServerRuntimeAccessible(): Promise<boolean> {
   const languageServerDll = getLanguageServerRuntimePath();
@@ -23,7 +27,11 @@ export async function isLanguageServerRuntimeAccessible(): Promise<boolean> {
 }
 
 function getLanguageServerRuntimePath(): string {
-  return Configuration.get<string>(ConfigurationConstants.LanguageServer.RuntimePath);
+  return getConfiguredLanguageServerRuntimePath() ?? LanguageServerConstants.DefaultPath;
+}
+
+function getConfiguredLanguageServerRuntimePath(): string | undefined {
+  return Configuration.getOptional<string>(ConfigurationConstants.LanguageServer.RuntimePath);
 }
 
 function getLanguageServerLaunchArgs(): string[] {
