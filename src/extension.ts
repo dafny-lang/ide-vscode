@@ -1,4 +1,3 @@
-
 import { ExtensionContext, OutputChannel, window as Window } from 'vscode';
 import { ExtensionConstants, LanguageServerConstants } from './constants';
 
