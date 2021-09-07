@@ -2,10 +2,10 @@
 import { ExtensionContext, OutputChannel, window as Window } from 'vscode';
 import { ExtensionConstants, LanguageServerConstants } from './constants';
 
-import { DafnyLanguageClient, isCustomLanguageServerInstallation } from './language/dafnyLanguageClient';
+import { DafnyLanguageClient } from './language/dafnyLanguageClient';
 import checkAndInformAboutInstallation from './startupCheck';
 import DafnyIntegration from './ui/dafnyIntegration';
-import DafnyInstaller from './ui/dafnyInstaller';
+import { DafnyInstaller } from './language/dafnyInstallation';
 import { Messages } from './ui/messages';
 
 let extensionRuntime: ExtensionRuntime | undefined;
@@ -60,7 +60,7 @@ class ExtensionRuntime {
     if(DafnyInstaller.isMinimumRequiredLanguageServer(installedVersion)) {
       return;
     }
-    if(isCustomLanguageServerInstallation(this.context)) {
+    if(!this.installer.isCustomInstallation()) {
       await Window.showInformationMessage(`Your Dafny installation is outdated. Recommended=${LanguageServerConstants.RequiredVersion}, Yours=${installedVersion}`);
       return;
     }

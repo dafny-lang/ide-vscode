@@ -1,4 +1,6 @@
 import * as os from 'os';
+import * as fs from 'fs';
+import * as path from 'path';
 
 import { workspace as Workspace, window as Window, ExtensionContext, Uri, OutputChannel, FileSystemError } from 'vscode';
 import { Utils } from 'vscode-uri';
@@ -6,10 +8,22 @@ import { Utils } from 'vscode-uri';
 import { fetch } from 'cross-fetch';
 import * as extract from 'extract-zip';
 
-import { LanguageServerConstants } from '../constants';
-import { isCustomLanguageServerInstallation, isLanguageServerRuntimeAccessible } from '../language/dafnyLanguageClient';
+import { ConfigurationConstants, LanguageServerConstants } from '../constants';
+import Configuration from '../configuration';
 
 const ArchiveFileName = 'dafny.zip';
+
+export function getLanguageServerRuntimePath(context: ExtensionContext): string {
+  const configuredPath = getConfiguredLanguageServerRuntimePath() ?? LanguageServerConstants.DefaultPath;
+  if(path.isAbsolute(configuredPath)) {
+    return configuredPath;
+  }
+  return path.join(context.extensionPath, configuredPath);
+}
+
+function getConfiguredLanguageServerRuntimePath(): string | null {
+  return Configuration.get<string | null>(ConfigurationConstants.LanguageServer.RuntimePath);
+}
 
 function getDafnyPlatformSuffix(): string {
   switch (os.type()) {
@@ -29,14 +43,7 @@ function getDafnyDownloadAddress(): string {
   return `${baseUri}/v${version}/dafny-${version}-x64-${suffix}.zip`;
 }
 
-function isMinimumRequiredLanguageServer(version: string): boolean {
-  const [ givenMajor, givenMinor ] = version.split('.');
-  const [ requiredMajor, requiredMinor ] = LanguageServerConstants.RequiredVersion.split('.');
-  return givenMajor > requiredMajor
-    || givenMajor === requiredMajor && givenMinor >= requiredMinor;
-}
-
-export default class DafnyInstaller {
+export class DafnyInstaller {
   public constructor(
     private readonly context: ExtensionContext,
     private readonly statusOutput: OutputChannel
@@ -47,11 +54,6 @@ export default class DafnyInstaller {
     const [ requiredMajor, requiredMinor ] = LanguageServerConstants.RequiredVersion.split('.');
     return givenMajor > requiredMajor
       || givenMajor === requiredMajor && givenMinor >= requiredMinor;
-  }
-
-  public async isAutomaticInstallationPresent(): Promise<boolean> {
-    return !isCustomLanguageServerInstallation(this.context)
-      && await isLanguageServerRuntimeAccessible(this.context);
   }
 
   public async install(): Promise<boolean> {
@@ -69,14 +71,34 @@ export default class DafnyInstaller {
   }
 
   public async updateNecessary(installedVersion: string): Promise<boolean> {
-    if(isMinimumRequiredLanguageServer(installedVersion)) {
+    if(DafnyInstaller.isMinimumRequiredLanguageServer(installedVersion)) {
       return false;
     }
-    if(isCustomLanguageServerInstallation(this.context)) {
+    if(this.isCustomInstallation()) {
       await Window.showInformationMessage(`Your Dafny installation is outdated. Recommended=${LanguageServerConstants.RequiredVersion}, Yours=${installedVersion}`);
       return false;
     }
     return true;
+  }
+
+  public async isAutomaticInstallationPresent(): Promise<boolean> {
+    return !this.isCustomInstallation()
+      && await this.isLanguageServerRuntimeAccessible();
+  }
+
+  public isCustomInstallation(): boolean {
+    return getLanguageServerRuntimePath(this.context) == null;
+  }
+
+  private async isLanguageServerRuntimeAccessible(): Promise<boolean> {
+    const languageServerDll = getLanguageServerRuntimePath(this.context);
+    try {
+      await fs.promises.access(languageServerDll, fs.constants.R_OK);
+      return true;
+    } catch(error: unknown) {
+      console.error(`cannot access language server: ${error}`);
+      return false;
+    }
   }
 
   private async cleanInstallDir(): Promise<void> {

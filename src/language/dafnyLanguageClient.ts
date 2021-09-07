@@ -1,44 +1,15 @@
-import * as fs from 'fs';
-import * as path from 'path';
-
 import { ExtensionContext } from 'vscode';
 import { Disposable, LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
 
 import Configuration from '../configuration';
-import { ConfigurationConstants, LanguageConstants, LanguageServerConstants } from '../constants';
+import { ConfigurationConstants, LanguageConstants } from '../constants';
 import { getDotnetExecutablePath } from '../dotnet';
 import { ICompilationStatusParams } from './api/compilationStatus';
 import { ICounterExampleItem, ICounterExampleParams } from './api/counterExample';
+import { getLanguageServerRuntimePath } from './dafnyInstallation';
 
 const LanguageServerId = 'dafny-vscode';
 const LanguageServerName = 'Dafny Language Server';
-
-export function isCustomLanguageServerInstallation(context: ExtensionContext): boolean {
-  return getLanguageServerRuntimePath(context) == null;
-}
-
-export async function isLanguageServerRuntimeAccessible(context: ExtensionContext): Promise<boolean> {
-  const languageServerDll = getLanguageServerRuntimePath(context);
-  try {
-    await fs.promises.access(languageServerDll, fs.constants.R_OK);
-    return true;
-  } catch(error: unknown) {
-    console.error(`cannot access language server: ${error}`);
-    return false;
-  }
-}
-
-function getLanguageServerRuntimePath(context: ExtensionContext): string {
-  const configuredPath = getConfiguredLanguageServerRuntimePath() ?? LanguageServerConstants.DefaultPath;
-  if(path.isAbsolute(configuredPath)) {
-    return configuredPath;
-  }
-  return path.join(context.extensionPath, configuredPath);
-}
-
-function getConfiguredLanguageServerRuntimePath(): string | null {
-  return Configuration.get<string | null>(ConfigurationConstants.LanguageServer.RuntimePath);
-}
 
 function getLanguageServerLaunchArgs(): string[] {
   const launchArgs = Configuration.get<string[]>(ConfigurationConstants.LanguageServer.LaunchArgs);
