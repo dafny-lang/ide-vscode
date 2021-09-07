@@ -46,7 +46,14 @@ class ExtensionRuntime {
     }
     await this.initializeClient();
     // Only register the version handler during the first iteration to not create an infinite loop of updates.
-    this.client!.onServerVersion(async version => await this.updateDafnyIfNecessary(version));
+    this.client!.onServerVersion(async version => {
+      if(!await this.updateDafnyIfNecessary(version)) {
+        this.statusOutput.appendLine('Dafny initialization failed');
+        return;
+      }
+      this.integration = DafnyIntegration.createAndRegister(this.context, this.client!);
+      this.statusOutput.appendLine('Dafny is ready');
+    });
   }
 
   private async initializeClient(): Promise<void> {
@@ -56,20 +63,21 @@ class ExtensionRuntime {
     await this.client.onReady();
   }
 
-  private async updateDafnyIfNecessary(installedVersion: string): Promise<void> {
+  private async updateDafnyIfNecessary(installedVersion: string): Promise<boolean> {
     if(DafnyInstaller.isMinimumRequiredLanguageServer(installedVersion)) {
-      return;
+      return true;
     }
     if(this.installer.isCustomInstallation()) {
       await Window.showInformationMessage(`Your Dafny installation is outdated. Recommended=${LanguageServerConstants.RequiredVersion}, Yours=${installedVersion}`);
-      return;
+      return true;
     }
     await this.client!.stop();
     if(!await this.installer.install()) {
       await Window.showErrorMessage(Messages.Installation.Error);
-      return;
+      return false;
     }
     await this.initializeClient();
+    return true;
   }
 
   async dispose(): Promise<void> {
