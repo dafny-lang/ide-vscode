@@ -17,7 +17,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
   }
   statusOutput = Window.createOutputChannel(ExtensionConstants.ChannelName);
   extensionRuntime = new ExtensionRuntime(context, statusOutput);
-
+  await extensionRuntime.initialize();
 }
 
 export async function deactivate(): Promise<void> {
@@ -60,7 +60,7 @@ class ExtensionRuntime {
     if(DafnyInstaller.isMinimumRequiredLanguageServer(installedVersion)) {
       return;
     }
-    if(!this.installer.isCustomInstallation()) {
+    if(this.installer.isCustomInstallation()) {
       await Window.showInformationMessage(`Your Dafny installation is outdated. Recommended=${LanguageServerConstants.RequiredVersion}, Yours=${installedVersion}`);
       return;
     }
