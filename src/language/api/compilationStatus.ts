@@ -14,3 +14,12 @@ export interface ICompilationStatusParams {
   version?: integer;
   status: CompilationStatus;
 }
+
+export interface IVerificationStartedParams {
+  uri: DocumentUri;
+}
+
+export interface IVerificationCompletedParams {
+  uri: DocumentUri;
+  verified: boolean;
+}

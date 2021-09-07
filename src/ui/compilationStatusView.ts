@@ -1,7 +1,8 @@
 import { StatusBarAlignment, StatusBarItem, TextDocument, Uri, window as Window, workspace as Workspace, Disposable } from 'vscode';
+import { DocumentUri } from 'vscode-languageserver-protocol';
 
 import { LanguageConstants } from '../constants';
-import { CompilationStatus, ICompilationStatusParams } from '../language/api/compilationStatus';
+import { CompilationStatus, ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from '../language/api/compilationStatus';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { Messages } from './messages';
 
@@ -16,9 +17,14 @@ const COMPILATION_STATUS_MESSAGE_MAPPINGS = {
   [CompilationStatus.VerificationFailed]: Messages.CompilationStatus.VerificationFailed
 };
 
+function getVsDocumentPath(params: { uri: DocumentUri }): string {
+  return Uri.parse(params.uri).toString();
+}
+
 export default class CompilationStatusView {
-  // TODO legacy verification status for dafny <=3.2
-  private readonly documentStatuses = new Map<string, CompilationStatus>();
+  // We store the message string for easer backwards compatibility with the
+  // legacy status messages.
+  private readonly documentStatusMessages = new Map<string, string>();
 
   private eventRegistrations?: Disposable;
 
@@ -29,7 +35,9 @@ export default class CompilationStatusView {
       Window.createStatusBarItem(StatusBarAlignment.Left, StatusBarPriority)
     );
     view.eventRegistrations = Disposable.from(
-      languageClient.onCompilationStatus(params => view.updateCompilationStatus(params)),
+      languageClient.onCompilationStatus(params => view.compilationStatusChanged(params)),
+      languageClient.onVerificationStarted(params => view.verificationStarted(params)),
+      languageClient.onVerificationCompleted(params => view.verificationCompleted(params)),
       Workspace.onDidCloseTextDocument(document => view.documentClosed(document)),
       Workspace.onDidChangeTextDocument(() => view.updateActiveDocumentStatus()),
       Window.onDidChangeActiveTextEditor(() => view.updateActiveDocumentStatus())
@@ -38,20 +46,39 @@ export default class CompilationStatusView {
   }
 
   private documentClosed(document: TextDocument): void {
-    this.documentStatuses.delete(document.uri.toString());
+    this.documentStatusMessages.delete(document.uri.toString());
     this.updateActiveDocumentStatus();
   }
 
   private getStatusBarText(document: TextDocument): string {
-    const status = this.documentStatuses.get(document.uri.toString());
+    const status = this.documentStatusMessages.get(document.uri.toString());
     if(status == null) {
       return '';
     }
-    return COMPILATION_STATUS_MESSAGE_MAPPINGS[status];
+    return status;
   }
 
-  private updateCompilationStatus(params: ICompilationStatusParams): void {
-    this.documentStatuses.set(Uri.parse(params.uri).toString(), params.status);
+  private compilationStatusChanged(params: ICompilationStatusParams): void {
+    this.documentStatusMessages.set(
+      getVsDocumentPath(params),
+      COMPILATION_STATUS_MESSAGE_MAPPINGS[params.status]
+    );
+    this.updateActiveDocumentStatus();
+  }
+
+  private verificationStarted(params: IVerificationStartedParams): void {
+    this.documentStatusMessages.set(
+      getVsDocumentPath(params),
+      Messages.CompilationStatus.Verifying
+    );
+    this.updateActiveDocumentStatus();
+  }
+
+  private verificationCompleted(params: IVerificationCompletedParams): void {
+    this.documentStatusMessages.set(
+      getVsDocumentPath(params),
+      params.verified ? Messages.CompilationStatus.Verified : Messages.CompilationStatus.NotVerified
+    );
     this.updateActiveDocumentStatus();
   }
 

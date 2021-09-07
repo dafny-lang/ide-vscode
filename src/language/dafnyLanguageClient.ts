@@ -4,7 +4,7 @@ import { Disposable, LanguageClient, LanguageClientOptions, ServerOptions } from
 import Configuration from '../configuration';
 import { ConfigurationConstants, LanguageConstants } from '../constants';
 import { getDotnetExecutablePath } from '../dotnet';
-import { ICompilationStatusParams } from './api/compilationStatus';
+import { ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from './api/compilationStatus';
 import { ICounterExampleItem, ICounterExampleParams } from './api/counterExample';
 import { getLanguageServerRuntimePath } from './dafnyInstallation';
 
@@ -54,5 +54,12 @@ export class DafnyLanguageClient extends LanguageClient {
     return this.onNotification('dafnyLanguageServerVersionReceived', callback);
   }
 
-  // TODO legacy status messages for dafny 3.2.
+  // TODO Legacy verification status messages
+  public onVerificationStarted(callback: (params: IVerificationStartedParams) => void) {
+    return this.onNotification('dafny/verification/started', callback);
+  }
+
+  public onVerificationCompleted(callback: (params: IVerificationCompletedParams) => void) {
+    return this.onNotification('dafny/verification/completed', callback);
+  }
 }
