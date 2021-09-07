@@ -1,12 +1,13 @@
 import * as os from 'os';
 
-import { workspace as Workspace, ExtensionContext, Uri, OutputChannel, FileSystemError } from 'vscode';
+import { workspace as Workspace, window as Window, ExtensionContext, Uri, OutputChannel, FileSystemError } from 'vscode';
 import { Utils } from 'vscode-uri';
 
 import { fetch } from 'cross-fetch';
 import * as extract from 'extract-zip';
 
 import { LanguageServerConstants } from '../constants';
+import { isCustomLanguageServerInstallation, isLanguageServerRuntimeAccessible } from '../language/dafnyLanguageClient';
 
 const ArchiveFileName = 'dafny.zip';
 
@@ -28,11 +29,30 @@ function getDafnyDownloadAddress(): string {
   return `${baseUri}/v${version}/dafny-${version}-x64-${suffix}.zip`;
 }
 
-export default class LanguageServerDownloadView {
+function isMinimumRequiredLanguageServer(version: string): boolean {
+  const [ givenMajor, givenMinor ] = version.split('.');
+  const [ requiredMajor, requiredMinor ] = LanguageServerConstants.RequiredVersion.split('.');
+  return givenMajor > requiredMajor
+    || givenMajor === requiredMajor && givenMinor >= requiredMinor;
+}
+
+export default class DafnyInstaller {
   public constructor(
     private readonly context: ExtensionContext,
     private readonly statusOutput: OutputChannel
   ) {}
+
+  public static isMinimumRequiredLanguageServer(version: string): boolean {
+    const [ givenMajor, givenMinor ] = version.split('.');
+    const [ requiredMajor, requiredMinor ] = LanguageServerConstants.RequiredVersion.split('.');
+    return givenMajor > requiredMajor
+      || givenMajor === requiredMajor && givenMinor >= requiredMinor;
+  }
+
+  public async isAutomaticInstallationPresent(): Promise<boolean> {
+    return !isCustomLanguageServerInstallation(this.context)
+      && await isLanguageServerRuntimeAccessible(this.context);
+  }
 
   public async install(): Promise<boolean> {
     this.writeStatus('starting dafny installation');
@@ -45,6 +65,17 @@ export default class LanguageServerDownloadView {
     await this.extractArchive(archive);
     await Workspace.fs.delete(archive);
     this.writeStatus('dafny installation completed');
+    return true;
+  }
+
+  public async updateNecessary(installedVersion: string): Promise<boolean> {
+    if(isMinimumRequiredLanguageServer(installedVersion)) {
+      return false;
+    }
+    if(isCustomLanguageServerInstallation(this.context)) {
+      await Window.showInformationMessage(`Your Dafny installation is outdated. Recommended=${LanguageServerConstants.RequiredVersion}, Yours=${installedVersion}`);
+      return false;
+    }
     return true;
   }
 
