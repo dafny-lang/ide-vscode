@@ -81,16 +81,11 @@ export class DafnyInstaller {
     return true;
   }
 
-  public async isAutomaticInstallationPresent(): Promise<boolean> {
-    return !this.isCustomInstallation()
-      && await this.isLanguageServerRuntimeAccessible();
-  }
-
   public isCustomInstallation(): boolean {
-    return getLanguageServerRuntimePath(this.context) == null;
+    return getConfiguredLanguageServerRuntimePath() != null;
   }
 
-  private async isLanguageServerRuntimeAccessible(): Promise<boolean> {
+  public async isLanguageServerRuntimeAccessible(): Promise<boolean> {
     const languageServerDll = getLanguageServerRuntimePath(this.context);
     try {
       await fs.promises.access(languageServerDll, fs.constants.R_OK);

@@ -5,7 +5,7 @@ import { ExtensionConstants, LanguageServerConstants } from './constants';
 import { DafnyLanguageClient } from './language/dafnyLanguageClient';
 import checkAndInformAboutInstallation from './startupCheck';
 import DafnyIntegration from './ui/dafnyIntegration';
-import { DafnyInstaller } from './language/dafnyInstallation';
+import { DafnyInstaller, getLanguageServerRuntimePath } from './language/dafnyInstallation';
 import { Messages } from './ui/messages';
 
 let extensionRuntime: ExtensionRuntime | undefined;
@@ -38,9 +38,9 @@ class ExtensionRuntime {
   }
 
   public async initialize(): Promise<void> {
-    if(!await this.installer.isAutomaticInstallationPresent()) {
+    if(!this.installer.isCustomInstallation() && !await this.installer.isLanguageServerRuntimeAccessible()) {
       if(!await this.installer.install()) {
-        await Window.showErrorMessage(Messages.Installation.Error);
+        Window.showErrorMessage(Messages.Installation.Error);
         return;
       }
     }
@@ -57,7 +57,7 @@ class ExtensionRuntime {
   }
 
   private async initializeClient(): Promise<void> {
-    this.statusOutput.appendLine('starting Dafny');
+    this.statusOutput.appendLine(`starting Dafny from ${getLanguageServerRuntimePath(this.context)}`);
     this.client = await DafnyLanguageClient.create(this.context);
     this.client.start();
     await this.client.onReady();
@@ -68,12 +68,12 @@ class ExtensionRuntime {
       return true;
     }
     if(this.installer.isCustomInstallation()) {
-      await Window.showInformationMessage(`Your Dafny installation is outdated. Recommended=${LanguageServerConstants.RequiredVersion}, Yours=${installedVersion}`);
+      Window.showInformationMessage(`Your Dafny installation is outdated. Recommended=${LanguageServerConstants.RequiredVersion}, Yours=${installedVersion}`);
       return true;
     }
     await this.client!.stop();
     if(!await this.installer.install()) {
-      await Window.showErrorMessage(Messages.Installation.Error);
+      Window.showErrorMessage(Messages.Installation.Error);
       return false;
     }
     await this.initializeClient();
