@@ -57,7 +57,7 @@ export class DafnyInstaller {
   }
 
   public async install(): Promise<boolean> {
-    this.writeStatus('starting dafny installation');
+    this.writeStatus('starting Dafny installation');
     this.statusOutput.show();
     await this.cleanInstallDir();
     const archive = await this.downloadArchive(getDafnyDownloadAddress());
@@ -66,7 +66,7 @@ export class DafnyInstaller {
     }
     await this.extractArchive(archive);
     await Workspace.fs.delete(archive);
-    this.writeStatus('dafny installation completed');
+    this.writeStatus('Dafny installation completed');
     return true;
   }
 
@@ -98,7 +98,7 @@ export class DafnyInstaller {
 
   private async cleanInstallDir(): Promise<void> {
     const installPath = this.getInstallationPath();
-    this.writeStatus(`deleting previous dafny installation at ${installPath}`);
+    this.writeStatus(`deleting previous Dafny installation at ${installPath}`);
     try {
       await Workspace.fs.delete(
         installPath,
@@ -116,14 +116,14 @@ export class DafnyInstaller {
   }
 
   private async downloadArchive(downloadUri: string): Promise<Uri | undefined> {
-    this.writeStatus(`downloading dafny from ${downloadUri}`);
+    this.writeStatus(`downloading Dafny from ${downloadUri}`);
     const response = await fetch(downloadUri);
     if(!response.ok) {
-      this.writeStatus(`dafny download failed: ${response.status} (${response.statusText})`);
+      this.writeStatus(`Dafny download failed: ${response.status} (${response.statusText})`);
       return;
     }
     if(response.body == null) {
-      this.writeStatus('dafny download failed: No Content');
+      this.writeStatus('Dafny download failed: No Content');
       return;
     }
     const content = await response.arrayBuffer();
@@ -134,7 +134,7 @@ export class DafnyInstaller {
 
   private async extractArchive(archivePath: Uri): Promise<void> {
     const dirPath = this.getInstallationPath();
-    this.writeStatus(`extracting dafny to ${dirPath}`);
+    this.writeStatus(`extracting Dafny to ${dirPath}`);
     await extract(archivePath.fsPath, { dir: dirPath.fsPath });
   }
 
