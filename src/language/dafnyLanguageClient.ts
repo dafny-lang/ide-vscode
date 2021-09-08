@@ -1,5 +1,5 @@
-import { ExtensionContext } from 'vscode';
-import { Disposable, LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
+import { ExtensionContext, Disposable } from 'vscode';
+import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
 
 import Configuration from '../configuration';
 import { ConfigurationConstants, LanguageConstants } from '../constants';
@@ -55,11 +55,11 @@ export class DafnyLanguageClient extends LanguageClient {
   }
 
   // TODO Legacy verification status messages
-  public onVerificationStarted(callback: (params: IVerificationStartedParams) => void) {
+  public onVerificationStarted(callback: (params: IVerificationStartedParams) => void): Disposable {
     return this.onNotification('dafny/verification/started', callback);
   }
 
-  public onVerificationCompleted(callback: (params: IVerificationCompletedParams) => void) {
+  public onVerificationCompleted(callback: (params: IVerificationCompletedParams) => void): Disposable {
     return this.onNotification('dafny/verification/completed', callback);
   }
 }

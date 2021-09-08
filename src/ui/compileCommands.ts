@@ -15,7 +15,7 @@ const OutputPathArg = '/out';
 export default class CompileCommands {
   private constructor(private readonly commandRegistrations: Disposable) { }
 
-  public static createAndRegister(context: ExtensionContext) {
+  public static createAndRegister(context: ExtensionContext): CompileCommands {
     return new CompileCommands(
       Disposable.from(
         Commands.registerCommand(DafnyCommands.Compile, () => compileAndRun(context, false, false)),
@@ -43,7 +43,7 @@ async function compileAndRun(context: ExtensionContext, useCustomArgs: boolean, 
   return true;
 }
 
-function runCommandInTerminal(command: string) {
+function runCommandInTerminal(command: string): void {
   const terminal = Window.activeTerminal ?? Window.createTerminal();
   terminal.show();
   console.log(command);
