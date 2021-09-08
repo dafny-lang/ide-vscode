@@ -8,14 +8,12 @@ import { Messages } from './ui/messages';
 import createAndRegisterDafnyIntegration from './ui/dafnyIntegration';
 
 let extensionRuntime: ExtensionRuntime | undefined;
-let statusOutput: OutputChannel | undefined;
-let dafnyVersion: string | undefined;
 
 export async function activate(context: ExtensionContext): Promise<void> {
   if(!await checkAndInformAboutInstallation()) {
     return;
   }
-  statusOutput = Window.createOutputChannel(ExtensionConstants.ChannelName);
+  const statusOutput = Window.createOutputChannel(ExtensionConstants.ChannelName);
   context.subscriptions.push(statusOutput);
   extensionRuntime = new ExtensionRuntime(context, statusOutput);
   await extensionRuntime.initialize();
@@ -28,6 +26,7 @@ export async function deactivate(): Promise<void> {
 class ExtensionRuntime {
   private readonly installer: DafnyInstaller;
   private client?: DafnyLanguageClient;
+  private dafnyVersion?: string;
 
   constructor(
     private readonly context: ExtensionContext,
@@ -45,11 +44,11 @@ class ExtensionRuntime {
     }
     await this.initializeClient();
     // Only register the version handler during the first iteration to not create an infinite loop of updates.
-    if(!await this.updateDafnyIfNecessary(dafnyVersion!)) {
+    if(!await this.updateDafnyIfNecessary(this.dafnyVersion!)) {
       this.statusOutput.appendLine('Dafny initialization failed');
       return;
     }
-    createAndRegisterDafnyIntegration(this.context, this.client!, dafnyVersion!);
+    createAndRegisterDafnyIntegration(this.context, this.client!, this.dafnyVersion!);
     this.statusOutput.appendLine('Dafny is ready');
   }
 
@@ -58,7 +57,7 @@ class ExtensionRuntime {
     this.client = await DafnyLanguageClient.create(this.context);
     this.client.start();
     await this.client.onReady();
-    dafnyVersion = await this.getDafnyVersionAfterStartup();
+    this.dafnyVersion = await this.getDafnyVersionAfterStartup();
   }
 
   private async getDafnyVersionAfterStartup(): Promise<string> {
