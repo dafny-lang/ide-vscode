@@ -28,7 +28,7 @@ class ExtensionRuntime {
   private client?: DafnyLanguageClient;
   private dafnyVersion?: string;
 
-  constructor(
+  public constructor(
     private readonly context: ExtensionContext,
     private readonly statusOutput: OutputChannel
   ) {
@@ -86,7 +86,7 @@ class ExtensionRuntime {
     return true;
   }
 
-  async dispose(): Promise<void> {
+  public async dispose(): Promise<void> {
     await this.client?.stop();
   }
 }

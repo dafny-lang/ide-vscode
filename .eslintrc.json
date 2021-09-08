@@ -14,13 +14,13 @@
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "ecmaVersion": 2018,
-        "sourceType": "module"
+        "sourceType": "module",
+        "project": "./tsconfig.json"
     },
     "plugins": [
         "@typescript-eslint"
     ],
     "rules": {
-        "brace-style": "warn",
         "indent": [ "warn", 2 ],
         "max-depth": [ "warn", 3 ],
         "linebreak-style": [ "warn", "unix" ],
@@ -38,6 +38,34 @@
         ],
         "@typescript-eslint/object-curly-spacing": [ "warn", "always" ],
         "@typescript-eslint/prefer-optional-chain": "warn",
-        "@typescript-eslint/no-implicit-any-catch": "warn"
+        "@typescript-eslint/no-implicit-any-catch": "warn",
+        "@typescript-eslint/strict-boolean-expressions": "warn",
+        "brace-style": "off",
+        "@typescript-eslint/brace-style": "warn",
+        "comma-dangle": "off",
+        "@typescript-eslint/comma-dangle": "warn",
+        "comma-spacing": "off",
+        "@typescript-eslint/comma-spacing": "warn",
+        "@typescript-eslint/consistent-type-definitions": [ "warn", "interface" ],
+        "dot-notation": "off",
+        "@typescript-eslint/dot-notation": "warn",
+        "@typescript-eslint/explicit-member-accessibility": "warn",
+        "@typescript-eslint/explicit-module-boundary-types": "warn",
+        "func-call-spacing": "off",
+        "@typescript-eslint/func-call-spacing": "warn",
+        "keyword-spacing": "off",
+        "@typescript-eslint/keyword-spacing": [
+            "warn",
+            {
+                "overrides": {
+                    "if": { "after": false },
+                    "for": { "after": false },
+                    "while": { "after": false },
+                    "catch": { "after": false }
+                }
+            }
+        ],
+        "@typescript-eslint/member-delimiter-style": "warn",
+        "@typescript-eslint/method-signature-style": [ "warn", "method" ]
     }
 }

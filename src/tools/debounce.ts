@@ -1,6 +1,6 @@
 interface IPreviousRequest {
   timeout: NodeJS.Timeout;
-  reject: (error?: any) => any;
+  reject(error?: any): any;
 }
 
 export class DebounceError extends Error {}

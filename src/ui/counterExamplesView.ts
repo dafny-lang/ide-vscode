@@ -132,20 +132,20 @@ export default class CounterExamplesView {
         after: {
           backgroundColor: customOptions.backgroundColor ?? DefaultDarkBackgroundColor,
           color: customOptions.fontColor ?? DefaultDarkFontColor,
-          margin: DefaultMargin,
-        },
+          margin: DefaultMargin
+        }
       },
       light: {
         after: {
           backgroundColor: customOptions.backgroundColor ?? DefaultLightBackgroundColor,
           color: customOptions.fontColor ?? DefaultLightFontColor,
-          margin: DefaultMargin,
-        },
+          margin: DefaultMargin
+        }
       }
     });
   }
 
-  dispose(): void {
+  public dispose(): void {
     this.disposed = true;
     this.getCounterExamplesDebounced.dispose();
     for(const [_, decoration] of this.activeDecorations) {

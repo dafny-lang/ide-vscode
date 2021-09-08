@@ -6,7 +6,7 @@ import CompileCommands from './compileCommands';
 import CounterExamplesView from './counterExamplesView';
 import DafnyVersionView from './dafnyVersionView';
 
-export default function createAndRegisterDafnyIntegration(context: ExtensionContext, languageClient: DafnyLanguageClient, dafnyVersion: string) {
+export default function createAndRegisterDafnyIntegration(context: ExtensionContext, languageClient: DafnyLanguageClient, dafnyVersion: string): void {
   CounterExamplesView.createAndRegister(context, languageClient);
   CompileCommands.createAndRegister(context);
   CompilationStatusView.createAndRegister(context, languageClient);

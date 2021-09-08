@@ -17,7 +17,7 @@ export default class CompileCommands {
     context.subscriptions.push(
       Commands.registerCommand(DafnyCommands.Compile, () => compileAndRun(context, false, false)),
       Commands.registerCommand(DafnyCommands.CompileCustomArgs, () => compileAndRun(context, true, false)),
-      Commands.registerCommand(DafnyCommands.CompileAndRun, () => compileAndRun(context, false, true)),
+      Commands.registerCommand(DafnyCommands.CompileAndRun, () => compileAndRun(context, false, true))
     );
     return new CompileCommands();
   }
@@ -44,7 +44,7 @@ function runCommandInTerminal(command: string): void {
 }
 
 class CommandFactory {
-  constructor(
+  public constructor(
     private readonly context: ExtensionContext,
     private readonly fileName: string,
     private readonly useCustomArgs: boolean,
