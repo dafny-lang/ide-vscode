@@ -66,7 +66,7 @@ class ExtensionRuntime {
     const version = await new Promise<string>(resolve => {
       versionRegistration = this.client!.onServerVersion(version => resolve(version));
     });
-    versionRegistration?.dispose();
+    versionRegistration!.dispose();
     return version;
   }
 
