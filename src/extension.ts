@@ -1,4 +1,4 @@
-import { ExtensionContext, OutputChannel, window as Window } from 'vscode';
+import { Disposable, ExtensionContext, OutputChannel, window as Window } from 'vscode';
 import { ExtensionConstants, LanguageServerConstants } from './constants';
 
 import { DafnyLanguageClient } from './language/dafnyLanguageClient';
@@ -9,6 +9,7 @@ import { Messages } from './ui/messages';
 
 let extensionRuntime: ExtensionRuntime | undefined;
 let statusOutput: OutputChannel | undefined;
+let dafnyVersion: string | undefined;
 
 export async function activate(context: ExtensionContext): Promise<void> {
   if(!await checkAndInformAboutInstallation()) {
@@ -45,14 +46,12 @@ class ExtensionRuntime {
     }
     await this.initializeClient();
     // Only register the version handler during the first iteration to not create an infinite loop of updates.
-    this.client!.onServerVersion(async version => {
-      if(!await this.updateDafnyIfNecessary(version)) {
-        this.statusOutput.appendLine('Dafny initialization failed');
-        return;
-      }
-      this.integration = DafnyIntegration.createAndRegister(this.context, this.client!);
-      this.statusOutput.appendLine('Dafny is ready');
-    });
+    if(!await this.updateDafnyIfNecessary(dafnyVersion!)) {
+      this.statusOutput.appendLine('Dafny initialization failed');
+      return;
+    }
+    this.integration = DafnyIntegration.createAndRegister(this.context, this.client!, dafnyVersion!);
+    this.statusOutput.appendLine('Dafny is ready');
   }
 
   private async initializeClient(): Promise<void> {
@@ -60,6 +59,16 @@ class ExtensionRuntime {
     this.client = await DafnyLanguageClient.create(this.context);
     this.client.start();
     await this.client.onReady();
+    dafnyVersion = await this.getDafnyVersionAfterStartup();
+  }
+
+  private async getDafnyVersionAfterStartup(): Promise<string> {
+    let versionRegistration: Disposable | undefined;
+    const version = await new Promise<string>(resolve => {
+      versionRegistration = this.client!.onServerVersion(version => resolve(version));
+    });
+    versionRegistration?.dispose();
+    return version;
   }
 
   private async updateDafnyIfNecessary(installedVersion: string): Promise<boolean> {
