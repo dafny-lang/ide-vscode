@@ -1,4 +1,4 @@
-import { StatusBarAlignment, StatusBarItem, TextDocument, Uri, window as Window, workspace as Workspace, Disposable } from 'vscode';
+import { StatusBarAlignment, StatusBarItem, TextDocument, Uri, window as Window, workspace as Workspace, ExtensionContext } from 'vscode';
 import { DocumentUri } from 'vscode-languageserver-protocol';
 
 import { LanguageConstants } from '../constants';
@@ -26,21 +26,19 @@ export default class CompilationStatusView {
   // legacy status messages.
   private readonly documentStatusMessages = new Map<string, string>();
 
-  private eventRegistrations?: Disposable;
-
   private constructor(private readonly statusBarItem: StatusBarItem) {}
 
-  public static createAndRegister(languageClient: DafnyLanguageClient): CompilationStatusView {
-    const view = new CompilationStatusView(
-      Window.createStatusBarItem(StatusBarAlignment.Left, StatusBarPriority)
-    );
-    view.eventRegistrations = Disposable.from(
+  public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): CompilationStatusView {
+    const statusBarItem = Window.createStatusBarItem(StatusBarAlignment.Left, StatusBarPriority);
+    const view = new CompilationStatusView(statusBarItem);
+    context.subscriptions.push(
       languageClient.onCompilationStatus(params => view.compilationStatusChanged(params)),
       languageClient.onVerificationStarted(params => view.verificationStarted(params)),
       languageClient.onVerificationCompleted(params => view.verificationCompleted(params)),
       Workspace.onDidCloseTextDocument(document => view.documentClosed(document)),
       Workspace.onDidChangeTextDocument(() => view.updateActiveDocumentStatus()),
-      Window.onDidChangeActiveTextEditor(() => view.updateActiveDocumentStatus())
+      Window.onDidChangeActiveTextEditor(() => view.updateActiveDocumentStatus()),
+      statusBarItem
     );
     return view;
   }
@@ -94,10 +92,5 @@ export default class CompilationStatusView {
     } else {
       this.statusBarItem.hide();
     }
-  }
-
-  dispose(): void {
-    this.statusBarItem.dispose();
-    this.eventRegistrations?.dispose();
   }
 }

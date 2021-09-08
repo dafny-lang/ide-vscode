@@ -1,4 +1,4 @@
-import { DecorationOptions, Position, Range, TextEditor, TextEditorDecorationType, Uri, window as Window, workspace as Workspace, commands as Commands, Disposable } from 'vscode';
+import { DecorationOptions, Position, Range, TextEditor, TextEditorDecorationType, Uri, window as Window, workspace as Workspace, commands as Commands, ExtensionContext } from 'vscode';
 
 import { DafnyCommands } from '../commands';
 import Configuration from '../configuration';
@@ -22,24 +22,23 @@ const DefaultLightFontColor = '#102027';
 export default class CounterExamplesView {
   private readonly activeDecorations = new Map<Uri, TextEditorDecorationType>();
   private readonly documentsWithActiveCounterExamples = new Set<Uri>();
-
   private readonly getCounterExamplesDebounced = debounce(
     (param: ICounterExampleParams) => this.languageClient.getCounterExamples(param),
     CounterExampleUpdateDelayMs
   );
 
-  private eventRegistrations?: Disposable;
   private disposed: boolean = false;
 
   private constructor(private readonly languageClient: DafnyLanguageClient) {}
 
-  public static createAndRegister(languageClient: DafnyLanguageClient): CounterExamplesView {
+  public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): CounterExamplesView {
     const instance = new CounterExamplesView(languageClient);
-    instance.eventRegistrations = Disposable.from(
+    context.subscriptions.push(
       Window.onDidChangeActiveTextEditor(editor => instance.updateCounterExamples(editor)),
       Workspace.onDidChangeTextDocument(() => instance.updateCounterExamples(Window.activeTextEditor)),
       Commands.registerCommand(DafnyCommands.ShowCounterExample, () => instance.enableCounterExamplesForActiveEditor()),
-      Commands.registerCommand(DafnyCommands.HideCounterExample, () => instance.disableCounterExamplesForActiveEditor())
+      Commands.registerCommand(DafnyCommands.HideCounterExample, () => instance.disableCounterExamplesForActiveEditor()),
+      instance
     );
     return instance;
   }
@@ -152,6 +151,5 @@ export default class CounterExamplesView {
     for(const [_, decoration] of this.activeDecorations) {
       decoration.dispose();
     }
-    this.eventRegistrations?.dispose();
   }
 }

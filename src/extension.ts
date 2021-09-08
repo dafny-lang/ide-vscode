@@ -3,9 +3,9 @@ import { ExtensionConstants, LanguageServerConstants } from './constants';
 
 import { DafnyLanguageClient } from './language/dafnyLanguageClient';
 import checkAndInformAboutInstallation from './startupCheck';
-import DafnyIntegration from './ui/dafnyIntegration';
 import { DafnyInstaller, getLanguageServerRuntimePath } from './language/dafnyInstallation';
 import { Messages } from './ui/messages';
+import createAndRegisterDafnyIntegration from './ui/dafnyIntegration';
 
 let extensionRuntime: ExtensionRuntime | undefined;
 let statusOutput: OutputChannel | undefined;
@@ -16,19 +16,18 @@ export async function activate(context: ExtensionContext): Promise<void> {
     return;
   }
   statusOutput = Window.createOutputChannel(ExtensionConstants.ChannelName);
+  context.subscriptions.push(statusOutput);
   extensionRuntime = new ExtensionRuntime(context, statusOutput);
   await extensionRuntime.initialize();
 }
 
 export async function deactivate(): Promise<void> {
   await extensionRuntime?.dispose();
-  statusOutput?.dispose();
 }
 
 class ExtensionRuntime {
   private readonly installer: DafnyInstaller;
   private client?: DafnyLanguageClient;
-  private integration?: DafnyIntegration;
 
   constructor(
     private readonly context: ExtensionContext,
@@ -50,7 +49,7 @@ class ExtensionRuntime {
       this.statusOutput.appendLine('Dafny initialization failed');
       return;
     }
-    this.integration = DafnyIntegration.createAndRegister(this.context, this.client!, dafnyVersion!);
+    createAndRegisterDafnyIntegration(this.context, this.client!, dafnyVersion!);
     this.statusOutput.appendLine('Dafny is ready');
   }
 
@@ -89,7 +88,6 @@ class ExtensionRuntime {
   }
 
   async dispose(): Promise<void> {
-    this.integration?.dispose();
     await this.client?.stop();
   }
 }

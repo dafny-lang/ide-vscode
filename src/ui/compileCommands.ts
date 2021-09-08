@@ -1,7 +1,7 @@
 import * as os from 'os';
 import * as path from 'path';
 
-import { window as Window, commands as Commands, Disposable, ExtensionContext } from 'vscode';
+import { window as Window, commands as Commands, ExtensionContext } from 'vscode';
 import { DafnyCommands } from '../commands';
 
 import Configuration from '../configuration';
@@ -13,20 +13,13 @@ const CompileArg = '/compile';
 const OutputPathArg = '/out';
 
 export default class CompileCommands {
-  private constructor(private readonly commandRegistrations: Disposable) { }
-
   public static createAndRegister(context: ExtensionContext): CompileCommands {
-    return new CompileCommands(
-      Disposable.from(
-        Commands.registerCommand(DafnyCommands.Compile, () => compileAndRun(context, false, false)),
-        Commands.registerCommand(DafnyCommands.CompileCustomArgs, () => compileAndRun(context, true, false)),
-        Commands.registerCommand(DafnyCommands.CompileAndRun, () => compileAndRun(context, false, true)),
-      )
+    context.subscriptions.push(
+      Commands.registerCommand(DafnyCommands.Compile, () => compileAndRun(context, false, false)),
+      Commands.registerCommand(DafnyCommands.CompileCustomArgs, () => compileAndRun(context, true, false)),
+      Commands.registerCommand(DafnyCommands.CompileAndRun, () => compileAndRun(context, false, true)),
     );
-  }
-
-  dispose(): void {
-    this.commandRegistrations.dispose();
+    return new CompileCommands();
   }
 }
 
