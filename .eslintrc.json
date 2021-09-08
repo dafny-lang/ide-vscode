@@ -25,8 +25,6 @@
         "max-depth": [ "warn", 3 ],
         "linebreak-style": [ "warn", "unix" ],
         "max-params": [ "warn", 4 ],
-        "quotes": [ "warn", "single" ],
-        "require-await": "warn",
         "semi": [ "warn", "always" ],
         "no-trailing-spaces": "warn",
         "no-unused-vars": "off",
@@ -66,6 +64,13 @@
             }
         ],
         "@typescript-eslint/member-delimiter-style": "warn",
-        "@typescript-eslint/method-signature-style": [ "warn", "method" ]
+        "@typescript-eslint/method-signature-style": [ "warn", "method" ],
+        "require-await": "off",
+        "@typescript-eslint/require-await": "warn",
+        "quotes": "off",
+        "@typescript-eslint/quotes": [ "warn", "single" ],
+        "@typescript-eslint/prefer-readonly": "warn",
+        "@typescript-eslint/prefer-includes": "warn",
+        "@typescript-eslint/prefer-nullish-coalescing": "warn"
     }
 }
