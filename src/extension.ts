@@ -60,18 +60,18 @@ class ExtensionRuntime {
     this.client = await DafnyLanguageClient.create(this.context);
     this.client.start();
     await this.client.onReady();
-    this.dafnyVersion = await Promise.any([
-      this.getDafnyVersionAfterStartup(),
-      // Fallback to unknown in case the server does not report the version.
-      timeout(DafnyVersionTimeoutMs, LanguageServerConstants.UnknownVersion)
-    ]);
+    this.dafnyVersion = await this.getDafnyVersionAfterStartup();
   }
 
   private async getDafnyVersionAfterStartup(): Promise<string> {
     let versionRegistration: Disposable | undefined;
-    const version = await new Promise<string>(resolve => {
-      versionRegistration = this.client!.onServerVersion(version => resolve(version));
-    });
+    const version = await Promise.any([
+      new Promise<string>(resolve => {
+        versionRegistration = this.client!.onServerVersion(version => resolve(version));
+      }),
+      // Fallback to unknown in case the server does not report the version.
+      timeout(DafnyVersionTimeoutMs, LanguageServerConstants.UnknownVersion)
+    ]);
     versionRegistration!.dispose();
     return version;
   }
