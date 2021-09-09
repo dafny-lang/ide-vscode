@@ -12,12 +12,10 @@ const DafnyVersionTimeoutMs = 5_000;
 let extensionRuntime: ExtensionRuntime | undefined;
 
 export async function activate(context: ExtensionContext): Promise<void> {
-  console.log(process.version);
   if(!await checkAndInformAboutInstallation()) {
     return;
   }
   const statusOutput = Window.createOutputChannel(ExtensionConstants.ChannelName);
-  statusOutput.show();
   context.subscriptions.push(statusOutput);
   extensionRuntime = new ExtensionRuntime(context, statusOutput);
   await extensionRuntime.initialize();
