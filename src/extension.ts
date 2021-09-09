@@ -6,14 +6,18 @@ import checkAndInformAboutInstallation from './startupCheck';
 import { DafnyInstaller, getLanguageServerRuntimePath } from './language/dafnyInstallation';
 import { Messages } from './ui/messages';
 import createAndRegisterDafnyIntegration from './ui/dafnyIntegration';
+import { timeout } from './tools/timeout';
 
+const DafnyVersionTimeoutMs = 5_000;
 let extensionRuntime: ExtensionRuntime | undefined;
 
 export async function activate(context: ExtensionContext): Promise<void> {
+  console.log(process.version);
   if(!await checkAndInformAboutInstallation()) {
     return;
   }
   const statusOutput = Window.createOutputChannel(ExtensionConstants.ChannelName);
+  statusOutput.show();
   context.subscriptions.push(statusOutput);
   extensionRuntime = new ExtensionRuntime(context, statusOutput);
   await extensionRuntime.initialize();
@@ -57,7 +61,11 @@ class ExtensionRuntime {
     this.client = await DafnyLanguageClient.create(this.context);
     this.client.start();
     await this.client.onReady();
-    this.dafnyVersion = await this.getDafnyVersionAfterStartup();
+    this.dafnyVersion = await Promise.any([
+      this.getDafnyVersionAfterStartup(),
+      // Fallback to unknown in case the server does not report the version.
+      timeout(DafnyVersionTimeoutMs, LanguageServerConstants.UnknownVersion)
+    ]);
   }
 
   private async getDafnyVersionAfterStartup(): Promise<string> {

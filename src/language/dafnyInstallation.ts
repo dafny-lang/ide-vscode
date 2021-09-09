@@ -50,6 +50,9 @@ export class DafnyInstaller {
   ) {}
 
   public static isMinimumRequiredLanguageServer(version: string): boolean {
+    if(version === LanguageServerConstants.UnknownVersion) {
+      return true;
+    }
     const [ givenMajor, givenMinor ] = version.split('.');
     const [ requiredMajor, requiredMinor ] = LanguageServerConstants.RequiredVersion.split('.');
     return givenMajor > requiredMajor
