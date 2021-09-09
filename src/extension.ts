@@ -47,7 +47,6 @@ class ExtensionRuntime {
       }
     }
     await this.initializeClient();
-    // Only register the version handler during the first iteration to not create an infinite loop of updates.
     if(!await this.updateDafnyIfNecessary(this.dafnyVersion!)) {
       this.statusOutput.appendLine('Dafny initialization failed');
       return;
