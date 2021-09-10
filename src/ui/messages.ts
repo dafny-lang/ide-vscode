@@ -18,7 +18,6 @@ export namespace Messages {
 
   export namespace Installation {
     export const Error = 'An error occurred during the installation of Dafny.';
-    export const Name = 'DafnyLS';
   }
 
   export namespace Dotnet {

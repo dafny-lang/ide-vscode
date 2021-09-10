@@ -188,6 +188,10 @@
       {
         "command": "dafny.hideCounterExample",
         "title": "Dafny: Hide CounterExample"
+      },
+      {
+        "command": "dafny.showVersion",
+        "title": "Dafny: Show Installed Version"
       }
     ]
   },

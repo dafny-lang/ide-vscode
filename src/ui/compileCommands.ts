@@ -5,8 +5,9 @@ import { window as Window, commands as Commands, ExtensionContext } from 'vscode
 import { DafnyCommands } from '../commands';
 
 import Configuration from '../configuration';
-import { ConfigurationConstants, LanguageServerConstants } from '../constants';
+import { ConfigurationConstants } from '../constants';
 import { getDotnetExecutablePath } from '../dotnet';
+import { getCompilerRuntimePath } from '../language/dafnyInstallation';
 import { Messages } from './messages';
 
 const CompileArg = '/compile';
@@ -54,21 +55,12 @@ class CommandFactory {
   public async createCompilerCommand(): Promise<string | undefined> {
     const commandPrefix = this.getCommandPrefix();
     const dotnetPath = await getDotnetExecutablePath();
-    const compilerPath = this.getCompilerRuntimePath();
+    const compilerPath = getCompilerRuntimePath(this.context);
     const compilerArgs = await this.getCompilerArgs();
     if(compilerArgs == null) {
       return undefined;
     }
     return  `${commandPrefix}"${dotnetPath}" "${compilerPath}" "${this.fileName}" ${compilerArgs}`;
-  }
-
-  private getCompilerRuntimePath(): string {
-    const configuredPath = Configuration.get<string | null>(ConfigurationConstants.Compiler.RuntimePath)
-      ?? LanguageServerConstants.DefaultCompilerPath;
-    if(!path.isAbsolute(configuredPath)) {
-      return path.join(this.context.extensionPath, configuredPath);
-    }
-    return configuredPath;
   }
 
   private getCommandPrefix(): string {

@@ -13,6 +13,16 @@ import Configuration from '../configuration';
 
 const ArchiveFileName = 'dafny.zip';
 
+
+export function getCompilerRuntimePath(context: ExtensionContext): string {
+  const configuredPath = Configuration.get<string | null>(ConfigurationConstants.Compiler.RuntimePath)
+    ?? LanguageServerConstants.DefaultCompilerPath;
+  if(!path.isAbsolute(configuredPath)) {
+    return path.join(context.extensionPath, configuredPath);
+  }
+  return configuredPath;
+}
+
 export function getLanguageServerRuntimePath(context: ExtensionContext): string {
   const configuredPath = getConfiguredLanguageServerRuntimePath() ?? LanguageServerConstants.DefaultPath;
   if(path.isAbsolute(configuredPath)) {
