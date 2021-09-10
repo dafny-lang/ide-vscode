@@ -61,7 +61,7 @@ export default class DafnyVersionView {
     try {
       const { stdout } = await execFilePromisified(dotnetPath, [ compilerPath, CompilerVersionArg ]);
       const version = /\d+\.\d+\.\d+\.\d+/.exec(stdout);
-      return version == null ? UnknownVersion : version[0];
+      return (version == null || version.length === 0) ? UnknownVersion : version[0];
     } catch(error: unknown) {
       console.error('failed to retrieve the compiler version', error);
       return UnknownVersion;
