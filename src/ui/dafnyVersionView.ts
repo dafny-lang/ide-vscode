@@ -20,11 +20,11 @@ export default class DafnyVersionView {
     private readonly statusBarItem: StatusBarItem
   ) {}
 
-  public static createAndRegister(context: ExtensionContext, dafnyVersion: string): DafnyVersionView {
+  public static createAndRegister(context: ExtensionContext, languageServerVersion: string): DafnyVersionView {
     const statusBarItem = Window.createStatusBarItem(StatusBarAlignment.Right, StatusBarPriority);
-    statusBarItem.text = dafnyVersion;
+    statusBarItem.text = languageServerVersion;
     statusBarItem.command = DafnyCommands.ShowVersion;
-    const view = new DafnyVersionView(context, dafnyVersion, statusBarItem);
+    const view = new DafnyVersionView(context, languageServerVersion, statusBarItem);
     context.subscriptions.push(
       Window.onDidChangeActiveTextEditor(() => view.refreshVersionView()),
       Commands.registerCommand(DafnyCommands.ShowVersion, () => view.showDafnyVersion()),

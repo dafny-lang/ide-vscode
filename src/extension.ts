@@ -28,7 +28,7 @@ export async function deactivate(): Promise<void> {
 class ExtensionRuntime {
   private readonly installer: DafnyInstaller;
   private client?: DafnyLanguageClient;
-  private dafnyVersion?: string;
+  private languageServerVersion?: string;
 
   public constructor(
     private readonly context: ExtensionContext,
@@ -45,11 +45,11 @@ class ExtensionRuntime {
       }
     }
     await this.initializeClient();
-    if(!await this.updateDafnyIfNecessary(this.dafnyVersion!)) {
+    if(!await this.updateDafnyIfNecessary(this.languageServerVersion!)) {
       this.statusOutput.appendLine('Dafny initialization failed');
       return;
     }
-    createAndRegisterDafnyIntegration(this.context, this.client!, this.dafnyVersion!);
+    createAndRegisterDafnyIntegration(this.context, this.client!, this.languageServerVersion!);
     this.statusOutput.appendLine('Dafny is ready');
   }
 
@@ -58,10 +58,10 @@ class ExtensionRuntime {
     this.client = await DafnyLanguageClient.create(this.context);
     this.client.start();
     await this.client.onReady();
-    this.dafnyVersion = await this.getDafnyVersionAfterStartup();
+    this.languageServerVersion = await this.getLanguageServerVersionAfterStartup();
   }
 
-  private async getDafnyVersionAfterStartup(): Promise<string> {
+  private async getLanguageServerVersionAfterStartup(): Promise<string> {
     let versionRegistration: Disposable | undefined;
     const version = await Promise.any([
       new Promise<string>(resolve => {
@@ -79,7 +79,9 @@ class ExtensionRuntime {
       return true;
     }
     if(this.installer.isCustomInstallation()) {
-      Window.showInformationMessage(`Your Dafny installation is outdated. Recommended=${LanguageServerConstants.RequiredVersion}, Yours=${installedVersion}`);
+      Window.showInformationMessage(
+        `Your Dafny installation is outdated. Recommended=${LanguageServerConstants.RequiredVersion}, Yours=${installedVersion}`
+      );
       return true;
     }
     await this.client!.stop();
