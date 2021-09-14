@@ -24,6 +24,6 @@ export namespace Messages {
     export const NoCompatibleInstallation = 'There is no compatible dotnet runtime installed. Dafny requires the ASP.NET Core Runtime 5.0.';
     export const ChangeConfiguration = 'Change dafny.dotnetExecutablePath';
     export const VisitDownload = 'Get dotnet';
-    export const DownloadUri = 'https://dotnet.microsoft.com/';
+    export const DownloadUri = 'https://dotnet.microsoft.com/download/dotnet/5.0';
   }
 }
