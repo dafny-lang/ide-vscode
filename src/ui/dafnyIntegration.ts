@@ -6,13 +6,13 @@ import CompileCommands from './compileCommands';
 import CounterExamplesView from './counterExamplesView';
 import DafnyVersionView from './dafnyVersionView';
 
-export default function createAndRegisterDafnyIntegration(
+export default async function createAndRegisterDafnyIntegration(
   context: ExtensionContext,
   languageClient: DafnyLanguageClient,
   languageServerVersion: string
-): void {
+): Promise<void> {
   CounterExamplesView.createAndRegister(context, languageClient);
   CompileCommands.createAndRegister(context);
   CompilationStatusView.createAndRegister(context, languageClient);
-  DafnyVersionView.createAndRegister(context, languageServerVersion);
+  await DafnyVersionView.createAndRegister(context, languageServerVersion);
 }

@@ -13,6 +13,25 @@ const CompilerVersionArg = '/version';
 const StatusBarPriority = 10;
 const execFilePromisified = promisify(execFile);
 
+async function getTooltipText(context: ExtensionContext, languageServerVersion: string): Promise<string> {
+  const compilerVersion = await getCompilerVersion(context);
+  const extensionVersion = require(context.asAbsolutePath('./package.json')).version;
+  return `Compiler: ${compilerVersion}\nLanguage Server: ${languageServerVersion}\nExtension: ${extensionVersion}`;
+}
+
+async function getCompilerVersion(context: ExtensionContext): Promise<string> {
+  const dotnetPath = await getDotnetExecutablePath();
+  const compilerPath = getCompilerRuntimePath(context);
+  try {
+    const { stdout } = await execFilePromisified(dotnetPath, [ compilerPath, CompilerVersionArg ]);
+    const version = /\d+\.\d+\.\d+\.\d+/.exec(stdout);
+    return (version == null || version.length === 0) ? UnknownVersion : version[0];
+  } catch(error: unknown) {
+    console.error('failed to retrieve the compiler version', error);
+    return UnknownVersion;
+  }
+}
+
 export default class DafnyVersionView {
   private constructor(
     private readonly context: ExtensionContext,
@@ -20,14 +39,14 @@ export default class DafnyVersionView {
     private readonly statusBarItem: StatusBarItem
   ) {}
 
-  public static createAndRegister(context: ExtensionContext, languageServerVersion: string): DafnyVersionView {
+  public static async createAndRegister(context: ExtensionContext, languageServerVersion: string): Promise<DafnyVersionView> {
     const statusBarItem = Window.createStatusBarItem(StatusBarAlignment.Right, StatusBarPriority);
     statusBarItem.text = languageServerVersion;
     statusBarItem.command = DafnyCommands.ShowVersion;
+    statusBarItem.tooltip = await getTooltipText(context, languageServerVersion);
     const view = new DafnyVersionView(context, languageServerVersion, statusBarItem);
     context.subscriptions.push(
       Window.onDidChangeActiveTextEditor(() => view.refreshVersionView()),
-      Commands.registerCommand(DafnyCommands.ShowVersion, () => view.showDafnyVersion()),
       statusBarItem
     );
     view.refreshVersionView();
@@ -44,27 +63,6 @@ export default class DafnyVersionView {
       this.statusBarItem.show();
     } else {
       this.statusBarItem.hide();
-    }
-  }
-
-  private async showDafnyVersion(): Promise<void> {
-    const compilerVersion = await this.getCompilerVersion();
-    const extensionVersion = require(this.context.asAbsolutePath('./package.json')).version;
-    Window.showInformationMessage(
-      `Compiler: ${compilerVersion}, Language Server: ${this.languageServerVersion}, Extension: ${extensionVersion}`
-    );
-  }
-
-  private async getCompilerVersion(): Promise<string> {
-    const dotnetPath = await getDotnetExecutablePath();
-    const compilerPath = getCompilerRuntimePath(this.context);
-    try {
-      const { stdout } = await execFilePromisified(dotnetPath, [ compilerPath, CompilerVersionArg ]);
-      const version = /\d+\.\d+\.\d+\.\d+/.exec(stdout);
-      return (version == null || version.length === 0) ? UnknownVersion : version[0];
-    } catch(error: unknown) {
-      console.error('failed to retrieve the compiler version', error);
-      return UnknownVersion;
     }
   }
 }

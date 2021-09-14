@@ -49,7 +49,7 @@ class ExtensionRuntime {
       this.statusOutput.appendLine('Dafny initialization failed');
       return;
     }
-    createAndRegisterDafnyIntegration(this.context, this.client!, this.languageServerVersion!);
+    await createAndRegisterDafnyIntegration(this.context, this.client!, this.languageServerVersion!);
     this.statusOutput.appendLine('Dafny is ready');
   }
 
