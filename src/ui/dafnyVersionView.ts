@@ -1,7 +1,7 @@
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 
-import { ExtensionContext, StatusBarAlignment, StatusBarItem, window as Window, commands as Commands } from 'vscode';
+import { ExtensionContext, StatusBarAlignment, StatusBarItem, window as Window } from 'vscode';
 import { DafnyCommands } from '../commands';
 
 import { LanguageConstants, LanguageServerConstants } from '../constants';
