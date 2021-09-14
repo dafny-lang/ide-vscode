@@ -36,7 +36,7 @@ function getConfiguredLanguageServerRuntimePath(): string | null {
 }
 
 function getDafnyPlatformSuffix(): string {
-  switch (os.type()) {
+  switch(os.type()) {
   case 'Windows_NT':
     return 'win';
   case 'Darwin':
