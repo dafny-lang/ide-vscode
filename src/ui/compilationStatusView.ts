@@ -36,7 +36,7 @@ function unhandledStatusMessage(status: never): Error {
 }
 
 export default class CompilationStatusView {
-  // We store the message string for easer backwards compatibility with the
+  // We store the message string for easier backwards compatibility with the
   // legacy status messages.
   private readonly documentStatusMessages = new Map<string, string>();
 
