@@ -7,12 +7,12 @@ import { ConfigurationConstants, DotnetConstants } from './constants';
 import Configuration from './configuration';
 
 const ListRuntimesArg = '--list-runtimes';
-const execFilePromisified = promisify(execFile);
+const execFileAsync = promisify(execFile);
 
 export async function hasSupportedDotnetVersion(): Promise<boolean> {
   const dotnetExecutable = await getDotnetExecutablePath();
   try {
-    const { stdout } = await execFilePromisified(dotnetExecutable, [ ListRuntimesArg ]);
+    const { stdout } = await execFileAsync(dotnetExecutable, [ ListRuntimesArg ]);
     return DotnetConstants.SupportedRuntimesPattern.test(stdout);
   } catch(error: unknown) {
     console.error(`error invoking ${DotnetConstants.ExecutableName} ${ListRuntimesArg}: ${error}`);

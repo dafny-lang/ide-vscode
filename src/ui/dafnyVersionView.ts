@@ -11,7 +11,7 @@ import { getCompilerRuntimePath } from '../language/dafnyInstallation';
 const UnknownVersion = LanguageServerConstants.UnknownVersion;
 const CompilerVersionArg = '/version';
 const StatusBarPriority = 10;
-const execFilePromisified = promisify(execFile);
+const execFileAsync = promisify(execFile);
 
 async function getTooltipText(context: ExtensionContext, languageServerVersion: string): Promise<string> {
   const compilerVersion = await getCompilerVersion(context);
@@ -23,7 +23,7 @@ async function getCompilerVersion(context: ExtensionContext): Promise<string> {
   const dotnetPath = await getDotnetExecutablePath();
   const compilerPath = getCompilerRuntimePath(context);
   try {
-    const { stdout } = await execFilePromisified(dotnetPath, [ compilerPath, CompilerVersionArg ]);
+    const { stdout } = await execFileAsync(dotnetPath, [ compilerPath, CompilerVersionArg ]);
     const version = /\d+\.\d+\.\d+\.\d+/.exec(stdout);
     return (version == null || version.length === 0) ? UnknownVersion : version[0];
   } catch(error: unknown) {
