@@ -136,7 +136,7 @@ export class DafnyInstaller {
           this.writeStatus(`download error: ${error}`);
           resolve(undefined);
         })
-        .on('downloadProgress', progress => progressReporter.update(progress))
+        .on('downloadProgress', progress => progressReporter.updateDownloadProgress(progress))
         .pipe(archiveHandle);
     });
   }
@@ -144,7 +144,14 @@ export class DafnyInstaller {
   private async extractArchive(archivePath: Uri): Promise<void> {
     const dirPath = this.getInstallationPath();
     this.writeStatus(`extracting Dafny to ${dirPath.fsPath}`);
-    await extract(archivePath.fsPath, { dir: dirPath.fsPath });
+    const progressReporter = new ProgressReporter(this.statusOutput);
+    await extract(
+      archivePath.fsPath,
+      {
+        dir: dirPath.fsPath,
+        onEntry: (_, archive) => progressReporter.update(archive.entriesRead / archive.entryCount)
+      }
+    );
   }
 
   private getZipPath(): Uri {
@@ -160,7 +167,6 @@ export class DafnyInstaller {
   }
 }
 
-// The downloadProgress event is not typed in got (any).
 interface IDownloadProgress {
   percent: number;
   transferred: number;
@@ -171,9 +177,16 @@ class ProgressReporter {
 
   public constructor(private readonly statusOutput: OutputChannel) {}
 
-  public update(progress: IDownloadProgress) {
-    const tenth = Math.round(progress.percent * 10);
-    if(tenth > this.lastTenth && progress.transferred > 0) {
+  public updateDownloadProgress(progress: IDownloadProgress) {
+    if(progress.transferred > 0) {
+      // The transferred byte count has to be checked since got reports percent=0 at the beginning.
+      this.update(progress.percent);
+    }
+  }
+
+  public update(percent: number) {
+    const tenth = Math.round(percent * 10);
+    if(tenth > this.lastTenth) {
       this.statusOutput.append(`${tenth * 10}%`);
       if(tenth === 10) {
         this.statusOutput.appendLine('');
