@@ -101,7 +101,7 @@ export class DafnyInstaller {
 
   private async cleanInstallDir(): Promise<void> {
     const installPath = this.getInstallationPath();
-    this.writeStatus(`deleting previous Dafny installation at ${installPath}`);
+    this.writeStatus(`deleting previous Dafny installation at ${installPath.fsPath}`);
     try {
       await workspace.fs.delete(
         installPath,
@@ -143,7 +143,7 @@ export class DafnyInstaller {
 
   private async extractArchive(archivePath: Uri): Promise<void> {
     const dirPath = this.getInstallationPath();
-    this.writeStatus(`extracting Dafny to ${dirPath}`);
+    this.writeStatus(`extracting Dafny to ${dirPath.fsPath}`);
     await extract(archivePath.fsPath, { dir: dirPath.fsPath });
   }
 
