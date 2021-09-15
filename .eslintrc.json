@@ -102,6 +102,7 @@
     "@typescript-eslint/method-signature-style": [ "warn", "method" ],
     "require-await": "off",
     "@typescript-eslint/require-await": "warn",
+    "@typescript-eslint/await-thenable": "warn",
     "quotes": "off",
     "@typescript-eslint/quotes": [ "warn", "single" ],
     "@typescript-eslint/prefer-readonly": "warn",
