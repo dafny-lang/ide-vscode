@@ -84,17 +84,6 @@ export class DafnyInstaller {
     return true;
   }
 
-  public async updateNecessary(installedVersion: string): Promise<boolean> {
-    if(DafnyInstaller.isMinimumRequiredLanguageServer(installedVersion)) {
-      return false;
-    }
-    if(this.isCustomInstallation()) {
-      await Window.showInformationMessage(`Your Dafny installation is outdated. Recommended=${LanguageServerConstants.RequiredVersion}, Yours=${installedVersion}`);
-      return false;
-    }
-    return true;
-  }
-
   public isCustomInstallation(): boolean {
     return getConfiguredLanguageServerRuntimePath() != null;
   }
