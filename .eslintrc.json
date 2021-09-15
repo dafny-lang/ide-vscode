@@ -1,105 +1,105 @@
 {
-    "env": {
-        "browser": true,
-        "es6": true
-    },
-    "extends": [
-        "eslint:recommended",
-        "plugin:@typescript-eslint/eslint-recommended"
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended"
+  ],
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly"
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "rules": {
+    "indent": [ "warn", 2 ],
+    "max-depth": [ "warn", 3 ],
+    "linebreak-style": [ "warn", "unix" ],
+    "max-params": [ "warn", 4 ],
+    "semi": [ "warn", "always" ],
+    "no-trailing-spaces": "warn",
+    "no-unreachable": "warn",
+    "eqeqeq": [
+      "warn",
+      "always",
+      {
+        "null": "ignore"
+      }
     ],
-    "globals": {
-        "Atomics": "readonly",
-        "SharedArrayBuffer": "readonly"
-    },
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-        "ecmaVersion": 2018,
-        "sourceType": "module",
-        "project": "./tsconfig.json"
-    },
-    "plugins": [
-        "@typescript-eslint"
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
+      {
+        "varsIgnorePattern": "^_$"
+      }
     ],
-    "rules": {
-        "indent": [ "warn", 2 ],
-        "max-depth": [ "warn", 3 ],
-        "linebreak-style": [ "warn", "unix" ],
-        "max-params": [ "warn", 4 ],
-        "semi": [ "warn", "always" ],
-        "no-trailing-spaces": "warn",
-        "no-unreachable": "warn",
-        "eqeqeq": [
-            "warn",
-            "always",
-            {
-                "null": "ignore"
+    "@typescript-eslint/object-curly-spacing": [ "warn", "always" ],
+    "@typescript-eslint/prefer-optional-chain": "warn",
+    "@typescript-eslint/no-implicit-any-catch": "warn",
+    "@typescript-eslint/strict-boolean-expressions": "warn",
+    "brace-style": "off",
+    "@typescript-eslint/brace-style": "warn",
+    "comma-dangle": "off",
+    "@typescript-eslint/comma-dangle": "warn",
+    "comma-spacing": "off",
+    "@typescript-eslint/comma-spacing": "warn",
+    "@typescript-eslint/consistent-type-definitions": [ "warn", "interface" ],
+    "dot-notation": "off",
+    "@typescript-eslint/dot-notation": "warn",
+    "@typescript-eslint/explicit-member-accessibility": "warn",
+    "@typescript-eslint/explicit-module-boundary-types": "warn",
+    "func-call-spacing": "off",
+    "@typescript-eslint/func-call-spacing": "warn",
+    "keyword-spacing": "off",
+    "@typescript-eslint/keyword-spacing": [
+      "warn",
+      {
+        "overrides": {
+          "if": { "after": false },
+          "for": { "after": false },
+          "while": { "after": false },
+          "catch": { "after": false },
+          "switch": { "after": false }
+        }
+      }
+    ],
+    "@typescript-eslint/member-delimiter-style": [
+      "warn",
+      {
+        "multiline": {
+          "delimiter": "comma",
+          "requireLast": false
+        },
+        "singleline": {
+          "delimiter": "comma",
+          "requireLast": false
+        },
+        "overrides": {
+          "interface": {
+            "multiline": {
+              "delimiter": "semi",
+              "requireLast": true
             }
-        ],
-        "no-unused-vars": "off",
-        "@typescript-eslint/no-unused-vars": [
-            "warn",
-            {
-                "varsIgnorePattern": "^_$"
-            }
-        ],
-        "@typescript-eslint/object-curly-spacing": [ "warn", "always" ],
-        "@typescript-eslint/prefer-optional-chain": "warn",
-        "@typescript-eslint/no-implicit-any-catch": "warn",
-        "@typescript-eslint/strict-boolean-expressions": "warn",
-        "brace-style": "off",
-        "@typescript-eslint/brace-style": "warn",
-        "comma-dangle": "off",
-        "@typescript-eslint/comma-dangle": "warn",
-        "comma-spacing": "off",
-        "@typescript-eslint/comma-spacing": "warn",
-        "@typescript-eslint/consistent-type-definitions": [ "warn", "interface" ],
-        "dot-notation": "off",
-        "@typescript-eslint/dot-notation": "warn",
-        "@typescript-eslint/explicit-member-accessibility": "warn",
-        "@typescript-eslint/explicit-module-boundary-types": "warn",
-        "func-call-spacing": "off",
-        "@typescript-eslint/func-call-spacing": "warn",
-        "keyword-spacing": "off",
-        "@typescript-eslint/keyword-spacing": [
-            "warn",
-            {
-                "overrides": {
-                    "if": { "after": false },
-                    "for": { "after": false },
-                    "while": { "after": false },
-                    "catch": { "after": false },
-                    "switch": { "after": false }
-                }
-            }
-        ],
-        "@typescript-eslint/member-delimiter-style": [
-            "warn",
-            {
-                "multiline": {
-                  "delimiter": "comma",
-                  "requireLast": false
-                },
-                "singleline": {
-                    "delimiter": "comma",
-                    "requireLast": false
-                },
-                "overrides": {
-                    "interface": {
-                        "multiline": {
-                            "delimiter": "semi",
-                            "requireLast": true
-                        }
-                    }
-                }
-            }
-        ],
-        "@typescript-eslint/method-signature-style": [ "warn", "method" ],
-        "require-await": "off",
-        "@typescript-eslint/require-await": "warn",
-        "quotes": "off",
-        "@typescript-eslint/quotes": [ "warn", "single" ],
-        "@typescript-eslint/prefer-readonly": "warn",
-        "@typescript-eslint/prefer-includes": "warn",
-        "@typescript-eslint/prefer-nullish-coalescing": "warn"
-    }
+          }
+        }
+      }
+    ],
+    "@typescript-eslint/method-signature-style": [ "warn", "method" ],
+    "require-await": "off",
+    "@typescript-eslint/require-await": "warn",
+    "quotes": "off",
+    "@typescript-eslint/quotes": [ "warn", "single" ],
+    "@typescript-eslint/prefer-readonly": "warn",
+    "@typescript-eslint/prefer-includes": "warn",
+    "@typescript-eslint/prefer-nullish-coalescing": "warn"
+  }
 }
