@@ -73,15 +73,19 @@ export class DafnyInstaller {
   public async install(): Promise<boolean> {
     this.statusOutput.show();
     this.writeStatus('starting Dafny installation');
-    await this.cleanInstallDir();
-    const archive = await this.downloadArchive(getDafnyDownloadAddress());
-    if(archive == null) {
+    try {
+      await this.cleanInstallDir();
+      const archive = await this.downloadArchive(getDafnyDownloadAddress());
+      await this.extractArchive(archive);
+      await workspace.fs.delete(archive, { useTrash: false });
+      this.writeStatus('Dafny installation completed');
+      return true;
+    } catch(error: unknown) {
+      this.writeStatus('Dafny installation failed:');
+      this.writeStatus(`> ${error}`);
+      console.error('dafny installation failed', error);
       return false;
     }
-    await this.extractArchive(archive);
-    await workspace.fs.delete(archive);
-    this.writeStatus('Dafny installation completed');
-    return true;
   }
 
   public isCustomInstallation(): boolean {
@@ -94,7 +98,6 @@ export class DafnyInstaller {
       await fs.promises.access(languageServerDll, fs.constants.R_OK);
       return true;
     } catch(error: unknown) {
-      console.error(`cannot access language server: ${error}`);
       return false;
     }
   }
@@ -112,30 +115,23 @@ export class DafnyInstaller {
       );
     } catch(error: unknown) {
       if(!(error instanceof FileSystemError) || error.code !== 'FileNotFound') {
-        this.writeStatus(`error deleting folder: ${error}`);
         throw error;
       }
     }
   }
 
-  private async downloadArchive(downloadUri: string): Promise<Uri | undefined> {
+  private async downloadArchive(downloadUri: string): Promise<Uri> {
     await mkdirAsync(this.getInstallationPath().fsPath, { recursive: true });
-    return await new Promise<Uri | undefined>(resolve => {
+    return await new Promise<Uri>((resolve, reject) => {
       const archivePath = this.getZipPath();
       const archiveHandle = fs.createWriteStream(archivePath.fsPath);
       this.writeStatus(`downloading Dafny from ${downloadUri}`);
       const progressReporter = new ProgressReporter(this.statusOutput);
       archiveHandle
         .on('finish', () => resolve(archivePath))
-        .on('error', error => {
-          this.writeStatus(`file write error: ${error}`);
-          resolve(undefined);
-        });
+        .on('error', error => reject(error));
       got.stream(downloadUri)
-        .on('error', error => {
-          this.writeStatus(`download error: ${error}`);
-          resolve(undefined);
-        })
+        .on('error', error => reject(error))
         .on('downloadProgress', progress => progressReporter.updateDownloadProgress(progress))
         .pipe(archiveHandle);
     });
