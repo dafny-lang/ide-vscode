@@ -35,6 +35,10 @@
         "null": "ignore"
       }
     ],
+    "no-multi-spaces": "warn",
+    "space-before-blocks": [ "warn", "always" ],
+    "space-in-parens": [ "warn", "never" ],
+    "array-bracket-spacing": [ "warn", "always" ],
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
       "warn",
@@ -42,7 +46,9 @@
         "varsIgnorePattern": "^_$"
       }
     ],
+    "object-curly-spacing": "off",
     "@typescript-eslint/object-curly-spacing": [ "warn", "always" ],
+    "@typescript-eslint/type-annotation-spacing": [ "warn" ],
     "@typescript-eslint/prefer-optional-chain": "warn",
     "@typescript-eslint/no-implicit-any-catch": "warn",
     "@typescript-eslint/strict-boolean-expressions": "warn",
@@ -100,6 +106,11 @@
     "@typescript-eslint/quotes": [ "warn", "single" ],
     "@typescript-eslint/prefer-readonly": "warn",
     "@typescript-eslint/prefer-includes": "warn",
-    "@typescript-eslint/prefer-nullish-coalescing": "warn"
+    "@typescript-eslint/prefer-nullish-coalescing": "warn",
+    "@typescript-eslint/unbound-method": "warn",
+    "@typescript-eslint/unified-signatures": "warn",
+    "@typescript-eslint/restrict-plus-operands": "warn",
+    "@typescript-eslint/space-infix-ops": "warn",
+    "@typescript-eslint/prefer-for-of": "warn"
   }
 }

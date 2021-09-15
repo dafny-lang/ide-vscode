@@ -148,7 +148,7 @@ export default class CounterExamplesView {
   public dispose(): void {
     this.disposed = true;
     this.getCounterExamplesDebounced.dispose();
-    for(const [_, decoration] of this.activeDecorations) {
+    for(const [ _, decoration ] of this.activeDecorations) {
       decoration.dispose();
     }
   }
