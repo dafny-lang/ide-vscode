@@ -11,6 +11,7 @@ import { getCompilerRuntimePath } from '../language/dafnyInstallation';
 import { Messages } from './messages';
 
 const CompileArg = '/compile';
+const CompileAndRunArg = `${CompileArg}:3`;
 const OutputPathArg = '/out';
 
 export default class CompileCommands {
@@ -97,7 +98,7 @@ class CommandFactory {
     if(!this.run) {
       return args;
     }
-    return [ ...args.filter(arg => !arg.includes(CompileArg)), `${CompileArg}:3` ];
+    return [ ...args.filter(arg => !arg.includes(CompileArg)), CompileAndRunArg ];
   }
 
   private withOutputPath(args: string[]): string[] {
