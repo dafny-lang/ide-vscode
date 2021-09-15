@@ -174,7 +174,7 @@ class ProgressReporter {
 
   public updateDownloadProgress(progress: { percent: number, transferred: number }) {
     if(progress.transferred > 0) {
-      // The transferred byte count has to be checked since got reports percent=0 at the beginning.
+      // The transferred byte count has to be checked since got reports percent=1 at the beginning.
       this.update(progress.percent);
     }
   }
