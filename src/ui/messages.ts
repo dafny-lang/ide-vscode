@@ -18,6 +18,7 @@ export namespace Messages {
 
   export namespace Installation {
     export const Error = 'An error occurred during the installation of Dafny.';
+    export const Outdated = 'Your Dafny installation is outdated: ';
   }
 
   export namespace Dotnet {

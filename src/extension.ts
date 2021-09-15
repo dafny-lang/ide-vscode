@@ -80,7 +80,7 @@ class ExtensionRuntime {
     }
     if(this.installer.isCustomInstallation()) {
       Window.showInformationMessage(
-        `Your Dafny installation is outdated. Recommended=${LanguageServerConstants.RequiredVersion}, Yours=${installedVersion}`
+        `${Messages.Installation.Outdated} ${installedVersion} < ${LanguageServerConstants.RequiredVersion}`
       );
       return true;
     }
