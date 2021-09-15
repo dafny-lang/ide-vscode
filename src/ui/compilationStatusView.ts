@@ -8,17 +8,31 @@ import { Messages } from './messages';
 
 const StatusBarPriority = 10;
 
-const COMPILATION_STATUS_MESSAGE_MAPPINGS = {
-  [CompilationStatus.ParsingFailed]: Messages.CompilationStatus.ParsingFailed,
-  [CompilationStatus.ResolutionFailed]: Messages.CompilationStatus.ResolutionFailed,
-  [CompilationStatus.CompilationSucceeded]: Messages.CompilationStatus.CompilationSucceeded,
-  [CompilationStatus.VerificationStarted]: Messages.CompilationStatus.Verifying,
-  [CompilationStatus.VerificationSucceeded]: Messages.CompilationStatus.VerificationSucceeded,
-  [CompilationStatus.VerificationFailed]: Messages.CompilationStatus.VerificationFailed
-};
-
 function getVsDocumentPath(params: { uri: DocumentUri }): string {
   return Uri.parse(params.uri).toString();
+}
+
+function toStatusMessage(status: CompilationStatus): string {
+  switch(status) {
+  case CompilationStatus.ParsingFailed:
+    return Messages.CompilationStatus.ParsingFailed;
+  case CompilationStatus.ResolutionFailed:
+    return Messages.CompilationStatus.ResolutionFailed;
+  case CompilationStatus.CompilationSucceeded:
+    return Messages.CompilationStatus.CompilationSucceeded;
+  case CompilationStatus.VerificationStarted:
+    return Messages.CompilationStatus.Verifying;
+  case CompilationStatus.VerificationSucceeded:
+    return Messages.CompilationStatus.VerificationSucceeded;
+  case CompilationStatus.VerificationFailed:
+    return Messages.CompilationStatus.VerificationFailed;
+  default:
+    throw unhandledStatusMessage(status);
+  }
+}
+
+function unhandledStatusMessage(status: never): Error {
+  return new Error(`unknown status message: ${status}`);
 }
 
 export default class CompilationStatusView {
@@ -59,7 +73,7 @@ export default class CompilationStatusView {
   private compilationStatusChanged(params: ICompilationStatusParams): void {
     this.documentStatusMessages.set(
       getVsDocumentPath(params),
-      COMPILATION_STATUS_MESSAGE_MAPPINGS[params.status]
+      toStatusMessage(params.status)
     );
     this.updateActiveDocumentStatus();
   }
