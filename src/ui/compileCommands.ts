@@ -41,7 +41,6 @@ async function compileAndRun(context: ExtensionContext, useCustomArgs: boolean, 
 function runCommandInTerminal(command: string): void {
   const terminal = window.activeTerminal ?? window.createTerminal();
   terminal.show();
-  console.log(command);
   terminal.sendText(command);
 }
 

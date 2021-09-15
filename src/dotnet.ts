@@ -27,10 +27,8 @@ export async function getDotnetExecutablePath(): Promise<string> {
   }
   try {
     const resolvedPath = await which(DotnetConstants.ExecutableName);
-    console.log(`resolved dotnet installation at ${resolvedPath}`);
     return resolvedPath;
   } catch(error: unknown) {
-    console.error(`failed to resolve the dotnet installation path: ${error}`);
     return DotnetConstants.ExecutableName;
   }
 }
