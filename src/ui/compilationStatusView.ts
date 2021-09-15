@@ -1,4 +1,4 @@
-import { StatusBarAlignment, StatusBarItem, TextDocument, Uri, window as Window, workspace as Workspace, ExtensionContext } from 'vscode';
+import { StatusBarAlignment, StatusBarItem, TextDocument, Uri, window, workspace, ExtensionContext } from 'vscode';
 import { DocumentUri } from 'vscode-languageserver-protocol';
 
 import { LanguageConstants } from '../constants';
@@ -43,15 +43,15 @@ export default class CompilationStatusView {
   private constructor(private readonly statusBarItem: StatusBarItem) {}
 
   public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): CompilationStatusView {
-    const statusBarItem = Window.createStatusBarItem(StatusBarAlignment.Left, StatusBarPriority);
+    const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, StatusBarPriority);
     const view = new CompilationStatusView(statusBarItem);
     context.subscriptions.push(
       languageClient.onCompilationStatus(params => view.compilationStatusChanged(params)),
       languageClient.onVerificationStarted(params => view.verificationStarted(params)),
       languageClient.onVerificationCompleted(params => view.verificationCompleted(params)),
-      Workspace.onDidCloseTextDocument(document => view.documentClosed(document)),
-      Workspace.onDidChangeTextDocument(() => view.updateActiveDocumentStatus()),
-      Window.onDidChangeActiveTextEditor(() => view.updateActiveDocumentStatus()),
+      workspace.onDidCloseTextDocument(document => view.documentClosed(document)),
+      workspace.onDidChangeTextDocument(() => view.updateActiveDocumentStatus()),
+      window.onDidChangeActiveTextEditor(() => view.updateActiveDocumentStatus()),
       statusBarItem
     );
     return view;
@@ -95,7 +95,7 @@ export default class CompilationStatusView {
   }
 
   private updateActiveDocumentStatus(): void {
-    const editor = Window.activeTextEditor;
+    const editor = window.activeTextEditor;
     if(editor == null) {
       return;
     }

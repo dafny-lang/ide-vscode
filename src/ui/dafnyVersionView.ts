@@ -1,7 +1,7 @@
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 
-import { ExtensionContext, StatusBarAlignment, StatusBarItem, window as Window } from 'vscode';
+import { ExtensionContext, StatusBarAlignment, StatusBarItem, window } from 'vscode';
 import { DafnyCommands } from '../commands';
 
 import { LanguageConstants, LanguageServerConstants } from '../constants';
@@ -40,13 +40,13 @@ export default class DafnyVersionView {
   ) {}
 
   public static async createAndRegister(context: ExtensionContext, languageServerVersion: string): Promise<DafnyVersionView> {
-    const statusBarItem = Window.createStatusBarItem(StatusBarAlignment.Right, StatusBarPriority);
+    const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, StatusBarPriority);
     statusBarItem.text = languageServerVersion;
     statusBarItem.command = DafnyCommands.ShowVersion;
     statusBarItem.tooltip = await getTooltipText(context, languageServerVersion);
     const view = new DafnyVersionView(context, languageServerVersion, statusBarItem);
     context.subscriptions.push(
-      Window.onDidChangeActiveTextEditor(() => view.refreshVersionView()),
+      window.onDidChangeActiveTextEditor(() => view.refreshVersionView()),
       statusBarItem
     );
     view.refreshVersionView();
@@ -54,7 +54,7 @@ export default class DafnyVersionView {
   }
 
   private refreshVersionView(): void {
-    const editor = Window.activeTextEditor;
+    const editor = window.activeTextEditor;
     if(editor == null) {
       return;
     }

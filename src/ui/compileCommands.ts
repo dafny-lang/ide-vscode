@@ -1,7 +1,7 @@
 import * as os from 'os';
 import * as path from 'path';
 
-import { window as Window, commands as Commands, ExtensionContext } from 'vscode';
+import { window, commands, ExtensionContext } from 'vscode';
 import { DafnyCommands } from '../commands';
 
 import Configuration from '../configuration';
@@ -16,16 +16,16 @@ const OutputPathArg = '/out';
 export default class CompileCommands {
   public static createAndRegister(context: ExtensionContext): CompileCommands {
     context.subscriptions.push(
-      Commands.registerCommand(DafnyCommands.Compile, () => compileAndRun(context, false, false)),
-      Commands.registerCommand(DafnyCommands.CompileCustomArgs, () => compileAndRun(context, true, false)),
-      Commands.registerCommand(DafnyCommands.CompileAndRun, () => compileAndRun(context, false, true))
+      commands.registerCommand(DafnyCommands.Compile, () => compileAndRun(context, false, false)),
+      commands.registerCommand(DafnyCommands.CompileCustomArgs, () => compileAndRun(context, true, false)),
+      commands.registerCommand(DafnyCommands.CompileAndRun, () => compileAndRun(context, false, true))
     );
     return new CompileCommands();
   }
 }
 
 async function compileAndRun(context: ExtensionContext, useCustomArgs: boolean, run: boolean): Promise<boolean> {
-  const document = Window.activeTextEditor?.document;
+  const document = window.activeTextEditor?.document;
   if(document == null || !await document.save()) {
     return false;
   }
@@ -38,7 +38,7 @@ async function compileAndRun(context: ExtensionContext, useCustomArgs: boolean, 
 }
 
 function runCommandInTerminal(command: string): void {
-  const terminal = Window.activeTerminal ?? Window.createTerminal();
+  const terminal = window.activeTerminal ?? window.createTerminal();
   terminal.show();
   console.log(command);
   terminal.sendText(command);
@@ -76,12 +76,12 @@ class CommandFactory {
   }
 
   private async getCustomCompilerArgs(originalArgs: string): Promise<string | undefined> {
-    const customArgs = await Window.showInputBox({
+    const customArgs = await window.showInputBox({
       value: originalArgs,
       prompt: Messages.Compiler.CustomArgumentsPrompt
     });
     if(customArgs == null) {
-      Window.showErrorMessage(Messages.Compiler.NoArgumentsGiven);
+      window.showErrorMessage(Messages.Compiler.NoArgumentsGiven);
     }
     return customArgs;
   }

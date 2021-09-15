@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
 
-import { workspace as Workspace, window as Window, ExtensionContext, Uri, OutputChannel, FileSystemError, Progress } from 'vscode';
+import { workspace, ExtensionContext, Uri, OutputChannel, FileSystemError } from 'vscode';
 import { Utils } from 'vscode-uri';
 
 import got from 'got';
@@ -79,7 +79,7 @@ export class DafnyInstaller {
       return false;
     }
     await this.extractArchive(archive);
-    await Workspace.fs.delete(archive);
+    await workspace.fs.delete(archive);
     this.writeStatus('Dafny installation completed');
     return true;
   }
@@ -103,7 +103,7 @@ export class DafnyInstaller {
     const installPath = this.getInstallationPath();
     this.writeStatus(`deleting previous Dafny installation at ${installPath}`);
     try {
-      await Workspace.fs.delete(
+      await workspace.fs.delete(
         installPath,
         {
           recursive: true,

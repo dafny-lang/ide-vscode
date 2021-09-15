@@ -1,4 +1,4 @@
-import { window as Window, commands as Commands, Uri } from 'vscode';
+import { window, commands, Uri } from 'vscode';
 
 import { VSCodeCommands } from './commands';
 import { hasSupportedDotnetVersion } from './dotnet';
@@ -10,17 +10,17 @@ export default async function checkAndInformAboutInstallation(): Promise<boolean
 
 async function checkDotnetInstallation(): Promise<boolean> {
   if(!await hasSupportedDotnetVersion()) {
-    const selection = await Window.showErrorMessage(
+    const selection = await window.showErrorMessage(
       Messages.Dotnet.NoCompatibleInstallation,
       Messages.Dotnet.ChangeConfiguration,
       Messages.Dotnet.VisitDownload
     );
     switch(selection) {
     case Messages.Dotnet.ChangeConfiguration:
-      Commands.executeCommand(VSCodeCommands.ConfigureLanguageSettings);
+      commands.executeCommand(VSCodeCommands.ConfigureLanguageSettings);
       break;
     case Messages.Dotnet.VisitDownload:
-      Commands.executeCommand(VSCodeCommands.Open, Uri.parse(Messages.Dotnet.DownloadUri));
+      commands.executeCommand(VSCodeCommands.Open, Uri.parse(Messages.Dotnet.DownloadUri));
       break;
     }
     return false;

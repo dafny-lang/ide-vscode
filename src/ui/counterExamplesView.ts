@@ -1,4 +1,4 @@
-import { DecorationOptions, Position, Range, TextEditor, TextEditorDecorationType, Uri, window as Window, workspace as Workspace, commands as Commands, ExtensionContext } from 'vscode';
+import { DecorationOptions, Position, Range, TextEditor, TextEditorDecorationType, Uri, window, workspace, commands, ExtensionContext } from 'vscode';
 
 import { DafnyCommands } from '../commands';
 import Configuration from '../configuration';
@@ -34,17 +34,17 @@ export default class CounterExamplesView {
   public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): CounterExamplesView {
     const instance = new CounterExamplesView(languageClient);
     context.subscriptions.push(
-      Window.onDidChangeActiveTextEditor(editor => instance.updateCounterExamples(editor)),
-      Workspace.onDidChangeTextDocument(() => instance.updateCounterExamples(Window.activeTextEditor)),
-      Commands.registerCommand(DafnyCommands.ShowCounterExample, () => instance.enableCounterExamplesForActiveEditor()),
-      Commands.registerCommand(DafnyCommands.HideCounterExample, () => instance.disableCounterExamplesForActiveEditor()),
+      window.onDidChangeActiveTextEditor(editor => instance.updateCounterExamples(editor)),
+      workspace.onDidChangeTextDocument(() => instance.updateCounterExamples(window.activeTextEditor)),
+      commands.registerCommand(DafnyCommands.ShowCounterExample, () => instance.enableCounterExamplesForActiveEditor()),
+      commands.registerCommand(DafnyCommands.HideCounterExample, () => instance.disableCounterExamplesForActiveEditor()),
       instance
     );
     return instance;
   }
 
   private async enableCounterExamplesForActiveEditor(): Promise<void> {
-    const editor = Window.activeTextEditor;
+    const editor = window.activeTextEditor;
     if(editor == null) {
       return;
     }
@@ -53,7 +53,7 @@ export default class CounterExamplesView {
   }
 
   private disableCounterExamplesForActiveEditor(): void {
-    const editor = Window.activeTextEditor;
+    const editor = window.activeTextEditor;
     if(editor == null) {
       return;
     }
@@ -80,7 +80,7 @@ export default class CounterExamplesView {
       }
     } catch(error: unknown) {
       if(!(error instanceof DebounceError)) {
-        Window.showErrorMessage(`CounterExample request failed: ${error}`);
+        window.showErrorMessage(`CounterExample request failed: ${error}`);
       }
     }
   }
@@ -127,7 +127,7 @@ export default class CounterExamplesView {
 
   private static createTextEditorDecoration(): TextEditorDecorationType {
     const customOptions = Configuration.get<IColorOptions>(ConfigurationConstants.CounterExamples.Color);
-    return Window.createTextEditorDecorationType({
+    return window.createTextEditorDecorationType({
       dark:{
         after: {
           backgroundColor: customOptions.backgroundColor ?? DefaultDarkBackgroundColor,

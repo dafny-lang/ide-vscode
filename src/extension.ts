@@ -1,4 +1,4 @@
-import { Disposable, ExtensionContext, OutputChannel, window as Window } from 'vscode';
+import { Disposable, ExtensionContext, OutputChannel, window } from 'vscode';
 import { ExtensionConstants, LanguageServerConstants } from './constants';
 
 import { DafnyLanguageClient } from './language/dafnyLanguageClient';
@@ -15,7 +15,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
   if(!await checkAndInformAboutInstallation()) {
     return;
   }
-  const statusOutput = Window.createOutputChannel(ExtensionConstants.ChannelName);
+  const statusOutput = window.createOutputChannel(ExtensionConstants.ChannelName);
   context.subscriptions.push(statusOutput);
   extensionRuntime = new ExtensionRuntime(context, statusOutput);
   await extensionRuntime.initialize();
@@ -40,7 +40,7 @@ class ExtensionRuntime {
   public async initialize(): Promise<void> {
     if(!this.installer.isCustomInstallation() && !await this.installer.isLanguageServerRuntimeAccessible()) {
       if(!await this.installer.install()) {
-        Window.showErrorMessage(Messages.Installation.Error);
+        window.showErrorMessage(Messages.Installation.Error);
         return;
       }
     }
@@ -79,14 +79,14 @@ class ExtensionRuntime {
       return true;
     }
     if(this.installer.isCustomInstallation()) {
-      Window.showInformationMessage(
+      window.showInformationMessage(
         `${Messages.Installation.Outdated} ${installedVersion} < ${LanguageServerConstants.RequiredVersion}`
       );
       return true;
     }
     await this.client!.stop();
     if(!await this.installer.install()) {
-      Window.showErrorMessage(Messages.Installation.Error);
+      window.showErrorMessage(Messages.Installation.Error);
       return false;
     }
     await this.initializeClient();
