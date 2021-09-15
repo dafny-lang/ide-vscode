@@ -33,18 +33,14 @@ async function getCompilerVersion(context: ExtensionContext): Promise<string> {
 }
 
 export default class DafnyVersionView {
-  private constructor(
-    private readonly context: ExtensionContext,
-    private readonly languageServerVersion: string,
-    private readonly statusBarItem: StatusBarItem
-  ) {}
+  private constructor(private readonly statusBarItem: StatusBarItem) {}
 
   public static async createAndRegister(context: ExtensionContext, languageServerVersion: string): Promise<DafnyVersionView> {
     const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, StatusBarPriority);
     statusBarItem.text = languageServerVersion;
     statusBarItem.command = DafnyCommands.ShowVersion;
     statusBarItem.tooltip = await getTooltipText(context, languageServerVersion);
-    const view = new DafnyVersionView(context, languageServerVersion, statusBarItem);
+    const view = new DafnyVersionView(statusBarItem);
     context.subscriptions.push(
       window.onDidChangeActiveTextEditor(() => view.refreshVersionView()),
       statusBarItem
