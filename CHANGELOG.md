@@ -4,6 +4,7 @@
 
 - Revised the code base
 - Setting a custom Dafny installation now disables automatic updates
+- Now showing the Dafny installation progress in the terminal
 
 ## 1.8.0
 
