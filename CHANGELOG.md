@@ -3,6 +3,7 @@
 ## 2.0.0
 
 - Revised the code base
+- Setting a custom Dafny installation now disables automatic updates
 
 ## 1.8.0
 

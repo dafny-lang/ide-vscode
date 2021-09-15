@@ -27,6 +27,7 @@
         "max-params": [ "warn", 4 ],
         "semi": [ "warn", "always" ],
         "no-trailing-spaces": "warn",
+        "no-unreachable": "warn",
         "eqeqeq": [
             "warn",
             "always",
@@ -71,7 +72,27 @@
                 }
             }
         ],
-        "@typescript-eslint/member-delimiter-style": "warn",
+        "@typescript-eslint/member-delimiter-style": [
+            "warn",
+            {
+                "multiline": {
+                  "delimiter": "comma",
+                  "requireLast": false
+                },
+                "singleline": {
+                    "delimiter": "comma",
+                    "requireLast": false
+                },
+                "overrides": {
+                    "interface": {
+                        "multiline": {
+                            "delimiter": "semi",
+                            "requireLast": true
+                        }
+                    }
+                }
+            }
+        ],
         "@typescript-eslint/method-signature-style": [ "warn", "method" ],
         "require-await": "off",
         "@typescript-eslint/require-await": "warn",

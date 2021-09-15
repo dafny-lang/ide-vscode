@@ -1,18 +1,19 @@
 import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
+import { promisify } from 'util';
 
-import { workspace as Workspace, window as Window, ExtensionContext, Uri, OutputChannel, FileSystemError } from 'vscode';
+import { workspace as Workspace, window as Window, ExtensionContext, Uri, OutputChannel, FileSystemError, Progress } from 'vscode';
 import { Utils } from 'vscode-uri';
 
-import { fetch } from 'cross-fetch';
+import got from 'got';
 import * as extract from 'extract-zip';
 
 import { ConfigurationConstants, LanguageServerConstants } from '../constants';
 import Configuration from '../configuration';
 
 const ArchiveFileName = 'dafny.zip';
-
+const mkdirAsync = promisify(fs.mkdir);
 
 export function getCompilerRuntimePath(context: ExtensionContext): string {
   const configuredPath = Configuration.get<string | null>(ConfigurationConstants.Compiler.RuntimePath)
@@ -129,20 +130,26 @@ export class DafnyInstaller {
   }
 
   private async downloadArchive(downloadUri: string): Promise<Uri | undefined> {
-    this.writeStatus(`downloading Dafny from ${downloadUri}`);
-    const response = await fetch(downloadUri);
-    if(!response.ok) {
-      this.writeStatus(`Dafny download failed: ${response.status} (${response.statusText})`);
-      return;
-    }
-    if(response.body == null) {
-      this.writeStatus('Dafny download failed: No Content');
-      return;
-    }
-    const content = await response.arrayBuffer();
-    const archivePath = this.getZipPath();
-    await Workspace.fs.writeFile(archivePath, new Uint8Array(content));
-    return archivePath;
+    await mkdirAsync(this.getInstallationPath().fsPath, { recursive: true });
+    return await new Promise<Uri | undefined>(resolve => {
+      const archivePath = this.getZipPath();
+      const archiveHandle = fs.createWriteStream(archivePath.fsPath);
+      this.writeStatus(`downloading Dafny from ${downloadUri}`);
+      const progressReporter = new ProgressReporter(this.statusOutput);
+      archiveHandle
+        .on('finish', () => resolve(archivePath))
+        .on('error', error => {
+          this.writeStatus(`file write error: ${error}`);
+          resolve(undefined);
+        });
+      got.stream(downloadUri)
+        .on('error', error => {
+          this.writeStatus(`download error: ${error}`);
+          resolve(undefined);
+        })
+        .on('downloadProgress', progress => progressReporter.update(progress))
+        .pipe(archiveHandle);
+    });
   }
 
   private async extractArchive(archivePath: Uri): Promise<void> {
@@ -161,5 +168,30 @@ export class DafnyInstaller {
 
   private writeStatus(message: string): void {
     this.statusOutput.appendLine(message);
+  }
+}
+
+// The downloadProgress event is not typed in got (any).
+interface IDownloadProgress {
+  percent: number;
+  transferred: number;
+}
+
+class ProgressReporter {
+  private lastTenth = -1;
+
+  public constructor(private readonly statusOutput: OutputChannel) {}
+
+  public update(progress: IDownloadProgress) {
+    const tenth = Math.round(progress.percent * 10);
+    if(tenth > this.lastTenth && progress.transferred > 0) {
+      this.statusOutput.append(`${tenth * 10}%`);
+      if(tenth === 10) {
+        this.statusOutput.appendLine('');
+      } else {
+        this.statusOutput.append('...');
+      }
+      this.lastTenth = tenth;
+    }
   }
 }
