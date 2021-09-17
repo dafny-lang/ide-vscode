@@ -57,14 +57,6 @@ export default class CompilationStatusView {
     this.updateActiveDocumentStatus();
   }
 
-  private getStatusBarText(document: TextDocument): string {
-    const status = this.documentStatusMessages.get(document.uri.toString());
-    if(status == null) {
-      return '';
-    }
-    return status;
-  }
-
   private compilationStatusChanged(params: ICompilationStatusParams): void {
     this.documentStatusMessages.set(
       getVsDocumentPath(params),
@@ -90,10 +82,10 @@ export default class CompilationStatusView {
   }
 
   private updateActiveDocumentStatus(): void {
-    const document = window.activeTextEditor?.document;
+    const document = window.activeTextEditor?.document.uri.toString();
     if(document == null) {
       return;
     }
-    this.statusBarItem.text = this.getStatusBarText(document);
+    this.statusBarItem.text = this.documentStatusMessages.get(document) ?? '';
   }
 }
