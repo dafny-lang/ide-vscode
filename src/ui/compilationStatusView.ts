@@ -4,6 +4,7 @@ import { DocumentUri } from 'vscode-languageserver-protocol';
 import { LanguageConstants } from '../constants';
 import { CompilationStatus, ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from '../language/api/compilationStatus';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
+import { enableOnlyForDafnyDocuments } from '../tools/visibility';
 import { Messages } from './messages';
 
 const StatusBarPriority = 10;
@@ -52,6 +53,7 @@ export default class CompilationStatusView {
       workspace.onDidCloseTextDocument(document => view.documentClosed(document)),
       workspace.onDidChangeTextDocument(() => view.updateActiveDocumentStatus()),
       window.onDidChangeActiveTextEditor(() => view.updateActiveDocumentStatus()),
+      enableOnlyForDafnyDocuments(statusBarItem),
       statusBarItem
     );
     return view;
@@ -95,16 +97,10 @@ export default class CompilationStatusView {
   }
 
   private updateActiveDocumentStatus(): void {
-    const editor = window.activeTextEditor;
-    if(editor == null) {
+    const document = window.activeTextEditor?.document;
+    if(document == null) {
       return;
     }
-    const document = editor.document;
     this.statusBarItem.text = this.getStatusBarText(document);
-    if(document.languageId === LanguageConstants.Id) {
-      this.statusBarItem.show();
-    } else {
-      this.statusBarItem.hide();
-    }
   }
 }
