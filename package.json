@@ -125,6 +125,11 @@
           ],
           "description": "When to apply the automatic verification (requires restart)"
         },
+        "dafny.verificationTimeLimit": {
+          "type": "number",
+          "default": "0",
+          "description": "Maximum number of time in seconds to verify a document, 0=infinite (requires restart)"
+        },
         "dafny.languageServerLaunchArgs": {
           "type": "array",
           "default": [],

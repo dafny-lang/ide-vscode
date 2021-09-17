@@ -5,6 +5,7 @@
 - Revised the code base
 - Setting a custom Dafny installation now disables automatic updates
 - Now showing the Dafny installation progress in the terminal
+- Added option to set a time limit for the automatic verification
 
 ## 1.8.0
 

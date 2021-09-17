@@ -13,11 +13,19 @@ const LanguageServerName = 'Dafny Language Server';
 
 function getLanguageServerLaunchArgs(): string[] {
   const launchArgs = Configuration.get<string[]>(ConfigurationConstants.LanguageServer.LaunchArgs);
-  return [ getVerificationArgument(), ...launchArgs ];
+  return [
+    getVerificationArgument(),
+    getVerifierTimeLimitArgument(),
+    ...launchArgs
+  ];
 }
 
 function getVerificationArgument(): string {
   return `--documents:verify=${Configuration.get<string>(ConfigurationConstants.LanguageServer.AutomaticVerification)}`;
+}
+
+function getVerifierTimeLimitArgument(): string {
+  return `--verifier:timelimit=${Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationTimeLimit)}`;
 }
 
 export class DafnyLanguageClient extends LanguageClient {

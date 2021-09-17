@@ -17,6 +17,7 @@ export namespace ConfigurationConstants {
     export const RuntimePath = 'languageServerRuntimePath';
     export const LaunchArgs = 'languageServerLaunchArgs';
     export const AutomaticVerification = 'automaticVerification';
+    export const VerificationTimeLimit = 'verificationTimeLimit';
   }
 
   export namespace Compiler {
