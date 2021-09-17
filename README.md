@@ -21,12 +21,10 @@ You can find [examples below](#examples).
 | Shortcut                  | Description                                                                             |
 | :------------------------ | :-------------------------------------------------------------------------------------- |
 | `Ctrl+Shift+B` or `⇧+⌘+B` | Compile to `.dll` or, if there is a `Main` method, to `.exe` file                       |
-| `F2`                      | Rename a symbol                                                                         |
 | `F5`                      | Compile and run, if the source file has a `Main` method                                 |
 | `F6`                      | Compile with custom arguments                                                           |
 | `F7`                      | Show _CounterExample_                                                                   |
 | `F8`                      | Hide _CounterExample_                                                                   |
-| `F9`                      | Restarts the _Dafny Language Server_, also installs the latest language server version. |
 
 ## Requirements
 
@@ -37,10 +35,10 @@ When you first open a _Dafny_ file, the extension will prompt you to install .NE
 
 | Setting                           | Description                                                                                                                                                                                        | Default                                                        |
 | :-------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------- |
-| `dafny.languageServerRuntimePath` | Absolute or relative path to the _Dafny_ language server runtime (`DafnyLS.dll`).                                                                                                                  | `../../dafnyLanguageServer/DafnyLS.dll`                        |
+| `dafny.languageServerRuntimePath` | Absolute or relative path to the _Dafny_ language server runtime (`DafnyLanguageServer.dll`).                                                                                                      | `null`                                                         |
 | `dafny.automaticVerification`     | Optional string to control when the document should be verified (choose between `never`, `onchange`, and `onsave`.                                                                                 | `onchange`                                                     |
 | `dafny.languageServerLaunchArgs`  | Optional array of strings as _Dafny_ language server arguments.                                                                                                                                    | `[ ]`                                                          |
-| `dafny.compilerRuntimePath`       | Absolute or relative path to the _Dafny_ compiler (`Dafny.dll`).                                                                                                                                   | `../../dafnyLanguageServer/Dafny.dll`                          |
+| `dafny.compilerRuntimePath`       | Absolute or relative path to the _Dafny_ compiler (`Dafny.dll`).                                                                                                                                   | `null`                                                         |
 | `dafny.compilerArgs`              | Optional array of strings as _Dafny_ compilation arguments.                                                                                                                                        | `[ "/verifyAllModules", "/compile:1", "/spillTargetCode:1" ]`  |
 | `dafny.compilerOutputDir`         | Absolute or relative path to the compilation output directory.                                                                                                                                     | `bin`                                                          |
 | `dafny.dotnetExecutablePath`      | Absolute path to the dotnet executable. Only necessary if dotnet is not in system PATH (you'll get an error if that's the case).                                                                   |                                                                |

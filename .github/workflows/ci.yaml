@@ -19,12 +19,16 @@ jobs:
       #  uses: warchant/setup-sonar-scanner@v1
 
       - run: npm install
-      #- run: npm run prettier
-      - run: npm run build
-      - run: npm run package
+      - run: npm run lint
+      - run: npm run vscode:prepublish
       #      - run: npm test
       #        env:
       #          CI: true
+      - name: "Prepare: Package VSCode Extension"
+        uses: actions/setup-node@v1
+      - run: npm install -g vsce@1.96.1
+      - run: vsce package --out dist/
+
 
       #- name: "Run sonar-scanner"
       #  env:
@@ -119,8 +123,8 @@ jobs:
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
 
-      - run: npm install
-      - run: npm run publish -- -p "${MARKETPLACE_TOKEN}" --packagePath dist/${PACKAGE_NAME}-${VERSION}.vsix
+      - run: npm install -g vsce@1.96.1
+      - run: vsce publish -p "${MARKETPLACE_TOKEN}" --packagePath dist/${PACKAGE_NAME}-${VERSION}.vsix
         env:
           # Note: Marketplace Token according to:
           #   https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token

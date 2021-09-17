@@ -1,5 +1,11 @@
 # Release Notes
 
+## 2.0.0
+
+- Revised the code base
+- Setting a custom Dafny installation now disables automatic updates
+- Now showing the Dafny installation progress in the terminal
+
 ## 1.8.0
 
 - Group verification errors and their related locations by using the "Related Information" UI for diagnostics.

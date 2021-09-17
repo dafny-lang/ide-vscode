@@ -1,36 +1,99 @@
-"use strict";
-import { ExtensionContext, workspace, window } from "./ideApi/_IdeApi";
-import { ServerInitializer } from "./dafnyLanguageServerStartup/_DafnyLanguageServerStartupModule";
-import { ExecutionCapabilities } from "./localExecution/_LocalExecutionModule";
-import { Warning, Error } from "./stringResources/_StringResourcesModule";
+import { Disposable, ExtensionContext, OutputChannel, window } from 'vscode';
+import { ExtensionConstants, LanguageServerConstants } from './constants';
 
-/**
- * This is the plugin's entry point (the "main" function)
- * It starts the language server with the DafnyLanguageServer class.
- */
-export function activate(extensionContext: ExtensionContext) {
-  if (workspace.workspaceFolders === undefined) {
-    window.showWarningMessage(Warning.NoWorkspace);
-  }
+import { DafnyLanguageClient } from './language/dafnyLanguageClient';
+import checkAndInformAboutInstallation from './startupCheck';
+import { DafnyInstaller, getLanguageServerRuntimePath } from './language/dafnyInstallation';
+import { Messages } from './ui/messages';
+import createAndRegisterDafnyIntegration from './ui/dafnyIntegration';
+import { timeout } from './tools/timeout';
 
-  const exeCapabilities = new ExecutionCapabilities();
-  if (!exeCapabilities.hasSupportedDotnetVersion()) {
-    // Promt the user to install dotnet and stop extension execution.
-    window
-      .showErrorMessage(
-        Error.NoSupportedDotnet,
-        Error.ConfigureDotnetExecutable,
-        Error.GetDotnet
-      )
-      .then((selection: string | undefined) => {
-        if (selection !== undefined) {
-          exeCapabilities.getDotnet(selection);
-        }
-      });
+const DafnyVersionTimeoutMs = 5_000;
+let extensionRuntime: ExtensionRuntime | undefined;
+
+export async function activate(context: ExtensionContext): Promise<void> {
+  if(!await checkAndInformAboutInstallation()) {
     return;
   }
+  const statusOutput = window.createOutputChannel(ExtensionConstants.ChannelName);
+  context.subscriptions.push(statusOutput);
+  extensionRuntime = new ExtensionRuntime(context, statusOutput);
+  await extensionRuntime.initialize();
+}
 
-  const dafnyLanguageServer = new ServerInitializer(extensionContext);
-  dafnyLanguageServer.startLanguageServer();
-  dafnyLanguageServer.registerServerRestartCommand();
+export async function deactivate(): Promise<void> {
+  await extensionRuntime?.dispose();
+}
+
+class ExtensionRuntime {
+  private readonly installer: DafnyInstaller;
+  private client?: DafnyLanguageClient;
+  private languageServerVersion?: string;
+
+  public constructor(
+    private readonly context: ExtensionContext,
+    private readonly statusOutput: OutputChannel
+  ) {
+    this.installer = new DafnyInstaller(context, statusOutput);
+  }
+
+  public async initialize(): Promise<void> {
+    if(!this.installer.isCustomInstallation() && !await this.installer.isLanguageServerRuntimeAccessible()) {
+      if(!await this.installer.install()) {
+        window.showErrorMessage(Messages.Installation.Error);
+        return;
+      }
+    }
+    await this.initializeClient();
+    if(!await this.updateDafnyIfNecessary(this.languageServerVersion!)) {
+      this.statusOutput.appendLine('Dafny initialization failed');
+      return;
+    }
+    await createAndRegisterDafnyIntegration(this.context, this.client!, this.languageServerVersion!);
+    this.statusOutput.appendLine('Dafny is ready');
+  }
+
+  private async initializeClient(): Promise<void> {
+    this.statusOutput.appendLine(`starting Dafny from ${getLanguageServerRuntimePath(this.context)}`);
+    this.client = await DafnyLanguageClient.create(this.context);
+    this.client.start();
+    await this.client.onReady();
+    this.languageServerVersion = await this.getLanguageServerVersionAfterStartup();
+  }
+
+  private async getLanguageServerVersionAfterStartup(): Promise<string> {
+    let versionRegistration: Disposable | undefined;
+    const version = await Promise.any([
+      new Promise<string>(resolve => {
+        versionRegistration = this.client!.onServerVersion(version => resolve(version));
+      }),
+      // Fallback to unknown in case the server does not report the version.
+      timeout(DafnyVersionTimeoutMs, LanguageServerConstants.UnknownVersion)
+    ]);
+    versionRegistration!.dispose();
+    return version;
+  }
+
+  private async updateDafnyIfNecessary(installedVersion: string): Promise<boolean> {
+    if(DafnyInstaller.isMinimumRequiredLanguageServer(installedVersion)) {
+      return true;
+    }
+    if(this.installer.isCustomInstallation()) {
+      window.showInformationMessage(
+        `${Messages.Installation.Outdated} ${installedVersion} < ${LanguageServerConstants.RequiredVersion}`
+      );
+      return true;
+    }
+    await this.client!.stop();
+    if(!await this.installer.install()) {
+      window.showErrorMessage(Messages.Installation.Error);
+      return false;
+    }
+    await this.initializeClient();
+    return true;
+  }
+
+  public async dispose(): Promise<void> {
+    await this.client?.stop();
+  }
 }
