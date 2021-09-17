@@ -18,6 +18,7 @@ export namespace ConfigurationConstants {
     export const LaunchArgs = 'languageServerLaunchArgs';
     export const AutomaticVerification = 'automaticVerification';
     export const VerificationTimeLimit = 'verificationTimeLimit';
+    export const VerificationVirtualCores = 'verificationVirtualCores';
   }
 
   export namespace Compiler {

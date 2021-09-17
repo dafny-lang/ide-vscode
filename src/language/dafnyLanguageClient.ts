@@ -16,6 +16,7 @@ function getLanguageServerLaunchArgs(): string[] {
   return [
     getVerificationArgument(),
     getVerifierTimeLimitArgument(),
+    getVerifierVirtualCoresArgument(),
     ...launchArgs
   ];
 }
@@ -26,6 +27,10 @@ function getVerificationArgument(): string {
 
 function getVerifierTimeLimitArgument(): string {
   return `--verifier:timelimit=${Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationTimeLimit)}`;
+}
+
+function getVerifierVirtualCoresArgument(): string {
+  return `--verifier:vcscores=${Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationVirtualCores)}`;
 }
 
 export class DafnyLanguageClient extends LanguageClient {
