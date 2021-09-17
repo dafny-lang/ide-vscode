@@ -1,7 +1,6 @@
 import { StatusBarAlignment, StatusBarItem, TextDocument, Uri, window, workspace, ExtensionContext } from 'vscode';
 import { DocumentUri } from 'vscode-languageserver-protocol';
 
-import { LanguageConstants } from '../constants';
 import { CompilationStatus, ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from '../language/api/compilationStatus';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { enableOnlyForDafnyDocuments } from '../tools/visibility';

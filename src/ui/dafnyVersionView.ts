@@ -2,8 +2,8 @@ import { execFile } from 'child_process';
 import { promisify } from 'util';
 
 import { ExtensionContext, StatusBarAlignment, window } from 'vscode';
-import { DafnyCommands } from '../commands';
 
+import { DafnyCommands } from '../commands';
 import { LanguageServerConstants } from '../constants';
 import { getDotnetExecutablePath } from '../dotnet';
 import { getCompilerRuntimePath } from '../language/dafnyInstallation';
