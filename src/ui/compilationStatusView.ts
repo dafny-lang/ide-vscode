@@ -26,13 +26,7 @@ function toStatusMessage(status: CompilationStatus): string {
     return Messages.CompilationStatus.VerificationSucceeded;
   case CompilationStatus.VerificationFailed:
     return Messages.CompilationStatus.VerificationFailed;
-  default:
-    throw unhandledStatusMessage(status);
   }
-}
-
-function unhandledStatusMessage(status: never): Error {
-  return new Error(`unknown status message: ${status}`);
 }
 
 export default class CompilationStatusView {
