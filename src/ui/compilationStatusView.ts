@@ -1,9 +1,9 @@
 import { StatusBarAlignment, StatusBarItem, TextDocument, Uri, window, workspace, ExtensionContext } from 'vscode';
 import { DocumentUri } from 'vscode-languageserver-protocol';
 
-import { LanguageConstants } from '../constants';
 import { CompilationStatus, ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from '../language/api/compilationStatus';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
+import { enableOnlyForDafnyDocuments } from '../tools/visibility';
 import { Messages } from './messages';
 
 const StatusBarPriority = 10;
@@ -26,13 +26,7 @@ function toStatusMessage(status: CompilationStatus): string {
     return Messages.CompilationStatus.VerificationSucceeded;
   case CompilationStatus.VerificationFailed:
     return Messages.CompilationStatus.VerificationFailed;
-  default:
-    throw unhandledStatusMessage(status);
   }
-}
-
-function unhandledStatusMessage(status: never): Error {
-  return new Error(`unknown status message: ${status}`);
 }
 
 export default class CompilationStatusView {
@@ -52,6 +46,7 @@ export default class CompilationStatusView {
       workspace.onDidCloseTextDocument(document => view.documentClosed(document)),
       workspace.onDidChangeTextDocument(() => view.updateActiveDocumentStatus()),
       window.onDidChangeActiveTextEditor(() => view.updateActiveDocumentStatus()),
+      enableOnlyForDafnyDocuments(statusBarItem),
       statusBarItem
     );
     return view;
@@ -60,14 +55,6 @@ export default class CompilationStatusView {
   private documentClosed(document: TextDocument): void {
     this.documentStatusMessages.delete(document.uri.toString());
     this.updateActiveDocumentStatus();
-  }
-
-  private getStatusBarText(document: TextDocument): string {
-    const status = this.documentStatusMessages.get(document.uri.toString());
-    if(status == null) {
-      return '';
-    }
-    return status;
   }
 
   private compilationStatusChanged(params: ICompilationStatusParams): void {
@@ -95,16 +82,10 @@ export default class CompilationStatusView {
   }
 
   private updateActiveDocumentStatus(): void {
-    const editor = window.activeTextEditor;
-    if(editor == null) {
+    const document = window.activeTextEditor?.document.uri.toString();
+    if(document == null) {
       return;
     }
-    const document = editor.document;
-    this.statusBarItem.text = this.getStatusBarText(document);
-    if(document.languageId === LanguageConstants.Id) {
-      this.statusBarItem.show();
-    } else {
-      this.statusBarItem.hide();
-    }
+    this.statusBarItem.text = this.documentStatusMessages.get(document) ?? '';
   }
 }

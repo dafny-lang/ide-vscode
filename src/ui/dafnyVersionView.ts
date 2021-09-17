@@ -1,12 +1,13 @@
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 
-import { ExtensionContext, StatusBarAlignment, StatusBarItem, window } from 'vscode';
-import { DafnyCommands } from '../commands';
+import { ExtensionContext, StatusBarAlignment, window } from 'vscode';
 
-import { LanguageConstants, LanguageServerConstants } from '../constants';
+import { DafnyCommands } from '../commands';
+import { LanguageServerConstants } from '../constants';
 import { getDotnetExecutablePath } from '../dotnet';
 import { getCompilerRuntimePath } from '../language/dafnyInstallation';
+import { enableOnlyForDafnyDocuments } from '../tools/visibility';
 
 const UnknownVersion = LanguageServerConstants.UnknownVersion;
 const CompilerVersionArg = '/version';
@@ -33,32 +34,16 @@ async function getCompilerVersion(context: ExtensionContext): Promise<string> {
 }
 
 export default class DafnyVersionView {
-  private constructor(private readonly statusBarItem: StatusBarItem) {}
+  private constructor() {}
 
-  public static async createAndRegister(context: ExtensionContext, languageServerVersion: string): Promise<DafnyVersionView> {
+  public static async createAndRegister(context: ExtensionContext, languageServerVersion: string): Promise<void> {
     const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, StatusBarPriority);
     statusBarItem.text = languageServerVersion;
     statusBarItem.command = DafnyCommands.ShowVersion;
     statusBarItem.tooltip = await getTooltipText(context, languageServerVersion);
-    const view = new DafnyVersionView(statusBarItem);
     context.subscriptions.push(
-      window.onDidChangeActiveTextEditor(() => view.refreshVersionView()),
+      enableOnlyForDafnyDocuments(statusBarItem),
       statusBarItem
     );
-    view.refreshVersionView();
-    return view;
-  }
-
-  private refreshVersionView(): void {
-    const editor = window.activeTextEditor;
-    if(editor == null) {
-      return;
-    }
-    const document = editor.document;
-    if(document.languageId === LanguageConstants.Id) {
-      this.statusBarItem.show();
-    } else {
-      this.statusBarItem.hide();
-    }
   }
 }
