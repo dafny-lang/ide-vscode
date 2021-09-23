@@ -39,7 +39,6 @@ export default class DafnyVersionView {
   public static async createAndRegister(context: ExtensionContext, languageServerVersion: string): Promise<void> {
     const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, StatusBarPriority);
     statusBarItem.text = languageServerVersion;
-    statusBarItem.command = DafnyCommands.ShowVersion;
     statusBarItem.tooltip = await getTooltipText(context, languageServerVersion);
     context.subscriptions.push(
       enableOnlyForDafnyDocuments(statusBarItem),

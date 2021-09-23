@@ -4,7 +4,6 @@ export namespace DafnyCommands {
   export const CompileAndRun = 'dafny.compileAndRun';
   export const ShowCounterExample = 'dafny.showCounterExample';
   export const HideCounterExample = 'dafny.hideCounterExample';
-  export const ShowVersion = 'dafny.showVersion';
 }
 
 export namespace VSCodeCommands {
