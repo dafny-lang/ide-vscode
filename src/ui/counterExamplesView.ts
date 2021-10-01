@@ -27,7 +27,7 @@ export default class CounterExamplesView {
     CounterExampleUpdateDelayMs
   );
 
-  private disposed: boolean = false;
+  private disposed = false;
 
   private constructor(private readonly languageClient: DafnyLanguageClient) {}
 

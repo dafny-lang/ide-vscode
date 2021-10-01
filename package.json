@@ -85,6 +85,14 @@
         "when": "editorTextFocus && editorLangId == dafny"
       }
     ],
+    "views": {
+      "explorer": [
+        {
+          "id": "counterExamplesTreeView",
+          "name": "Counter Examples"
+        }
+      ]
+    },
     "languages": [
       {
         "id": "dafny",
