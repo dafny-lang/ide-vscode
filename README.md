@@ -115,3 +115,38 @@ code
 Dafny for Visual Studio Code is an MIT licensed open-source project that lives from code contributions.
 
 We welcome your help! For a description of how you can contribute, as well as a list of issues you can work on, please visit the [Dafny-VSCode GitHub repository](https://github.com/DafnyVSCode/ide-vscode).
+
+
+### Building Locally
+
+To build Dafny VSCode locally, first clone this repository.
+
+```sh
+git clone https://github.com/dafny-lang/ide-vscode.git
+```
+
+Change into the root directory of the previously cloned repository and install the node modules.
+
+```sh
+npm install
+```
+
+You may now open the root folder within Visual Studio Code and hit `F5` to debug the extension. 
+
+### Packaging
+
+To create a VSIX package of the previously built sources, install the [VSCode Extension Manager](https://github.com/microsoft/vscode-vsce) globally:
+
+```sh
+npm install -g vsce
+```
+
+Now create the package through the CLI:
+
+```sh
+vsce package
+```
+
+### Coding Conventions
+
+We use ESLint with the TypeScript plugin to ensure code consistency across the whole source. Install the [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) extension in VSCode to have life feedback. Alternatively, you can check your code from the command line by running `npm run lint`.
