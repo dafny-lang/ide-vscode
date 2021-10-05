@@ -116,7 +116,6 @@ Dafny for Visual Studio Code is an MIT licensed open-source project that lives f
 
 We welcome your help! For a description of how you can contribute, as well as a list of issues you can work on, please visit the [Dafny-VSCode GitHub repository](https://github.com/DafnyVSCode/ide-vscode).
 
-
 ### Building Locally
 
 To build Dafny VSCode locally, first clone this repository.
