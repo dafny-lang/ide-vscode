@@ -206,9 +206,9 @@
   ],
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -b",
-    "watch": "tsc -b -w",
-    "lint": "eslint --max-warnings=0 **/*.ts"
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --max-warnings 0 --ext ts"
   },
   "devDependencies": {
     "@types/node": "^12.12.0",
