@@ -1,4 +1,4 @@
-import { Event, EventEmitter, ExtensionContext, TextEditor, TreeDataProvider, TreeItem, window, workspace } from 'vscode';
+import { EventEmitter, ExtensionContext, TextEditor, TreeDataProvider, TreeItem, window, workspace } from 'vscode';
 
 import { ICounterExampleItem, ICounterExampleParams } from '../language/api/counterExample';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
