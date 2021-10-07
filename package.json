@@ -19,7 +19,7 @@
   },
   "icon": "logo.png",
   "engines": {
-    "vscode": "^1.60.0"
+    "vscode": "^1.52.0"
   },
   "categories": [
     "Programming Languages"
@@ -218,8 +218,8 @@
   "devDependencies": {
     "@types/glob": "^7.1.4",
     "@types/mocha": "^9.0.0",
-    "@types/node": "14.x",
-    "@types/vscode": "^1.60.0",
+    "@types/node": "^12.12.0",
+    "@types/vscode": "^1.52.0",
     "@types/which": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^4.31.1",
     "@typescript-eslint/parser": "^4.31.1",
