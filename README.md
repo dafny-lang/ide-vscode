@@ -130,7 +130,8 @@ Change into the root directory of the previously cloned repository and install t
 npm install
 ```
 
-You may now open the root folder within Visual Studio Code and hit `F5` to debug the extension. 
+To build and debug using Visual Studio Code, install the [TypeScript + Webpack Problem Matchers](https://marketplace.visualstudio.com/items?itemName=eamodio.tsl-problem-matcher) extension.
+After the installation, open the root folder within VSCode and hit `F5` to debug the Dafny extension.
 
 ### Packaging
 
