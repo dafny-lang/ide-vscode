@@ -7,6 +7,7 @@ import { LanguageServerConstants } from '../constants';
 import { getDotnetExecutablePath } from '../dotnet';
 import { getCompilerRuntimePath } from '../language/dafnyInstallation';
 import { enableOnlyForDafnyDocuments } from '../tools/visibility';
+import { version as ExtensionVersion } from '../../package-lock.json';
 
 const UnknownVersion = LanguageServerConstants.UnknownVersion;
 const CompilerVersionArg = '/version';
@@ -15,8 +16,7 @@ const execFileAsync = promisify(execFile);
 
 async function getTooltipText(context: ExtensionContext, languageServerVersion: string): Promise<string> {
   const compilerVersion = await getCompilerVersion(context);
-  const extensionVersion = getExtensionVersion(context);
-  return `Compiler: ${compilerVersion}\nLanguage Server: ${languageServerVersion}\nExtension: ${extensionVersion}`;
+  return `Compiler: ${compilerVersion}\nLanguage Server: ${languageServerVersion}\nExtension: ${ExtensionVersion}`;
 }
 
 async function getCompilerVersion(context: ExtensionContext): Promise<string> {
@@ -28,15 +28,6 @@ async function getCompilerVersion(context: ExtensionContext): Promise<string> {
     return (version == null || version.length === 0) ? UnknownVersion : version[0];
   } catch(error: unknown) {
     console.error('failed to retrieve the compiler version', error);
-    return UnknownVersion;
-  }
-}
-
-function getExtensionVersion(context: ExtensionContext): string {
-  try {
-    return require(context.asAbsolutePath('./package.json')).version;
-  } catch(error: unknown) {
-    console.error('failed to resolve the extension version from package.json', error);
     return UnknownVersion;
   }
 }
