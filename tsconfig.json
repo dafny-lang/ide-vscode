@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es2021",
-    "lib": ["ES2021"],
-    "outDir": "out",
-    "rootDir": "src",
+    "target": "ES2021",
+    "lib": [
+      "ES2021"
+    ],
     "sourceMap": true,
     "strict": true,
     "alwaysStrict": true,
@@ -15,7 +15,14 @@
     "noPropertyAccessFromIndexSignature": true,
     "strictFunctionTypes": true,
     "strictNullChecks": true,
-    "strictPropertyInitialization": true
+    "strictPropertyInitialization": true,
+    "resolveJsonModule": true
   },
-  "exclude": ["node_modules", ".vscode-test"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    ".vscode-test"
+  ]
 }
