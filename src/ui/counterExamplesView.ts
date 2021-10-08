@@ -109,8 +109,8 @@ export default class CounterExamplesView {
   }
 
   private static createDecorator(counterExample: ICounterExampleItem): DecorationOptions {
-    const contentText = Object.keys(counterExample.variables)
-      .map(variableName => `${variableName} = ${counterExample.variables[variableName]}`)
+    const contentText = Object.entries(counterExample.variables)
+      .map(([ name, value ]) => `${name} = ${value}`)
       .join(' ');
     // TODO earlier versions showed a warning that there are references present.
     const line = counterExample.position.line;
