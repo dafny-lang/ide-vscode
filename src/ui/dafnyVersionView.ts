@@ -7,7 +7,7 @@ import { LanguageServerConstants } from '../constants';
 import { getDotnetExecutablePath } from '../dotnet';
 import { getCompilerRuntimePath } from '../language/dafnyInstallation';
 import { enableOnlyForDafnyDocuments } from '../tools/visibility';
-import { version as ExtensionVersion } from '../../package-lock.json';
+import { version as ExtensionVersion } from '../../package.json';
 
 const UnknownVersion = LanguageServerConstants.UnknownVersion;
 const CompilerVersionArg = '/version';
