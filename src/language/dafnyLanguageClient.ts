@@ -4,6 +4,7 @@ import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-lan
 import Configuration from '../configuration';
 import { ConfigurationConstants, LanguageConstants } from '../constants';
 import { getDotnetExecutablePath } from '../dotnet';
+import { DafnyDocumentFilter } from '../tools/vscode';
 import { ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from './api/compilationStatus';
 import { ICounterExampleItem, ICounterExampleParams } from './api/counterExample';
 import { IGhostDiagnosticsParams } from './api/ghostDiagnostics';
@@ -52,9 +53,7 @@ export class DafnyLanguageClient extends LanguageClient {
       debug: { command: dotnetExecutable, args: launchArguments }
     };
     const clientOptions: LanguageClientOptions = {
-      documentSelector: [
-        { scheme: 'file', language: LanguageConstants.Id }
-      ],
+      documentSelector: [ DafnyDocumentFilter ],
       diagnosticCollectionName: LanguageServerId
     };
     return new DafnyLanguageClient(LanguageServerId, LanguageServerName, serverOptions, clientOptions);

@@ -3,7 +3,7 @@ import { Diagnostic, Range } from 'vscode-languageclient';
 
 import { IGhostDiagnosticsParams } from '../language/api/ghostDiagnostics';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
-import { getVsDocumentPath, toVsRange } from '../tools/languageClient';
+import { DafnyDocumentFilter, getVsDocumentPath, toVsRange } from '../tools/vscode';
 
 const TextOpacity = '0.4';
 
@@ -20,7 +20,7 @@ export default class GhostDiagnosticsView implements HoverProvider {
   public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): GhostDiagnosticsView {
     const instance = new GhostDiagnosticsView();
     context.subscriptions.push(
-      languages.registerHoverProvider('dafny', instance),
+      languages.registerHoverProvider(DafnyDocumentFilter, instance),
       workspace.onDidCloseTextDocument(document => instance.clearGhostDiagnostics(document.uri.toString())),
       languageClient.onGhostDiagnostics(params => instance.updateGhostDiagnostics(params)),
       instance

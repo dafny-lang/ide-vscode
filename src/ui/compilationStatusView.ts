@@ -2,7 +2,7 @@ import { StatusBarAlignment, StatusBarItem, TextDocument, window, workspace, Ext
 
 import { CompilationStatus, ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from '../language/api/compilationStatus';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
-import { getVsDocumentPath } from '../tools/languageClient';
+import { getVsDocumentPath } from '../tools/vscode';
 import { enableOnlyForDafnyDocuments } from '../tools/visibility';
 import { Messages } from './messages';
 
