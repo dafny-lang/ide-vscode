@@ -1,21 +1,26 @@
-import { DecorationOptions, TextEditorDecorationType, window, ExtensionContext, workspace } from 'vscode';
-import { Diagnostic } from 'vscode-languageclient';
+import { DecorationOptions, TextEditorDecorationType, window, ExtensionContext, workspace, languages, HoverProvider, CancellationToken, Hover, Position, ProviderResult, TextDocument } from 'vscode';
+import { Diagnostic, Range } from 'vscode-languageclient';
 
 import { IGhostDiagnosticsParams } from '../language/api/ghostDiagnostics';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath, toVsRange } from '../tools/languageClient';
 
-const DarkBackgroundColor = '#706f6c';
-const LightBackgroundColor = DarkBackgroundColor;
+const TextOpacity = '0.4';
 
-export default class GhostDiagnosticsView {
-  private readonly activeDecorations = new Map<string, TextEditorDecorationType>();
+function isInsideRange(position: Position, range: Range): boolean {
+  return (range.start.line < position.line || range.start.line === position.line && range.start.character <= position.character)
+    && (range.end.line > position.line || range.end.line === position.line && range.end.character >= position.character);
+}
+
+export default class GhostDiagnosticsView implements HoverProvider {
+  private readonly dataByDocument = new Map<string, { diagnostics: IGhostDiagnosticsParams, decoration: TextEditorDecorationType }>();
 
   private constructor() {}
 
   public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): GhostDiagnosticsView {
     const instance = new GhostDiagnosticsView();
     context.subscriptions.push(
+      languages.registerHoverProvider('dafny', instance),
       workspace.onDidCloseTextDocument(document => instance.clearGhostDiagnostics(document.uri.toString())),
       languageClient.onGhostDiagnostics(params => instance.updateGhostDiagnostics(params)),
       instance
@@ -23,27 +28,38 @@ export default class GhostDiagnosticsView {
     return instance;
   }
 
-  private updateGhostDiagnostics(params: IGhostDiagnosticsParams): void {
-    const documentPath = getVsDocumentPath(params);
+  public provideHover(document: TextDocument, position: Position): ProviderResult<Hover> {
+    const data = this.dataByDocument.get(document.uri.toString());
+    if(data == null) {
+      return;
+    }
+    const texts = data.diagnostics.diagnostics
+      .filter(diagnostic => isInsideRange(position, diagnostic.range))
+      .map(diagnostic => diagnostic.message);
+    return new Hover(texts);
+  }
+
+  private updateGhostDiagnostics(diagnostics: IGhostDiagnosticsParams): void {
+    const documentPath = getVsDocumentPath(diagnostics);
     this.clearGhostDiagnostics(documentPath);
-    if(params.diagnostics.length === 0) {
+    if(diagnostics.diagnostics.length === 0) {
       return;
     }
     const editor = window.activeTextEditor;
     if(editor == null || editor.document.uri.toString() !== documentPath) {
       return;
     }
-    const decorators = params.diagnostics.map(diagnostic => GhostDiagnosticsView.createDecorator(diagnostic));
+    const decorators = diagnostics.diagnostics.map(diagnostic => GhostDiagnosticsView.createDecorator(diagnostic));
     const decoration = GhostDiagnosticsView.createTextEditorDecoration();
-    this.activeDecorations.set(documentPath, decoration);
     editor.setDecorations(decoration, decorators);
+    this.dataByDocument.set(documentPath, { diagnostics, decoration });
   }
 
   private clearGhostDiagnostics(documentPath: string): void {
-    const oldDecoration = this.activeDecorations.get(documentPath);
-    if(oldDecoration != null) {
-      oldDecoration.dispose();
-      this.activeDecorations.delete(documentPath);
+    const data = this.dataByDocument.get(documentPath);
+    if(data != null) {
+      data.decoration.dispose();
+      this.dataByDocument.delete(documentPath);
     }
   }
 
@@ -55,17 +71,12 @@ export default class GhostDiagnosticsView {
 
   private static createTextEditorDecoration(): TextEditorDecorationType {
     return window.createTextEditorDecorationType({
-      dark:{
-        backgroundColor: DarkBackgroundColor
-      },
-      light: {
-        backgroundColor: LightBackgroundColor
-      }
+      opacity: TextOpacity
     });
   }
 
   public dispose(): void {
-    for(const [ _, decoration ] of this.activeDecorations) {
+    for(const [ _, { decoration } ] of this.dataByDocument) {
       decoration.dispose();
     }
   }
