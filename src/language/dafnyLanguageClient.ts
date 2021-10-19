@@ -2,7 +2,7 @@ import { ExtensionContext, Disposable } from 'vscode';
 import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
 
 import Configuration from '../configuration';
-import { ConfigurationConstants, LanguageConstants } from '../constants';
+import { ConfigurationConstants } from '../constants';
 import { getDotnetExecutablePath } from '../dotnet';
 import { DafnyDocumentFilter } from '../tools/vscode';
 import { ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from './api/compilationStatus';
