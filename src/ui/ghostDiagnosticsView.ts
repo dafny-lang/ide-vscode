@@ -36,7 +36,7 @@ export default class GhostDiagnosticsView implements HoverProvider {
     const diagnostic = data.diagnostics.diagnostics
       .find(diagnostic => isInsideRange(position, diagnostic.range));
     if(diagnostic == null) {
-      return new Hover([]);
+      return;
     }
     return new Hover(diagnostic.message, toVsRange(diagnostic.range));
   }
