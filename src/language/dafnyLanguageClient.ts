@@ -6,6 +6,7 @@ import { ConfigurationConstants, LanguageConstants } from '../constants';
 import { getDotnetExecutablePath } from '../dotnet';
 import { ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from './api/compilationStatus';
 import { ICounterExampleItem, ICounterExampleParams } from './api/counterExample';
+import { IGhostDiagnosticsParams } from './api/ghostDiagnostics';
 import { getLanguageServerRuntimePath } from './dafnyInstallation';
 
 const LanguageServerId = 'dafny-vscode';
@@ -57,6 +58,10 @@ export class DafnyLanguageClient extends LanguageClient {
       diagnosticCollectionName: LanguageServerId
     };
     return new DafnyLanguageClient(LanguageServerId, LanguageServerName, serverOptions, clientOptions);
+  }
+
+  public onGhostDiagnostics(callback: (params: IGhostDiagnosticsParams) => void): Disposable {
+    return this.onNotification('dafny/ghost/diagnostics', callback);
   }
 
   public onCompilationStatus(callback: (params: ICompilationStatusParams) => void): Disposable {
