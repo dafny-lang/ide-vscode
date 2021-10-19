@@ -1,4 +1,4 @@
-import { DecorationOptions, TextEditorDecorationType, window, ExtensionContext, workspace, languages, HoverProvider, CancellationToken, Hover, Position, ProviderResult, TextDocument } from 'vscode';
+import { DecorationOptions, TextEditorDecorationType, window, ExtensionContext, workspace, languages, HoverProvider, Hover, Position, ProviderResult, TextDocument } from 'vscode';
 import { Diagnostic, Range } from 'vscode-languageclient';
 
 import { IGhostDiagnosticsParams } from '../language/api/ghostDiagnostics';
@@ -33,10 +33,12 @@ export default class GhostDiagnosticsView implements HoverProvider {
     if(data == null) {
       return;
     }
-    const texts = data.diagnostics.diagnostics
-      .filter(diagnostic => isInsideRange(position, diagnostic.range))
-      .map(diagnostic => diagnostic.message);
-    return new Hover(texts);
+    const diagnostic = data.diagnostics.diagnostics
+      .find(diagnostic => isInsideRange(position, diagnostic.range));
+    if(diagnostic == null) {
+      return new Hover([]);
+    }
+    return new Hover(diagnostic.message, toVsRange(diagnostic.range));
   }
 
   private updateGhostDiagnostics(diagnostics: IGhostDiagnosticsParams): void {
