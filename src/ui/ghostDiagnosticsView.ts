@@ -1,9 +1,9 @@
-import { DecorationOptions, TextEditorDecorationType, window, ExtensionContext, workspace, languages, HoverProvider, Hover, Position, ProviderResult, TextDocument, DecorationRenderOptions } from 'vscode';
-import { Diagnostic, Range } from 'vscode-languageclient';
+import { DecorationOptions, TextEditorDecorationType, window, ExtensionContext, workspace, DecorationRenderOptions } from 'vscode';
+import { Diagnostic } from 'vscode-languageclient';
 
 import { IGhostDiagnosticsParams } from '../language/api/ghostDiagnostics';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
-import { DafnyDocumentFilter, getVsDocumentPath, toVsRange } from '../tools/vscode';
+import { getVsDocumentPath, toVsRange } from '../tools/vscode';
 
 const GhostDecoration: DecorationRenderOptions = {
   dark: {
@@ -14,12 +14,7 @@ const GhostDecoration: DecorationRenderOptions = {
   }
 };
 
-function isInsideRange(position: Position, range: Range): boolean {
-  return (range.start.line < position.line || range.start.line === position.line && range.start.character <= position.character)
-    && (range.end.line > position.line || range.end.line === position.line && range.end.character >= position.character);
-}
-
-export default class GhostDiagnosticsView implements HoverProvider {
+export default class GhostDiagnosticsView {
   private readonly dataByDocument = new Map<string, { diagnostics: IGhostDiagnosticsParams, decoration: TextEditorDecorationType }>();
 
   private constructor() {}
@@ -27,25 +22,11 @@ export default class GhostDiagnosticsView implements HoverProvider {
   public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): GhostDiagnosticsView {
     const instance = new GhostDiagnosticsView();
     context.subscriptions.push(
-      languages.registerHoverProvider(DafnyDocumentFilter, instance),
       workspace.onDidCloseTextDocument(document => instance.clearGhostDiagnostics(document.uri.toString())),
       languageClient.onGhostDiagnostics(params => instance.updateGhostDiagnostics(params)),
       instance
     );
     return instance;
-  }
-
-  public provideHover(document: TextDocument, position: Position): ProviderResult<Hover> {
-    const data = this.dataByDocument.get(document.uri.toString());
-    if(data == null) {
-      return;
-    }
-    const diagnostic = data.diagnostics.diagnostics
-      .find(diagnostic => isInsideRange(position, diagnostic.range));
-    if(diagnostic == null) {
-      return;
-    }
-    return new Hover(diagnostic.message, toVsRange(diagnostic.range));
   }
 
   private updateGhostDiagnostics(diagnostics: IGhostDiagnosticsParams): void {
@@ -74,7 +55,8 @@ export default class GhostDiagnosticsView implements HoverProvider {
 
   private static createDecorator(diagnostic: Diagnostic): DecorationOptions {
     return {
-      range: toVsRange(diagnostic.range)
+      range: toVsRange(diagnostic.range),
+      hoverMessage: diagnostic.message
     };
   }
 
