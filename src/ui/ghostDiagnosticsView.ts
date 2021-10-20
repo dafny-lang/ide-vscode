@@ -1,4 +1,4 @@
-import { DecorationOptions, TextEditorDecorationType, window, ExtensionContext, workspace, DecorationRenderOptions } from 'vscode';
+import { DecorationOptions, TextEditorDecorationType, window, ExtensionContext, workspace, DecorationRenderOptions, TextEditor } from 'vscode';
 import { Diagnostic } from 'vscode-languageclient';
 
 import { IGhostDiagnosticsParams } from '../language/api/ghostDiagnostics';
@@ -23,6 +23,7 @@ export default class GhostDiagnosticsView {
     const instance = new GhostDiagnosticsView();
     context.subscriptions.push(
       workspace.onDidCloseTextDocument(document => instance.clearGhostDiagnostics(document.uri.toString())),
+      window.onDidChangeActiveTextEditor(editor => instance.refreshDisplayedGhostDiagnostics(editor)),
       languageClient.onGhostDiagnostics(params => instance.updateGhostDiagnostics(params)),
       instance
     );
@@ -35,14 +36,22 @@ export default class GhostDiagnosticsView {
     if(diagnostics.diagnostics.length === 0) {
       return;
     }
-    const editor = window.activeTextEditor;
-    if(editor == null || editor.document.uri.toString() !== documentPath) {
+    const decoration = window.createTextEditorDecorationType(GhostDecoration);
+    this.dataByDocument.set(documentPath, { diagnostics, decoration });
+    this.refreshDisplayedGhostDiagnostics(window.activeTextEditor);
+  }
+
+  public refreshDisplayedGhostDiagnostics(editor?: TextEditor): void {
+    if(editor == null) {
       return;
     }
-    const decorators = diagnostics.diagnostics.map(diagnostic => GhostDiagnosticsView.createDecorator(diagnostic));
-    const decoration = window.createTextEditorDecorationType(GhostDecoration);
-    editor.setDecorations(decoration, decorators);
-    this.dataByDocument.set(documentPath, { diagnostics, decoration });
+    const documentPath = editor.document.uri.toString();
+    const data = this.dataByDocument.get(documentPath);
+    if(data == null) {
+      return;
+    }
+    const decorators = data.diagnostics.diagnostics.map(diagnostic => this.createDecorator(diagnostic));
+    editor.setDecorations(data.decoration, decorators);
   }
 
   private clearGhostDiagnostics(documentPath: string): void {
