@@ -15,7 +15,7 @@ const GhostDecoration: DecorationRenderOptions = {
 };
 
 export default class GhostDiagnosticsView {
-  private readonly dataByDocument = new Map<string, { diagnostics: IGhostDiagnosticsParams, decoration: TextEditorDecorationType }>();
+  private readonly dataByDocument = new Map<string, { diagnostics: Diagnostic[], decoration: TextEditorDecorationType }>();
 
   private constructor() {}
 
@@ -30,10 +30,11 @@ export default class GhostDiagnosticsView {
     return instance;
   }
 
-  private updateGhostDiagnostics(diagnostics: IGhostDiagnosticsParams): void {
-    const documentPath = getVsDocumentPath(diagnostics);
+  private updateGhostDiagnostics(params: IGhostDiagnosticsParams): void {
+    const documentPath = getVsDocumentPath(params);
     this.clearGhostDiagnostics(documentPath);
-    if(diagnostics.diagnostics.length === 0) {
+    const diagnostics = params.diagnostics;
+    if(diagnostics.length === 0) {
       return;
     }
     const decoration = window.createTextEditorDecorationType(GhostDecoration);
@@ -50,7 +51,7 @@ export default class GhostDiagnosticsView {
     if(data == null) {
       return;
     }
-    const decorators = data.diagnostics.diagnostics.map(diagnostic => this.createDecorator(diagnostic));
+    const decorators = data.diagnostics.map(diagnostic => this.createDecorator(diagnostic));
     editor.setDecorations(data.decoration, decorators);
   }
 
