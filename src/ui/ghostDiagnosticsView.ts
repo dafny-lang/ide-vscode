@@ -1,11 +1,18 @@
-import { DecorationOptions, TextEditorDecorationType, window, ExtensionContext, workspace, languages, HoverProvider, Hover, Position, ProviderResult, TextDocument } from 'vscode';
+import { DecorationOptions, TextEditorDecorationType, window, ExtensionContext, workspace, languages, HoverProvider, Hover, Position, ProviderResult, TextDocument, DecorationRenderOptions } from 'vscode';
 import { Diagnostic, Range } from 'vscode-languageclient';
 
 import { IGhostDiagnosticsParams } from '../language/api/ghostDiagnostics';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { DafnyDocumentFilter, getVsDocumentPath, toVsRange } from '../tools/vscode';
 
-const TextOpacity = '0.4';
+const GhostDecoration: DecorationRenderOptions = {
+  dark: {
+    backgroundColor: '#545454'
+  },
+  light: {
+    backgroundColor: '#d4d4d4'
+  }
+};
 
 function isInsideRange(position: Position, range: Range): boolean {
   return (range.start.line < position.line || range.start.line === position.line && range.start.character <= position.character)
@@ -52,7 +59,7 @@ export default class GhostDiagnosticsView implements HoverProvider {
       return;
     }
     const decorators = diagnostics.diagnostics.map(diagnostic => GhostDiagnosticsView.createDecorator(diagnostic));
-    const decoration = GhostDiagnosticsView.createTextEditorDecoration();
+    const decoration = window.createTextEditorDecorationType(GhostDecoration);
     editor.setDecorations(decoration, decorators);
     this.dataByDocument.set(documentPath, { diagnostics, decoration });
   }
@@ -69,12 +76,6 @@ export default class GhostDiagnosticsView implements HoverProvider {
     return {
       range: toVsRange(diagnostic.range)
     };
-  }
-
-  private static createTextEditorDecoration(): TextEditorDecorationType {
-    return window.createTextEditorDecorationType({
-      opacity: TextOpacity
-    });
   }
 
   public dispose(): void {
