@@ -51,7 +51,7 @@ export default class GhostDiagnosticsView {
     if(data == null) {
       return;
     }
-    const decorators = data.diagnostics.map(diagnostic => this.createDecorator(diagnostic));
+    const decorators = data.diagnostics.map(diagnostic => GhostDiagnosticsView.createDecorator(diagnostic));
     editor.setDecorations(data.decoration, decorators);
   }
 
