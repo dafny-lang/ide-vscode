@@ -182,7 +182,7 @@
 					<array>
 						<dict>
 							<key>match</key>
-							<string>\\"</string>
+							<string>\\((\\)|("))</string>
 						</dict>
 					</array>
 				</dict>
