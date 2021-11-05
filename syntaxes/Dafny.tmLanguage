@@ -304,7 +304,7 @@
 			<array>
 				<dict>
 					<key>begin</key>
-					<string>(?:&lt;|,)\s*(\w+)</string>
+					<string>&lt;(\w+)</string>
 					<key>beginCaptures</key>
 					<dict>
 						<key>1</key>
@@ -314,7 +314,7 @@
 						</dict>
 					</dict>
 					<key>end</key>
-					<string>\s*|,|&gt;</string>
+					<string>&gt;</string>
 					<key>name</key>
 					<string>meta.type.identifier.dafny</string>
 				</dict>
