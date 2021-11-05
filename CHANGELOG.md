@@ -8,6 +8,7 @@
 - Improved syntax highlighting
 - Added option to set a time limit for the automatic verification
 - Added option to set the number of virtual cores to use for automatic verification
+- Updated Dafny and language server to [v3.3.0](https://github.com/dafny-lang/dafny/releases/tag/v3.3.0)
 
 ## 1.8.0
 
