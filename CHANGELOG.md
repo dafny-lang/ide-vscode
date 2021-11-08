@@ -1,5 +1,9 @@
 # Release Notes
 
+## 2.1.0
+
+- Changed the marketplace publisher to dafny-lang
+
 ## 2.0.0
 
 - Revised the code base
