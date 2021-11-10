@@ -8,6 +8,9 @@ import { Messages } from './ui/messages';
 import createAndRegisterDafnyIntegration from './ui/dafnyIntegration';
 import { timeout } from './tools/timeout';
 
+// Promise.any() is only available since Node.JS 15.
+import * as PromiseAny from 'promise.any';
+
 const DafnyVersionTimeoutMs = 5_000;
 let extensionRuntime: ExtensionRuntime | undefined;
 
@@ -63,7 +66,7 @@ class ExtensionRuntime {
 
   private async getLanguageServerVersionAfterStartup(): Promise<string> {
     let versionRegistration: Disposable | undefined;
-    const version = await Promise.any([
+    const version = await PromiseAny([
       new Promise<string>(resolve => {
         versionRegistration = this.client!.onServerVersion(version => resolve(version));
       }),
