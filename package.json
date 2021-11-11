@@ -218,7 +218,7 @@
   "devDependencies": {
     "@types/glob": "^7.1.4",
     "@types/mocha": "^9.0.0",
-    "@types/node": "^12.12.0",
+    "@types/node": "^12.12.70",
     "@types/promise.any": "^2.0.0",
     "@types/vscode": "^1.52.0",
     "@types/which": "^2.0.1",
