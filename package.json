@@ -218,7 +218,8 @@
   "devDependencies": {
     "@types/glob": "^7.1.4",
     "@types/mocha": "^9.0.0",
-    "@types/node": "^12.12.0",
+    "@types/node": "^12.12.70",
+    "@types/promise.any": "^2.0.0",
     "@types/vscode": "^1.52.0",
     "@types/which": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^4.31.1",
@@ -235,6 +236,7 @@
   "dependencies": {
     "extract-zip": "^2.0.1",
     "got": "^11.8.2",
+    "promise.any": "^2.0.2",
     "vscode-languageclient": "^7.0.0",
     "vscode-uri": "^3.0.2",
     "which": "^2.0.2"

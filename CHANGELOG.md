@@ -4,6 +4,10 @@
 
 - Changed the marketplace publisher to dafny-lang
 
+## 2.0.1
+
+- Fixed VSCode compatibility (Promise.any is not a function error)
+
 ## 2.0.0
 
 - Revised the code base
