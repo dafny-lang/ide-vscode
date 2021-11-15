@@ -1,5 +1,5 @@
 {
-  "name": "dafny-vscode",
+  "name": "ide-vscode",
   "displayName": "Dafny",
   "description": "Dafny for Visual Studio Code",
   "version": "2.1.0",
