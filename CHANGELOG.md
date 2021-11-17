@@ -1,12 +1,18 @@
 # Release Notes
 
+## 2.0.1
+
+- Fixed VSCode compatibility (Promise.any is not a function error)
+
 ## 2.0.0
 
 - Revised the code base
 - Setting a custom Dafny installation now disables automatic updates
 - Now showing the Dafny installation progress in the terminal
+- Improved syntax highlighting
 - Added option to set a time limit for the automatic verification
 - Added option to set the number of virtual cores to use for automatic verification
+- Updated Dafny and language server to [v3.3.0](https://github.com/dafny-lang/dafny/releases/tag/v3.3.0)
 
 ## 1.8.0
 

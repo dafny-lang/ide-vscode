@@ -98,6 +98,10 @@
 					<key>include</key>
 					<string>#keywords</string>
 				</dict>
+				<dict>
+					<key>include</key>
+					<string>#strings</string>
+				</dict>
 			</array>
 		</dict>
 		<key>comments</key>
@@ -160,6 +164,27 @@
 					</dict>
 					<key>match</key>
 					<string>\s*((//).*$\n?)</string>
+				</dict>
+			</array>
+		</dict>
+		<key>strings</key>
+		<dict>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>begin</key>
+					<string>"</string>
+					<key>end</key>
+					<string>"</string>
+					<key>name</key>
+					<string>string.dafny</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>match</key>
+							<string>\\((\\)|("))</string>
+						</dict>
+					</array>
 				</dict>
 			</array>
 		</dict>
