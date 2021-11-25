@@ -1,5 +1,9 @@
 # Release Notes
 
+## 2.0.2
+
+- Improved syntax highlighting of strings
+
 ## 2.0.1
 
 - Fixed VSCode compatibility (Promise.any is not a function error)

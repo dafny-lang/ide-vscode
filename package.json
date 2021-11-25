@@ -2,7 +2,7 @@
   "name": "dafny-vscode",
   "displayName": "Dafny",
   "description": "Dafny for Visual Studio Code",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "publisher": "correctnessLab",
   "repository": {
     "type": "git",
