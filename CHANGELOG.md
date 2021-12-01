@@ -1,5 +1,9 @@
 # Release Notes
 
+## 2.1.0
+
+- Now marking ghost statements by default
+
 ## 2.0.2
 
 - Improved syntax highlighting of strings

@@ -2,10 +2,12 @@ import { ExtensionContext, Disposable } from 'vscode';
 import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
 
 import Configuration from '../configuration';
-import { ConfigurationConstants, LanguageConstants } from '../constants';
+import { ConfigurationConstants } from '../constants';
 import { getDotnetExecutablePath } from '../dotnet';
+import { DafnyDocumentFilter } from '../tools/vscode';
 import { ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from './api/compilationStatus';
 import { ICounterExampleItem, ICounterExampleParams } from './api/counterExample';
+import { IGhostDiagnosticsParams } from './api/ghostDiagnostics';
 import { getLanguageServerRuntimePath } from './dafnyInstallation';
 
 const LanguageServerId = 'dafny-vscode';
@@ -17,6 +19,7 @@ function getLanguageServerLaunchArgs(): string[] {
     getVerificationArgument(),
     getVerifierTimeLimitArgument(),
     getVerifierVirtualCoresArgument(),
+    getMarkGhostStatementsArgument(),
     ...launchArgs
   ];
 }
@@ -31,6 +34,10 @@ function getVerifierTimeLimitArgument(): string {
 
 function getVerifierVirtualCoresArgument(): string {
   return `--verifier:vcscores=${Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationVirtualCores)}`;
+}
+
+function getMarkGhostStatementsArgument(): string {
+  return `--ghost:markStatements=${Configuration.get<string>(ConfigurationConstants.LanguageServer.MarkGhostStatements)}`;
 }
 
 export class DafnyLanguageClient extends LanguageClient {
@@ -51,12 +58,14 @@ export class DafnyLanguageClient extends LanguageClient {
       debug: { command: dotnetExecutable, args: launchArguments }
     };
     const clientOptions: LanguageClientOptions = {
-      documentSelector: [
-        { scheme: 'file', language: LanguageConstants.Id }
-      ],
+      documentSelector: [ DafnyDocumentFilter ],
       diagnosticCollectionName: LanguageServerId
     };
     return new DafnyLanguageClient(LanguageServerId, LanguageServerName, serverOptions, clientOptions);
+  }
+
+  public onGhostDiagnostics(callback: (params: IGhostDiagnosticsParams) => void): Disposable {
+    return this.onNotification('dafny/ghost/diagnostics', callback);
   }
 
   public onCompilationStatus(callback: (params: ICompilationStatusParams) => void): Disposable {
