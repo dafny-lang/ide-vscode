@@ -1,4 +1,4 @@
-import { ExtensionContext, Disposable } from 'vscode';
+import { ExtensionContext, Disposable, OutputChannel } from 'vscode';
 import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
 
 import Configuration from '../configuration';
@@ -41,16 +41,21 @@ function getMarkGhostStatementsArgument(): string {
 }
 
 export class DafnyLanguageClient extends LanguageClient {
+  private statusOutput: OutputChannel;
+
   // eslint-disable-next-line max-params
-  private constructor(id: string, name: string, serverOptions: ServerOptions, clientOptions: LanguageClientOptions, forceDebug?: boolean) {
+  private constructor(id: string, name: string, serverOptions: ServerOptions,
+      clientOptions: LanguageClientOptions, outputChannel: OutputChannel, forceDebug?: boolean) {
     super(id, name, serverOptions, clientOptions, forceDebug);
+    this.statusOutput = outputChannel;
   }
 
   public getCounterExamples(param: ICounterExampleParams): Promise<ICounterExampleItem[]> {
-    return this.sendRequest<ICounterExampleItem[]>('dafny/counterExample', param);
+    return this.sendLoggedRequest<ICounterExampleParams, ICounterExampleItem[]>(
+      'dafny/counterExample', param);
   }
 
-  public static async create(context: ExtensionContext): Promise<DafnyLanguageClient> {
+  public static async create(context: ExtensionContext, outputChannel: OutputChannel): Promise<DafnyLanguageClient> {
     const dotnetExecutable = await getDotnetExecutablePath();
     const launchArguments = [ getLanguageServerRuntimePath(context), ...getLanguageServerLaunchArgs() ];
     const serverOptions: ServerOptions = {
@@ -61,27 +66,39 @@ export class DafnyLanguageClient extends LanguageClient {
       documentSelector: [ DafnyDocumentFilter ],
       diagnosticCollectionName: LanguageServerId
     };
-    return new DafnyLanguageClient(LanguageServerId, LanguageServerName, serverOptions, clientOptions);
+    return new DafnyLanguageClient(LanguageServerId, LanguageServerName, serverOptions, clientOptions, outputChannel);
   }
 
   public onGhostDiagnostics(callback: (params: IGhostDiagnosticsParams) => void): Disposable {
-    return this.onNotification('dafny/ghost/diagnostics', callback);
+    return this.onLoggedNotification('dafny/ghost/diagnostics', callback);
   }
 
   public onCompilationStatus(callback: (params: ICompilationStatusParams) => void): Disposable {
-    return this.onNotification('dafny/compilation/status', callback);
+    return this.onLoggedNotification('dafny/compilation/status', callback);
   }
 
   public onServerVersion(callback: (version: string) => void): Disposable {
-    return this.onNotification('dafnyLanguageServerVersionReceived', callback);
+    return this.onLoggedNotification('dafnyLanguageServerVersionReceived', callback);
   }
 
   // TODO Legacy verification status messages
   public onVerificationStarted(callback: (params: IVerificationStartedParams) => void): Disposable {
-    return this.onNotification('dafny/verification/started', callback);
+    return this.onLoggedNotification('dafny/verification/started', callback);
   }
 
   public onVerificationCompleted(callback: (params: IVerificationCompletedParams) => void): Disposable {
-    return this.onNotification('dafny/verification/completed', callback);
+    return this.onLoggedNotification('dafny/verification/completed', callback);
+  }
+
+  public onLoggedNotification<Params, Return>(route: string, callback: (params: Params) => Return): Disposable {
+    return this.onNotification(route, (params: Params) => {
+      this.statusOutput.appendLine('Received ' + route);
+      this.statusOutput.appendLine(JSON.stringify(params));
+      return callback(params);
+    });
+  }
+
+  public sendLoggedRequest<Param, Return>(route: string, param: Param): Promise<Return>  {
+    return this.sendRequest<Return>(route, param);
   }
 }
