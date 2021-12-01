@@ -3,6 +3,7 @@
 ## 2.1.0
 
 - Now marking ghost statements by default
+- Fixed issue when compiling untitled documents
 
 ## 2.0.2
 
