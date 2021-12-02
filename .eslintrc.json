@@ -120,6 +120,14 @@
     "@typescript-eslint/padding-line-between-statements": "warn",
     "@typescript-eslint/require-array-sort-compare": "warn",
     "@typescript-eslint/ban-types": "warn",
-    "@typescript-eslint/array-type": "warn"
+    "@typescript-eslint/array-type": "warn",
+    "@typescript-eslint/naming-convention": [
+      "warn",
+      {
+        "selector": "typeParameter",
+        "format": [ "PascalCase" ],
+        "prefix": [ "T" ]
+      }
+    ]
   }
 }

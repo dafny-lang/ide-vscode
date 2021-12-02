@@ -44,15 +44,22 @@ export class DafnyLanguageClient extends LanguageClient {
   private statusOutput: OutputChannel;
 
   // eslint-disable-next-line max-params
-  private constructor(id: string, name: string, serverOptions: ServerOptions,
-      clientOptions: LanguageClientOptions, outputChannel: OutputChannel, forceDebug?: boolean) {
+  private constructor(
+      id: string,
+      name: string,
+      serverOptions: ServerOptions,
+      clientOptions: LanguageClientOptions,
+      outputChannel: OutputChannel,
+      forceDebug?: boolean
+    ) {
     super(id, name, serverOptions, clientOptions, forceDebug);
     this.statusOutput = outputChannel;
   }
 
   public getCounterExamples(param: ICounterExampleParams): Promise<ICounterExampleItem[]> {
     return this.sendLoggedRequest<ICounterExampleParams, ICounterExampleItem[]>(
-      'dafny/counterExample', param);
+      'dafny/counterExample', param
+    );
   }
 
   public static async create(context: ExtensionContext, outputChannel: OutputChannel): Promise<DafnyLanguageClient> {
@@ -90,15 +97,16 @@ export class DafnyLanguageClient extends LanguageClient {
     return this.onLoggedNotification('dafny/verification/completed', callback);
   }
 
-  public onLoggedNotification<Params, Return>(route: string, callback: (params: Params) => Return): Disposable {
-    return this.onNotification(route, (params: Params) => {
-      this.statusOutput.appendLine('Received ' + route);
+  private onLoggedNotification<TParams, TResult>(route: string, callback: (params: TParams) => TResult): Disposable {
+    return this.onNotification(route, (params: TParams) => {
+      this.statusOutput.appendLine(`Received ${route}`);
       this.statusOutput.appendLine(JSON.stringify(params));
       return callback(params);
     });
   }
 
-  public sendLoggedRequest<Param, Return>(route: string, param: Param): Promise<Return>  {
-    return this.sendRequest<Return>(route, param);
+  private sendLoggedRequest<Param, TResult>(route: string, param: Param): Promise<TResult>  {
+    this.statusOutput.appendLine(`Sent ${JSON.stringify(param)} to ${route}`);
+    return this.sendRequest<TResult>(route, param);
   }
 }
