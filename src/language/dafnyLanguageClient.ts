@@ -53,9 +53,12 @@ export class DafnyLanguageClient extends LanguageClient {
   public static async create(context: ExtensionContext): Promise<DafnyLanguageClient> {
     const dotnetExecutable = await getDotnetExecutablePath();
     const launchArguments = [ getLanguageServerRuntimePath(context), ...getLanguageServerLaunchArgs() ];
+    const serverEnv = Object.assign({}, process.env, {COMPlus_DefaultStackSize: 100000});
     const serverOptions: ServerOptions = {
-      run: { command: dotnetExecutable, args: launchArguments },
-      debug: { command: dotnetExecutable, args: launchArguments }
+      run: { command: dotnetExecutable, args: launchArguments,
+             options:  { env: serverEnv }},
+      debug: { command: dotnetExecutable, args: launchArguments,
+               options:  { env: serverEnv } }
     };
     const clientOptions: LanguageClientOptions = {
       documentSelector: [ DafnyDocumentFilter ],
