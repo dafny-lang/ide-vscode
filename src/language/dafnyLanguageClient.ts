@@ -41,17 +41,17 @@ function getMarkGhostStatementsArgument(): string {
 }
 
 export class DafnyLanguageClient extends LanguageClient {
-  private statusOutput: OutputChannel;
+  private readOnly statusOutput: OutputChannel;
 
   // eslint-disable-next-line max-params
   private constructor(
-      id: string,
-      name: string,
-      serverOptions: ServerOptions,
-      clientOptions: LanguageClientOptions,
-      outputChannel: OutputChannel,
-      forceDebug?: boolean
-    ) {
+    id: string,
+    name: string,
+    serverOptions: ServerOptions,
+    clientOptions: LanguageClientOptions,
+    outputChannel: OutputChannel,
+    forceDebug?: boolean
+  ) {
     super(id, name, serverOptions, clientOptions, forceDebug);
     this.statusOutput = outputChannel;
   }
@@ -105,7 +105,7 @@ export class DafnyLanguageClient extends LanguageClient {
     });
   }
 
-  private sendLoggedRequest<TParams, TResult>(route: string, param: TParams): Promise<TResult>  {
+  private sendLoggedRequest<TParams, TResult>(route: string, param: TParams): Promise<TResult> {
     this.statusOutput.appendLine(`Sent ${JSON.stringify(param)} to ${route}`);
     return this.sendRequest<TResult>(route, param);
   }
