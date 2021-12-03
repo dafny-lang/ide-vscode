@@ -105,7 +105,7 @@ export class DafnyLanguageClient extends LanguageClient {
     });
   }
 
-  private sendLoggedRequest<TParam, TResult>(route: string, param: TParam): Promise<TResult>  {
+  private sendLoggedRequest<TParams, TResult>(route: string, param: TParams): Promise<TResult>  {
     this.statusOutput.appendLine(`Sent ${JSON.stringify(param)} to ${route}`);
     return this.sendRequest<TResult>(route, param);
   }
