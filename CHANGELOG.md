@@ -5,6 +5,7 @@
 - Now marking ghost statements by default
 - Fixed issue when compiling untitled documents
 - Raised the minimum required .NET version to 6.0
+- Updated Dafny and language server to [v3.4.0](https://github.com/dafny-lang/dafny/releases/tag/v3.4.0)
 
 ## 2.0.2
 
