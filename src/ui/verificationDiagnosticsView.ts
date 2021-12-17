@@ -2,6 +2,7 @@ import { DecorationOptions, TextEditorDecorationType, Range, window, ExtensionCo
 import { Diagnostic } from 'vscode-languageclient';
 
 import { IVerificationDiagnosticsParams } from '../language/api/verificationDiagnostics';
+import { IVerificationIntermediateParams } from '../language/api/verificationIntermediate';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath, toVsRange } from '../tools/vscode';
 
@@ -35,7 +36,6 @@ export default class VerificationDiagnosticsView {
 
     return instance;
   }
-
   public refreshDisplayedVerificationDiagnostics(editor?: TextEditor): void {
     if(editor == null) {
       return;
