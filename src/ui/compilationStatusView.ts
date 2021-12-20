@@ -19,9 +19,9 @@ function toStatusMessage(status: CompilationStatus, message?: string | null): st
   case CompilationStatus.VerificationStarted:
     return Messages.CompilationStatus.Verifying;
   case CompilationStatus.VerificationInProgress:
-    return message != null ?
-      Messages.CompilationStatus.VerificationInProgressHeader + message :
-      Messages.CompilationStatus.Verifying;
+    return message != null
+      ? `${Messages.CompilationStatus.VerificationInProgressHeader} ${message}`
+      : Messages.CompilationStatus.Verifying;
   case CompilationStatus.VerificationSucceeded:
     return Messages.CompilationStatus.VerificationSucceeded;
   case CompilationStatus.VerificationFailed:
