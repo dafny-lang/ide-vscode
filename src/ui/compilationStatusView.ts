@@ -17,10 +17,10 @@ function toStatusMessage(status: CompilationStatus, message?: string | null): st
   case CompilationStatus.CompilationSucceeded:
     return Messages.CompilationStatus.CompilationSucceeded;
   case CompilationStatus.VerificationStarted:
-    return Messages.CompilationStatus.Verifying;
+    return `${Messages.CompilationStatus.Verifying}...`;
   case CompilationStatus.VerificationInProgress:
     return message != null
-      ? `${Messages.CompilationStatus.VerificationInProgressHeader} ${message}`
+      ? `${Messages.CompilationStatus.Verifying} ${message}...`
       : Messages.CompilationStatus.Verifying;
   case CompilationStatus.VerificationSucceeded:
     return Messages.CompilationStatus.VerificationSucceeded;
