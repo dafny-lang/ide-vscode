@@ -36,12 +36,12 @@ export namespace ConfigurationConstants {
 
 export namespace DotnetConstants {
   export const ExecutableName = 'dotnet';
-  export const SupportedRuntimesPattern = /Microsoft\.AspNetCore\.App\s*6\.0/i;
+  export const SupportedRuntimesPattern = /Microsoft\.AspNetCore\.App\s*5\.0/i;
 }
 
 export namespace LanguageServerConstants {
   export const ResourceFolder = [ 'out', 'resources' ];
-  export const RequiredVersion = '3.4.0';
+  export const RequiredVersion = '3.3.0';
   export const UnknownVersion = 'unknown';
   export const DownloadBaseUri = 'https://github.com/dafny-lang/dafny/releases/download';
   export const DefaultPath = 'out/resources/dafny/DafnyLanguageServer.dll';
