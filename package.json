@@ -2,7 +2,7 @@
   "name": "dafny-vscode",
   "displayName": "Dafny",
   "description": "Dafny for Visual Studio Code",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "publisher": "correctnessLab",
   "repository": {
     "type": "git",
@@ -138,7 +138,7 @@
         "dafny.markGhostStatements": {
           "type": "boolean",
           "default": "true",
-          "description": "Mark ghost statements in the code (requires restart)"
+          "description": "Mark ghost statements in the code (requires restart and Dafny 3.4.0+)"
         },
         "dafny.languageServerLaunchArgs": {
           "type": "array",

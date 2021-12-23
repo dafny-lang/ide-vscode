@@ -2,7 +2,7 @@
 
 ## 2.1.0
 
-- Now marking ghost statements by default
+- Now marking ghost statements by default (requires Dafny 3.4.0+)
 - Fixed issue when compiling untitled documents
 
 ## 2.0.2
