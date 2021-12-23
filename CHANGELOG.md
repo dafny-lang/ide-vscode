@@ -4,6 +4,7 @@
 
 - Now marking ghost statements by default (requires Dafny 3.4.0+)
 - Fixed issue when compiling untitled documents
+- Changed 'Compilation Succeeded' status message to 'Resolved (not verified)'
 
 ## 2.0.2
 
