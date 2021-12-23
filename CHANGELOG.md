@@ -3,6 +3,12 @@
 ## 2.1.0
 
 - Changed the marketplace publisher to dafny-lang
+- Now marking ghost statements by default (requires Dafny 3.4.0+)
+- Fixed issue when compiling untitled documents
+
+## 2.0.2
+
+- Improved syntax highlighting of strings
 
 ## 2.0.1
 

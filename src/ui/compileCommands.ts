@@ -2,7 +2,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { window, commands, ExtensionContext } from 'vscode';
-import { DafnyCommands } from '../commands';
+import { DafnyCommands, VSCodeCommands } from '../commands';
 
 import Configuration from '../configuration';
 import { ConfigurationConstants } from '../constants';
@@ -27,7 +27,14 @@ export default class CompileCommands {
 
 async function compileAndRun(context: ExtensionContext, useCustomArgs: boolean, run: boolean): Promise<boolean> {
   const document = window.activeTextEditor?.document;
-  if(document == null || !await document.save()) {
+  if(document == null) {
+    return false;
+  }
+  if(document.isUntitled) {
+    commands.executeCommand(VSCodeCommands.SaveAs);
+    return false;
+  }
+  if(!await document.save()) {
     return false;
   }
   const compilerCommand = await new CommandFactory(context, document.fileName, useCustomArgs, run).createCompilerCommand();

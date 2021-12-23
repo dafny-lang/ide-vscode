@@ -1,16 +1,12 @@
-import { StatusBarAlignment, StatusBarItem, TextDocument, Uri, window, workspace, ExtensionContext } from 'vscode';
-import { DocumentUri } from 'vscode-languageserver-protocol';
+import { StatusBarAlignment, StatusBarItem, TextDocument, window, workspace, ExtensionContext } from 'vscode';
 
 import { CompilationStatus, ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from '../language/api/compilationStatus';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
+import { getVsDocumentPath } from '../tools/vscode';
 import { enableOnlyForDafnyDocuments } from '../tools/visibility';
 import { Messages } from './messages';
 
 const StatusBarPriority = 10;
-
-function getVsDocumentPath(params: { uri: DocumentUri }): string {
-  return Uri.parse(params.uri).toString();
-}
 
 function toStatusMessage(status: CompilationStatus): string {
   switch(status) {

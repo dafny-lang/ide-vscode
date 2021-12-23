@@ -135,6 +135,11 @@
           "default": "0",
           "description": "Maximum number of virtual cores that may be used for verification, 0=auto (requires restart)"
         },
+        "dafny.markGhostStatements": {
+          "type": "boolean",
+          "default": "true",
+          "description": "Mark ghost statements in the code (requires restart and Dafny 3.4.0+)"
+        },
         "dafny.languageServerLaunchArgs": {
           "type": "array",
           "default": [],
