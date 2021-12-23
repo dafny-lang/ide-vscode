@@ -1,9 +1,9 @@
 {
-  "name": "dafny-vscode",
+  "name": "ide-vscode",
   "displayName": "Dafny",
   "description": "Dafny for Visual Studio Code",
   "version": "2.1.0",
-  "publisher": "correctnessLab",
+  "publisher": "dafny-lang",
   "repository": {
     "type": "git",
     "url": "https://github.com/dafny-lang/ide-vscode"
