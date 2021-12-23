@@ -1,6 +1,6 @@
 # Release Notes
 
-## 2.1.0
+## 2.1.1
 
 - Changed the marketplace publisher to dafny-lang
 - Now marking ghost statements by default (requires Dafny 3.4.0+)
