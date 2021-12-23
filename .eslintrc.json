@@ -48,6 +48,7 @@
       }
     ],
     "object-curly-spacing": "off",
+    "operator-linebreak": [ "warn", "before" ],
     "@typescript-eslint/object-curly-spacing": [ "warn", "always" ],
     "@typescript-eslint/type-annotation-spacing": [ "warn" ],
     "@typescript-eslint/prefer-optional-chain": "warn",
