@@ -19,6 +19,7 @@ export namespace ConfigurationConstants {
     export const AutomaticVerification = 'automaticVerification';
     export const VerificationTimeLimit = 'verificationTimeLimit';
     export const VerificationVirtualCores = 'verificationVirtualCores';
+    export const VerificationCachingPolicy = 'verificationCachingPolicy';
     export const MarkGhostStatements = 'markGhostStatements';
   }
 

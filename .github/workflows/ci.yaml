@@ -1,8 +1,8 @@
 name: CI
-on: [push]
+on: [push, pull_request]
 
 env:
-  PACKAGE_NAME: dafny-vscode
+  PACKAGE_NAME: ide-vscode
 
 jobs:
   build:

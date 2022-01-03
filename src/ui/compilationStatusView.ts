@@ -10,7 +10,7 @@ import { ENGINE_METHOD_PKEY_ASN1_METHS } from 'constants';
 
 const StatusBarPriority = 10;
 
-function toStatusMessage(status: CompilationStatus): string {
+function toStatusMessage(status: CompilationStatus, message?: string | null): string {
   switch(status) {
   case CompilationStatus.ParsingFailed:
     return Messages.CompilationStatus.ParsingFailed;
@@ -19,7 +19,9 @@ function toStatusMessage(status: CompilationStatus): string {
   case CompilationStatus.CompilationSucceeded:
     return Messages.CompilationStatus.CompilationSucceeded;
   case CompilationStatus.VerificationStarted:
-    return Messages.CompilationStatus.Verifying;
+    return message != null
+      ? `${Messages.CompilationStatus.Verifying} ${message}...`
+      : `${Messages.CompilationStatus.Verifying}...`;
   case CompilationStatus.VerificationSucceeded:
     return Messages.CompilationStatus.VerificationSucceeded;
   case CompilationStatus.VerificationFailed:
@@ -59,7 +61,7 @@ export default class CompilationStatusView {
   private compilationStatusChanged(params: ICompilationStatusParams): void {
     this.documentStatusMessages.set(
       getVsDocumentPath(params),
-      toStatusMessage(params.status)
+      toStatusMessage(params.status, params.message)
     );
     this.updateActiveDocumentStatus();
   }

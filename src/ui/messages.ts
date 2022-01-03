@@ -2,8 +2,8 @@ export namespace Messages {
   export namespace CompilationStatus {
     export const ParsingFailed = '$(thumbsdown) Parsing Failed';
     export const ResolutionFailed = '$(thumbsdown) Resolution Failed';
-    export const CompilationSucceeded = '$(thumbsup) Compilation Succeeded';
-    export const Verifying = '$(sync~spin) Verifying...';
+    export const CompilationSucceeded = '$(book) Resolved (not verified)';
+    export const Verifying = '$(sync~spin) Verifying';
     export const VerificationSucceeded = '$(thumbsup) Verification Succeeded';
     export const VerificationFailed = '$(thumbsdown) Verification Failed';
 

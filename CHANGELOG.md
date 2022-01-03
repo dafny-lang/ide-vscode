@@ -1,8 +1,11 @@
 # Release Notes
 
-## 2.1.0
+## 2.1.1
 
-- Now marking ghost statements by default
+- Changed the marketplace publisher to dafny-lang
+- Now marking ghost statements by default (requires Dafny 3.4.0+)
+- Fixed issue when compiling untitled documents
+- Changed 'Compilation Succeeded' status message to 'Resolved (not verified)'
 
 ## 2.0.2
 

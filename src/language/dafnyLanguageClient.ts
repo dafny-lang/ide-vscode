@@ -20,6 +20,7 @@ function getLanguageServerLaunchArgs(): string[] {
   return [
     getVerificationArgument(),
     getVerifierTimeLimitArgument(),
+    getVerifierCachingPolicy(),
     getVerifierVirtualCoresArgument(),
     getMarkGhostStatementsArgument(),
     ...launchArgs
@@ -32,6 +33,16 @@ function getVerificationArgument(): string {
 
 function getVerifierTimeLimitArgument(): string {
   return `--verifier:timelimit=${Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationTimeLimit)}`;
+}
+
+function getVerifierCachingPolicy(): string {
+  const setting = Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationCachingPolicy);
+  const verifySnapshots = {
+    'No caching': 0,
+    'Basic caching': 1,
+    'Advanced caching': 3
+  }[setting] ?? 0;
+  return `--verifier:verifySnapshots=${verifySnapshots}`;
 }
 
 function getVerifierVirtualCoresArgument(): string {

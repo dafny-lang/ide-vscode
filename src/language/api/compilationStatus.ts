@@ -13,6 +13,7 @@ export interface ICompilationStatusParams {
   uri: DocumentUri;
   version?: integer;
   status: CompilationStatus;
+  message?: string | null;
 }
 
 export interface IVerificationStartedParams {
