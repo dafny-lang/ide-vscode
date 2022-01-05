@@ -19,7 +19,7 @@ const mkdirAsync = promisify(fs.mkdir);
 // Previously, it would have been interpreted wrongly like a "relative path".
 // Now it is interpreted as "switch back to default"
 function ifNullOrEmpty(a: string | null, b: string) {
-  return a === "" || a == null ? b : a;
+  return a === '' || a == null ? b : a;
 }
 
 export function getCompilerRuntimePath(context: ExtensionContext): string {
