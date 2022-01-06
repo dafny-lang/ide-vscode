@@ -15,16 +15,9 @@ import Configuration from '../configuration';
 const ArchiveFileName = 'dafny.zip';
 const mkdirAsync = promisify(fs.mkdir);
 
-// If someone deletes a configured language server runtime or compiler path, there will remain an empty string.
-// Previously, it would have been interpreted wrongly like a "relative path".
-// Now it is interpreted as "switch back to default"
-function ifNullOrEmpty(a: string | null, b: string) {
-  return a === "" || a == null ? b : a;
-}
-
 export function getCompilerRuntimePath(context: ExtensionContext): string {
-  const configuredPath = ifNullOrEmpty(Configuration.get<string | null>(ConfigurationConstants.Compiler.RuntimePath)
-    , LanguageServerConstants.DefaultCompilerPath);
+  const configuredPath = Configuration.get<string | null>(ConfigurationConstants.Compiler.RuntimePath)
+    || LanguageServerConstants.DefaultCompilerPath;
   if(!path.isAbsolute(configuredPath)) {
     return path.join(context.extensionPath, configuredPath);
   }
@@ -32,7 +25,7 @@ export function getCompilerRuntimePath(context: ExtensionContext): string {
 }
 
 export function getLanguageServerRuntimePath(context: ExtensionContext): string {
-  const configuredPath = ifNullOrEmpty(getConfiguredLanguageServerRuntimePath(), LanguageServerConstants.DefaultPath);
+  const configuredPath = getConfiguredLanguageServerRuntimePath() || LanguageServerConstants.DefaultPath;
   if(path.isAbsolute(configuredPath)) {
     return configuredPath;
   }
