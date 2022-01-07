@@ -16,8 +16,8 @@ const ArchiveFileName = 'dafny.zip';
 const mkdirAsync = promisify(fs.mkdir);
 
 // Equivalent to a || b but without ESLint warnings
-function ifNullOrEmpty(a: string | null, b: string) {
-  return a === null || a === '' ? a : b;
+function ifNullOrEmpty(a: string | null, b: string): string {
+  return a === null || a === '' ? b : a;
 }
 
 export function getCompilerRuntimePath(context: ExtensionContext): string {
