@@ -17,7 +17,7 @@ const mkdirAsync = promisify(fs.mkdir);
 
 // Equivalent to a || b but without ESLint warnings
 function ifNullOrEmpty(a: string | null, b: string) {
-  return a ? a : b;
+  return a == null || a == "" ? a : b;
 }
 
 export function getCompilerRuntimePath(context: ExtensionContext): string {
