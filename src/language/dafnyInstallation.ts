@@ -20,9 +20,22 @@ function ifNullOrEmpty(a: string | null, b: string): string {
   return a === null || a === '' ? b : a;
 }
 
+function getConfiguredVersion(): string {
+  const version = Configuration.get<string>(ConfigurationConstants.PreferredVersion);
+  return version === LanguageServerConstants.Latest
+    ? LanguageServerConstants.LatestVersion
+    : version;
+}
+
+export function isConfiguredToInstallLatestDafny(): boolean {
+  return Configuration.get<string>(ConfigurationConstants.PreferredVersion) === LanguageServerConstants.Latest;
+}
+
 export function getCompilerRuntimePath(context: ExtensionContext): string {
-  const configuredPath = ifNullOrEmpty(Configuration.get<string | null>(ConfigurationConstants.Compiler.RuntimePath)
-    , LanguageServerConstants.DefaultCompilerPath);
+  const configuredPath = ifNullOrEmpty(
+    Configuration.get<string | null>(ConfigurationConstants.Compiler.RuntimePath),
+    LanguageServerConstants.GetDefaultCompilerPath(getConfiguredVersion())
+  );
   if(!path.isAbsolute(configuredPath)) {
     return path.join(context.extensionPath, configuredPath);
   }
@@ -30,7 +43,10 @@ export function getCompilerRuntimePath(context: ExtensionContext): string {
 }
 
 export function getLanguageServerRuntimePath(context: ExtensionContext): string {
-  const configuredPath = ifNullOrEmpty(getConfiguredLanguageServerRuntimePath(), LanguageServerConstants.DefaultPath);
+  const configuredPath = ifNullOrEmpty(
+    getConfiguredLanguageServerRuntimePath(),
+    LanguageServerConstants.GetDefaultPath(getConfiguredVersion())
+  );
   if(path.isAbsolute(configuredPath)) {
     return configuredPath;
   }
@@ -54,7 +70,7 @@ function getDafnyPlatformSuffix(): string {
 
 function getDafnyDownloadAddress(): string {
   const baseUri = LanguageServerConstants.DownloadBaseUri;
-  const version = LanguageServerConstants.RequiredVersion;
+  const version = getConfiguredVersion();
   const suffix = getDafnyPlatformSuffix();
   return `${baseUri}/v${version}/dafny-${version}-x64-${suffix}.zip`;
 }
@@ -65,14 +81,14 @@ export class DafnyInstaller {
     private readonly statusOutput: OutputChannel
   ) {}
 
-  public static isMinimumRequiredLanguageServer(version: string): boolean {
+  public static isLatestKnownLanguageServerOrNewer(version: string): boolean {
     if(version === LanguageServerConstants.UnknownVersion) {
       return true;
     }
     const [ givenMajor, givenMinor ] = version.split('.');
-    const [ requiredMajor, requiredMinor ] = LanguageServerConstants.RequiredVersion.split('.');
-    return givenMajor > requiredMajor
-      || givenMajor === requiredMajor && givenMinor >= requiredMinor;
+    const [ latestRequired, latestMinor ] = LanguageServerConstants.LatestVersion.split('.');
+    return givenMajor > latestRequired
+      || givenMajor === latestRequired && givenMinor >= latestMinor;
   }
 
   public async install(): Promise<boolean> {
@@ -160,7 +176,10 @@ export class DafnyInstaller {
   }
 
   private getInstallationPath(): Uri {
-    return Utils.joinPath(this.context.extensionUri, ...LanguageServerConstants.ResourceFolder);
+    return Utils.joinPath(
+      this.context.extensionUri,
+      ...LanguageServerConstants.GetResourceFolder(getConfiguredVersion())
+    );
   }
 
   private writeStatus(message: string): void {

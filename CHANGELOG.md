@@ -1,5 +1,9 @@
 # Release Notes
 
+## 2.2.0
+
+- Added option to specify the preferred dafny version for automatic installation
+
 ## 2.1.1
 
 - Changed the marketplace publisher to dafny-lang

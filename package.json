@@ -2,7 +2,7 @@
   "name": "ide-vscode",
   "displayName": "Dafny",
   "description": "Dafny for Visual Studio Code",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "publisher": "dafny-lang",
   "repository": {
     "type": "git",
@@ -178,6 +178,16 @@
             "/spillTargetCode:1"
           ],
           "description": "Optional array of strings as Dafny compilation arguments"
+        },
+        "dafny.preferredVersion": {
+          "type": "string",
+          "enum": [
+            "latest",
+            "3.3.0",
+            "3.2.0"
+          ],
+          "default": "latest",
+          "description": "The preferred Dafny version to use (overriden by custom compiler and language server paths, requires restart)."
         },
         "dafny.dotnetExecutablePath": {
           "type": "string",
