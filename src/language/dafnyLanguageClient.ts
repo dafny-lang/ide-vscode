@@ -21,6 +21,7 @@ function getLanguageServerLaunchArgs(): string[] {
     getVerifierCachingPolicy(),
     getVerifierVirtualCoresArgument(),
     getMarkGhostStatementsArgument(),
+    getCompilerBackendsArgument(),
     ...launchArgs
   ];
 }
@@ -49,6 +50,14 @@ function getVerifierVirtualCoresArgument(): string {
 
 function getMarkGhostStatementsArgument(): string {
   return `--ghost:markStatements=${Configuration.get<string>(ConfigurationConstants.LanguageServer.MarkGhostStatements)}`;
+}
+
+function getCompilerBackendsArgument(): string {
+  var backends = Configuration.get<string>(ConfigurationConstants.LanguageServer.CompilerBackends);
+  if(backends === null) {
+    backends = "";
+  }
+  return `--compiler:backends=${backends}`;
 }
 
 export class DafnyLanguageClient extends LanguageClient {
