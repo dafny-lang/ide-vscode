@@ -81,14 +81,28 @@ export class DafnyInstaller {
     private readonly statusOutput: OutputChannel
   ) {}
 
-  public static isLatestKnownLanguageServerOrNewer(version: string): boolean {
+  public isLatestKnownLanguageServerOrNewer(version: string): boolean {
     if(version === LanguageServerConstants.UnknownVersion) {
+      this.writeStatus('failed to resolve the installed Dafny version');
       return true;
     }
-    const [ givenMajor, givenMinor ] = version.split('.');
-    const [ latestRequired, latestMinor ] = LanguageServerConstants.LatestVersion.split('.');
-    return givenMajor > latestRequired
-      || givenMajor === latestRequired && givenMinor >= latestMinor;
+    const givenParts = version.split('.');
+    const latestVersion = LanguageServerConstants.LatestVersion;
+    const latestParts = latestVersion.split('.');
+    for(let i = 0; i < Math.min(givenParts.length, latestParts.length); i++) {
+      const given = givenParts[i];
+      const latest = latestParts[i];
+      if(given < latest) {
+        this.writeStatus(`the installed Dafny version is older than the latest: ${version} < ${latestVersion}`);
+        return false;
+      }
+      if(given > latest) {
+        this.writeStatus(`the installed Dafny version is newer than the latest: ${version} > ${latestVersion}`);
+        return true;
+      }
+    }
+    this.writeStatus(`the installed Dafny version is the latest known: ${version} = ${latestVersion}`);
+    return true;
   }
 
   public async install(): Promise<boolean> {

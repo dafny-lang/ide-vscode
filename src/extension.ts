@@ -78,7 +78,7 @@ class ExtensionRuntime {
   }
 
   private async updateDafnyIfNecessary(installedVersion: string): Promise<boolean> {
-    if(DafnyInstaller.isLatestKnownLanguageServerOrNewer(installedVersion)) {
+    if(this.installer.isLatestKnownLanguageServerOrNewer(installedVersion)) {
       return true;
     }
     if(this.installer.isCustomInstallation() || !isConfiguredToInstallLatestDafny()) {
