@@ -1,4 +1,4 @@
-import { ExtensionContext, Disposable } from 'vscode';
+import { ExtensionContext, Disposable, OutputChannel } from 'vscode';
 import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
 
 import Configuration from '../configuration';
@@ -21,7 +21,7 @@ function getLanguageServerLaunchArgs(): string[] {
     getVerifierCachingPolicy(),
     getVerifierVirtualCoresArgument(),
     getMarkGhostStatementsArgument(),
-    getCompilerBackendsArgument(),
+    getDafnyPluginsArgument(),
     ...launchArgs
   ];
 }
@@ -52,12 +52,12 @@ function getMarkGhostStatementsArgument(): string {
   return `--ghost:markStatements=${Configuration.get<string>(ConfigurationConstants.LanguageServer.MarkGhostStatements)}`;
 }
 
-function getCompilerBackendsArgument(): string {
-  var backends = Configuration.get<string>(ConfigurationConstants.LanguageServer.CompilerBackends);
-  if(backends === null) {
-    backends = "";
+function getDafnyPluginsArgument(): string {
+  var plugins = Configuration.get<string>(ConfigurationConstants.LanguageServer.DafnyPlugins);
+  if(plugins === null) {
+    plugins = "";
   }
-  return `--compiler:backends=${backends}`;
+  return `--dafny:plugins=${plugins}`;
 }
 
 export class DafnyLanguageClient extends LanguageClient {
@@ -70,9 +70,10 @@ export class DafnyLanguageClient extends LanguageClient {
     return this.sendRequest<ICounterExampleItem[]>('dafny/counterExample', param);
   }
 
-  public static async create(context: ExtensionContext): Promise<DafnyLanguageClient> {
+  public static async create(context: ExtensionContext, statusOutput: OutputChannel): Promise<DafnyLanguageClient> {
     const dotnetExecutable = await getDotnetExecutablePath();
     const launchArguments = [ getLanguageServerRuntimePath(context), ...getLanguageServerLaunchArgs() ];
+    statusOutput.appendLine(`Language server arguments: ${launchArguments.join(" ")}`);
     const serverOptions: ServerOptions = {
       run: { command: dotnetExecutable, args: launchArguments },
       debug: { command: dotnetExecutable, args: launchArguments }

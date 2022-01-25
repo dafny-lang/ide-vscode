@@ -155,10 +155,10 @@
           "default": "true",
           "description": "Mark ghost statements in the code (requires restart and Dafny 3.4.0+)"
         },
-        "dafny.compilerBackends": {
+        "dafny.dafnyPlugins": {
           "type": "string",
           "default": "",
-          "description": "Comma-separated list of compiler assemblies (requires restart and Dafny 3.4.0+)"
+          "description": "Comma-separated list of assemblies (requires restart and Dafny 3.4.0+)"
         },
         "dafny.languageServerLaunchArgs": {
           "type": "array",

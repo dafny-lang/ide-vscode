@@ -21,7 +21,7 @@ export namespace ConfigurationConstants {
     export const VerificationVirtualCores = 'verificationVirtualCores';
     export const VerificationCachingPolicy = 'verificationCachingPolicy';
     export const MarkGhostStatements = 'markGhostStatements';
-    export const CompilerBackends = 'compilerBackends';
+    export const DafnyPlugins = 'dafnyPlugins';
   }
 
   export namespace Compiler {
