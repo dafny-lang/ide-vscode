@@ -53,9 +53,9 @@ function getMarkGhostStatementsArgument(): string {
 }
 
 function getDafnyPluginsArgument(): string {
-  var plugins = Configuration.get<string>(ConfigurationConstants.LanguageServer.DafnyPlugins);
+  let plugins = Configuration.get<string>(ConfigurationConstants.LanguageServer.DafnyPlugins);
   if(plugins === null) {
-    plugins = "";
+    plugins = '';
   }
   return `--dafny:plugins=${plugins}`;
 }
@@ -73,7 +73,7 @@ export class DafnyLanguageClient extends LanguageClient {
   public static async create(context: ExtensionContext, statusOutput: OutputChannel): Promise<DafnyLanguageClient> {
     const dotnetExecutable = await getDotnetExecutablePath();
     const launchArguments = [ getLanguageServerRuntimePath(context), ...getLanguageServerLaunchArgs() ];
-    statusOutput.appendLine(`Language server arguments: ${launchArguments.join(" ")}`);
+    statusOutput.appendLine(`Language server arguments: ${launchArguments.join(' ')}`);
     const serverOptions: ServerOptions = {
       run: { command: dotnetExecutable, args: launchArguments },
       debug: { command: dotnetExecutable, args: launchArguments }
