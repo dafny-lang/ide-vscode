@@ -53,11 +53,11 @@ function getMarkGhostStatementsArgument(): string {
 }
 
 function getDafnyPluginsArgument(): string {
-  let plugins = Configuration.get<string>(ConfigurationConstants.LanguageServer.DafnyPlugins);
+  let plugins = Configuration.get<string[]>(ConfigurationConstants.LanguageServer.DafnyPlugins);
   if(plugins === null) {
-    plugins = '';
+    return '';
   }
-  return `--dafny:plugins=${plugins}`;
+  return `--dafny:plugins=${plugins.join(',')}`;
 }
 
 export class DafnyLanguageClient extends LanguageClient {

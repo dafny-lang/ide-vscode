@@ -156,9 +156,12 @@
           "description": "Mark ghost statements in the code (requires restart and Dafny 3.4.0+)"
         },
         "dafny.dafnyPlugins": {
-          "type": "string",
-          "default": "",
-          "description": "Comma-separated list of assemblies (requires restart and Dafny 3.4.0+)"
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "List of ssemblies that Dafny is going to use as plugins (requires Dafny 3.4+)"
         },
         "dafny.languageServerLaunchArgs": {
           "type": "array",
