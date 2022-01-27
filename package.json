@@ -157,6 +157,9 @@
         },
         "dafny.languageServerLaunchArgs": {
           "type": "array",
+          "items": {
+            "type": "string"
+          },
           "default": [],
           "description": "Optional array of strings to pass to the language server runtime."
         },
@@ -172,6 +175,9 @@
         },
         "dafny.compilerArgs": {
           "type": "array",
+          "items": {
+            "type": "string"
+          },
           "default": [
             "/verifyAllModules",
             "/compile:1",
