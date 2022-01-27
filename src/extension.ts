@@ -3,7 +3,7 @@ import { ExtensionConstants, LanguageServerConstants } from './constants';
 
 import { DafnyLanguageClient } from './language/dafnyLanguageClient';
 import checkAndInformAboutInstallation from './startupCheck';
-import { DafnyInstaller, getLanguageServerRuntimePath } from './language/dafnyInstallation';
+import { DafnyInstaller, getLanguageServerRuntimePath, isConfiguredToInstallLatestDafny } from './language/dafnyInstallation';
 import { Messages } from './ui/messages';
 import createAndRegisterDafnyIntegration from './ui/dafnyIntegration';
 import { timeout } from './tools/timeout';
@@ -78,12 +78,12 @@ class ExtensionRuntime {
   }
 
   private async updateDafnyIfNecessary(installedVersion: string): Promise<boolean> {
-    if(DafnyInstaller.isMinimumRequiredLanguageServer(installedVersion)) {
+    if(this.installer.isLatestKnownLanguageServerOrNewer(installedVersion)) {
       return true;
     }
-    if(this.installer.isCustomInstallation()) {
+    if(this.installer.isCustomInstallation() || !isConfiguredToInstallLatestDafny()) {
       window.showInformationMessage(
-        `${Messages.Installation.Outdated} ${installedVersion} < ${LanguageServerConstants.RequiredVersion}`
+        `${Messages.Installation.Outdated} ${installedVersion} < ${LanguageServerConstants.LatestVersion}`
       );
       return true;
     }
