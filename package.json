@@ -161,7 +161,7 @@
             "type": "string"
           },
           "default": [],
-          "description": "List of ssemblies that Dafny is going to use as plugins (requires Dafny 3.4+)"
+          "description": "Absolute paths to assemblies to be used as plugins (requires Dafny 3.4+).\nExample 1: /user/home/dafnyplugin.dll\nExample 2: /user/home/dafnyplugin.dll,oneArgument\nExample 3: /user/home/dafnyplugin.dll,\"argument with space and \\\" escaped quote\" secondArgument"
         },
         "dafny.languageServerLaunchArgs": {
           "type": "array",
