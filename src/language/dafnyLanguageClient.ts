@@ -57,7 +57,14 @@ function getDafnyPluginsArgument(): string {
   if(plugins === null) {
     return '';
   }
-  return `--dafny:plugins=${plugins.join(',')}`;
+  plugins = plugins.filter(x => x !== null && x !== '');
+  var result = [];
+  for(let i in plugins) {
+    var possiblyEscaped = plugins[i].indexOf(' ') >= 0 && plugins[i][0] != '"' ?
+      '"'+plugins[i].replace(/"/g, '\\"')+'"': plugins[i];
+    result.push(`--dafny:plugins:${i}=${possiblyEscaped}`);
+  }
+  return result.join(" ");
 }
 
 export class DafnyLanguageClient extends LanguageClient {
