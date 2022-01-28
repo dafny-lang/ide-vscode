@@ -58,13 +58,13 @@ function getDafnyPluginsArgument(): string {
     return '';
   }
   plugins = plugins.filter(x => x !== null && x !== '');
-  var result = [];
-  for(let i in plugins) {
-    var possiblyEscaped = plugins[i].indexOf(' ') >= 0 && plugins[i][0] != '"' ?
-      '"'+plugins[i].replace(/"/g, '\\"')+'"': plugins[i];
+  const result = [];
+  for(const i in plugins) {
+    const possiblyEscaped = plugins[i].includes(' ') && !plugins[i].startsWith('"')
+      ? '"' + plugins[i].replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"' : plugins[i];
     result.push(`--dafny:plugins:${i}=${possiblyEscaped}`);
   }
-  return result.join(" ");
+  return result.join(' ');
 }
 
 export class DafnyLanguageClient extends LanguageClient {
