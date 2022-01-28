@@ -61,7 +61,7 @@ function getDafnyPluginsArgument(): string {
   const result = [];
   for(const i in plugins) {
     const possiblyEscaped = plugins[i].includes(' ') && !plugins[i].startsWith('"')
-      ? '"' + plugins[i].replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"' : plugins[i];
+      ? '"' + plugins[i].replace(/"/g, '\\"') + '"' : plugins[i];
     result.push(`--dafny:plugins:${i}=${possiblyEscaped}`);
   }
   return result.join(' ');
