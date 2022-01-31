@@ -28,6 +28,10 @@ export async function deactivate(): Promise<void> {
   await extensionRuntime?.dispose();
 }
 
+export async function restartServer(): Promise<void> {
+  await extensionRuntime?.restart();
+}
+
 class ExtensionRuntime {
   private readonly installer: DafnyInstaller;
   private client?: DafnyLanguageClient;
@@ -58,10 +62,7 @@ class ExtensionRuntime {
 
   private async initializeClient(): Promise<void> {
     this.statusOutput.appendLine(`starting Dafny from ${getLanguageServerRuntimePath(this.context)}`);
-    this.client = await DafnyLanguageClient.create(this.context);
-    this.client.start();
-    await this.client.onReady();
-    this.languageServerVersion = await this.getLanguageServerVersionAfterStartup();
+    await this.ensure();
   }
 
   private async getLanguageServerVersionAfterStartup(): Promise<string> {
@@ -98,5 +99,17 @@ class ExtensionRuntime {
 
   public async dispose(): Promise<void> {
     await this.client?.stop();
+  }
+
+  public async ensure() {
+    this.client = this.client ?? await DafnyLanguageClient.create(this.context);
+    this.client.start();
+    await this.client.onReady();
+    this.languageServerVersion = await this.getLanguageServerVersionAfterStartup();
+  }
+
+  public async restart() {
+    await this.dispose();
+    await this.ensure();
   }
 }
