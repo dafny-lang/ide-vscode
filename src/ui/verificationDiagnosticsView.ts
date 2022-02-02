@@ -1,3 +1,4 @@
+/* eslint-disable max-depth */
 import { commands, DecorationOptions, Range, window, ExtensionContext, workspace, TextEditor, languages, Hover, TextDocument, Selection, CodeActionContext, ProviderResult, Command, CodeAction, CodeActionKind, WorkspaceEdit, Position } from 'vscode';
 import { CancellationToken, Diagnostic, Disposable } from 'vscode-languageclient';
 import { LanguageConstants } from '../constants';
@@ -44,7 +45,7 @@ export default class VerificationDiagnosticsView {
     const errorPathIcon = context.asAbsolutePath("images/errorPath.svg");
     const verifiedIcon = context.asAbsolutePath("images/verified.svg");
     const errorPathWayIcon = context.asAbsolutePath("images/errorPathWay.svg");
-    var getDecoration = (icon: string) => window.createTextEditorDecorationType({
+    const getDecoration = (icon: string) => window.createTextEditorDecorationType({
       isWholeLine: true,
       rangeBehavior: 1,
       gutterIconPath: icon,
@@ -58,41 +59,41 @@ export default class VerificationDiagnosticsView {
       rangeBehavior: 1,
       outline: '#fe536a 2px solid',
     });
-    //instance.textEditorWatcher = window.onDidChangeTextEditorSelection((e) => instance.onTextChange(e));
-    languages.registerHoverProvider(LanguageConstants.Id, {
+    instance.textEditorWatcher = window.onDidChangeTextEditorSelection((e) => instance.onTextChange(e));
+    /*languages.registerHoverProvider(LanguageConstants.Id, {
       provideHover(document, position, token) {
         instance.onTextChange(position.line, token);
         return null;
         //return new Hover('I am a hover!');
       }
-    });
+    });*/
     languages.registerCodeActionsProvider(LanguageConstants.Id, instance);
     return instance;
   }
 
   public rangeOfClosingBrace(document: TextDocument, originalRange: Range): {range: Range, indent: number} | undefined {
-    var tmpRange = new Range(originalRange.start, new Position(originalRange.start.line+1, 0));
-    var documentText = document.getText(tmpRange).substring(1);
-    var braceNumber = 1;
-    var i = 0;
-    var lastIndentBeforeBrace = 0;
-    var first = true;
-    var onlySpaces = true;
-    var lastIndent = 0;
+    const tmpRange = new Range(originalRange.start, new Position(originalRange.start.line+1, 0));
+    const documentText = document.getText(tmpRange).substring(1);
+    let braceNumber = 1;
+    let i = 0;
+    let lastIndentBeforeBrace = 0;
+    let first = true;
+    let onlySpaces = true;
+    let lastIndent = 0;
     while(documentText != null && documentText != "") {
-     while(i < documentText.length && braceNumber != 0) {
-        if(documentText[i] == "{") braceNumber++;
-        if(documentText[i] == "}") braceNumber--;
+      while(i < documentText.length && braceNumber != 0) {
+        if(documentText[i] == '{') braceNumber++;
+        if(documentText[i] == '}') braceNumber--;
         i++;
         if(!first && onlySpaces) {
-          if(documentText[i] == " ") {
+          if(documentText[i] == ' ') {
             lastIndent = i;
           } else {
             onlySpaces = false;
           }
         }
       }
-       if(braceNumber != 0) {
+      if(braceNumber !== 0) {
         lastIndentBeforeBrace = lastIndent;
         tmpRange = new Range(tmpRange.end.line, tmpRange.end.character, tmpRange.end.line + 1, 0);
         documentText = document.getText(tmpRange);
