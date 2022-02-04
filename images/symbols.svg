@@ -6,7 +6,7 @@
    id="svg6"
    sodipodi:docname="symbols.svg"
    inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
-   inkscape:export-filename="C:\Users\mimayere\Documents\ide-vscode\images\symbolspendingerrorbinding.png"
+   inkscape:export-filename="C:\Users\mimayere\Documents\ide-vscode\images\symbolserrortimehighlightedfadedrecomputing.png"
    inkscape:export-xdpi="9.6000004"
    inkscape:export-ydpi="9.6000004"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -24,14 +24,14 @@
      inkscape:pageopacity="0.0"
      inkscape:pagecheckerboard="0"
      showgrid="false"
-     inkscape:zoom="0.85500996"
-     inkscape:cx="329.23593"
-     inkscape:cy="387.12999"
-     inkscape:window-width="1664"
-     inkscape:window-height="1020"
-     inkscape:window-x="84"
-     inkscape:window-y="47"
-     inkscape:window-maximized="0"
+     inkscape:zoom="1.7100199"
+     inkscape:cx="109.64785"
+     inkscape:cy="190.64105"
+     inkscape:window-width="1920"
+     inkscape:window-height="986"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
      inkscape:current-layer="g4" />
   <g
      id="g4">
@@ -91,14 +91,36 @@
          id="rect2-7-1-8" />
     </g>
     <rect
-       x="-85.613037"
-       y="251.95598"
+       x="127.52643"
+       y="223.71495"
+       width="149.99811"
+       height="100%"
+       rx="30.000002%"
+       ry="30.000002%"
+       style="opacity:0.53481;fill:#b300b3;fill-opacity:1"
+       id="rect827"
+       inkscape:export-filename="C:\Users\mimayere\Documents\ide-vscode\images\symbolsredfaded.png"
+       inkscape:export-xdpi="9.6000004"
+       inkscape:export-ydpi="9.6000004" />
+    <path
+       id="rect827-5-3"
+       style="fill:#b300b3"
+       d="m 57.013375,195.46469 c 41.54948,0 62.907815,0.57133 63.888085,24.53241 0.98027,23.96107 -58.428045,32.18767 -57.309285,54.79255 1.11876,22.60487 56.948525,21.07771 57.016885,43.21869 0.0684,22.14098 -21.461415,26.87156 -63.010895,26.87156 -41.54947,0 -63.0108865,-1.5412 -63.3032805,-23.94761 -0.292395,-22.4064 55.5904805,-22.7141 56.7244805,-46.72743 1.13401,-24.01333 -56.9218335,-31.26291 -57.3092695,-53.21398 -0.387436,-21.95106 21.7538095,-25.52619 63.3032795,-25.52619 z"
+       sodipodi:nodetypes="szzzzzzzs" />
+    <path
+       id="rect827-5-3-4"
+       style="fill:#b300b3;opacity:0.48101266"
+       d="m 149.99474,-0.43946281 c 41.54948,0 62.90781,0.57133 63.88808,24.53240981 0.98027,23.96107 -58.42804,32.18767 -57.30928,54.79255 1.11876,22.604873 56.94852,21.07771 57.01688,43.218693 0.0684,22.14098 -21.46141,26.87156 -63.01089,26.87156 -41.54947,0 -63.010883,-1.5412 -63.303277,-23.94761 -0.292395,-22.4064 55.590477,-22.7141 56.724477,-46.727433 C 145.13474,54.287377 87.0789,47.037797 86.691464,25.086727 86.304028,3.1356672 108.44527,-0.43946281 149.99474,-0.43946281 Z"
+       sodipodi:nodetypes="szzzzzzzs" />
+    <rect
+       x="-243.4191"
+       y="324.99533"
        width="50%"
        height="100%"
        rx="30.000002%"
        ry="30.000002%"
        style="fill:#fe536a;fill-opacity:1"
-       id="rect827"
+       id="rect827-3"
        inkscape:export-filename="C:\Users\mimayere\Documents\ide-vscode\images\symbolsredfaded.png"
        inkscape:export-xdpi="9.6000004"
        inkscape:export-ydpi="9.6000004" />
@@ -116,7 +138,7 @@
        inkscape:export-ydpi="9.6000004" />
     <g
        id="g1232-5"
-       transform="translate(84.29068,323.08536)">
+       transform="translate(5.2006378,-2.147069)">
       <rect
          x="63.366714"
          y="0"
@@ -133,8 +155,8 @@
          id="rect2-7-1-8-3" />
     </g>
     <rect
-       x="137.88815"
-       y="-0.72021073"
+       x="-22.343899"
+       y="491.67172"
        width="7.9250665%"
        height="102%"
        style="opacity:0.550633;fill:#fe536a;fill-opacity:1;stroke-width:0.703788"
@@ -157,6 +179,30 @@
        ry="21.345129%"
        style="opacity:0.553797;fill:#ffffff;fill-opacity:1;stroke-width:0.506548"
        id="rect827-9-3"
+       inkscape:export-filename="C:\Users\mimayere\Documents\ide-vscode\images\symbolsredfaded.png"
+       inkscape:export-xdpi="9.6000004"
+       inkscape:export-ydpi="9.6000004" />
+    <rect
+       x="109.79317"
+       y="6.8703928"
+       width="26.218601%"
+       height="23.977495%"
+       rx="15.731162%"
+       ry="7.1932487%"
+       style="opacity:0.49683544;fill:#ffffff;fill-opacity:1;stroke-width:0.354586"
+       id="rect827-9-3-0"
+       inkscape:export-filename="C:\Users\mimayere\Documents\ide-vscode\images\symbolsredfaded.png"
+       inkscape:export-xdpi="9.6000004"
+       inkscape:export-ydpi="9.6000004" />
+    <rect
+       x="109.79317"
+       y="104.23768"
+       width="26.218601%"
+       height="23.977495%"
+       rx="15.731162%"
+       ry="7.1932487%"
+       style="fill:#ffffff;fill-opacity:1;stroke-width:0.354586;opacity:0.49683544"
+       id="rect827-9-3-0-1"
        inkscape:export-filename="C:\Users\mimayere\Documents\ide-vscode\images\symbolsredfaded.png"
        inkscape:export-xdpi="9.6000004"
        inkscape:export-ydpi="9.6000004" />
