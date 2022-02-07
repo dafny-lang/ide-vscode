@@ -308,19 +308,18 @@
 			<array>
 				<dict>
 					<key>begin</key>
-					<string>&lt;(\w+)</string>
-					<key>beginCaptures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>storage.type.dafny</string>
-						</dict>
-					</dict>
+					<string>&lt;(?=\w+)</string>
 					<key>end</key>
 					<string>&gt;</string>
 					<key>name</key>
 					<string>meta.type.identifier.dafny</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#code</string>
+						</dict>
+					</array>
 				</dict>
 			</array>
 		</dict>
