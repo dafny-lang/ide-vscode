@@ -54,7 +54,7 @@
 		</dict>
 		<dict>
 			<key>begin</key>
-			<string>(\w+)\s*\(</string>
+			<string>(\w+)\s*(&lt;[^&gt;]+&gt;)?\s*\(</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
