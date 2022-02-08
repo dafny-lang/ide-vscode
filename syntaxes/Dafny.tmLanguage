@@ -173,6 +173,21 @@
 			<array>
 				<dict>
 					<key>begin</key>
+					<string>@"</string>
+					<key>end</key>
+					<string>"</string>
+					<key>name</key>
+					<string>string.dafny</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>match</key>
+							<string>""</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>begin</key>
 					<string>"</string>
 					<key>end</key>
 					<string>("|\n)</string>
