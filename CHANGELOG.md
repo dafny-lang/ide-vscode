@@ -3,6 +3,10 @@
 ## 2.2.0
 
 - Added option to specify the preferred dafny version for automatic installation
+- Empty compiler/language server paths are now treated as unconfigured (use automatic installation)
+- Now accepting .NET 6.0 as a supported platform
+- Now showing verification progress messages (if available)
+- Added option to configure Dafny's caching policy
 
 ## 2.1.1
 
