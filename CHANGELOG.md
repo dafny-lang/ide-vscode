@@ -7,6 +7,7 @@
 - Now accepting .NET 6.0 as a supported platform
 - Now showing verification progress messages (if available)
 - Added option to configure Dafny's caching policy
+- Fixed the text selection for highlighted ghost statements
 
 ## 2.1.1
 
