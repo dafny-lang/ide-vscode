@@ -3,6 +3,7 @@
 ## 2.2.0
 
 - Added option to specify the preferred dafny version for automatic installation
+- Fixed the text selection for highlighted ghost statements
 
 ## 2.1.1
 
