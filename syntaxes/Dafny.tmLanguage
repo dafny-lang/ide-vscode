@@ -16,7 +16,7 @@
 	<array>
 		<dict>
 			<key>begin</key>
-			<string>(class)\s*(\w+)\s*</string>
+			<string>(class)\s*([\w'?]+)\s*</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
@@ -54,7 +54,7 @@
 		</dict>
 		<dict>
 			<key>begin</key>
-			<string>(\w+)\s*(&lt;[^&gt;]+&gt;)?\s*\(</string>
+			<string>([\w'?]+)\s*(?:&lt;(?:(?:[^&lt;&gt;]|&lt;(?:(?:[^&lt;&gt;]|&lt;(?:(?:[^&lt;&gt;])+)&gt;)+)&gt;)+)&gt;\s*)?\(</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
@@ -101,6 +101,10 @@
 				<dict>
 					<key>include</key>
 					<string>#strings</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#generics</string>
 				</dict>
 			</array>
 		</dict>
@@ -281,7 +285,7 @@
 			<array>
 				<dict>
 					<key>begin</key>
-					<string>:\s*(\w+)</string>
+					<string>:\s*([\w'?]+)</string>
 					<key>beginCaptures</key>
 					<dict>
 						<key>1</key>
@@ -323,7 +327,7 @@
 			<array>
 				<dict>
 					<key>begin</key>
-					<string>&lt;(?=\w+)</string>
+					<string>&lt;(?=[\w'?]+)</string>
 					<key>end</key>
 					<string>&gt;</string>
 					<key>name</key>
