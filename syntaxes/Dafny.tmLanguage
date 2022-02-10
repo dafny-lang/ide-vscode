@@ -82,12 +82,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>match</key>
-			<string>\b(class|trait|function|ghost|nameonly|var|const|method|constructor|abstract|module|import|export|lemma|as|is|opened|static|twostate|refines|witness|extends|returns|break|then|else|if|label|return|while|for|to|downto|print|new|in|fresh|allocated|match|case|assert|by|assume|expect|reveal|modify|predicate|least|greatest|forall|exists|false|true|null|old|unchanged|calc|iterator|yields|yield)\b</string>
-			<key>name</key>
-			<string>keyword.control.dafny</string>
-		</dict>
-		<dict>
 			<key>include</key>
 			<string>#code</string>
 		</dict>
@@ -150,6 +144,10 @@
 					<key>include</key>
 					<string>#keywords</string>
 				</dict>
+				<dict>
+					<key>include</key>
+					<string>#keywordsIfNotHandled</string>
+				</dict>
 			</array>
 		</dict>
 		<key>code</key>
@@ -158,11 +156,31 @@
 			<array>
 				<dict>
 					<key>include</key>
+					<string>#comments</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#comments-inline</string>
+				</dict>
+				<dict>
+					<key>include</key>
 					<string>#attributes</string>
 				</dict>
 				<dict>
 					<key>include</key>
+					<string>#strings</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#keywords</string>
+				</dict>
+				<dict>
+					<key>include</key>
 					<string>#genericfunctioncalls</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#generics</string>
 				</dict>
 				<dict>
 					<key>include</key>
@@ -174,27 +192,11 @@
 				</dict>
 				<dict>
 					<key>include</key>
-					<string>#comments</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>#comments-inline</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>#strings</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>#generics</string>
-				</dict>
-				<dict>
-					<key>include</key>
 					<string>#typedeclaration</string>
 				</dict>
 				<dict>
 					<key>include</key>
-					<string>#keywords</string>
+					<string>#keywordsIfNotHandled</string>
 				</dict>
 			</array>
 		</dict>
@@ -365,13 +367,25 @@
 				</dict>
 			</array>
 		</dict>
+		<key>keywordsIfNotHandled</key>
+		<dict>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>match</key>
+					<string>\b(datatype|codatatype|type|newtype)\b</string>
+					<key>name</key>
+					<string>keyword.control.dafny</string>
+				</dict>
+			</array>
+		</dict>
 		<key>keywords</key>
 		<dict>
 			<key>patterns</key>
 			<array>
 				<dict>
 					<key>match</key>
-					<string>\b(class|trait|datatype|codatatype|type|newtype|function|include|ghost|nameonly|var|const|method|constructor|abstract|module|import|export|lemma|as|is|opened|static|twostate|refines|witness|extends|returns|break|then|else|if|label|return|while|for|to|downto|print|new|in|fresh|allocated|match|case|assert|by|assume|expect|reveal|modify|predicate|least|greatest|forall|exists|false|true|null|old|unchanged|calc|iterator|yields|yield)\b</string>
+					<string>\b(class|trait|function|include|ghost|nameonly|var|const|method|constructor|abstract|module|import|export|lemma|as|is|opened|static|twostate|refines|witness|extends|returns|break|then|else|if|label|return|while|for|to|downto|print|new|in|fresh|allocated|match|case|assert|by|assume|expect|reveal|modify|predicate|least|greatest|forall|exists|false|true|null|old|unchanged|calc|iterator|yields|yield)\b</string>
 					<key>name</key>
 					<string>keyword.control.dafny</string>
 				</dict>
@@ -457,6 +471,10 @@
 						<dict>
 							<key>include</key>
 							<string>#keywords</string>
+						</dict>
+						<dict>
+							<key>include</key>
+							<string>#keywordsIfNotHandled</string>
 						</dict>
 					</array>
 				</dict>

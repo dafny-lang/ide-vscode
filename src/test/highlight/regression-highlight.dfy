@@ -7,8 +7,8 @@ predicate Generic<Bar<Foo<Blah<P>>>>(foo: Bar<Foo<Blah<P>>>){}
 predicate Regular(foo: Baz){}
 
 function test() {
-  purple("hello")
-       //^^^^^^^ should be a string
+  FunctionCall("hello")
+             //^^^^^^^ should be a string
 }
 
 // Issue#120: 'Purple?' should be highlighted entirely
@@ -20,6 +20,10 @@ datatype D = D((bool, int) -> bool) | E(bool)
 
 // should be recognized as a keyword
 datatype
+
+method X() ensures (true) {
+   //      ^^^^^^^ keyword
+}
 
 // Issue#85: Strings should be highlighted correctly.
 method {:extern "foo"} Foo() returns (res: Result<string, string>)
