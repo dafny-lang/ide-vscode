@@ -11,6 +11,7 @@
    inkscape:export-ydpi="9.6000004"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
   <defs
@@ -24,9 +25,9 @@
      inkscape:pageopacity="0.0"
      inkscape:pagecheckerboard="0"
      showgrid="false"
-     inkscape:zoom="1.7100199"
-     inkscape:cx="109.64785"
-     inkscape:cy="190.64105"
+     inkscape:zoom="0.42750498"
+     inkscape:cx="610.51921"
+     inkscape:cy="240.93287"
      inkscape:window-width="1920"
      inkscape:window-height="986"
      inkscape:window-x="-11"
@@ -36,8 +37,17 @@
   <g
      id="g4">
     <rect
-       x="432.50958"
-       y="93.768921"
+       style="opacity:0.481013;fill:#000000;fill-opacity:1;stroke-width:2.21565"
+       id="rect864"
+       width="1432.3915"
+       height="861.75049"
+       x="519.86469"
+       y="206.73381"
+       rx="148.07816"
+       ry="16.881495" />
+    <rect
+       x="698.80872"
+       y="632.98322"
        width="50%"
        height="100%"
        rx="30.000002%"
@@ -48,33 +58,29 @@
        inkscape:export-xdpi="9.6000004"
        inkscape:export-ydpi="9.6000004" />
     <rect
-       x="308.05511"
-       y="476.08536"
-       width="56%"
-       height="102%"
-       style="fill:#62b455;fill-opacity:0.538168"
-       id="rect2" />
-    <rect
-       x="129.00572"
-       y="542.08325"
+       x="1104.8844"
+       y="641.32513"
        width="56%"
        height="102%"
        style="fill:#62b455;fill-opacity:0.538168"
        id="rect2-2" />
-    <rect
-       x="343.56152"
-       y="218.56383"
-       width="56%"
-       height="102%"
-       style="fill:#62b455;fill-opacity:1"
-       id="rect2-7" />
+    <g
+       id="g1112">
+      <rect
+         x="22%"
+         y="-110%"
+         width="56%"
+         height="100%"
+         style="fill:#62b455;fill-opacity:1;stroke:#62b455;stroke-opacity:1"
+         id="rect2-7" />
+    </g>
     <g
        id="g1232"
        style="opacity:0.515823"
        inkscape:export-filename="C:\Users\mimayere\Documents\ide-vscode\images\sourceyellowfaded.png"
        inkscape:export-xdpi="9.6000004"
        inkscape:export-ydpi="9.6000004"
-       transform="translate(577.77105,362.56888)">
+       transform="translate(1553.6498,461.81078)">
       <rect
          x="63.366714"
          y="0"
@@ -91,8 +97,8 @@
          id="rect2-7-1-8" />
     </g>
     <rect
-       x="127.52643"
-       y="223.71495"
+       x="1103.4052"
+       y="322.95685"
        width="149.99811"
        height="100%"
        rx="30.000002%"
@@ -105,16 +111,16 @@
     <path
        id="rect827-5-3"
        style="fill:#b300b3"
-       d="m 57.013375,195.46469 c 41.54948,0 62.907815,0.57133 63.888085,24.53241 0.98027,23.96107 -58.428045,32.18767 -57.309285,54.79255 1.11876,22.60487 56.948525,21.07771 57.016885,43.21869 0.0684,22.14098 -21.461415,26.87156 -63.010895,26.87156 -41.54947,0 -63.0108865,-1.5412 -63.3032805,-23.94761 -0.292395,-22.4064 55.5904805,-22.7141 56.7244805,-46.72743 1.13401,-24.01333 -56.9218335,-31.26291 -57.3092695,-53.21398 -0.387436,-21.95106 21.7538095,-25.52619 63.3032795,-25.52619 z"
+       d="m 1032.8921,294.70659 c 41.5495,0 62.9078,0.57133 63.8881,24.53241 0.9802,23.96107 -58.4281,32.18767 -57.3093,54.79255 1.1187,22.60487 56.9485,21.07771 57.0169,43.21869 0.068,22.14098 -21.4615,26.87156 -63.0109,26.87156 -41.5495,0 -63.01092,-1.5412 -63.30331,-23.94761 -0.2924,-22.4064 55.59051,-22.7141 56.72451,-46.72743 1.134,-24.01333 -56.92187,-31.26291 -57.3093,-53.21398 -0.38744,-21.95106 21.75381,-25.52619 63.3033,-25.52619 z"
        sodipodi:nodetypes="szzzzzzzs" />
     <path
        id="rect827-5-3-4"
-       style="fill:#b300b3;opacity:0.48101266"
-       d="m 149.99474,-0.43946281 c 41.54948,0 62.90781,0.57133 63.88808,24.53240981 0.98027,23.96107 -58.42804,32.18767 -57.30928,54.79255 1.11876,22.604873 56.94852,21.07771 57.01688,43.218693 0.0684,22.14098 -21.46141,26.87156 -63.01089,26.87156 -41.54947,0 -63.010883,-1.5412 -63.303277,-23.94761 -0.292395,-22.4064 55.590477,-22.7141 56.724477,-46.727433 C 145.13474,54.287377 87.0789,47.037797 86.691464,25.086727 86.304028,3.1356672 108.44527,-0.43946281 149.99474,-0.43946281 Z"
+       style="opacity:0.481013;fill:#b300b3"
+       d="m 1777.8094,310.51839 c 41.5495,0 62.9078,0.57133 63.8881,24.53241 0.9802,23.96107 -58.4281,32.18767 -57.3093,54.79255 1.1187,22.60487 56.9485,21.07771 57.0169,43.21869 0.068,22.14098 -21.4615,26.87156 -63.0109,26.87156 -41.5495,0 -63.0109,-1.5412 -63.3033,-23.94761 -0.2924,-22.4064 55.5905,-22.7141 56.7245,-46.72743 1.134,-24.01333 -56.9219,-31.26291 -57.3093,-53.21398 -0.3874,-21.95106 21.7538,-25.52619 63.3033,-25.52619 z"
        sodipodi:nodetypes="szzzzzzzs" />
     <rect
-       x="-243.4191"
-       y="324.99533"
+       x="25%"
+       y="0"
        width="50%"
        height="100%"
        rx="30.000002%"
@@ -125,8 +131,8 @@
        inkscape:export-xdpi="9.6000004"
        inkscape:export-ydpi="9.6000004" />
     <rect
-       x="432.50958"
-       y="243.76892"
+       x="1408.3883"
+       y="343.01083"
        width="35.575218%"
        height="71.150436%"
        rx="21.345131%"
@@ -137,33 +143,35 @@
        inkscape:export-xdpi="9.6000004"
        inkscape:export-ydpi="9.6000004" />
     <g
-       id="g1232-5"
-       transform="translate(5.2006378,-2.147069)">
-      <rect
-         x="63.366714"
-         y="0"
-         width="13.505368%"
-         height="102%"
-         style="fill:#e2ea1f;fill-opacity:1;stroke-width:0.491088"
-         id="rect2-7-1-1" />
-      <rect
-         x="183.24834"
-         y="0"
-         width="13.505368%"
-         height="102%"
-         style="fill:#e2ea1f;fill-opacity:1;stroke-width:0.491088"
-         id="rect2-7-1-8-3" />
+       id="g1527">
+      <g
+         id="g1232-5">
+        <rect
+           x="20%"
+           y="-220%"
+           width="12%"
+           height="100%"
+           style="fill:#e2ea1f;fill-opacity:1;stroke-width:0.491088"
+           id="rect2-7-1-1" />
+        <rect
+           x="68%"
+           y="-220%"
+           width="12%"
+           height="100%"
+           style="fill:#e2ea1f;fill-opacity:1;stroke-width:0.491088"
+           id="rect2-7-1-8-3" />
+      </g>
     </g>
     <rect
-       x="-22.343899"
-       y="491.67172"
+       x="953.53479"
+       y="590.91364"
        width="7.9250665%"
        height="102%"
        style="opacity:0.550633;fill:#fe536a;fill-opacity:1;stroke-width:0.703788"
        id="rect2-5" />
     <rect
-       x="343.56152"
-       y="325.28949"
+       x="1319.4402"
+       y="424.5314"
        width="30.000002%"
        height="100%"
        rx="30.000002%"
@@ -171,8 +179,8 @@
        style="opacity:0.493671;fill:#fe536a;fill-opacity:1"
        id="rect846" />
     <rect
-       x="127.52643"
-       y="223.71495"
+       x="1103.4052"
+       y="322.95685"
        width="18.031563%"
        height="71.150436%"
        rx="10.818938%"
@@ -183,32 +191,32 @@
        inkscape:export-xdpi="9.6000004"
        inkscape:export-ydpi="9.6000004" />
     <rect
-       x="109.79317"
-       y="6.8703928"
+       x="1737.6078"
+       y="317.82825"
        width="26.218601%"
        height="23.977495%"
        rx="15.731162%"
        ry="7.1932487%"
-       style="opacity:0.49683544;fill:#ffffff;fill-opacity:1;stroke-width:0.354586"
+       style="opacity:0.496835;fill:#ffffff;fill-opacity:1;stroke-width:0.354586"
        id="rect827-9-3-0"
        inkscape:export-filename="C:\Users\mimayere\Documents\ide-vscode\images\symbolsredfaded.png"
        inkscape:export-xdpi="9.6000004"
        inkscape:export-ydpi="9.6000004" />
     <rect
-       x="109.79317"
-       y="104.23768"
-       width="26.218601%"
+       x="1861.6602"
+       y="378.80685"
+       width="78.655998"
        height="23.977495%"
        rx="15.731162%"
        ry="7.1932487%"
-       style="fill:#ffffff;fill-opacity:1;stroke-width:0.354586;opacity:0.49683544"
+       style="opacity:0.496835;fill:#ffffff;fill-opacity:1;stroke-width:0.354586"
        id="rect827-9-3-0-1"
        inkscape:export-filename="C:\Users\mimayere\Documents\ide-vscode\images\symbolsredfaded.png"
        inkscape:export-xdpi="9.6000004"
        inkscape:export-ydpi="9.6000004" />
     <rect
-       x="289.46683"
-       y="218.56383"
+       x="1265.3456"
+       y="317.80573"
        width="18.031563%"
        height="71.150436%"
        rx="10.818938%"
@@ -218,5 +226,49 @@
        inkscape:export-filename="C:\Users\mimayere\Documents\ide-vscode\images\symbolsredfaded.png"
        inkscape:export-xdpi="9.6000004"
        inkscape:export-ydpi="9.6000004" />
+    <g
+       id="g1117"
+       style="opacity:0.5"
+       transform="translate(300,0)">
+      <use
+         x="0"
+         y="0"
+         xlink:href="#g1112"
+         id="use1114"
+         width="100%"
+         height="100%" />
+    </g>
+    <g
+       id="g1117-1"
+       style="opacity:0.5"
+       transform="translate(600)">
+      <use
+         x="0"
+         y="0"
+         xlink:href="#g1112"
+         id="use1114-3"
+         width="100%"
+         height="100%" />
+    </g>
+    <g
+       id="g1532"
+       transform="translate(300,0)"
+       style="opacity:0.5">
+      <use
+         x="0"
+         y="0"
+         xlink:href="#g1527"
+         id="use1529"
+         width="100%"
+         height="100%" />
+    </g>
+    <use
+       x="0"
+       y="0"
+       xlink:href="#g1527"
+       id="use1588"
+       transform="translate(600,165)"
+       width="100%"
+       height="100%" />
   </g>
 </svg>
