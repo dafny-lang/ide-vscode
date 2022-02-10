@@ -16,7 +16,7 @@
 	<array>
 		<dict>
 			<key>begin</key>
-			<string>(class)\s*([\w'?]+)\s*</string>
+			<string>(class)\s*([\w'?]+\b(?!&lt;))?\s*</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
@@ -27,15 +27,27 @@
 				<key>2</key>
 				<dict>
 					<key>name</key>
-					<string>entity.name.function.dafny</string>
+					<string>storage.type.dafny</string>
 				</dict>
 			</dict>
 			<key>end</key>
-			<string>\{</string>
+			<string>([\w'?]+)?\s*\{(?!:)</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>storage.type.dafny</string>
+				</dict>
+			</dict>
 			<key>name</key>
 			<string>meta.class.identifier.dafny</string>
 			<key>patterns</key>
 			<array>
+			  <dict>
+				  <key>include</key>
+					<string>#attributes</string>
+				</dict>
 				<dict>
 					<key>include</key>
 					<string>#comments</string>
@@ -44,17 +56,78 @@
 					<key>include</key>
 					<string>#comments-inline</string>
 				</dict>
+				<dict>
+					<key>include</key>
+					<string>#generics</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(extends)\s+([\w'?]+)</string>
+					<key>captures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>keyword.control.dafny</string>
+						</dict>
+						<key>2</key>
+						<dict>
+							<key>name</key>
+							<string>storage.type.dafny</string>
+						</dict>
+					</dict>
+					<key>name</key>
+					<string>meta.class.extends.identifier</string>
+				</dict>
 			</array>
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(class|trait|datatype|codatatype|type|newtype|function|ghost|nameonly|var|const|method|constructor|abstract|module|import|export|lemma|as|is|opened|static|twostate|refines|witness|extends|returns|break|then|else|if|label|return|while|for|to|downto|print|new|in|fresh|allocated|match|case|assert|by|assume|expect|reveal|modify|predicate|least|greatest|forall|exists|false|true|null|old|unchanged|calc|iterator|yields|yield)\b</string>
+			<string>\b(class|trait|function|ghost|nameonly|var|const|method|constructor|abstract|module|import|export|lemma|as|is|opened|static|twostate|refines|witness|extends|returns|break|then|else|if|label|return|while|for|to|downto|print|new|in|fresh|allocated|match|case|assert|by|assume|expect|reveal|modify|predicate|least|greatest|forall|exists|false|true|null|old|unchanged|calc|iterator|yields|yield)\b</string>
 			<key>name</key>
 			<string>keyword.control.dafny</string>
 		</dict>
 		<dict>
+			<key>include</key>
+			<string>#code</string>
+		</dict>
+	</array>
+	<key>repository</key>
+	<dict>
+	  <key>genericfunctioncalls</key>
+    <dict>
 			<key>begin</key>
-			<string>([\w'?]+)\s*(?:&lt;(?:(?:[^&lt;&gt;]|&lt;(?:(?:[^&lt;&gt;]|&lt;(?:(?:[^&lt;&gt;])+)&gt;)+)&gt;)+)&gt;\s*)?\(</string>
+			<string>([\w'?]+)\s*&lt;(?=[^\)\(]*&gt;(?=\())</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>entity.name.function.dafny</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>&gt;(?=\()</string>
+			<key>name</key>
+			<string>meta.method.genericfunctioncall</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#generics</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>[\w'?]+</string>
+					<key>name</key>
+					<string>storage.type.dafny</string>
+				</dict>
+			</array>
+		</dict>
+    <key>functioncalls</key>
+    <dict>
+			<key>begin</key>
+			<string>([\w'?]+)\s*\(</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
@@ -66,26 +139,39 @@
 			<key>end</key>
 			<string>\)</string>
 			<key>name</key>
-			<string>meta.method.identifier.dafny</string>
+			<string>meta.method.functioncall</string>
 			<key>patterns</key>
 			<array>
 				<dict>
 					<key>include</key>
 					<string>#parameters</string>
 				</dict>
+				<dict>
+					<key>include</key>
+					<string>#keywords</string>
+				</dict>
 			</array>
 		</dict>
-		<dict>
-			<key>include</key>
-			<string>#code</string>
-		</dict>
-	</array>
-	<key>repository</key>
-	<dict>
 		<key>code</key>
 		<dict>
 			<key>patterns</key>
 			<array>
+        <dict>
+				  <key>include</key>
+					<string>#attributes</string>
+				</dict>
+        <dict>
+				  <key>include</key>
+					<string>#genericfunctioncalls</string>
+				</dict>
+        <dict>
+				  <key>include</key>
+					<string>#parameters</string>
+				</dict>
+			  <dict>
+				  <key>include</key>
+					<string>#functioncalls</string>
+				</dict>
 				<dict>
 					<key>include</key>
 					<string>#comments</string>
@@ -105,6 +191,43 @@
 				<dict>
 					<key>include</key>
 					<string>#generics</string>
+				</dict>
+				<dict>
+				  <key>include</key>
+					<string>#typedeclaration</string>
+				</dict>
+			</array>
+		</dict>
+		<key>attributes</key>
+		<dict>
+		  <key>patterns</key>
+			<array>
+			  <dict>
+				  <key>begin</key>
+					<string>\{:(\w+)</string>
+					<key>beginCaptures</key>
+					<dict>
+            <key>1</key>
+						<dict>
+							<key>name</key>
+							<string>entity.other.attribute-name.dafny</string>
+						</dict>
+					</dict>
+				  <key>end</key>
+					<string>\}</string>
+					<key>name</key>
+					<string>attribute</string>
+					<key>patterns</key>
+					<array>
+					  <dict>
+							<key>include</key>
+							<string>#strings</string>
+						</dict>
+						<dict>
+							<key>include</key>
+							<string>#keywords</string>
+						</dict>
+					</array>
 				</dict>
 			</array>
 		</dict>
@@ -207,13 +330,48 @@
 				</dict>
 			</array>
 		</dict>
+		<key>typedeclaration</key>
+		<dict>
+			<key>patterns</key>
+			<array>
+			  <dict>
+					<key>begin</key>
+					<string>\b(datatype|codatatype|type|newtype)(?=.*=)\b</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>keyword.control.dafny</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>=</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#generics</string>
+						</dict>
+						<dict>
+						  <key>match</key>
+							<string>[\w'?]+</string>
+							<key>name</key>
+							<string>storage.type.dafny</string>
+						</dict>
+					</array>
+					<key>name</key>
+					<string>datatype.declaration</string>
+				</dict>
+			</array>
+		</dict>
 		<key>keywords</key>
 		<dict>
 			<key>patterns</key>
 			<array>
 				<dict>
 					<key>match</key>
-					<string>\b(class|trait|datatype|codatatype|type|newtype|function|include|ghost|nameonly|var|const|method|constructor|abstract|module|import|export|lemma|as|is|opened|static|twostate|refines|witness|extends|returns|break|then|else|if|label|return|while|for|to|downto|print|new|in|fresh|allocated|match|case|assert|by|assume|expect|reveal|modify|predicate|least|greatest|forall|exists|false|true|null|old|unchanged|calc|iterator|yields|yield)\b</string>
+					<string>\b(class|trait|function|include|ghost|nameonly|var|const|method|constructor|abstract|module|import|export|lemma|as|is|opened|static|twostate|refines|witness|extends|returns|break|then|else|if|label|return|while|for|to|downto|print|new|in|fresh|allocated|match|case|assert|by|assume|expect|reveal|modify|predicate|least|greatest|forall|exists|false|true|null|old|unchanged|calc|iterator|yields|yield)\b</string>
 					<key>name</key>
 					<string>keyword.control.dafny</string>
 				</dict>
@@ -283,9 +441,28 @@
 		<dict>
 			<key>patterns</key>
 			<array>
+			  <dict>
+				  <key>begin</key>
+					<string>\(</string>
+					<key>end</key>
+					<string>\)</string>
+					<key>name</key>
+					<string>meta.parameters.parenthesized</string>
+					<key>patterns</key>
+			    <array>
+					  <dict>
+							<key>include</key>
+							<string>#parameters</string>
+						</dict>
+						<dict>
+							<key>include</key>
+							<string>#keywords</string>
+						</dict>
+					</array>
+				</dict>
 				<dict>
 					<key>begin</key>
-					<string>:\s*([\w'?]+)</string>
+					<string>(?<!\{):\s*([\w'?]+\b(?!&lt;))</string>
 					<key>beginCaptures</key>
 					<dict>
 						<key>1</key>
@@ -295,9 +472,13 @@
 						</dict>
 					</dict>
 					<key>end</key>
-					<string>\s*|,|\)|\}|requires|ensures|modifies</string>
+					<string>(?=&lt;|\s*|,|\)|\}|requires|ensures|modifies)</string>
 					<key>name</key>
-					<string>meta.type.identifier.dafny</string>
+					<string>meta.type.formaldeclaration</string>
+				</dict>
+				<dict>
+				  <key>include</key>
+					<string>#functioncalls</string>
 				</dict>
 				<dict>
 					<key>include</key>
@@ -327,16 +508,30 @@
 			<array>
 				<dict>
 					<key>begin</key>
-					<string>&lt;(?=[\w'?]+)</string>
+					<string>([\w'?]+)&lt;(?=[\w'?]+)</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>storage.type.dafny</string>
+						</dict>
+					</dict>
 					<key>end</key>
 					<string>&gt;</string>
 					<key>name</key>
-					<string>meta.type.identifier.dafny</string>
+					<string>meta.type.generic.dafny</string>
 					<key>patterns</key>
 					<array>
-						<dict>
+					  <dict>
 							<key>include</key>
-							<string>#code</string>
+							<string>#generics</string>
+						</dict>
+						<dict>
+							<key>match</key>
+							<string>[\w'?]+</string>
+							<key>name</key>
+							<string>storage.type.dafny</string>
 						</dict>
 					</array>
 				</dict>
