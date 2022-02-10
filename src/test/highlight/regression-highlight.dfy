@@ -1,4 +1,5 @@
-// Issue #121: Generic and Regular should be highlighted with the same color
+// Issue #121: Generic and Regular should be highlighted
+// with the same color
 predicate Generic<Bar>(foo: Bar){}
 predicate Generic<Bar<Foo>>(foo: Bar<Foo>){}
 predicate Generic<Bar<Foo<Blah>>>(foo: Bar<Foo<Blah>>){}
@@ -16,6 +17,9 @@ predicate IsPurple(foo: Bar){}
 
 // Issue#106: The three "bool" should be blue
 datatype D = D((bool, int) -> bool) | E(bool)
+
+// should be recognized as a keyword
+datatype
 
 // Issue#85: Strings should be highlighted correctly.
 method {:extern "foo"} Foo() returns (res: Result<string, string>)
@@ -55,11 +59,13 @@ datatype Boxed<T> = Box(value: T)
 //             ^ type
 
 datatype MyThing = MyThingConstructor
-//                 ^^^^^^^^^^^^^^^^^^ ideally like a method, but needs semantics
+//                 ^^^^^^^^^^^^^^^^^^
+// ideally like a method, but needs semantics
 
 method test() {
 // Issue#70 The string should be highlighted correctly
-  var tmp := "This string does not have any reserved words that should be highlighted.";
+  var tmp :=
+    "This string does not have any reserved words to highlight.";
 }
 class {:extern "MyClass"} MyClass<T, U, V> {
 }                      // ^^^^^^^ ^  ^  ^  should be a type
