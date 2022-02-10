@@ -44,8 +44,8 @@
 			<string>meta.class.identifier.dafny</string>
 			<key>patterns</key>
 			<array>
-			  <dict>
-				  <key>include</key>
+				<dict>
+					<key>include</key>
 					<string>#attributes</string>
 				</dict>
 				<dict>
@@ -94,8 +94,8 @@
 	</array>
 	<key>repository</key>
 	<dict>
-	  <key>genericfunctioncalls</key>
-    <dict>
+		<key>genericfunctioncalls</key>
+		<dict>
 			<key>begin</key>
 			<string>([\w'?]+)\s*&lt;(?=[^\)\(]*&gt;(?=\())</string>
 			<key>beginCaptures</key>
@@ -124,8 +124,8 @@
 				</dict>
 			</array>
 		</dict>
-    <key>functioncalls</key>
-    <dict>
+		<key>functioncalls</key>
+		<dict>
 			<key>begin</key>
 			<string>([\w'?]+)\s*\(</string>
 			<key>beginCaptures</key>
@@ -156,20 +156,20 @@
 		<dict>
 			<key>patterns</key>
 			<array>
-        <dict>
-				  <key>include</key>
+				<dict>
+					<key>include</key>
 					<string>#attributes</string>
 				</dict>
-        <dict>
-				  <key>include</key>
+				<dict>
+					<key>include</key>
 					<string>#genericfunctioncalls</string>
 				</dict>
-        <dict>
-				  <key>include</key>
+				<dict>
+					<key>include</key>
 					<string>#parameters</string>
 				</dict>
-			  <dict>
-				  <key>include</key>
+				<dict>
+					<key>include</key>
 					<string>#functioncalls</string>
 				</dict>
 				<dict>
@@ -189,7 +189,7 @@
 					<string>#generics</string>
 				</dict>
 				<dict>
-				  <key>include</key>
+					<key>include</key>
 					<string>#typedeclaration</string>
 				</dict>
 				<dict>
@@ -200,26 +200,26 @@
 		</dict>
 		<key>attributes</key>
 		<dict>
-		  <key>patterns</key>
+			<key>patterns</key>
 			<array>
-			  <dict>
-				  <key>begin</key>
+				<dict>
+					<key>begin</key>
 					<string>\{:(\w+)</string>
 					<key>beginCaptures</key>
 					<dict>
-            <key>1</key>
+						<key>1</key>
 						<dict>
 							<key>name</key>
 							<string>entity.other.attribute-name.dafny</string>
 						</dict>
 					</dict>
-				  <key>end</key>
+					<key>end</key>
 					<string>\}</string>
 					<key>name</key>
 					<string>attribute</string>
 					<key>patterns</key>
 					<array>
-					  <dict>
+						<dict>
 							<key>include</key>
 							<string>#strings</string>
 						</dict>
@@ -334,7 +334,7 @@
 		<dict>
 			<key>patterns</key>
 			<array>
-			  <dict>
+				<dict>
 					<key>begin</key>
 					<string>\b(datatype|codatatype|type|newtype)(?=.*=)\b</string>
 					<key>beginCaptures</key>
@@ -354,7 +354,7 @@
 							<string>#generics</string>
 						</dict>
 						<dict>
-						  <key>match</key>
+							<key>match</key>
 							<string>[\w'?]+</string>
 							<key>name</key>
 							<string>storage.type.dafny</string>
@@ -441,16 +441,16 @@
 		<dict>
 			<key>patterns</key>
 			<array>
-			  <dict>
-				  <key>begin</key>
+				<dict>
+					<key>begin</key>
 					<string>\(</string>
 					<key>end</key>
 					<string>\)</string>
 					<key>name</key>
 					<string>meta.parameters.parenthesized</string>
 					<key>patterns</key>
-			    <array>
-					  <dict>
+					<array>
+						<dict>
 							<key>include</key>
 							<string>#parameters</string>
 						</dict>
@@ -477,7 +477,7 @@
 					<string>meta.type.formaldeclaration</string>
 				</dict>
 				<dict>
-				  <key>include</key>
+					<key>include</key>
 					<string>#functioncalls</string>
 				</dict>
 				<dict>
@@ -523,7 +523,7 @@
 					<string>meta.type.generic.dafny</string>
 					<key>patterns</key>
 					<array>
-					  <dict>
+						<dict>
 							<key>include</key>
 							<string>#generics</string>
 						</dict>
