@@ -21,7 +21,7 @@ function getLanguageServerLaunchArgs(): string[] {
     getVerifierCachingPolicy(),
     getVerifierVirtualCoresArgument(),
     getMarkGhostStatementsArgument(),
-    getDafnyPluginsArgument(),
+    ...getDafnyPluginsArgument(),
     ...launchArgs
   ];
 }
@@ -52,19 +52,18 @@ function getMarkGhostStatementsArgument(): string {
   return `--ghost:markStatements=${Configuration.get<string>(ConfigurationConstants.LanguageServer.MarkGhostStatements)}`;
 }
 
-function getDafnyPluginsArgument(): string {
-  let plugins = Configuration.get<string[]>(ConfigurationConstants.LanguageServer.DafnyPlugins);
-  if(plugins === null) {
-    return '';
+function getDafnyPluginsArgument(): string[] {
+  const plugins = Configuration.get<string[]>(ConfigurationConstants.LanguageServer.DafnyPlugins);
+  if(plugins === null || !Array.isArray(plugins)) {
+    return [];
   }
-  plugins = plugins.filter(x => x !== null && x !== '');
   const result = [];
   for(const i in plugins) {
-    const possiblyEscaped = plugins[i].includes(' ') && !plugins[i].startsWith('"')
-      ? '"' + plugins[i].replace(/"/g, '\\"') + '"' : plugins[i];
-    result.push(`--dafny:plugins:${i}=${possiblyEscaped}`);
+    const plugin = plugins[i];
+    if(plugin === null || plugin === '') continue;
+    result.push(`--dafny:plugins:${i}=${plugins[i]}`);
   }
-  return result.join(' ');
+  return result;
 }
 
 export class DafnyLanguageClient extends LanguageClient {
@@ -80,7 +79,11 @@ export class DafnyLanguageClient extends LanguageClient {
   public static async create(context: ExtensionContext, statusOutput: OutputChannel): Promise<DafnyLanguageClient> {
     const dotnetExecutable = await getDotnetExecutablePath();
     const launchArguments = [ getLanguageServerRuntimePath(context), ...getLanguageServerLaunchArgs() ];
-    statusOutput.appendLine(`Language server arguments: ${launchArguments.join(' ')}`);
+    statusOutput.appendLine(`Language server arguments: ${launchArguments.map(oneArgument =>
+      oneArgument.match('\\s|"|\\\\') ?
+        '"' + oneArgument.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'
+        : oneArgument
+    ).join(' ')}`);
     const serverOptions: ServerOptions = {
       run: { command: dotnetExecutable, args: launchArguments },
       debug: { command: dotnetExecutable, args: launchArguments }
