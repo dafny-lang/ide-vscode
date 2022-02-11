@@ -11,8 +11,8 @@ import { getVsDocumentPath, toVsRange } from '../tools/vscode';
 interface ErrorGraph {
   [line: number]: Range [];
   fixableErrors: {
-    [line: number]: Range;
-  }
+    [line: number]: Range
+  };
 }
 
 // TODO: Find a way to not depend on this function
@@ -30,7 +30,7 @@ export default class VerificationDiagnosticsView {
   private errorsRelatedPathDecoration: any;
   private textEditorWatcher?: Disposable;
 
-  private readonly dataByDocument = new Map<string, { errors: Range[], verified: Range[], errorGraph: ErrorGraph}>();
+  private readonly dataByDocument = new Map<string, { errors: Range[], verified: Range[], errorGraph: ErrorGraph }>();
 
   private constructor() {}
 
@@ -41,14 +41,14 @@ export default class VerificationDiagnosticsView {
       window.onDidChangeActiveTextEditor(editor => instance.refreshDisplayedVerificationDiagnostics(editor)),
       languageClient.onVerificationDiagnostics(params => instance.updateVerificationDiagnostics(params))
     );
-    const errorIcon = context.asAbsolutePath("images/errorSource.svg");
-    const errorPathIcon = context.asAbsolutePath("images/errorPath.svg");
-    const verifiedIcon = context.asAbsolutePath("images/verified.svg");
-    const errorPathWayIcon = context.asAbsolutePath("images/errorPathWay.svg");
+    const errorIcon = context.asAbsolutePath('images/errorSource.svg');
+    const errorPathIcon = context.asAbsolutePath('images/errorPath.svg');
+    const verifiedIcon = context.asAbsolutePath('images/verified.svg');
+    const errorPathWayIcon = context.asAbsolutePath('images/errorPathWay.svg');
     const getDecoration = (icon: string) => window.createTextEditorDecorationType({
       isWholeLine: true,
       rangeBehavior: 1,
-      gutterIconPath: icon,
+      gutterIconPath: icon
     });
     instance.errorDecoration = getDecoration(errorIcon);
     instance.errorsRelatedDecoration = getDecoration(errorPathIcon);
@@ -57,7 +57,7 @@ export default class VerificationDiagnosticsView {
     instance.relatedDecorations = window.createTextEditorDecorationType({
       isWholeLine: false,
       rangeBehavior: 1,
-      outline: '#fe536a 2px solid',
+      outline: '#fe536a 2px solid'
     });
     instance.textEditorWatcher = window.onDidChangeTextEditorSelection((e) => instance.onTextChange(e));
     /*languages.registerHoverProvider(LanguageConstants.Id, {
@@ -71,8 +71,8 @@ export default class VerificationDiagnosticsView {
     return instance;
   }
 
-  public rangeOfClosingBrace(document: TextDocument, originalRange: Range): {range: Range, indent: number} | undefined {
-    const tmpRange = new Range(originalRange.start, new Position(originalRange.start.line+1, 0));
+  public rangeOfClosingBrace(document: TextDocument, originalRange: Range): { range: Range, indent: number } | undefined {
+    const tmpRange = new Range(originalRange.start, new Position(originalRange.start.line + 1, 0));
     const documentText = document.getText(tmpRange).substring(1);
     let braceNumber = 1;
     let i = 0;
@@ -80,7 +80,7 @@ export default class VerificationDiagnosticsView {
     let first = true;
     let onlySpaces = true;
     let lastIndent = 0;
-    while(documentText != null && documentText != "") {
+    while(documentText != null && documentText != '') {
       while(i < documentText.length && braceNumber != 0) {
         if(documentText[i] == '{') braceNumber++;
         if(documentText[i] == '}') braceNumber--;
@@ -108,9 +108,9 @@ export default class VerificationDiagnosticsView {
     if(braceNumber == 0) {
       return {
         range: new Range(
-        new Position(tmpRange.start.line, tmpRange.start.character + i - 1),
-        new Position(tmpRange.start.line, tmpRange.start.character + i)),
-        indent: lastIndentBeforeBrace + 1};
+          new Position(tmpRange.start.line, tmpRange.start.character + i - 1),
+          new Position(tmpRange.start.line, tmpRange.start.character + i)),
+        indent: lastIndentBeforeBrace + 1 };
     } else {
       return undefined;
     }
@@ -129,31 +129,31 @@ export default class VerificationDiagnosticsView {
     if(errorGraph[line] == null || !errorGraph.fixableErrors[line]) {
       return undefined;
     }
-    var codeActions = [];
-    var originalRange = errorGraph.fixableErrors[line];
-    for(let relatedRange of errorGraph[line]) {
+    const codeActions = [];
+    const originalRange = errorGraph.fixableErrors[line];
+    for(const relatedRange of errorGraph[line]) {
       if(relatedRange == null) continue;
       // FIXME: Have the range already report the range of the expression, do not guess it !
-      var relatedRangeExtended = new Range(
+      const relatedRangeExtended = new Range(
         relatedRange.start,
         new Position(relatedRange.end.line, 9993)
       );
 
-      var originalBrace = document.getText(originalRange);
-      if(originalBrace != "{") continue;
-      var closingBraceIndent = this.rangeOfClosingBrace(document, originalRange);
+      const originalBrace = document.getText(originalRange);
+      if(originalBrace != '{') continue;
+      const closingBraceIndent = this.rangeOfClosingBrace(document, originalRange);
       if(closingBraceIndent == undefined) continue;
-      var {range: closingBrace, indent: indent} = closingBraceIndent;
+      let { range: closingBrace, indent: indent } = closingBraceIndent;
       indent = Math.max(indent, closingBrace.start.character + 2);
-      var indentationBrace = " ".repeat(closingBrace.start.character);
-      var missingChars = " ".repeat(indent - closingBrace.start.character)
-      var textToInsert = document.getText(relatedRangeExtended);
-      var codeAction = new CodeAction(
-        "Inline failing '" + textToInsert +
-        "' of line " + relatedRange.start.line + " (experimental)",
+      const indentationBrace = ' '.repeat(closingBrace.start.character);
+      const missingChars = ' '.repeat(indent - closingBrace.start.character);
+      const textToInsert = document.getText(relatedRangeExtended);
+      const codeAction = new CodeAction(
+        'Inline failing \'' + textToInsert
+        + '\' of line ' + relatedRange.start.line + ' (experimental)',
         CodeActionKind.RefactorInline);
       codeAction.edit = new WorkspaceEdit();
-      codeAction.edit.insert(document.uri, closingBrace.start, missingChars + "assert " + textToInsert + ";\n" + indentationBrace);
+      codeAction.edit.insert(document.uri, closingBrace.start, missingChars + 'assert ' + textToInsert + ';\n' + indentationBrace);
       codeActions.push(codeAction);
       break; // Let's offer to inline only one
     }
@@ -161,7 +161,7 @@ export default class VerificationDiagnosticsView {
   }
 
   public onTextChange(e: any, token: CancellationToken) {
-    var editor: TextEditor | undefined = window.activeTextEditor;
+    const editor: TextEditor | undefined = window.activeTextEditor;
     if(editor == null) {
       return;
     }
@@ -171,7 +171,7 @@ export default class VerificationDiagnosticsView {
       return;
     }
     const errorGraph = data.errorGraph;
-    const line = typeof e === "number" ? e : e.selections[0]._start._line;
+    const line = typeof e === 'number' ? e : e.selections[0]._start._line;
     if(errorGraph[line] == null) {
       editor.setDecorations(this.relatedDecorations, []);
       editor.setDecorations(this.errorsRelatedDecoration, []);
@@ -179,30 +179,30 @@ export default class VerificationDiagnosticsView {
       editor.setDecorations(this.errorsRelatedPathDecoration, []);
       return;
     }
-    var filteredErrors: Range[] = [];
-    var rangePaths = [];
-    var ranges: Range[] = [];
+    let filteredErrors: Range[] = [];
+    const rangePaths = [];
+    let ranges: Range[] = [];
     try {
-      var maybeStopComputation = <T>(result: T): T => {
+      const maybeStopComputation = <T>(result: T): T => {
         if(token && token.isCancellationRequested) {
-          throw "cancelled";
+          throw 'cancelled';
         } else {
           return result;
         }
-      }
+      };
       ranges = errorGraph[line].filter((x: any) => maybeStopComputation(x != null));
       filteredErrors = data.errors.filter(x =>
         ranges.every((importantRange: Range) => maybeStopComputation(importantRange.start.line != x.start.line)));
-      var lines = ranges.map((x: any) => x.start.line).concat(line);
-      var minLine = lines.length == 0 ? line : Math.min(...lines);
-      var maxLine = lines.length == 0 ? line : Math.max(...lines);
+      const lines = ranges.map((x: any) => x.start.line).concat(line);
+      const minLine = lines.length == 0 ? line : Math.min(...lines);
+      const maxLine = lines.length == 0 ? line : Math.max(...lines);
       for(var l = minLine; l <= maxLine; l++) {
         if(ranges.every((importantRange: Range) => importantRange.start.line != l) && l != line) {
           rangePaths.push(maybeStopComputation(new Range(l, 0, l, 1)));
         }
       }
     } catch(e) {
-      if(e == "cancelled") return;
+      if(e == 'cancelled') return;
     }
 
     editor.setDecorations(this.relatedDecorations, ranges);
@@ -224,7 +224,7 @@ export default class VerificationDiagnosticsView {
     if(data == null) {
       return;
     }
-    
+
     editor.setDecorations(this.verifiedDecoration, data.verified);
     editor.setDecorations(this.errorDecoration, data.errors);
   }
@@ -238,9 +238,9 @@ export default class VerificationDiagnosticsView {
   }
 
   private getUnverifiedRange(unverified: Range[], errorRange: Range): Range | null {
-    for(var i = 0; i < unverified.length; i++) {
+    for(let i = 0; i < unverified.length; i++) {
       if(this.rangesIntersect(unverified[i], errorRange)) {
-          return unverified[i];
+        return unverified[i];
       }
     }
     return null;
@@ -272,16 +272,16 @@ export default class VerificationDiagnosticsView {
       fixableErrors: {}
     };
 
-    var errors: Range[] = [];
-    for(let diagnostic of diagnostics) {
-      let range = rangeOf(diagnostic.range);
-      let unverifiedRange = this.getUnverifiedRange(unverified, range);
-      var relatedRangesAsErrors: Range[] = [];
+    const errors: Range[] = [];
+    for(const diagnostic of diagnostics) {
+      const range = rangeOf(diagnostic.range);
+      const unverifiedRange = this.getUnverifiedRange(unverified, range);
+      const relatedRangesAsErrors: Range[] = [];
       if(unverifiedRange != null && Array.isArray(diagnostic.relatedInformation)) {
-        for(let relatedInformation of diagnostic.relatedInformation as any[]) {
-          var location = relatedInformation.location;
+        for(const relatedInformation of diagnostic.relatedInformation as any[]) {
+          const location = relatedInformation.location;
           if(location == null || location.range == null) continue;
-          var locationRange = rangeOf(location.range);
+          const locationRange = rangeOf(location.range);
           this.addEntry(errorGraph, range, locationRange, true);
           if(unverifiedRange == null) {
             // We don't add this to the error graph.
