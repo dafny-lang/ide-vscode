@@ -17,5 +17,11 @@ function render(row, column, name) {
       console.log(`stdout: ${stdout}`);
   });
 }
-render(0, 0, "test");
-render(-1, 0, "testg");
+render(0, 0, "symbol-error");
+render(0, 1, "symbol-error-faded");
+render(0, 2, "symbol-error-pending");
+render(1, 0, "symbol-success");
+render(1, 1, "symbol-success-faded");
+render(1, 2, "symbol-success-pending");
+render(2, 0, "symbol-pending");
+render(2, 1, "symbol-pending-faded");

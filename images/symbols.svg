@@ -26,7 +26,7 @@
      inkscape:pagecheckerboard="0"
      showgrid="false"
      inkscape:zoom="0.42750498"
-     inkscape:cx="610.51921"
+     inkscape:cx="1126.3027"
      inkscape:cy="240.93287"
      inkscape:window-width="1920"
      inkscape:window-height="986"
@@ -41,25 +41,13 @@
        id="rect864"
        width="1432.3915"
        height="861.75049"
-       x="519.86469"
-       y="206.73381"
+       x="1252.0199"
+       y="-644.71826"
        rx="148.07816"
        ry="16.881495" />
     <rect
-       x="698.80872"
-       y="632.98322"
-       width="50%"
-       height="100%"
-       rx="30.000002%"
-       ry="30.000002%"
-       style="opacity:0.439873;fill:#fe536a;fill-opacity:1"
-       id="rect827-7"
-       inkscape:export-filename="C:\Users\mimayere\Documents\ide-vscode\images\symbolsredfaded.png"
-       inkscape:export-xdpi="9.6000004"
-       inkscape:export-ydpi="9.6000004" />
-    <rect
-       x="1104.8844"
-       y="641.32513"
+       x="1554.002"
+       y="5.0752363"
        width="56%"
        height="102%"
        style="fill:#62b455;fill-opacity:0.538168"
@@ -68,7 +56,7 @@
        id="g1112">
       <rect
          x="22%"
-         y="-110%"
+         y="110%"
          width="56%"
          height="100%"
          style="fill:#62b455;fill-opacity:1;stroke:#62b455;stroke-opacity:1"
@@ -80,7 +68,7 @@
        inkscape:export-filename="C:\Users\mimayere\Documents\ide-vscode\images\sourceyellowfaded.png"
        inkscape:export-xdpi="9.6000004"
        inkscape:export-ydpi="9.6000004"
-       transform="translate(1553.6498,461.81078)">
+       transform="translate(2002.7674,-174.43912)">
       <rect
          x="63.366714"
          y="0"
@@ -97,8 +85,8 @@
          id="rect2-7-1-8" />
     </g>
     <rect
-       x="1103.4052"
-       y="322.95685"
+       x="1552.5227"
+       y="-313.29306"
        width="149.99811"
        height="100%"
        rx="30.000002%"
@@ -111,28 +99,31 @@
     <path
        id="rect827-5-3"
        style="fill:#b300b3"
-       d="m 1032.8921,294.70659 c 41.5495,0 62.9078,0.57133 63.8881,24.53241 0.9802,23.96107 -58.4281,32.18767 -57.3093,54.79255 1.1187,22.60487 56.9485,21.07771 57.0169,43.21869 0.068,22.14098 -21.4615,26.87156 -63.0109,26.87156 -41.5495,0 -63.01092,-1.5412 -63.30331,-23.94761 -0.2924,-22.4064 55.59051,-22.7141 56.72451,-46.72743 1.134,-24.01333 -56.92187,-31.26291 -57.3093,-53.21398 -0.38744,-21.95106 21.75381,-25.52619 63.3033,-25.52619 z"
+       d="m 1482.0097,-341.54331 c 41.5495,0 62.9078,0.57133 63.8881,24.53241 0.9802,23.96107 -58.4281,32.18767 -57.3093,54.79255 1.1187,22.60487 56.9485,21.07771 57.0169,43.21869 0.068,22.14098 -21.4615,26.87156 -63.0109,26.87156 -41.5495,0 -63.0109,-1.5412 -63.3033,-23.94761 -0.2924,-22.4064 55.5905,-22.7141 56.7245,-46.72743 1.134,-24.01333 -56.9219,-31.26291 -57.3093,-53.21398 -0.3875,-21.95106 21.7538,-25.52619 63.3033,-25.52619 z"
        sodipodi:nodetypes="szzzzzzzs" />
     <path
        id="rect827-5-3-4"
        style="opacity:0.481013;fill:#b300b3"
-       d="m 1777.8094,310.51839 c 41.5495,0 62.9078,0.57133 63.8881,24.53241 0.9802,23.96107 -58.4281,32.18767 -57.3093,54.79255 1.1187,22.60487 56.9485,21.07771 57.0169,43.21869 0.068,22.14098 -21.4615,26.87156 -63.0109,26.87156 -41.5495,0 -63.0109,-1.5412 -63.3033,-23.94761 -0.2924,-22.4064 55.5905,-22.7141 56.7245,-46.72743 1.134,-24.01333 -56.9219,-31.26291 -57.3093,-53.21398 -0.3874,-21.95106 21.7538,-25.52619 63.3033,-25.52619 z"
+       d="m 2226.927,-325.73151 c 41.5495,0 62.9078,0.57133 63.8881,24.53241 0.9802,23.96107 -58.4281,32.18767 -57.3093,54.79255 1.1187,22.60487 56.9485,21.07771 57.0169,43.21869 0.068,22.14098 -21.4615,26.87156 -63.0109,26.87156 -41.5495,0 -63.0109,-1.5412 -63.3033,-23.94761 -0.2924,-22.4064 55.5905,-22.7141 56.7245,-46.72743 1.134,-24.01333 -56.9219,-31.26291 -57.3093,-53.21398 -0.3874,-21.95106 21.7538,-25.52619 63.3033,-25.52619 z"
        sodipodi:nodetypes="szzzzzzzs" />
+    <g
+       id="g1075">
+      <rect
+         x="25%"
+         y="0"
+         width="50%"
+         height="100%"
+         rx="30.000002%"
+         ry="30.000002%"
+         style="fill:#fe536a;fill-opacity:1"
+         id="rect827-3"
+         inkscape:export-filename="C:\Users\mimayere\Documents\ide-vscode\images\symbolsredfaded.png"
+         inkscape:export-xdpi="9.6000004"
+         inkscape:export-ydpi="9.6000004" />
+    </g>
     <rect
-       x="25%"
-       y="0"
-       width="50%"
-       height="100%"
-       rx="30.000002%"
-       ry="30.000002%"
-       style="fill:#fe536a;fill-opacity:1"
-       id="rect827-3"
-       inkscape:export-filename="C:\Users\mimayere\Documents\ide-vscode\images\symbolsredfaded.png"
-       inkscape:export-xdpi="9.6000004"
-       inkscape:export-ydpi="9.6000004" />
-    <rect
-       x="1408.3883"
-       y="343.01083"
+       x="1857.5059"
+       y="-293.23907"
        width="35.575218%"
        height="71.150436%"
        rx="21.345131%"
@@ -148,30 +139,23 @@
          id="g1232-5">
         <rect
            x="20%"
-           y="-220%"
+           y="220%"
            width="12%"
            height="100%"
            style="fill:#e2ea1f;fill-opacity:1;stroke-width:0.491088"
            id="rect2-7-1-1" />
-        <rect
-           x="68%"
-           y="-220%"
-           width="12%"
-           height="100%"
-           style="fill:#e2ea1f;fill-opacity:1;stroke-width:0.491088"
-           id="rect2-7-1-8-3" />
       </g>
     </g>
     <rect
-       x="953.53479"
-       y="590.91364"
+       x="1402.6523"
+       y="-45.336262"
        width="7.9250665%"
        height="102%"
        style="opacity:0.550633;fill:#fe536a;fill-opacity:1;stroke-width:0.703788"
        id="rect2-5" />
     <rect
-       x="1319.4402"
-       y="424.5314"
+       x="1768.5577"
+       y="-211.71849"
        width="30.000002%"
        height="100%"
        rx="30.000002%"
@@ -179,8 +163,8 @@
        style="opacity:0.493671;fill:#fe536a;fill-opacity:1"
        id="rect846" />
     <rect
-       x="1103.4052"
-       y="322.95685"
+       x="1552.5227"
+       y="-313.29306"
        width="18.031563%"
        height="71.150436%"
        rx="10.818938%"
@@ -191,8 +175,8 @@
        inkscape:export-xdpi="9.6000004"
        inkscape:export-ydpi="9.6000004" />
     <rect
-       x="1737.6078"
-       y="317.82825"
+       x="2186.7253"
+       y="-318.42166"
        width="26.218601%"
        height="23.977495%"
        rx="15.731162%"
@@ -203,8 +187,8 @@
        inkscape:export-xdpi="9.6000004"
        inkscape:export-ydpi="9.6000004" />
     <rect
-       x="1861.6602"
-       y="378.80685"
+       x="2310.7778"
+       y="-257.44305"
        width="78.655998"
        height="23.977495%"
        rx="15.731162%"
@@ -215,8 +199,8 @@
        inkscape:export-xdpi="9.6000004"
        inkscape:export-ydpi="9.6000004" />
     <rect
-       x="1265.3456"
-       y="317.80573"
+       x="1714.4631"
+       y="-318.44418"
        width="18.031563%"
        height="71.150436%"
        rx="10.818938%"
@@ -262,13 +246,52 @@
          width="100%"
          height="100%" />
     </g>
-    <use
-       x="0"
-       y="0"
-       xlink:href="#g1527"
-       id="use1588"
-       transform="translate(600,165)"
-       width="100%"
-       height="100%" />
+    <g
+       id="g1532-5"
+       transform="translate(600,-165)"
+       style="opacity:1">
+      <use
+         x="0"
+         y="0"
+         xlink:href="#g1527"
+         id="use1529-0"
+         width="100%"
+         height="100%" />
+    </g>
+    <g
+       id="g1532-5-6"
+       transform="translate(600,-330)">
+      <use
+         x="0"
+         y="0"
+         xlink:href="#g1527"
+         id="use1529-0-3"
+         width="100%"
+         height="100%" />
+    </g>
+    <g
+       id="g1080"
+       transform="translate(300,0)"
+       style="opacity:0.5">
+      <use
+         x="0"
+         y="0"
+         xlink:href="#g1075"
+         id="use1077"
+         width="100%"
+         height="100%" />
+    </g>
+    <g
+       id="g1103"
+       transform="translate(600,0)"
+       style="opacity:0.5">
+      <use
+         x="0"
+         y="0"
+         xlink:href="#g1075"
+         id="use1100"
+         width="100%"
+         height="100%" />
+    </g>
   </g>
 </svg>
