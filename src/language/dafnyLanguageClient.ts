@@ -80,8 +80,8 @@ export class DafnyLanguageClient extends LanguageClient {
     const dotnetExecutable = await getDotnetExecutablePath();
     const launchArguments = [ getLanguageServerRuntimePath(context), ...getLanguageServerLaunchArgs() ];
     statusOutput.appendLine(`Language server arguments: ${launchArguments.map(oneArgument =>
-      oneArgument.match('\\s|"|\\\\') ?
-        '"' + oneArgument.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'
+      (/\s|"|\\/.exec(oneArgument))
+        ? '"' + oneArgument.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'
         : oneArgument
     ).join(' ')}`);
     const serverOptions: ServerOptions = {
