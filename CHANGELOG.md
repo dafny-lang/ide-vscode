@@ -8,6 +8,7 @@
 - Now showing verification progress messages (if available)
 - Added option to configure Dafny's caching policy
 - Fixed the text selection for highlighted ghost statements
+- Several improvements to the syntax highlighting
 
 ## 2.1.1
 
