@@ -41,9 +41,12 @@ export default class VerificationDiagnosticsView {
       window.onDidChangeActiveTextEditor(editor => instance.refreshDisplayedVerificationDiagnostics(editor)),
       languageClient.onVerificationDiagnostics(params => instance.updateVerificationDiagnostics(params))
     );
-    const errorIcon = context.asAbsolutePath('images/errorSource.svg');
+    //const errorIcon = context.asAbsolutePath('images/errorSource.svg');
+    const errorIcon = context.asAbsolutePath('images/symbol-error.png');
+    
     const errorPathIcon = context.asAbsolutePath('images/errorPath.svg');
-    const verifiedIcon = context.asAbsolutePath('images/verified.svg');
+    //const verifiedIcon = context.asAbsolutePath('images/verified.svg');
+    const verifiedIcon = context.asAbsolutePath('images/symbol-success.png');
     const errorPathWayIcon = context.asAbsolutePath('images/errorPathWay.svg');
     const getDecoration = (icon: string) => window.createTextEditorDecorationType({
       isWholeLine: true,

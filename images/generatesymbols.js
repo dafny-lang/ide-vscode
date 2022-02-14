@@ -4,7 +4,7 @@
 const { exec } = require("child_process");
 
 function render(row, column, name) {
-  exec(`c:/Progra~1/Inkscape/bin/inkscape.com --actions="export-area:${column*300}:${row*165}:${column*300+300}:${row*165+150}" --export-filename "${name}.png" symbols.svg`,
+  exec(`c:/Progra~1/Inkscape/bin/inkscape.com --actions="export-dpi:9.6;export-area:${column*300}:${row*300}:${column*300+290}:${row*300+290}" --export-filename "${name}.png" symbols.svg`,
   (error, stdout, stderr) => {
       if (error) {
           console.log(`error: ${error.message}`);
