@@ -57,13 +57,11 @@ function getDafnyPluginsArgument(): string[] {
   if(plugins === null || !Array.isArray(plugins)) {
     return [];
   }
-  const result = [];
-  for(const i in plugins) {
-    const plugin = plugins[i];
-    if(plugin === null || plugin === '') continue;
-    result.push(`--dafny:plugins:${i}=${plugins[i]}`);
-  }
-  return result;
+  return (
+    plugins
+      .filter(plugin => plugin !== null && plugin !== '')
+      .map((plugin, i) => `--dafny:plugins:${i}=${plugin}`)
+  );
 }
 
 export class DafnyLanguageClient extends LanguageClient {
@@ -76,14 +74,19 @@ export class DafnyLanguageClient extends LanguageClient {
     return this.sendRequest<ICounterExampleItem[]>('dafny/counterExample', param);
   }
 
-  public static async create(context: ExtensionContext, statusOutput: OutputChannel): Promise<DafnyLanguageClient> {
-    const dotnetExecutable = await getDotnetExecutablePath();
-    const launchArguments = [ getLanguageServerRuntimePath(context), ...getLanguageServerLaunchArgs() ];
-    statusOutput.appendLine(`Language server arguments: ${launchArguments.map(oneArgument =>
+  public static argumentsToCommandLine(launchArguments: string[]): string {
+    return launchArguments.map(oneArgument =>
       (/\s|"|\\/.exec(oneArgument))
         ? '"' + oneArgument.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'
         : oneArgument
-    ).join(' ')}`);
+    ).join(' ');
+  }
+
+  public static async create(context: ExtensionContext, statusOutput: OutputChannel): Promise<DafnyLanguageClient> {
+    const dotnetExecutable = await getDotnetExecutablePath();
+    const launchArguments = [ getLanguageServerRuntimePath(context), ...getLanguageServerLaunchArgs() ];
+    statusOutput.appendLine(
+      `Language server arguments: ${DafnyLanguageClient.argumentsToCommandLine(launchArguments)}`);
     const serverOptions: ServerOptions = {
       run: { command: dotnetExecutable, args: launchArguments },
       debug: { command: dotnetExecutable, args: launchArguments }
