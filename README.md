@@ -5,7 +5,6 @@ This VSCode plugin requires the Dafny language server (shipped with the Dafny re
 
 ## Features
 
-- Compatible to **Dafny 3.3.0**.
 - **Compile and Run** `.dfy` files.
 - **Verification** as one types.
 - **Syntax highlighting** thanks to [sublime-dafny](https://github.com/erggo/sublime-dafny). See file `LICENSE_sublime-dafny.rst` for license.
