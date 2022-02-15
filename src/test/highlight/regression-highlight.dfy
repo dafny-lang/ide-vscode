@@ -1,3 +1,7 @@
+function test() {
+  set x | 0 < x < 10 :: predicate(x)
+}//                     ^^^^^^^^^ should be a function call, not a type
+
 // Issue #121: Generic and Regular should be highlighted
 // with the same color
 predicate Generic<Bar>(foo: Bar){}
