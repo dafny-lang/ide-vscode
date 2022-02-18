@@ -1,7 +1,7 @@
 /* eslint-disable max-depth */
-import { commands, DecorationOptions, Range, window, ExtensionContext, workspace, TextEditor, languages, Hover, TextDocument, Selection, CodeActionContext, ProviderResult, Command, CodeAction, CodeActionKind, WorkspaceEdit, Position, TextEditorDecorationType } from 'vscode';
-import { CancellationToken, Diagnostic, Disposable } from 'vscode-languageclient';
-import { LanguageConstants } from '../constants';
+import { /*commands, */DecorationOptions, Range, window, ExtensionContext, workspace, TextEditor, /*languages, Hover, TextDocument, Selection, CodeActionContext, ProviderResult, Command, CodeAction, CodeActionKind, WorkspaceEdit, Position,*/ TextEditorDecorationType } from 'vscode';
+import { /*CancellationToken, */Diagnostic, Disposable } from 'vscode-languageclient';
+//import { LanguageConstants } from '../constants';
 
 import { IVerificationDiagnosticsParams } from '../language/api/verificationDiagnostics';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
@@ -14,12 +14,12 @@ interface ErrorGraph {
   };
 }
 
-// TODO: Find a way to not depend on this function
+/*// TODO: Find a way to not depend on this function
 function rangeOf(r: any): Range {
   return new Range(
     new Position(r.start.line, r.start.character),
     new Position(r.end.line, r.end.character));
-}
+}*/
 
 interface DecorationSet {
   error: TextEditorDecorationType;
@@ -58,7 +58,7 @@ export default class VerificationDiagnosticsView {
 
   private constructor(context: ExtensionContext) {
     function iconOf(path: string): TextEditorDecorationType {
-      let icon = context.asAbsolutePath(path);
+      const icon = context.asAbsolutePath(path);
       return window.createTextEditorDecorationType({
         isWholeLine: true,
         rangeBehavior: 1,
@@ -114,10 +114,10 @@ export default class VerificationDiagnosticsView {
     //languages.registerCodeActionsProvider(LanguageConstants.Id, instance);
     return instance;
   }
-
+  /*
   public rangeOfClosingBrace(document: TextDocument, originalRange: Range): { range: Range, indent: number } | undefined {
-    const tmpRange = new Range(originalRange.start, new Position(originalRange.start.line + 1, 0));
-    const documentText = document.getText(tmpRange).substring(1);
+    let tmpRange = new Range(originalRange.start, new Position(originalRange.start.line + 1, 0));
+    let documentText = document.getText(tmpRange).substring(1);
     let braceNumber = 1;
     let i = 0;
     let lastIndentBeforeBrace = 0;
@@ -159,8 +159,8 @@ export default class VerificationDiagnosticsView {
       return undefined;
     }
   }
-
-
+*/
+  /*
   public provideCodeActions(document: TextDocument, range: Range | Selection, context: CodeActionContext, token: CancellationToken): ProviderResult<CodeAction[]> {
     // If it's a related condition, try to inline it.
     const documentPath = document.uri.toString();
@@ -203,7 +203,8 @@ export default class VerificationDiagnosticsView {
     }
     return codeActions;
   }
-
+*/
+  /*
   public onTextChange(e: any, token: CancellationToken | null = null): void {
     const editor: TextEditor | undefined = window.activeTextEditor;
     if(editor == null) {
@@ -258,7 +259,7 @@ export default class VerificationDiagnosticsView {
     console.log('selection', e);
     console.log(window.activeTextEditor?.selections);
   }
-
+*/
   public refreshDisplayedVerificationDiagnostics(editor?: TextEditor): void {
     if(editor == null) {
       return;
@@ -290,7 +291,7 @@ export default class VerificationDiagnosticsView {
       this.dataByDocument.delete(documentPath);
     }
   }
-
+  /*
   private getUnverifiedRange(unverified: Range[], errorRange: Range): Range | null {
     for(let i = 0; i < unverified.length; i++) {
       if(this.rangesIntersect(unverified[i], errorRange)) {
@@ -299,7 +300,7 @@ export default class VerificationDiagnosticsView {
     }
     return null;
   }
-
+*/
   private rangesIntersect(range1: Range, range2: Range): boolean {
     return range1.start.line <= range2.end.line && range1.end.line >= range2.start.line;
   }
@@ -362,42 +363,41 @@ export default class VerificationDiagnosticsView {
     }*/
     const lineDiagnostics = params.perLineDiagnostic;
 
-    var previousLineDiagnostic = -1;
-    var initialDiagnosticLine = -1;
-    let error: Range[] = [], errorObsolete: Range[] = [], errorPending: Range[] = [];
-    let errorRange: Range[] = [], errorRangeObsolete: Range[] = [], errorRangePending: Range[] = [];
-    let verified: Range[] = [];
-    let unknown: Range[] = [];
-    let obsolete: Range[] = [];
-    let pending: Range[] = [];
-    let ranges = [unknown, obsolete, pending, verified, errorRangeObsolete, errorRangePending, errorRange, errorObsolete, errorPending, error];
+    let previousLineDiagnostic = -1;
+    let initialDiagnosticLine = -1;
+    const error: Range[] = [], errorObsolete: Range[] = [], errorPending: Range[] = [];
+    const errorRange: Range[] = [], errorRangeObsolete: Range[] = [], errorRangePending: Range[] = [];
+    const verified: Range[] = [];
+    const unknown: Range[] = [];
+    const obsolete: Range[] = [];
+    const pending: Range[] = [];
+    const ranges = [ unknown, obsolete, pending, verified, errorRangeObsolete, errorRangePending, errorRange, errorObsolete, errorPending, error ];
     // <= so that we add a virtual final line to commit the last range.
-    for(var line = 0; line <= lineDiagnostics.length; line++) {
-      const lineDiagnostic = line == lineDiagnostics.length ? -1 : lineDiagnostics[line];
-      if(lineDiagnostic != previousLineDiagnostic) {
-        if(previousLineDiagnostic != -1) { // Never assigned before
-          let range = new Range(initialDiagnosticLine, 1, line - 1, 1);
+    for(let line = 0; line <= lineDiagnostics.length; line++) {
+      const lineDiagnostic = line === lineDiagnostics.length ? -1 : lineDiagnostics[line];
+      if(lineDiagnostic !== previousLineDiagnostic) {
+        if(previousLineDiagnostic !== -1) { // Never assigned before
+          const range = new Range(initialDiagnosticLine, 1, line - 1, 1);
           ranges[previousLineDiagnostic].push(range);
-        } else {
-          previousLineDiagnostic = lineDiagnostic;
-          initialDiagnosticLine = line;
         }
+        previousLineDiagnostic = lineDiagnostic;
+        initialDiagnosticLine = line;
       } else {
         // Just continue
       }
     }
 
     this.dataByDocument.set(documentPath, {
-      error: error;
-      errorObsolete: errorObsolete;
-      errorPending: errorPending;
-      errorRange: errorRange;
-      errorRangeObsolete: errorRangeObsolete;
-      errorRangePending: errorRangePending;
-      verified: verified;
-      pending: pending;
+      error: error,
+      errorObsolete: errorObsolete,
+      errorPending: errorPending,
+      errorRange: errorRange,
+      errorRangeObsolete: errorRangeObsolete,
+      errorRangePending: errorRangePending,
+      verified: verified,
+      pending: pending,
       obsolete: obsolete,
-      errorGraph: {fixableErrors:{}}});
+      errorGraph: { fixableErrors:{} } });
     this.refreshDisplayedVerificationDiagnostics(window.activeTextEditor);
   }
 
