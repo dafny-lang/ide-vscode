@@ -41,13 +41,10 @@ export default class VerificationDiagnosticsView {
       window.onDidChangeActiveTextEditor(editor => instance.refreshDisplayedVerificationDiagnostics(editor)),
       languageClient.onVerificationDiagnostics(params => instance.updateVerificationDiagnostics(params))
     );
-    //const errorIcon = context.asAbsolutePath('images/errorSource.svg');
-    const errorIcon = context.asAbsolutePath('images/symbol-error.png');
-    
-    const errorPathIcon = context.asAbsolutePath('images/errorPath.svg');
-    //const verifiedIcon = context.asAbsolutePath('images/verified.svg');
-    const verifiedIcon = context.asAbsolutePath('images/symbol-success.png');
-    const errorPathWayIcon = context.asAbsolutePath('images/errorPathWay.svg');
+    const errorIcon = context.asAbsolutePath('images/error.png');
+    const errorPathIcon = context.asAbsolutePath('images/error-range.png');
+    const verifiedIcon = context.asAbsolutePath('images/verified.png');
+    const errorPathWayIcon = context.asAbsolutePath('images/error-range-pending.png');
     const getDecoration = (icon: string) => window.createTextEditorDecorationType({
       isWholeLine: true,
       rangeBehavior: 1,
@@ -62,7 +59,7 @@ export default class VerificationDiagnosticsView {
       rangeBehavior: 1,
       outline: '#fe536a 2px solid'
     });
-    instance.textEditorWatcher = window.onDidChangeTextEditorSelection((e) => instance.onTextChange(e));
+    instance.textEditorWatcher = window.onDidChangeTextEditorSelection((e) => instance.onTextChange(e, null));
     /*languages.registerHoverProvider(LanguageConstants.Id, {
       provideHover(document, position, token) {
         instance.onTextChange(position.line, token);
@@ -163,7 +160,7 @@ export default class VerificationDiagnosticsView {
     return codeActions;
   }
 
-  public onTextChange(e: any, token: CancellationToken) {
+  public onTextChange(e: any, token: CancellationToken | null = null): void {
     const editor: TextEditor | undefined = window.activeTextEditor;
     if(editor == null) {
       return;
