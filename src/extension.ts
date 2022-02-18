@@ -58,7 +58,7 @@ class ExtensionRuntime {
 
   private async initializeClient(): Promise<void> {
     this.statusOutput.appendLine(`starting Dafny from ${getLanguageServerRuntimePath(this.context)}`);
-    this.client = await DafnyLanguageClient.create(this.context);
+    this.client = await DafnyLanguageClient.create(this.context, this.statusOutput);
     this.client.start();
     await this.client.onReady();
     this.languageServerVersion = await this.getLanguageServerVersionAfterStartup();

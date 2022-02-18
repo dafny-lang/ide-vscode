@@ -1,4 +1,4 @@
-import { ExtensionContext, Disposable } from 'vscode';
+import { ExtensionContext, Disposable, OutputChannel } from 'vscode';
 import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
 
 import Configuration from '../configuration';
@@ -21,6 +21,7 @@ function getLanguageServerLaunchArgs(): string[] {
     getVerifierCachingPolicy(),
     getVerifierVirtualCoresArgument(),
     getMarkGhostStatementsArgument(),
+    ...getDafnyPluginsArgument(),
     ...launchArgs
   ];
 }
@@ -51,6 +52,18 @@ function getMarkGhostStatementsArgument(): string {
   return `--ghost:markStatements=${Configuration.get<string>(ConfigurationConstants.LanguageServer.MarkGhostStatements)}`;
 }
 
+function getDafnyPluginsArgument(): string[] {
+  const plugins = Configuration.get<string[]>(ConfigurationConstants.LanguageServer.DafnyPlugins);
+  if(plugins === null || !Array.isArray(plugins)) {
+    return [];
+  }
+  return (
+    plugins
+      .filter(plugin => plugin !== null && plugin !== '')
+      .map((plugin, i) => `--dafny:plugins:${i}=${plugin}`)
+  );
+}
+
 export class DafnyLanguageClient extends LanguageClient {
   // eslint-disable-next-line max-params
   private constructor(id: string, name: string, serverOptions: ServerOptions, clientOptions: LanguageClientOptions, forceDebug?: boolean) {
@@ -61,9 +74,18 @@ export class DafnyLanguageClient extends LanguageClient {
     return this.sendRequest<ICounterExampleItem[]>('dafny/counterExample', param);
   }
 
-  public static async create(context: ExtensionContext): Promise<DafnyLanguageClient> {
+  public static argumentsToCommandLine(launchArguments: string[]): string {
+    return launchArguments.map(oneArgument =>
+      (/\s|"|\\/.exec(oneArgument))
+        ? '"' + oneArgument.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'
+        : oneArgument
+    ).join(' ');
+  }
+
+  public static async create(context: ExtensionContext, statusOutput: OutputChannel): Promise<DafnyLanguageClient> {
     const dotnetExecutable = await getDotnetExecutablePath();
     const launchArguments = [ getLanguageServerRuntimePath(context), ...getLanguageServerLaunchArgs() ];
+    statusOutput.appendLine(`Language server arguments: ${DafnyLanguageClient.argumentsToCommandLine(launchArguments)}`);
     const serverOptions: ServerOptions = {
       run: { command: dotnetExecutable, args: launchArguments },
       debug: { command: dotnetExecutable, args: launchArguments }
