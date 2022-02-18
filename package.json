@@ -2,7 +2,7 @@
   "name": "ide-vscode",
   "displayName": "Dafny",
   "description": "Dafny for Visual Studio Code",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "publisher": "dafny-lang",
   "repository": {
     "type": "git",
@@ -155,8 +155,19 @@
           "default": "true",
           "description": "Mark ghost statements in the code (requires restart and Dafny 3.4.0+)"
         },
+        "dafny.dafnyPlugins": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Absolute paths to assemblies to be used as plugins (requires restart and Dafny 3.4.0+).\nExample 1: /user/home/dafnyplugin.dll\nExample 2: /user/home/dafnyplugin.dll,oneArgument\nExample 3: /user/home/dafnyplugin.dll,\"argument with space and \\\" escaped quote\" secondArgument"
+        },
         "dafny.languageServerLaunchArgs": {
           "type": "array",
+          "items": {
+            "type": "string"
+          },
           "default": [],
           "description": "Optional array of strings to pass to the language server runtime."
         },
@@ -172,12 +183,26 @@
         },
         "dafny.compilerArgs": {
           "type": "array",
+          "items": {
+            "type": "string"
+          },
           "default": [
             "/verifyAllModules",
             "/compile:1",
             "/spillTargetCode:1"
           ],
           "description": "Optional array of strings as Dafny compilation arguments"
+        },
+        "dafny.preferredVersion": {
+          "type": "string",
+          "enum": [
+            "latest",
+            "3.4.0",
+            "3.3.0",
+            "3.2.0"
+          ],
+          "default": "latest",
+          "description": "The preferred Dafny version to use (overriden by custom compiler and language server paths, requires restart)."
         },
         "dafny.dotnetExecutablePath": {
           "type": "string",
@@ -237,7 +262,7 @@
   },
   "devDependencies": {
     "@types/glob": "^7.1.4",
-    "@types/mocha": "^9.0.0",
+    "@types/mocha": "^9.1.0",
     "@types/node": "^12.12.70",
     "@types/promise.any": "^2.0.0",
     "@types/vscode": "^1.52.0",
@@ -247,7 +272,7 @@
     "@vscode/test-electron": "^1.6.2",
     "eslint": "^7.32.0",
     "glob": "^7.1.7",
-    "mocha": "^9.1.1",
+    "mocha": "^9.2.0",
     "ts-loader": "^9.2.5",
     "typescript": "^4.4.3",
     "webpack": "^5.52.1",

@@ -5,7 +5,6 @@ This VSCode plugin requires the Dafny language server (shipped with the Dafny re
 
 ## Features
 
-- Compatible to **Dafny 3.3.0**.
 - **Compile and Run** `.dfy` files.
 - **Verification** as one types.
 - **Syntax highlighting** thanks to [sublime-dafny](https://github.com/erggo/sublime-dafny). See file `LICENSE_sublime-dafny.rst` for license.
@@ -28,7 +27,7 @@ You can find [examples below](#examples).
 
 ## Requirements
 
-The plugin requires at least .NET Core 5.0 (the ASP.NET Core 5.0 runtime to be more specific) to run the _Dafny Language Server_. Please download a distribution from [Microsoft](https://dotnet.microsoft.com/download).
+The plugin requires at least .NET Core 5.0 (the ASP.NET Core 5.0 or 6.0 runtimes to be more specific) to run the _Dafny Language Server_. Please download a distribution from [Microsoft](https://dotnet.microsoft.com/download).
 When you first open a _Dafny_ file, the extension will prompt you to install .NET Core manually. The language server gets installed automatically.
 
 ## Extension Settings
@@ -43,7 +42,8 @@ When you first open a _Dafny_ file, the extension will prompt you to install .NE
 | `dafny.languageServerLaunchArgs`  | Optional array of strings as _Dafny_ language server arguments.                                                                                                                                    | `[ ]`                                                          |
 | `dafny.compilerRuntimePath`       | Absolute or relative path to the _Dafny_ compiler (`Dafny.dll`).                                                                                                                                   | `null`                                                         |
 | `dafny.compilerArgs`              | Optional array of strings as _Dafny_ compilation arguments.                                                                                                                                        | `[ "/verifyAllModules", "/compile:1", "/spillTargetCode:1" ]`  |
-| `dafny.compilerOutputDir`         | Absolute or relative path to the compilation output directory.                                                                                                                                     | `bin`                                                          |
+| `dafny.compilerArgs`              | Optional array of strings as _Dafny_ compilation arguments.                                                                                                                                        | `[ "/verifyAllModules", "/compile:1", "/spillTargetCode:1" ]`  |
+| `dafny.preferredVersion`          | The preferred Dafny version to use (overriden by custom compiler and language server paths, choose between `latest`, `3.3.0`, and `3.2.0`).                                                        | `latest`                                                       |
 | `dafny.dotnetExecutablePath`      | Absolute path to the dotnet executable. Only necessary if dotnet is not in system PATH (you'll get an error if that's the case).                                                                   |                                                                |
 | `dafny.colorCounterExamples`      | Customize the color (HEX) of Counter Examples. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults. | `{ "backgroundColor": null, "fontColor": null }`               |
 | `dafny.terminalCommandPrefix`     | The prefix to use when executing a command in the VS Code terminal. Defaults to & on windows.                                                                                                      |                                                                |

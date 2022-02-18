@@ -68,6 +68,7 @@
     "func-call-spacing": "off",
     "@typescript-eslint/func-call-spacing": "warn",
     "keyword-spacing": "off",
+    "curly": "warn",
     "@typescript-eslint/keyword-spacing": [
       "warn",
       {

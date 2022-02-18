@@ -15,9 +15,27 @@ import Configuration from '../configuration';
 const ArchiveFileName = 'dafny.zip';
 const mkdirAsync = promisify(fs.mkdir);
 
+// Equivalent to a || b but without ESLint warnings
+function ifNullOrEmpty(a: string | null, b: string): string {
+  return a === null || a === '' ? b : a;
+}
+
+function getConfiguredVersion(): string {
+  const version = Configuration.get<string>(ConfigurationConstants.PreferredVersion);
+  return version === LanguageServerConstants.Latest
+    ? LanguageServerConstants.LatestVersion
+    : version;
+}
+
+export function isConfiguredToInstallLatestDafny(): boolean {
+  return Configuration.get<string>(ConfigurationConstants.PreferredVersion) === LanguageServerConstants.Latest;
+}
+
 export function getCompilerRuntimePath(context: ExtensionContext): string {
-  const configuredPath = Configuration.get<string | null>(ConfigurationConstants.Compiler.RuntimePath)
-    ?? LanguageServerConstants.DefaultCompilerPath;
+  const configuredPath = ifNullOrEmpty(
+    Configuration.get<string | null>(ConfigurationConstants.Compiler.RuntimePath),
+    LanguageServerConstants.GetDefaultCompilerPath(getConfiguredVersion())
+  );
   if(!path.isAbsolute(configuredPath)) {
     return path.join(context.extensionPath, configuredPath);
   }
@@ -25,7 +43,10 @@ export function getCompilerRuntimePath(context: ExtensionContext): string {
 }
 
 export function getLanguageServerRuntimePath(context: ExtensionContext): string {
-  const configuredPath = getConfiguredLanguageServerRuntimePath() ?? LanguageServerConstants.DefaultPath;
+  const configuredPath = ifNullOrEmpty(
+    getConfiguredLanguageServerRuntimePath(),
+    LanguageServerConstants.GetDefaultPath(getConfiguredVersion())
+  );
   if(path.isAbsolute(configuredPath)) {
     return configuredPath;
   }
@@ -49,7 +70,7 @@ function getDafnyPlatformSuffix(): string {
 
 function getDafnyDownloadAddress(): string {
   const baseUri = LanguageServerConstants.DownloadBaseUri;
-  const version = LanguageServerConstants.RequiredVersion;
+  const version = getConfiguredVersion();
   const suffix = getDafnyPlatformSuffix();
   return `${baseUri}/v${version}/dafny-${version}-x64-${suffix}.zip`;
 }
@@ -60,14 +81,28 @@ export class DafnyInstaller {
     private readonly statusOutput: OutputChannel
   ) {}
 
-  public static isMinimumRequiredLanguageServer(version: string): boolean {
+  public isLatestKnownLanguageServerOrNewer(version: string): boolean {
     if(version === LanguageServerConstants.UnknownVersion) {
+      this.writeStatus('failed to resolve the installed Dafny version');
       return true;
     }
-    const [ givenMajor, givenMinor ] = version.split('.');
-    const [ requiredMajor, requiredMinor ] = LanguageServerConstants.RequiredVersion.split('.');
-    return givenMajor > requiredMajor
-      || givenMajor === requiredMajor && givenMinor >= requiredMinor;
+    const givenParts = version.split('.');
+    const latestVersion = LanguageServerConstants.LatestVersion;
+    const latestParts = latestVersion.split('.');
+    for(let i = 0; i < Math.min(givenParts.length, latestParts.length); i++) {
+      const given = givenParts[i];
+      const latest = latestParts[i];
+      if(given < latest) {
+        this.writeStatus(`the installed Dafny version is older than the latest: ${version} < ${latestVersion}`);
+        return false;
+      }
+      if(given > latest) {
+        this.writeStatus(`the installed Dafny version is newer than the latest: ${version} > ${latestVersion}`);
+        return true;
+      }
+    }
+    this.writeStatus(`the installed Dafny version is the latest known: ${version} = ${latestVersion}`);
+    return true;
   }
 
   public async install(): Promise<boolean> {
@@ -155,7 +190,10 @@ export class DafnyInstaller {
   }
 
   private getInstallationPath(): Uri {
-    return Utils.joinPath(this.context.extensionUri, ...LanguageServerConstants.ResourceFolder);
+    return Utils.joinPath(
+      this.context.extensionUri,
+      ...LanguageServerConstants.GetResourceFolder(getConfiguredVersion())
+    );
   }
 
   private writeStatus(message: string): void {

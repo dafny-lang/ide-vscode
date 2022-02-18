@@ -7,10 +7,10 @@ import { getVsDocumentPath, toVsRange } from '../tools/vscode';
 
 const GhostDecoration: DecorationRenderOptions = {
   dark: {
-    backgroundColor: '#323232'
+    backgroundColor: '#64646480'
   },
   light: {
-    backgroundColor: '#f2f2f2'
+    backgroundColor: '#79797980'
   }
 };
 
