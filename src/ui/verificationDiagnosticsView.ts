@@ -1,10 +1,9 @@
 /* eslint-disable max-depth */
-import { commands, DecorationOptions, Range, window, ExtensionContext, workspace, TextEditor, languages, Hover, TextDocument, Selection, CodeActionContext, ProviderResult, Command, CodeAction, CodeActionKind, WorkspaceEdit, Position } from 'vscode';
+import { commands, DecorationOptions, Range, window, ExtensionContext, workspace, TextEditor, languages, Hover, TextDocument, Selection, CodeActionContext, ProviderResult, Command, CodeAction, CodeActionKind, WorkspaceEdit, Position, TextEditorDecorationType } from 'vscode';
 import { CancellationToken, Diagnostic, Disposable } from 'vscode-languageclient';
 import { LanguageConstants } from '../constants';
 
 import { IVerificationDiagnosticsParams } from '../language/api/verificationDiagnostics';
-import { IVerificationIntermediateParams } from '../language/api/verificationIntermediate';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath, toVsRange } from '../tools/vscode';
 
@@ -22,44 +21,88 @@ function rangeOf(r: any): Range {
     new Position(r.end.line, r.end.character));
 }
 
+interface DecorationSet {
+  error: TextEditorDecorationType;
+  errorObsolete: TextEditorDecorationType;
+  errorPending: TextEditorDecorationType;
+  errorRange: TextEditorDecorationType;
+  errorRangeObsolete: TextEditorDecorationType;
+  errorRangePending: TextEditorDecorationType;
+  verified: TextEditorDecorationType;
+  pending: TextEditorDecorationType;
+  obsolete: TextEditorDecorationType;
+}
+
+interface DecorationSetRanges {
+  error: Range[];
+  errorObsolete: Range[];
+  errorPending: Range[];
+  errorRange: Range[];
+  errorRangeObsolete: Range[];
+  errorRangePending: Range[];
+  verified: Range[];
+  pending: Range[];
+  obsolete: Range[];
+}
+interface LinearVerificationDiagnostics extends DecorationSetRanges {
+  errorGraph: ErrorGraph;
+}
+
 export default class VerificationDiagnosticsView {
-  private errorDecoration: any;
-  private errorsRelatedDecoration: any;
-  private verifiedDecoration: any;
-  private relatedDecorations: any;
-  private errorsRelatedPathDecoration: any;
-  private textEditorWatcher?: Disposable;
+  private readonly normalDecorations: DecorationSet;
+  private readonly grayedeDecorations: DecorationSet;
+  private readonly relatedDecorations: TextEditorDecorationType;
+  private readonly textEditorWatcher?: Disposable;
 
-  private readonly dataByDocument = new Map<string, { errors: Range[], verified: Range[], errorGraph: ErrorGraph }>();
+  private readonly dataByDocument = new Map<string, LinearVerificationDiagnostics>();
 
-  private constructor() {}
+  private constructor(context: ExtensionContext) {
+    function iconOf(path: string): TextEditorDecorationType {
+      let icon = context.asAbsolutePath(path);
+      return window.createTextEditorDecorationType({
+        isWholeLine: true,
+        rangeBehavior: 1,
+        gutterIconPath: icon
+      });
+    }
+    this.normalDecorations = {
+      error: iconOf('images/error.png'),
+      errorObsolete: iconOf('images/error-obsolete.png'),
+      errorPending: iconOf('images/error-pending.png'),
+      errorRange: iconOf('images/error-range.png'),
+      errorRangeObsolete: iconOf('images/error-range-obsolete.png'),
+      errorRangePending: iconOf('images/error-range-pending.png'),
+      verified: iconOf('images/verified.png'),
+      pending: iconOf('images/pending.png'),
+      obsolete: iconOf('images/obsolete.png')
+    };
+    this.grayedeDecorations = {
+      error: iconOf('images/error-gray.png'),
+      errorObsolete: iconOf('images/error-obsolete-gray.png'),
+      errorPending: iconOf('images/error-pending-gray.png'),
+      errorRange: iconOf('images/error-range-gray.png'),
+      errorRangeObsolete: iconOf('images/error-range-obsolete-gray.png'),
+      errorRangePending: iconOf('images/error-range-pending-gray.png'),
+      verified: iconOf('images/verified-gray.png'),
+      pending: iconOf('images/pending.png'),
+      obsolete: iconOf('images/obsolete.png')
+    };
+    // For dynamic error highlighting
+    this.relatedDecorations = window.createTextEditorDecorationType({
+      isWholeLine: false,
+      rangeBehavior: 1,
+      outline: '#fe536a 2px solid'
+    });
+  }
 
   public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): VerificationDiagnosticsView {
-    const instance = new VerificationDiagnosticsView();
+    const instance = new VerificationDiagnosticsView(context);
     context.subscriptions.push(
       workspace.onDidCloseTextDocument(document => instance.clearVerificationDiagnostics(document.uri.toString())),
       window.onDidChangeActiveTextEditor(editor => instance.refreshDisplayedVerificationDiagnostics(editor)),
       languageClient.onVerificationDiagnostics(params => instance.updateVerificationDiagnostics(params))
     );
-    const errorIcon = context.asAbsolutePath('images/error.png');
-    const errorPathIcon = context.asAbsolutePath('images/error-range.png');
-    const verifiedIcon = context.asAbsolutePath('images/verified.png');
-    const errorPathWayIcon = context.asAbsolutePath('images/error-range-pending.png');
-    const getDecoration = (icon: string) => window.createTextEditorDecorationType({
-      isWholeLine: true,
-      rangeBehavior: 1,
-      gutterIconPath: icon
-    });
-    instance.errorDecoration = getDecoration(errorIcon);
-    instance.errorsRelatedDecoration = getDecoration(errorPathIcon);
-    instance.verifiedDecoration = getDecoration(verifiedIcon);
-    instance.errorsRelatedPathDecoration = getDecoration(errorPathWayIcon);
-    instance.relatedDecorations = window.createTextEditorDecorationType({
-      isWholeLine: false,
-      rangeBehavior: 1,
-      outline: '#fe536a 2px solid'
-    });
-    instance.textEditorWatcher = window.onDidChangeTextEditorSelection((e) => instance.onTextChange(e, null));
+    //instance.textEditorWatcher = window.onDidChangeTextEditorSelection((e) => instance.onTextChange(e, null));
     /*languages.registerHoverProvider(LanguageConstants.Id, {
       provideHover(document, position, token) {
         instance.onTextChange(position.line, token);
@@ -67,7 +110,8 @@ export default class VerificationDiagnosticsView {
         //return new Hover('I am a hover!');
       }
     });*/
-    languages.registerCodeActionsProvider(LanguageConstants.Id, instance);
+    // Quick code fix
+    //languages.registerCodeActionsProvider(LanguageConstants.Id, instance);
     return instance;
   }
 
@@ -225,8 +269,18 @@ export default class VerificationDiagnosticsView {
       return;
     }
 
-    editor.setDecorations(this.verifiedDecoration, data.verified);
-    editor.setDecorations(this.errorDecoration, data.errors);
+    // Take the normal one or the grayed one if parsing errors
+    const decorationSet: DecorationSet = this.normalDecorations;
+
+    editor.setDecorations(decorationSet.error, data.error);
+    editor.setDecorations(decorationSet.errorObsolete, data.errorObsolete);
+    editor.setDecorations(decorationSet.errorPending, data.errorPending);
+    editor.setDecorations(decorationSet.errorRange, data.errorRange);
+    editor.setDecorations(decorationSet.errorRangeObsolete, data.errorRangeObsolete);
+    editor.setDecorations(decorationSet.errorRangePending, data.errorRangePending);
+    editor.setDecorations(decorationSet.verified, data.verified);
+    editor.setDecorations(decorationSet.pending, data.pending);
+    editor.setDecorations(decorationSet.obsolete, data.obsolete);
   }
 
   private clearVerificationDiagnostics(documentPath: string): void {
@@ -265,7 +319,9 @@ export default class VerificationDiagnosticsView {
   private updateVerificationDiagnostics(params: IVerificationDiagnosticsParams): void {
     const documentPath = getVsDocumentPath(params);
     this.clearVerificationDiagnostics(documentPath);
-    const diagnostics = params.diagnostics;
+
+    /*
+    //const diagnostics = params.diagnostics;
     const verified: Range[] = params.verified.map(rangeOf);
     const unverified: Range[] = params.unverified.map(rangeOf);
     const errorGraph: ErrorGraph = {
@@ -303,9 +359,45 @@ export default class VerificationDiagnosticsView {
       } else {
         errors.push(range);
       }
+    }*/
+    const lineDiagnostics = params.perLineDiagnostic;
+
+    var previousLineDiagnostic = -1;
+    var initialDiagnosticLine = -1;
+    let error: Range[] = [], errorObsolete: Range[] = [], errorPending: Range[] = [];
+    let errorRange: Range[] = [], errorRangeObsolete: Range[] = [], errorRangePending: Range[] = [];
+    let verified: Range[] = [];
+    let unknown: Range[] = [];
+    let obsolete: Range[] = [];
+    let pending: Range[] = [];
+    let ranges = [unknown, obsolete, pending, verified, errorRangeObsolete, errorRangePending, errorRange, errorObsolete, errorPending, error];
+    // <= so that we add a virtual final line to commit the last range.
+    for(var line = 0; line <= lineDiagnostics.length; line++) {
+      const lineDiagnostic = line == lineDiagnostics.length ? -1 : lineDiagnostics[line];
+      if(lineDiagnostic != previousLineDiagnostic) {
+        if(previousLineDiagnostic != -1) { // Never assigned before
+          let range = new Range(initialDiagnosticLine, 1, line - 1, 1);
+          ranges[previousLineDiagnostic].push(range);
+        } else {
+          previousLineDiagnostic = lineDiagnostic;
+          initialDiagnosticLine = line;
+        }
+      } else {
+        // Just continue
+      }
     }
 
-    this.dataByDocument.set(documentPath, { errors, verified, errorGraph });
+    this.dataByDocument.set(documentPath, {
+      error: error;
+      errorObsolete: errorObsolete;
+      errorPending: errorPending;
+      errorRange: errorRange;
+      errorRangeObsolete: errorRangeObsolete;
+      errorRangePending: errorRangePending;
+      verified: verified;
+      pending: pending;
+      obsolete: obsolete,
+      errorGraph: {fixableErrors:{}}});
     this.refreshDisplayedVerificationDiagnostics(window.activeTextEditor);
   }
 
