@@ -1,6 +1,17 @@
+// Issue #136
+lemma Mylemma()
+{
+  (fizbuz - gr) as real / ((barProblematic - foo) as real) <= MyClass.Mymeth(i) < (bar) as real / ((onelement) as real);
+  //                                                  ^^^^^^^^^^^^^^^^^^^^^^should not highlight everything the same color
+}
+
+method nestedCalls() {
+  var x := functionCall1(functionCall2())
+}       // ^^^^^^^^^^^^^ ^^^^^^^^^^^^^ function calls
+
 function test() {
-  set x | 0 < x < 10 :: predicate(x)
-}//                     ^^^^^^^^^ should be a function call, not a type
+  set x | 0 < x < 10 :: pred(x)
+}//                     ^^^^ should be a function call, not a type
 
 // Issue #121: Generic and Regular should be highlighted
 // with the same color
