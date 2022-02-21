@@ -510,10 +510,10 @@
 					<key>include</key>
 					<string>#comments-inline</string>
 				</dict>
-				<dict>
+				<!--dict> Turn on if we want to support nested method calls
 					<key>include</key>
 					<string>$self</string>
-				</dict>
+				</dict-->
 				<dict>
 					<key>include</key>
 					<string>#strings</string>
