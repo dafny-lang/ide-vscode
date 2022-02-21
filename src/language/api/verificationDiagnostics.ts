@@ -52,7 +52,7 @@ export enum LineVerificationStatus {
 
 export enum NodeVerificationStatus {
   Unknown = 0,
-  Schedulded = 1,
+  Scheduled = 1,
   Verifying = 2,
   VerifiedObsolete = 3,
   VerifiedVerifying = 4,
