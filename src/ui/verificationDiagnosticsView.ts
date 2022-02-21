@@ -24,25 +24,32 @@ function rangeOf(r: any): Range {
 interface DecorationSet {
   error: TextEditorDecorationType;
   errorObsolete: TextEditorDecorationType;
-  errorPending: TextEditorDecorationType;
+  errorVerifying: TextEditorDecorationType;
   errorRange: TextEditorDecorationType;
   errorRangeObsolete: TextEditorDecorationType;
-  errorRangePending: TextEditorDecorationType;
+  errorRangeVerifying: TextEditorDecorationType;
+  verifiedObsolete: TextEditorDecorationType;
+  verifiedVerifying: TextEditorDecorationType;
   verified: TextEditorDecorationType;
-  pending: TextEditorDecorationType;
-  obsolete: TextEditorDecorationType;
+  verifying: TextEditorDecorationType;
+  verifying2: TextEditorDecorationType;
+  scheduled: TextEditorDecorationType;
+  resolutionError: TextEditorDecorationType;
 }
 
 interface DecorationSetRanges {
   error: Range[];
   errorObsolete: Range[];
-  errorPending: Range[];
+  errorVerifying: Range[];
   errorRange: Range[];
   errorRangeObsolete: Range[];
-  errorRangePending: Range[];
+  errorRangeVerifying: Range[];
   verified: Range[];
-  pending: Range[];
-  obsolete: Range[];
+  verifying: Range[];
+  verifiedObsolete: Range[];
+  verifiedVerifying: Range[];
+  scheduled: Range[];
+  resolutionError: Range[];
 }
 interface LinearVerificationDiagnostics extends DecorationSetRanges {
   errorGraph: ErrorGraph;
@@ -55,6 +62,25 @@ export default class VerificationDiagnosticsView {
   private readonly textEditorWatcher?: Disposable;
 
   private readonly dataByDocument = new Map<string, LinearVerificationDiagnostics>();
+  private animationCallback: unknown = 0;
+  // Alternates between 1 and 2
+  private animationFrame: number = 1;
+
+  private static readonly emptyLinearVerificationDiagnostics: LinearVerificationDiagnostics = {
+    errorGraph: { fixableErrors: {} },
+    error: [],
+    errorObsolete: [],
+    errorVerifying: [],
+    errorRange: [],
+    errorRangeObsolete: [],
+    errorRangeVerifying: [],
+    verified: [],
+    verifying: [],
+    scheduled: [],
+    resolutionError: [],
+    verifiedObsolete: [],
+    verifiedVerifying: []
+  };
 
   private constructor(context: ExtensionContext) {
     function iconOf(path: string): TextEditorDecorationType {
@@ -68,24 +94,32 @@ export default class VerificationDiagnosticsView {
     this.normalDecorations = {
       error: iconOf('images/error.png'),
       errorObsolete: iconOf('images/error-obsolete.png'),
-      errorPending: iconOf('images/error-pending.png'),
+      errorVerifying: iconOf('images/error-verifying.png'),
       errorRange: iconOf('images/error-range.png'),
       errorRangeObsolete: iconOf('images/error-range-obsolete.png'),
-      errorRangePending: iconOf('images/error-range-pending.png'),
+      errorRangeVerifying: iconOf('images/error-range-verifying.png'),
+      verifiedObsolete: iconOf('images/verified.png'),
+      verifiedVerifying: iconOf('images/verified.png'),
       verified: iconOf('images/verified.png'),
-      pending: iconOf('images/pending.png'),
-      obsolete: iconOf('images/obsolete.png')
+      verifying: iconOf('images/verifying.png'),
+      verifying2: iconOf('images/verifying-2.png'),
+      scheduled: iconOf('images/obsolete.png'),
+      resolutionError: iconOf('images/resolution-error.png')
     };
     this.grayedeDecorations = {
       error: iconOf('images/error-gray.png'),
       errorObsolete: iconOf('images/error-obsolete-gray.png'),
-      errorPending: iconOf('images/error-pending-gray.png'),
+      errorVerifying: iconOf('images/error-verifying-gray.png'),
       errorRange: iconOf('images/error-range-gray.png'),
       errorRangeObsolete: iconOf('images/error-range-obsolete-gray.png'),
-      errorRangePending: iconOf('images/error-range-pending-gray.png'),
+      errorRangeVerifying: iconOf('images/error-range-verifying-gray.png'),
+      verifiedObsolete: iconOf('images/verified-gray.png'),
+      verifiedVerifying: iconOf('images/verified-gray.png'),
       verified: iconOf('images/verified-gray.png'),
-      pending: iconOf('images/pending.png'),
-      obsolete: iconOf('images/obsolete.png')
+      verifying: iconOf('images/verifying.png'),
+      verifying2: iconOf('images/verifying-2.png'),
+      scheduled: iconOf('images/obsolete.png'),
+      resolutionError: iconOf('images/resolution-error.png')
     };
     // For dynamic error highlighting
     this.relatedDecorations = window.createTextEditorDecorationType({
@@ -260,28 +294,41 @@ export default class VerificationDiagnosticsView {
     console.log(window.activeTextEditor?.selections);
   }
 */
-  public refreshDisplayedVerificationDiagnostics(editor?: TextEditor): void {
+
+  public refreshDisplayedVerificationDiagnostics(editor?: TextEditor, animateOnly: boolean = false): void {
     if(editor == null) {
       return;
     }
     const documentPath = editor.document.uri.toString();
-    const data = this.dataByDocument.get(documentPath);
-    if(data == null) {
+    const originalData = this.dataByDocument.get(documentPath);
+    if(originalData == null) {
       return;
     }
+    const resolutionFailed = originalData.resolutionError.length > 0;
+    const decorationSets: { decorationSet: DecorationSet, active: boolean }[]
+      = [
+        { decorationSet: this.normalDecorations, active: !resolutionFailed },
+        { decorationSet: this.grayedeDecorations, active: resolutionFailed } ];
 
-    // Take the normal one or the grayed one if parsing errors
-    const decorationSet: DecorationSet = this.normalDecorations;
-
-    editor.setDecorations(decorationSet.error, data.error);
-    editor.setDecorations(decorationSet.errorObsolete, data.errorObsolete);
-    editor.setDecorations(decorationSet.errorPending, data.errorPending);
-    editor.setDecorations(decorationSet.errorRange, data.errorRange);
-    editor.setDecorations(decorationSet.errorRangeObsolete, data.errorRangeObsolete);
-    editor.setDecorations(decorationSet.errorRangePending, data.errorRangePending);
-    editor.setDecorations(decorationSet.verified, data.verified);
-    editor.setDecorations(decorationSet.pending, data.pending);
-    editor.setDecorations(decorationSet.obsolete, data.obsolete);
+    for(const { decorationSet, active } of decorationSets) {
+      const data: LinearVerificationDiagnostics = active ? originalData : VerificationDiagnosticsView.emptyLinearVerificationDiagnostics;
+      editor.setDecorations(decorationSet.verifying, this.animationFrame === 2 ? [] : data.verifying);
+      editor.setDecorations(decorationSet.verifying2, this.animationFrame === 2 ? data.verifying : []);
+      if(animateOnly) {
+        continue;
+      }
+      editor.setDecorations(decorationSet.error, data.error);
+      editor.setDecorations(decorationSet.errorObsolete, data.errorObsolete);
+      editor.setDecorations(decorationSet.errorVerifying, data.errorVerifying);
+      editor.setDecorations(decorationSet.errorRange, data.errorRange);
+      editor.setDecorations(decorationSet.errorRangeObsolete, data.errorRangeObsolete);
+      editor.setDecorations(decorationSet.errorRangeVerifying, data.errorRangeVerifying);
+      editor.setDecorations(decorationSet.verifiedObsolete, data.verifiedObsolete);
+      editor.setDecorations(decorationSet.verifiedVerifying, data.verifiedVerifying);
+      editor.setDecorations(decorationSet.verified, data.verified);
+      editor.setDecorations(decorationSet.scheduled, data.scheduled);
+      editor.setDecorations(decorationSet.resolutionError, data.resolutionError);
+    }
   }
 
   private clearVerificationDiagnostics(documentPath: string): void {
@@ -365,13 +412,13 @@ export default class VerificationDiagnosticsView {
 
     let previousLineDiagnostic = -1;
     let initialDiagnosticLine = -1;
-    const error: Range[] = [], errorObsolete: Range[] = [], errorPending: Range[] = [];
-    const errorRange: Range[] = [], errorRangeObsolete: Range[] = [], errorRangePending: Range[] = [];
-    const verified: Range[] = [];
-    const unknown: Range[] = [];
-    const obsolete: Range[] = [];
-    const pending: Range[] = [];
-    const ranges = [ unknown, obsolete, pending, verified, errorRangeObsolete, errorRangePending, errorRange, errorObsolete, errorPending, error ];
+    const error: Range[] = [], errorObsolete: Range[] = [], errorVerifying: Range[] = [];
+    const errorRange: Range[] = [], errorRangeObsolete: Range[] = [], errorRangeVerifying: Range[] = [];
+    const verified: Range[] = [], unknown: Range[] = [], scheduled: Range[] = [], verifying: Range[] = [];
+    const resolution: Range[] = [], verifiedVerifying: Range[] = [], verifiedObsolete: Range[] = [];
+    const ranges = [
+      unknown, scheduled, verifying, verifiedObsolete, verifiedVerifying, verified, errorRangeObsolete,
+      errorRangeVerifying, errorRange, errorObsolete, errorVerifying, error, resolution ];
     // <= so that we add a virtual final line to commit the last range.
     for(let line = 0; line <= lineDiagnostics.length; line++) {
       const lineDiagnostic = line === lineDiagnostics.length ? -1 : lineDiagnostics[line];
@@ -390,15 +437,25 @@ export default class VerificationDiagnosticsView {
     this.dataByDocument.set(documentPath, {
       error: error,
       errorObsolete: errorObsolete,
-      errorPending: errorPending,
+      errorVerifying: errorVerifying,
       errorRange: errorRange,
       errorRangeObsolete: errorRangeObsolete,
-      errorRangePending: errorRangePending,
+      errorRangeVerifying: errorRangeVerifying,
       verified: verified,
-      pending: pending,
-      obsolete: obsolete,
+      verifying: verifying,
+      verifiedObsolete: verifiedObsolete,
+      verifiedVerifying: verifiedVerifying,
+      scheduled: scheduled,
+      resolutionError: resolution,
       errorGraph: { fixableErrors:{} } });
+    clearInterval(this.animationCallback as any);
     this.refreshDisplayedVerificationDiagnostics(window.activeTextEditor);
+    if(verifying.length > 0) {
+      this.animationCallback = setInterval(() => {
+        this.animationFrame = 3 - this.animationFrame;
+        this.refreshDisplayedVerificationDiagnostics(window.activeTextEditor, true);
+      }, 200);
+    }
   }
 
   private static createDecorator(diagnostic: Diagnostic): DecorationOptions {

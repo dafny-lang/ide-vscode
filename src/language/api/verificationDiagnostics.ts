@@ -7,6 +7,7 @@ export interface IVerificationDiagnosticsParams {
   diagnostics: Diagnostic[];
   perNodeDiagnostic: NodeDiagnostic[];// of size linesCount
   linesCount: integer;
+  diagnosticsAreResolutionErrors: boolean;
   perLineDiagnostic: LineVerificationStatus[];
 }
 
@@ -30,27 +31,33 @@ export enum LineVerificationStatus {
   Unknown = 0,
   // For first-time computation not actively computing but soon
   // (scheduledComputation)
-  Obsolete = 1,
+  Scheduled = 1,
   // For first-time computations, actively computing
-  Pending = 2,
+  Verifying = 2,
+  VerifiedObsolete = 3,
+  VerifiedVerifying = 4,
   // Also applicable for empty spaces if they are not surrounded by errors.
-  Verified = 3,
+  Verified = 5,
   // For containers of other diagnostics nodes (e.g. methods)
-  ErrorRangeObsolete = 4,
-  ErrorRangePending = 5,
-  ErrorRange = 6,
+  ErrorRangeObsolete = 6,
+  ErrorRangePending = 7,
+  ErrorRange = 8,
   // For specific lines which have errors on it.
-  ErrorObsolete = 7,
-  ErrorPending = 8,
-  Error = 9
+  ErrorObsolete = 9,
+  ErrorVerifying = 10,
+  Error = 11,
+  // For lines containing resolution or parse errors
+  ResolutionError = 12
 }
 
 export enum NodeVerificationStatus {
   Unknown = 0,
-  Obsolete = 1,
-  Pending = 2,
-  Verified = 3,
-  ErrorObsolete = 4,
-  ErrorPending = 5,
-  Error = 6
+  Schedulded = 1,
+  Verifying = 2,
+  VerifiedObsolete = 3,
+  VerifiedVerifying = 4,
+  Verified = 5,
+  ErrorObsolete = 6,
+  ErrorVerifying = 7,
+  Error = 8
 }
