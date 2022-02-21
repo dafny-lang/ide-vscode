@@ -5,7 +5,6 @@ import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath } from '../tools/vscode';
 import { enableOnlyForDafnyDocuments } from '../tools/visibility';
 import { Messages } from './messages';
-import { IVerificationIntermediateParams } from '../language/api/verificationIntermediate';
 import { ENGINE_METHOD_PKEY_ASN1_METHS } from 'constants';
 
 const StatusBarPriority = 10;
@@ -43,7 +42,6 @@ export default class CompilationStatusView {
       languageClient.onCompilationStatus(params => view.compilationStatusChanged(params)),
       languageClient.onVerificationStarted(params => view.verificationStarted(params)),
       languageClient.onVerificationCompleted(params => view.verificationCompleted(params)),
-      languageClient.onVerificationIntermediate(params => view.verificationIntermediate(params)),
       workspace.onDidCloseTextDocument(document => view.documentClosed(document)),
       workspace.onDidChangeTextDocument(() => view.updateActiveDocumentStatus()),
       window.onDidChangeActiveTextEditor(() => view.updateActiveDocumentStatus()),
@@ -70,28 +68,6 @@ export default class CompilationStatusView {
     this.documentStatusMessages.set(
       getVsDocumentPath(params),
       Messages.CompilationStatus.Verifying
-    );
-    this.updateActiveDocumentStatus();
-  }
-
-  
-  public verificationIntermediate(params: IVerificationIntermediateParams): void {
-    var documentVSPath = getVsDocumentPath(params);
-    var currentMessage = this.documentStatusMessages.get(documentVSPath)
-    if(currentMessage == Messages.CompilationStatus.VerificationFailed ||
-       currentMessage == Messages.CompilationStatus.VerificationSucceeded) {
-      return;
-    }
-    var method = params.methodNameBeingVerified;
-    if(method.startsWith("_module.")) {
-      method= method.substring(8);
-    }
-    if(method.startsWith("__default.")) {
-      method = method.substring(10);
-    }
-    this.documentStatusMessages.set(
-      documentVSPath,
-      Messages.CompilationStatus.Verifying + method
     );
     this.updateActiveDocumentStatus();
   }
