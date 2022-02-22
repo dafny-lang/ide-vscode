@@ -25,11 +25,14 @@ interface DecorationSet {
   error: TextEditorDecorationType;
   errorObsolete: TextEditorDecorationType;
   errorVerifying: TextEditorDecorationType;
+  errorVerifying2: TextEditorDecorationType;
   errorRange: TextEditorDecorationType;
   errorRangeObsolete: TextEditorDecorationType;
   errorRangeVerifying: TextEditorDecorationType;
+  errorRangeVerifying2: TextEditorDecorationType;
   verifiedObsolete: TextEditorDecorationType;
   verifiedVerifying: TextEditorDecorationType;
+  verifiedVerifying2: TextEditorDecorationType;
   verified: TextEditorDecorationType;
   verifying: TextEditorDecorationType;
   verifying2: TextEditorDecorationType;
@@ -63,8 +66,8 @@ export default class VerificationDiagnosticsView {
 
   private readonly dataByDocument = new Map<string, LinearVerificationDiagnostics>();
   private animationCallback: unknown = 0;
-  // Alternates between 1 and 2
-  private animationFrame: number = 1;
+  // Alternates between 0 and 1
+  private animationFrame: number = 0;
 
   private static readonly emptyLinearVerificationDiagnostics: LinearVerificationDiagnostics = {
     errorGraph: { fixableErrors: {} },
@@ -95,11 +98,14 @@ export default class VerificationDiagnosticsView {
       error: iconOf('images/error.png'),
       errorObsolete: iconOf('images/error-obsolete.png'),
       errorVerifying: iconOf('images/error-verifying.png'),
+      errorVerifying2: iconOf('images/error-verifying-2.png'),
       errorRange: iconOf('images/error-range.png'),
       errorRangeObsolete: iconOf('images/error-range-obsolete.png'),
       errorRangeVerifying: iconOf('images/error-range-verifying.png'),
-      verifiedObsolete: iconOf('images/verified.png'),
-      verifiedVerifying: iconOf('images/verified.png'),
+      errorRangeVerifying2: iconOf('images/error-range-verifying-2.png'),
+      verifiedObsolete: iconOf('images/verified-obsolete.png'),
+      verifiedVerifying: iconOf('images/verified-verifying.png'),
+      verifiedVerifying2: iconOf('images/verified-verifying-2.png'),
       verified: iconOf('images/verified.png'),
       verifying: iconOf('images/verifying.png'),
       verifying2: iconOf('images/verifying-2.png'),
@@ -110,11 +116,14 @@ export default class VerificationDiagnosticsView {
       error: iconOf('images/error-gray.png'),
       errorObsolete: iconOf('images/error-obsolete-gray.png'),
       errorVerifying: iconOf('images/error-verifying-gray.png'),
+      errorVerifying2: iconOf('images/error-verifying-2.png'),
       errorRange: iconOf('images/error-range-gray.png'),
       errorRangeObsolete: iconOf('images/error-range-obsolete-gray.png'),
       errorRangeVerifying: iconOf('images/error-range-verifying-gray.png'),
+      errorRangeVerifying2: iconOf('images/error-range-verifying-2.png'),
       verifiedObsolete: iconOf('images/verified-gray.png'),
-      verifiedVerifying: iconOf('images/verified-gray.png'),
+      verifiedVerifying: iconOf('images/verified-verifying.png'),
+      verifiedVerifying2: iconOf('images/verified-verifying-2.png'),
       verified: iconOf('images/verified-gray.png'),
       verifying: iconOf('images/verifying.png'),
       verifying2: iconOf('images/verifying-2.png'),
@@ -294,6 +303,11 @@ export default class VerificationDiagnosticsView {
     console.log(window.activeTextEditor?.selections);
   }
 */
+  private animateIcon(editor: TextEditor, iconFrames: TextEditorDecorationType[], ranges: Range[]) {
+    for(let i = 0; i < iconFrames.length; i++) {
+      editor.setDecorations(iconFrames[i], this.animationFrame === i ? ranges : []);
+    }
+  }
 
   public refreshDisplayedVerificationDiagnostics(editor?: TextEditor, animateOnly: boolean = false): void {
     if(editor == null) {
@@ -312,19 +326,18 @@ export default class VerificationDiagnosticsView {
 
     for(const { decorationSet, active } of decorationSets) {
       const data: LinearVerificationDiagnostics = active ? originalData : VerificationDiagnosticsView.emptyLinearVerificationDiagnostics;
-      editor.setDecorations(decorationSet.verifying, this.animationFrame === 2 ? [] : data.verifying);
-      editor.setDecorations(decorationSet.verifying2, this.animationFrame === 2 ? data.verifying : []);
+      this.animateIcon(editor, [ decorationSet.verifying, decorationSet.verifying2 ], data.verifying);
+      this.animateIcon(editor, [ decorationSet.errorVerifying, decorationSet.errorVerifying2 ], data.errorVerifying);
+      this.animateIcon(editor, [ decorationSet.verifiedVerifying, decorationSet.verifiedVerifying2 ], data.verifiedVerifying);
+      this.animateIcon(editor, [ decorationSet.errorRangeVerifying, decorationSet.errorRangeVerifying2 ], data.errorRangeVerifying);
       if(animateOnly) {
         continue;
       }
       editor.setDecorations(decorationSet.error, data.error);
       editor.setDecorations(decorationSet.errorObsolete, data.errorObsolete);
-      editor.setDecorations(decorationSet.errorVerifying, data.errorVerifying);
       editor.setDecorations(decorationSet.errorRange, data.errorRange);
       editor.setDecorations(decorationSet.errorRangeObsolete, data.errorRangeObsolete);
-      editor.setDecorations(decorationSet.errorRangeVerifying, data.errorRangeVerifying);
       editor.setDecorations(decorationSet.verifiedObsolete, data.verifiedObsolete);
-      editor.setDecorations(decorationSet.verifiedVerifying, data.verifiedVerifying);
       editor.setDecorations(decorationSet.verified, data.verified);
       editor.setDecorations(decorationSet.scheduled, data.scheduled);
       editor.setDecorations(decorationSet.resolutionError, data.resolutionError);
@@ -450,9 +463,9 @@ export default class VerificationDiagnosticsView {
       errorGraph: { fixableErrors:{} } });
     clearInterval(this.animationCallback as any);
     this.refreshDisplayedVerificationDiagnostics(window.activeTextEditor);
-    if(verifying.length > 0) {
+    if(verifying.length > 0 || verifiedVerifying.length > 0 || errorVerifying.length > 0 || errorRangeVerifying.length > 0) {
       this.animationCallback = setInterval(() => {
-        this.animationFrame = 3 - this.animationFrame;
+        this.animationFrame = 1 - this.animationFrame;
         this.refreshDisplayedVerificationDiagnostics(window.activeTextEditor, true);
       }, 200);
     }
