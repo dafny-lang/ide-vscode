@@ -1,5 +1,5 @@
 /* eslint-disable max-depth */
-import { /*commands, */DecorationOptions, Range, window, ExtensionContext, workspace, TextEditor, /*languages, Hover, TextDocument, Selection, CodeActionContext, ProviderResult, Command, CodeAction, CodeActionKind, WorkspaceEdit, Position,*/ TextEditorDecorationType } from 'vscode';
+import { /*commands, */DecorationOptions, Range, window, ExtensionContext, workspace, TextEditor, /*languages, Hover, TextDocument, Selection, CodeActionContext, ProviderResult, Command, CodeAction, CodeActionKind, WorkspaceEdit, Position,*/ TextEditorDecorationType, TextEditorSelectionChangeEvent, Position } from 'vscode';
 import { /*CancellationToken, */Diagnostic, Disposable } from 'vscode-languageclient';
 //import { LanguageConstants } from '../constants';
 
@@ -9,9 +9,6 @@ import { getVsDocumentPath, toVsRange } from '../tools/vscode';
 
 interface ErrorGraph {
   [line: number]: Range [];
-  fixableErrors: {
-    [line: number]: Range
-  };
 }
 
 /*// TODO: Find a way to not depend on this function
@@ -54,7 +51,7 @@ export default class VerificationDiagnosticsView {
   private animationFrame: number = 0;
 
   private static readonly emptyLinearVerificationDiagnostics: LinearVerificationDiagnostics = {
-    errorGraph: { fixableErrors: {} },
+    errorGraph: { },
     decorations: Array(LineVerificationStatus.NumberOfLineDiagnostics).fill([])
   };
 
@@ -122,6 +119,7 @@ export default class VerificationDiagnosticsView {
       rangeBehavior: 1,
       outline: '#fe536a 2px solid'
     });
+    this.textEditorWatcher = window.onDidChangeTextEditorSelection((e) => this.onTextChange(e));
   }
 
   public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): VerificationDiagnosticsView {
@@ -131,7 +129,6 @@ export default class VerificationDiagnosticsView {
       window.onDidChangeActiveTextEditor(editor => instance.refreshDisplayedVerificationDiagnostics(editor)),
       languageClient.onVerificationDiagnostics(params => instance.updateVerificationDiagnostics(params))
     );
-    //instance.textEditorWatcher = window.onDidChangeTextEditorSelection((e) => instance.onTextChange(e, null));
     /*languages.registerHoverProvider(LanguageConstants.Id, {
       provideHover(document, position, token) {
         instance.onTextChange(position.line, token);
@@ -233,8 +230,9 @@ export default class VerificationDiagnosticsView {
     return codeActions;
   }
 */
-  /*
-  public onTextChange(e: any, token: CancellationToken | null = null): void {
+  /////////////////// Gutter rendering ///////////////////
+
+  public onTextChange(e: TextEditorSelectionChangeEvent): void {
     const editor: TextEditor | undefined = window.activeTextEditor;
     if(editor == null) {
       return;
@@ -245,50 +243,17 @@ export default class VerificationDiagnosticsView {
       return;
     }
     const errorGraph = data.errorGraph;
-    const line = typeof e === 'number' ? e : e.selections[0]._start._line;
+    const line = typeof e === 'number' ? e : e.selections[0].start.line;
     if(errorGraph[line] == null) {
       editor.setDecorations(this.relatedDecorations, []);
-      editor.setDecorations(this.errorsRelatedDecoration, []);
-      editor.setDecorations(this.errorDecoration, data.errors);
-      editor.setDecorations(this.errorsRelatedPathDecoration, []);
       return;
     }
-    let filteredErrors: Range[] = [];
-    const rangePaths = [];
-    let ranges: Range[] = [];
-    try {
-      const maybeStopComputation = <T>(result: T): T => {
-        if(token && token.isCancellationRequested) {
-          throw 'cancelled';
-        } else {
-          return result;
-        }
-      };
-      ranges = errorGraph[line].filter((x: any) => maybeStopComputation(x != null));
-      filteredErrors = data.errors.filter(x =>
-        ranges.every((importantRange: Range) => maybeStopComputation(importantRange.start.line != x.start.line)));
-      const lines = ranges.map((x: any) => x.start.line).concat(line);
-      const minLine = lines.length == 0 ? line : Math.min(...lines);
-      const maxLine = lines.length == 0 ? line : Math.max(...lines);
-      for(var l = minLine; l <= maxLine; l++) {
-        if(ranges.every((importantRange: Range) => importantRange.start.line != l) && l != line) {
-          rangePaths.push(maybeStopComputation(new Range(l, 0, l, 1)));
-        }
-      }
-    } catch(e) {
-      if(e == 'cancelled') return;
-    }
-
+    const ranges: Range[] = errorGraph[line].filter((x: any) => x != null);
     editor.setDecorations(this.relatedDecorations, ranges);
-    editor.setDecorations(this.errorDecoration, filteredErrors);
-    editor.setDecorations(this.errorsRelatedDecoration, ranges);
-    editor.setDecorations(this.errorsRelatedPathDecoration, rangePaths);
-    // If we are on an error or a related error,
-    // Find other corresponding errors and highlight them.
-    console.log('selection', e);
-    console.log(window.activeTextEditor?.selections);
   }
-*/
+
+  /////////////////// Gutter rendering ///////////////////
+
   private animateIcon(editor: TextEditor, iconFrames: TextEditorDecorationType[], ranges: Range[]) {
     for(let i = 0; i < iconFrames.length; i++) {
       editor.setDecorations(iconFrames[i], this.animationFrame === i ? ranges : []);
@@ -338,15 +303,12 @@ export default class VerificationDiagnosticsView {
     return range1.start.line <= range2.end.line && range1.end.line >= range2.start.line;
   }
 
-  private addEntry(errorGraph: ErrorGraph, range1: Range, range2: Range | null, fixable: boolean = false) {
-    if(errorGraph[range1.start.line] === undefined) {
-      errorGraph[range1.start.line] = [];
+  private addEntry(errorGraph: ErrorGraph, line: number, range2: Range | null) {
+    if(errorGraph[line] === undefined) {
+      errorGraph[line] = [];
     }
     if(range2 != null) {
-      errorGraph[range1.start.line].push(range2);
-    }
-    if(fixable) {
-      errorGraph.fixableErrors[range1.start.line] = range1;
+      errorGraph[line].push(range2);
     }
   }
 
@@ -382,11 +344,41 @@ export default class VerificationDiagnosticsView {
     }
     return lineDiagnostics;
   }
+  // TODO: Find a way to not depend on this function
+  private rangeOf(r: any): Range {
+    return new Range(
+      new Position(r.start.line, r.start.character),
+      new Position(r.end.line, r.end.character));
+  }
 
-  private updateVerificationDiagnostics(params: IVerificationDiagnosticsParams): void {
-    const documentPath = getVsDocumentPath(params);
-    const previousValue = this.dataByDocument.get(documentPath);
-    //this.clearVerificationDiagnostics(documentPath);
+  // For every error and related error, returns a mapping from line to affected ranges
+  private getErrorGraph(params: IVerificationDiagnosticsParams): ErrorGraph {
+    const diagnostics: Diagnostic[] = params.diagnostics;
+    const errorGraph: ErrorGraph = {
+    };
+    for(const diagnostic of diagnostics) {
+      const range = this.rangeOf(diagnostic.range);
+      this.addEntry(errorGraph, range.start.line, range);
+      if(Array.isArray(diagnostic.relatedInformation)) {
+        for(const relatedInformation of diagnostic.relatedInformation as any[]) {
+          const location = relatedInformation.location;
+          if(location == null || location.range == null) {
+            continue;
+          }
+          const locationRange = this.rangeOf(location.range);
+          if(params.uri === location.uri) {
+            this.addEntry(errorGraph, range.start.line, locationRange);
+            this.addEntry(errorGraph, locationRange.start.line, range);
+            this.addEntry(errorGraph, locationRange.start.line, locationRange);
+          }
+        }
+      }
+    }
+    return errorGraph;
+  }
+
+  private getRangesOfLineStatus(params: IVerificationDiagnosticsParams): Range[][] {
+    //// Per-line diagnostics
     const lineDiagnostics = this.addCosmetics(params.perLineDiagnostic);
 
     let previousLineDiagnostic = -1;
@@ -410,10 +402,27 @@ export default class VerificationDiagnosticsView {
         // Just continue
       }
     }
+    return ranges;
+  }
+
+  private updateVerificationDiagnostics(params: IVerificationDiagnosticsParams): void {
+    const documentPath = getVsDocumentPath(params);
+    //this.clearVerificationDiagnostics(documentPath);
+
+    const errorGraph = this.getErrorGraph(params);
+    const ranges = this.getRangesOfLineStatus(params);
 
     const newData: LinearVerificationDiagnostics = {
       decorations: ranges,
-      errorGraph: { fixableErrors:{} } };
+      errorGraph: errorGraph };
+
+    this.setDisplayedVerificationDiagnostics(documentPath, newData);
+  }
+
+  // Takes care of delaying the display of verification diagnostics to not interfere with UX.
+  private setDisplayedVerificationDiagnostics(documentPath: string, newData: LinearVerificationDiagnostics) {
+    const previousValue = this.dataByDocument.get(documentPath);
+    const ranges = newData.decorations;
     clearInterval(this.animationCallback as any);
     const mustBeDelayed = (ranges: Range[][], previousDecorations: Range[][]) => (
       (ranges[LineVerificationStatus.ResolutionError].length >= 1
@@ -465,8 +474,14 @@ export default class VerificationDiagnosticsView {
     if(this.textEditorWatcher) {
       this.textEditorWatcher.dispose();
     }
-    /*for(const [ _, { decoration } ] of this.dataByDocument) {
-      decoration.dispose();
-    }*/
+    for(const [ _, decoration ] of this.normalDecorations) {
+      if(decoration === undefined) {
+        continue;
+      } else if(decoration.type === 'static') {
+        decoration.icon.dispose();
+      } else if(decoration.type === 'dynamic') {
+        decoration.icons.forEach(icon => icon.dispose());
+      }
+    }
   }
 }
