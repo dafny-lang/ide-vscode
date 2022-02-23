@@ -391,7 +391,7 @@ export default class VerificationDiagnosticsView {
 
     let previousLineDiagnostic = -1;
     let initialDiagnosticLine = -1;
-    const ranges = Array(LineVerificationStatus.NumberOfLineDiagnostics);
+    const ranges: Range[][] = Array(LineVerificationStatus.NumberOfLineDiagnostics);
     for(let i = 0; i < ranges.length; i++) {
       ranges[i] = [];
     }
@@ -415,7 +415,22 @@ export default class VerificationDiagnosticsView {
       decorations: ranges,
       errorGraph: { fixableErrors:{} } };
     clearInterval(this.animationCallback as any);
-    if(ranges[LineVerificationStatus.ResolutionError].length >= 1 && (previousValue === undefined || previousValue.decorations[LineVerificationStatus.ResolutionError].length === 0)) {
+    const mustBeDelayed = (ranges: Range[][], previousDecorations: Range[][]) => (
+      (ranges[LineVerificationStatus.ResolutionError].length >= 1
+          && previousDecorations[LineVerificationStatus.ResolutionError].length === 0)
+      || ((ranges[LineVerificationStatus.ErrorObsolete].length >= 1
+           || ranges[LineVerificationStatus.VerifiedObsolete].length >= 1
+           || ranges[LineVerificationStatus.ErrorRangeObsolete].length >= 1
+           || ranges[LineVerificationStatus.ErrorRangeStartObsolete].length >= 1
+           || ranges[LineVerificationStatus.ErrorRangeEndObsolete].length >= 1)
+          && ranges[LineVerificationStatus.Verifying].length === 0
+          && ranges[LineVerificationStatus.ErrorVerifying].length === 0
+          && ranges[LineVerificationStatus.ErrorRangeEndVerifying].length === 0
+          && ranges[LineVerificationStatus.ErrorRangeVerifying].length === 0
+          && ranges[LineVerificationStatus.ErrorRangeStartVerifying].length === 0
+          && ranges[LineVerificationStatus.VerifiedVerifying].length === 0)
+    );
+    if(mustBeDelayed(ranges, (previousValue === undefined ? VerificationDiagnosticsView.emptyLinearVerificationDiagnostics : previousValue).decorations)) {
       // Delay for 1 second resolution errors so that we don't interrupt the verification workflow if not necessary.
       this.animationCallback = setTimeout(() => {
         this.dataByDocument.set(documentPath, newData);
