@@ -8,7 +8,7 @@ import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath, toVsRange } from '../tools/vscode';
 
 interface ErrorGraph {
-  [line: number]: Range [];
+  [line: number]: Map<Range, Range[]>;
 }
 
 /*// TODO: Find a way to not depend on this function
@@ -43,6 +43,8 @@ export default class VerificationDiagnosticsView {
   private readonly normalDecorations: DecorationSet;
   private readonly grayedeDecorations: DecorationSet;
   private readonly relatedDecorations: TextEditorDecorationType;
+  private readonly relatedDecorationsPartial: TextEditorDecorationType;
+  private readonly relatedDecorationsPartialActive: TextEditorDecorationType;
   private readonly textEditorWatcher?: Disposable;
 
   private readonly dataByDocument = new Map<string, LinearVerificationDiagnostics>();
@@ -117,7 +119,23 @@ export default class VerificationDiagnosticsView {
     this.relatedDecorations = window.createTextEditorDecorationType({
       isWholeLine: false,
       rangeBehavior: 1,
-      outline: '#fe536a 2px solid'
+      outline: '#fe536aa0 2px solid'
+      // textDecoration: 'underline overline #fe536ac0'
+      // backgroundColor: '#fe536a50'
+    });
+    this.relatedDecorationsPartial = window.createTextEditorDecorationType({
+      isWholeLine: false,
+      rangeBehavior: 1,
+      outline: '#fe536aa0 2px dashed'
+      // textDecoration: 'underline overline #fe536ac0'
+      // backgroundColor: '#fe536a50'
+    });
+    this.relatedDecorationsPartialActive = window.createTextEditorDecorationType({
+      isWholeLine: false,
+      rangeBehavior: 1,
+      outline: '#fe536a 2px dashed'
+      // textDecoration: 'underline overline #fe536ac0'
+      // backgroundColor: '#fe536a50'
     });
     this.textEditorWatcher = window.onDidChangeTextEditorSelection((e) => this.onTextChange(e));
   }
@@ -230,7 +248,26 @@ export default class VerificationDiagnosticsView {
     return codeActions;
   }
 */
-  /////////////////// Gutter rendering ///////////////////
+  /////////////////// Related error rendering ///////////////////
+  private rangeDistance(range1: Range, range2: Range): number {
+    if(range1.intersection(range2)?.isEmpty === false
+       || range1.contains(range2)
+       || range2.contains(range1)) {
+      return 0;
+    }
+    if(range1.end.line < range2.start.line) {
+      return (range2.start.line - range1.end.line) * 1000;
+    } else if(range2.end.line < range1.start.line) {
+      return (range1.start.line - range2.end.line) * 1000;
+    } else {
+      // Same line
+      if(range1.end.character < range2.start.character) {
+        return range2.start.character - range1.end.character;
+      } else {
+        return range1.start.character - range2.end.character;
+      }
+    }
+  }
 
   public onTextChange(e: TextEditorSelectionChangeEvent): void {
     const editor: TextEditor | undefined = window.activeTextEditor;
@@ -239,17 +276,64 @@ export default class VerificationDiagnosticsView {
     }
     const documentPath = editor.document.uri.toString();
     const data = this.dataByDocument.get(documentPath);
-    if(data == null) {
+    const resetRelatedDecorations = () => {
+      editor.setDecorations(this.relatedDecorations, []);
+      editor.setDecorations(this.relatedDecorationsPartial, []);
+      editor.setDecorations(this.relatedDecorationsPartialActive, []);
+    };
+    if(data == null || data.decorations[LineVerificationStatus.ResolutionError].length > 0) {
+      resetRelatedDecorations();
       return;
     }
     const errorGraph = data.errorGraph;
-    const line = typeof e === 'number' ? e : e.selections[0].start.line;
-    if(errorGraph[line] == null) {
-      editor.setDecorations(this.relatedDecorations, []);
+    const selection = e.selections[0];
+    const line = selection.start.line;
+    const errorGraphLine = errorGraph[line];
+    if(errorGraphLine == null) {
+      resetRelatedDecorations();
       return;
     }
-    const ranges: Range[] = errorGraph[line].filter((x: any) => x != null);
+    // Highlights all ranges on the line
+    // Highlights ranges under cursor and dependency with active highlighting
+    const keys = [ ...errorGraphLine.keys() ];
+    if(keys.length === 0) {
+      resetRelatedDecorations();
+      return;
+    }
+
+    // Determine which keys is the closest to the selection.
+    const closestKey = this.closestRange(selection, keys);
+    const ranges = [], partialRanges = [], partialActiveRanges = [];
+    for(const key of keys) {
+      const closest = closestKey === key;
+      const relatedRanges = errorGraphLine.get(key) ?? [];
+      if(relatedRanges.length <= 1) {
+        ranges.push(key);
+      } else { // Partial error
+        if(closest || keys.length === 1) {
+          partialActiveRanges.push(key);
+          partialActiveRanges.push(...relatedRanges);
+        } else {
+          partialRanges.push(key);
+        }
+      }
+    }
     editor.setDecorations(this.relatedDecorations, ranges);
+    editor.setDecorations(this.relatedDecorationsPartial, partialRanges);
+    editor.setDecorations(this.relatedDecorationsPartialActive, partialActiveRanges);
+  }
+
+  private closestRange(selection: Range, ranges: Range[]) {
+    let closestKey = ranges[0];
+    let currentDistance = -1;
+    for(const key of ranges) {
+      const newDistance = this.rangeDistance(key, selection);
+      if(newDistance < currentDistance || currentDistance < 0) {
+        closestKey = key;
+        currentDistance = newDistance;
+      }
+    }
+    return closestKey;
   }
 
   /////////////////// Gutter rendering ///////////////////
@@ -264,6 +348,7 @@ export default class VerificationDiagnosticsView {
     if(editor == null) {
       return;
     }
+    editor.setDecorations(this.relatedDecorations, []);
     const documentPath = editor.document.uri.toString();
     const originalData = this.dataByDocument.get(documentPath);
     if(originalData == null) {
@@ -303,12 +388,13 @@ export default class VerificationDiagnosticsView {
     return range1.start.line <= range2.end.line && range1.end.line >= range2.start.line;
   }
 
-  private addEntry(errorGraph: ErrorGraph, line: number, range2: Range | null) {
+  private addEntry(errorGraph: ErrorGraph, range1: Range, range2: Range | null) {
+    const line = range1.start.line;
     if(errorGraph[line] === undefined) {
-      errorGraph[line] = [];
+      errorGraph[line] = new Map();
     }
     if(range2 != null) {
-      errorGraph[line].push(range2);
+      errorGraph[line].set(range1, (errorGraph[line].get(range1) ?? []).concat([ range2 ]));
     }
   }
 
@@ -358,7 +444,7 @@ export default class VerificationDiagnosticsView {
     };
     for(const diagnostic of diagnostics) {
       const range = this.rangeOf(diagnostic.range);
-      this.addEntry(errorGraph, range.start.line, range);
+      this.addEntry(errorGraph, range, range);
       if(Array.isArray(diagnostic.relatedInformation)) {
         for(const relatedInformation of diagnostic.relatedInformation as any[]) {
           const location = relatedInformation.location;
@@ -367,9 +453,9 @@ export default class VerificationDiagnosticsView {
           }
           const locationRange = this.rangeOf(location.range);
           if(params.uri === location.uri) {
-            this.addEntry(errorGraph, range.start.line, locationRange);
-            this.addEntry(errorGraph, locationRange.start.line, range);
-            this.addEntry(errorGraph, locationRange.start.line, locationRange);
+            this.addEntry(errorGraph, range, locationRange);
+            this.addEntry(errorGraph, locationRange, range);
+            this.addEntry(errorGraph, locationRange, locationRange);
           }
         }
       }
@@ -483,5 +569,8 @@ export default class VerificationDiagnosticsView {
         decoration.icons.forEach(icon => icon.dispose());
       }
     }
+    this.relatedDecorations.dispose();
+    this.relatedDecorationsPartial.dispose();
+    this.relatedDecorationsPartialActive.dispose();
   }
 }
