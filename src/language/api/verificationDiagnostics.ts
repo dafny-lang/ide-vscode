@@ -40,14 +40,22 @@ export enum LineVerificationStatus {
   Verified = 5,
   // For containers of other diagnostics nodes (e.g. methods)
   ErrorRangeObsolete = 6,
-  ErrorRangePending = 7,
+  ErrorRangeVerifying = 7,
   ErrorRange = 8,
   // For specific lines which have errors on it.
   ErrorObsolete = 9,
   ErrorVerifying = 10,
   Error = 11,
   // For lines containing resolution or parse errors
-  ResolutionError = 12
+  ResolutionError = 12,
+  // Cosmetics, not part of server's output
+  ErrorRangeStart = 13,
+  ErrorRangeStartObsolete = 14,
+  ErrorRangeStartVerifying = 15,
+  ErrorRangeEnd = 16,
+  ErrorRangeEndObsolete = 17,
+  ErrorRangeEndVerifying = 18,
+  NumberOfLineDiagnostics = 19
 }
 
 export enum NodeVerificationStatus {

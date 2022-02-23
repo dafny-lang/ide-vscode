@@ -3,7 +3,7 @@ import { /*commands, */DecorationOptions, Range, window, ExtensionContext, works
 import { /*CancellationToken, */Diagnostic, Disposable } from 'vscode-languageclient';
 //import { LanguageConstants } from '../constants';
 
-import { IVerificationDiagnosticsParams } from '../language/api/verificationDiagnostics';
+import { IVerificationDiagnosticsParams, LineVerificationStatus } from '../language/api/verificationDiagnostics';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath, toVsRange } from '../tools/vscode';
 
@@ -21,38 +21,22 @@ function rangeOf(r: any): Range {
     new Position(r.end.line, r.end.character));
 }*/
 
-interface DecorationSet {
-  error: TextEditorDecorationType;
-  errorObsolete: TextEditorDecorationType;
-  errorVerifying: TextEditorDecorationType;
-  errorVerifying2: TextEditorDecorationType;
-  errorRange: TextEditorDecorationType;
-  errorRangeObsolete: TextEditorDecorationType;
-  errorRangeVerifying: TextEditorDecorationType;
-  errorRangeVerifying2: TextEditorDecorationType;
-  verifiedObsolete: TextEditorDecorationType;
-  verifiedVerifying: TextEditorDecorationType;
-  verifiedVerifying2: TextEditorDecorationType;
-  verified: TextEditorDecorationType;
-  verifying: TextEditorDecorationType;
-  verifying2: TextEditorDecorationType;
-  scheduled: TextEditorDecorationType;
-  resolutionError: TextEditorDecorationType;
-}
+type DecorationType = undefined | {
+  type: 'static',
+  path: string,
+  icon: TextEditorDecorationType
+} | {
+  type: 'dynamic',
+  paths: string[],
+  icons: TextEditorDecorationType[]
+};
+
+// Indexed by LineVerificationStatus
+type DecorationSet = Map<LineVerificationStatus, DecorationType>;
 
 interface DecorationSetRanges {
-  error: Range[];
-  errorObsolete: Range[];
-  errorVerifying: Range[];
-  errorRange: Range[];
-  errorRangeObsolete: Range[];
-  errorRangeVerifying: Range[];
-  verified: Range[];
-  verifying: Range[];
-  verifiedObsolete: Range[];
-  verifiedVerifying: Range[];
-  scheduled: Range[];
-  resolutionError: Range[];
+  // First array indexed by LineVerificationStatus
+  decorations: Range[][];
 }
 interface LinearVerificationDiagnostics extends DecorationSetRanges {
   errorGraph: ErrorGraph;
@@ -71,65 +55,67 @@ export default class VerificationDiagnosticsView {
 
   private static readonly emptyLinearVerificationDiagnostics: LinearVerificationDiagnostics = {
     errorGraph: { fixableErrors: {} },
-    error: [],
-    errorObsolete: [],
-    errorVerifying: [],
-    errorRange: [],
-    errorRangeObsolete: [],
-    errorRangeVerifying: [],
-    verified: [],
-    verifying: [],
-    scheduled: [],
-    resolutionError: [],
-    verifiedObsolete: [],
-    verifiedVerifying: []
+    decorations: Array(LineVerificationStatus.NumberOfLineDiagnostics).fill([])
   };
 
   private constructor(context: ExtensionContext) {
     function iconOf(path: string): TextEditorDecorationType {
-      const icon = context.asAbsolutePath(path);
+      const icon = context.asAbsolutePath(`images/${path}.png`);
       return window.createTextEditorDecorationType({
         isWholeLine: true,
         rangeBehavior: 1,
         gutterIconPath: icon
       });
     }
-    this.normalDecorations = {
-      error: iconOf('images/error.png'),
-      errorObsolete: iconOf('images/error-obsolete.png'),
-      errorVerifying: iconOf('images/error-verifying.png'),
-      errorVerifying2: iconOf('images/error-verifying-2.png'),
-      errorRange: iconOf('images/error-range.png'),
-      errorRangeObsolete: iconOf('images/error-range-obsolete.png'),
-      errorRangeVerifying: iconOf('images/error-range-verifying.png'),
-      errorRangeVerifying2: iconOf('images/error-range-verifying-2.png'),
-      verifiedObsolete: iconOf('images/verified-obsolete.png'),
-      verifiedVerifying: iconOf('images/verified-verifying.png'),
-      verifiedVerifying2: iconOf('images/verified-verifying-2.png'),
-      verified: iconOf('images/verified.png'),
-      verifying: iconOf('images/verifying.png'),
-      verifying2: iconOf('images/verifying-2.png'),
-      scheduled: iconOf('images/obsolete.png'),
-      resolutionError: iconOf('images/resolution-error.png')
-    };
-    this.grayedeDecorations = {
-      error: iconOf('images/error_gray.png'),
-      errorObsolete: iconOf('images/error-obsolete_gray.png'),
-      errorVerifying: iconOf('images/error-verifying_gray.png'),
-      errorVerifying2: iconOf('images/error-verifying-2.png'),
-      errorRange: iconOf('images/error-range_gray.png'),
-      errorRangeObsolete: iconOf('images/error-range-obsolete_gray.png'),
-      errorRangeVerifying: iconOf('images/error-range-verifying_gray.png'),
-      errorRangeVerifying2: iconOf('images/error-range-verifying-2.png'),
-      verifiedObsolete: iconOf('images/verified_gray.png'),
-      verifiedVerifying: iconOf('images/verified-verifying.png'),
-      verifiedVerifying2: iconOf('images/verified-verifying-2.png'),
-      verified: iconOf('images/verified_gray.png'),
-      verifying: iconOf('images/verifying.png'),
-      verifying2: iconOf('images/verifying-2.png'),
-      scheduled: iconOf('images/obsolete.png'),
-      resolutionError: iconOf('images/resolution-error.png')
-    };
+    function makeIcon(...paths: string[]): DecorationType {
+      if(paths.length === 1) {
+        return { type: 'static', path: paths[0], icon: iconOf(paths[0]) };
+      } else if(paths.length > 1) {
+        return { type: 'dynamic', paths: paths, icons: paths.map(path => iconOf(path)) };
+      } else {
+        return undefined;
+      }
+    }
+    this.normalDecorations = new Map<LineVerificationStatus, DecorationType>([
+      [ LineVerificationStatus.Scheduled, makeIcon('scheduled') ],
+      [ LineVerificationStatus.Error, makeIcon('error') ],
+      [ LineVerificationStatus.ErrorObsolete, makeIcon('error-obsolete') ],
+      [ LineVerificationStatus.ErrorVerifying, makeIcon('error-verifying', 'error-verifying-2') ],
+      [ LineVerificationStatus.ErrorRange, makeIcon('error-range') ],
+      [ LineVerificationStatus.ErrorRangeStart, makeIcon('error-range-start') ],
+      [ LineVerificationStatus.ErrorRangeStartObsolete, makeIcon('error-range-start-obsolete') ],
+      [ LineVerificationStatus.ErrorRangeStartVerifying, makeIcon('error-range-start-verifying', 'error-range-start-verifying-2') ],
+      [ LineVerificationStatus.ErrorRangeEnd, makeIcon('error-range-end') ],
+      [ LineVerificationStatus.ErrorRangeEndObsolete, makeIcon('error-range-end-obsolete') ],
+      [ LineVerificationStatus.ErrorRangeEndVerifying, makeIcon('error-range-end-verifying', 'error-range-end-verifying-2') ],
+      [ LineVerificationStatus.ErrorRangeObsolete, makeIcon('error-range-obsolete') ],
+      [ LineVerificationStatus.ErrorRangeVerifying, makeIcon('error-range-verifying', 'error-range-verifying-2') ],
+      [ LineVerificationStatus.VerifiedObsolete, makeIcon('verified-obsolete') ],
+      [ LineVerificationStatus.VerifiedVerifying, makeIcon('verified-verifying', 'verified-verifying-2') ],
+      [ LineVerificationStatus.Verified, makeIcon('verified') ],
+      [ LineVerificationStatus.Verifying, makeIcon('verifying', 'verifying-2') ],
+      [ LineVerificationStatus.ResolutionError, makeIcon('resolution-error') ]
+    ]);
+    this.grayedeDecorations = new Map<LineVerificationStatus, DecorationType>([
+      [ LineVerificationStatus.Scheduled, makeIcon('scheduled') ],
+      [ LineVerificationStatus.Error, makeIcon('error_gray') ],
+      [ LineVerificationStatus.ErrorObsolete, makeIcon('error-obsolete_gray') ],
+      [ LineVerificationStatus.ErrorVerifying, makeIcon('error-verifying_gray') ],
+      [ LineVerificationStatus.ErrorRange, makeIcon('error-range_gray') ],
+      [ LineVerificationStatus.ErrorRangeStart, makeIcon('error-range-start_gray') ],
+      [ LineVerificationStatus.ErrorRangeStartObsolete, makeIcon('error-range-start_gray') ],
+      [ LineVerificationStatus.ErrorRangeStartVerifying, makeIcon('error-range-start_gray') ],
+      [ LineVerificationStatus.ErrorRangeEnd, makeIcon('error-range-end_gray') ],
+      [ LineVerificationStatus.ErrorRangeEndObsolete, makeIcon('error-range-end_gray') ],
+      [ LineVerificationStatus.ErrorRangeEndVerifying, makeIcon('error-range-end_gray') ],
+      [ LineVerificationStatus.ErrorRangeObsolete, makeIcon('error-range-obsolete_gray') ],
+      [ LineVerificationStatus.ErrorRangeVerifying, makeIcon('error-range-verifying_gray') ],
+      [ LineVerificationStatus.VerifiedObsolete, makeIcon('verified_gray') ],
+      [ LineVerificationStatus.VerifiedVerifying, makeIcon('verified_gray') ],
+      [ LineVerificationStatus.Verified, makeIcon('verified_gray') ],
+      [ LineVerificationStatus.Verifying, makeIcon('verified_gray') ],
+      [ LineVerificationStatus.ResolutionError, makeIcon('resolution-error') ]
+    ]);
     // For dynamic error highlighting
     this.relatedDecorations = window.createTextEditorDecorationType({
       isWholeLine: false,
@@ -318,7 +304,7 @@ export default class VerificationDiagnosticsView {
     if(originalData == null) {
       return;
     }
-    const resolutionFailed = originalData.resolutionError.length > 0;
+    const resolutionFailed = originalData.decorations[LineVerificationStatus.ResolutionError].length > 0;
     const decorationSets: { decorationSet: DecorationSet, active: boolean }[]
       = [
         { decorationSet: this.normalDecorations, active: !resolutionFailed },
@@ -326,21 +312,18 @@ export default class VerificationDiagnosticsView {
 
     for(const { decorationSet, active } of decorationSets) {
       const data: LinearVerificationDiagnostics = active ? originalData : VerificationDiagnosticsView.emptyLinearVerificationDiagnostics;
-      this.animateIcon(editor, [ decorationSet.verifying, decorationSet.verifying2 ], data.verifying);
-      this.animateIcon(editor, [ decorationSet.errorVerifying, decorationSet.errorVerifying2 ], data.errorVerifying);
-      this.animateIcon(editor, [ decorationSet.verifiedVerifying, decorationSet.verifiedVerifying2 ], data.verifiedVerifying);
-      this.animateIcon(editor, [ decorationSet.errorRangeVerifying, decorationSet.errorRangeVerifying2 ], data.errorRangeVerifying);
-      if(animateOnly) {
-        continue;
+      const decorations = data.decorations;
+      for(let lineVerificationStatus = 0; lineVerificationStatus < LineVerificationStatus.NumberOfLineDiagnostics; lineVerificationStatus++) {
+        const ranges = decorations[lineVerificationStatus];
+        const decorationType = decorationSet.get(lineVerificationStatus);
+        if(decorationType === undefined) {
+          continue;
+        } else if(decorationType.type === 'static' && !animateOnly) {
+          editor.setDecorations(decorationType.icon, ranges);
+        } else if(decorationType.type === 'dynamic') {
+          this.animateIcon(editor, decorationType.icons, ranges);
+        }
       }
-      editor.setDecorations(decorationSet.error, data.error);
-      editor.setDecorations(decorationSet.errorObsolete, data.errorObsolete);
-      editor.setDecorations(decorationSet.errorRange, data.errorRange);
-      editor.setDecorations(decorationSet.errorRangeObsolete, data.errorRangeObsolete);
-      editor.setDecorations(decorationSet.verifiedObsolete, data.verifiedObsolete);
-      editor.setDecorations(decorationSet.verified, data.verified);
-      editor.setDecorations(decorationSet.scheduled, data.scheduled);
-      editor.setDecorations(decorationSet.resolutionError, data.resolutionError);
     }
   }
 
@@ -351,16 +334,6 @@ export default class VerificationDiagnosticsView {
       this.dataByDocument.delete(documentPath);
     }
   }
-  /*
-  private getUnverifiedRange(unverified: Range[], errorRange: Range): Range | null {
-    for(let i = 0; i < unverified.length; i++) {
-      if(this.rangesIntersect(unverified[i], errorRange)) {
-        return unverified[i];
-      }
-    }
-    return null;
-  }
-*/
   private rangesIntersect(range1: Range, range2: Range): boolean {
     return range1.start.line <= range2.end.line && range1.end.line >= range2.start.line;
   }
@@ -377,61 +350,52 @@ export default class VerificationDiagnosticsView {
     }
   }
 
+  private isNotErrorLine(diagnostic: LineVerificationStatus): boolean {
+    return (diagnostic === LineVerificationStatus.Scheduled
+      || diagnostic === LineVerificationStatus.Unknown
+      || diagnostic === LineVerificationStatus.Verified
+      || diagnostic === LineVerificationStatus.VerifiedObsolete
+      || diagnostic === LineVerificationStatus.VerifiedVerifying
+      || diagnostic === LineVerificationStatus.Verifying);
+  }
+
+  private addCosmetics(lineDiagnostics: LineVerificationStatus[]): LineVerificationStatus[] {
+    let previousLineDiagnostic = LineVerificationStatus.Verified;
+    let direction = 1;
+    for(let line = 0; line >= 0; line += direction) {
+      if(line === lineDiagnostics.length) {
+        direction = -1;
+        previousLineDiagnostic = LineVerificationStatus.Verified;
+        continue;
+      }
+      const lineDiagnostic = lineDiagnostics[line];
+      if(this.isNotErrorLine(previousLineDiagnostic)) {
+        if(lineDiagnostic === LineVerificationStatus.ErrorRange) {
+          lineDiagnostics[line] = direction === 1 ? LineVerificationStatus.ErrorRangeStart : LineVerificationStatus.ErrorRangeEnd;
+        } else if(lineDiagnostic === LineVerificationStatus.ErrorRangeObsolete) {
+          lineDiagnostics[line] = direction === 1 ? LineVerificationStatus.ErrorRangeStartObsolete : LineVerificationStatus.ErrorRangeEndObsolete;
+        } else if(lineDiagnostic === LineVerificationStatus.ErrorRangeVerifying) {
+          lineDiagnostics[line] = direction === 1 ? LineVerificationStatus.ErrorRangeStartVerifying : LineVerificationStatus.ErrorRangeEndVerifying;
+        }
+      }
+      previousLineDiagnostic = lineDiagnostic;
+    }
+    return lineDiagnostics;
+  }
+
   private updateVerificationDiagnostics(params: IVerificationDiagnosticsParams): void {
     const documentPath = getVsDocumentPath(params);
-    this.clearVerificationDiagnostics(documentPath);
-
-    /*
-    //const diagnostics = params.diagnostics;
-    const verified: Range[] = params.verified.map(rangeOf);
-    const unverified: Range[] = params.unverified.map(rangeOf);
-    const errorGraph: ErrorGraph = {
-      fixableErrors: {}
-    };
-
-    const errors: Range[] = [];
-    for(const diagnostic of diagnostics) {
-      const range = rangeOf(diagnostic.range);
-      const unverifiedRange = this.getUnverifiedRange(unverified, range);
-      const relatedRangesAsErrors: Range[] = [];
-      if(unverifiedRange != null && Array.isArray(diagnostic.relatedInformation)) {
-        for(const relatedInformation of diagnostic.relatedInformation as any[]) {
-          const location = relatedInformation.location;
-          if(location == null || location.range == null) continue;
-          const locationRange = rangeOf(location.range);
-          this.addEntry(errorGraph, range, locationRange, true);
-          if(unverifiedRange == null) {
-            // We don't add this to the error graph.
-          } else if(this.rangesIntersect(rangeOf(unverifiedRange), locationRange)) {
-            if(params.uri == location.uri) {
-              relatedRangesAsErrors.push(locationRange);
-              this.addEntry(errorGraph, locationRange, range);
-            }
-          } else {
-            this.addEntry(errorGraph, locationRange, null);
-          }
-        }
-        if(relatedRangesAsErrors.length > 0) {
-          errors.push(...relatedRangesAsErrors);
-          errors.push(range);
-        } else { // All related errors are outside of scope, we don't highlight them.
-          errors.push(range);
-        }
-      } else {
-        errors.push(range);
-      }
-    }*/
-    const lineDiagnostics = params.perLineDiagnostic;
+    const previousValue = this.dataByDocument.get(documentPath);
+    //this.clearVerificationDiagnostics(documentPath);
+    const lineDiagnostics = this.addCosmetics(params.perLineDiagnostic);
 
     let previousLineDiagnostic = -1;
     let initialDiagnosticLine = -1;
-    const error: Range[] = [], errorObsolete: Range[] = [], errorVerifying: Range[] = [];
-    const errorRange: Range[] = [], errorRangeObsolete: Range[] = [], errorRangeVerifying: Range[] = [];
-    const verified: Range[] = [], unknown: Range[] = [], scheduled: Range[] = [], verifying: Range[] = [];
-    const resolution: Range[] = [], verifiedVerifying: Range[] = [], verifiedObsolete: Range[] = [];
-    const ranges = [
-      unknown, scheduled, verifying, verifiedObsolete, verifiedVerifying, verified, errorRangeObsolete,
-      errorRangeVerifying, errorRange, errorObsolete, errorVerifying, error, resolution ];
+    const ranges = Array(LineVerificationStatus.NumberOfLineDiagnostics);
+    for(let i = 0; i < ranges.length; i++) {
+      ranges[i] = [];
+    }
+
     // <= so that we add a virtual final line to commit the last range.
     for(let line = 0; line <= lineDiagnostics.length; line++) {
       const lineDiagnostic = line === lineDiagnostics.length ? -1 : lineDiagnostics[line];
@@ -447,23 +411,27 @@ export default class VerificationDiagnosticsView {
       }
     }
 
-    this.dataByDocument.set(documentPath, {
-      error: error,
-      errorObsolete: errorObsolete,
-      errorVerifying: errorVerifying,
-      errorRange: errorRange,
-      errorRangeObsolete: errorRangeObsolete,
-      errorRangeVerifying: errorRangeVerifying,
-      verified: verified,
-      verifying: verifying,
-      verifiedObsolete: verifiedObsolete,
-      verifiedVerifying: verifiedVerifying,
-      scheduled: scheduled,
-      resolutionError: resolution,
-      errorGraph: { fixableErrors:{} } });
+    const newData: LinearVerificationDiagnostics = {
+      decorations: ranges,
+      errorGraph: { fixableErrors:{} } };
     clearInterval(this.animationCallback as any);
-    this.refreshDisplayedVerificationDiagnostics(window.activeTextEditor);
-    if(verifying.length > 0 || verifiedVerifying.length > 0 || errorVerifying.length > 0 || errorRangeVerifying.length > 0) {
+    if(ranges[LineVerificationStatus.ResolutionError].length >= 1 && (previousValue === undefined || previousValue.decorations[LineVerificationStatus.ResolutionError].length === 0)) {
+      // Delay for 1 second resolution errors so that we don't interrupt the verification workflow if not necessary.
+      this.animationCallback = setTimeout(() => {
+        this.dataByDocument.set(documentPath, newData);
+        this.refreshDisplayedVerificationDiagnostics(window.activeTextEditor);
+      }, 2000);
+    } else {
+      this.dataByDocument.set(documentPath, newData);
+      this.refreshDisplayedVerificationDiagnostics(window.activeTextEditor);
+    }
+    // Animated properties
+    if(ranges[LineVerificationStatus.Verifying].length > 0
+      || ranges[LineVerificationStatus.VerifiedVerifying].length > 0
+      || ranges[LineVerificationStatus.ErrorVerifying].length > 0
+      || ranges[LineVerificationStatus.ErrorRangeVerifying].length > 0
+      || ranges[LineVerificationStatus.ErrorRangeStartVerifying].length > 0
+      || ranges[LineVerificationStatus.ErrorRangeStartVerifying].length > 0) {
       this.animationCallback = setInterval(() => {
         this.animationFrame = 1 - this.animationFrame;
         this.refreshDisplayedVerificationDiagnostics(window.activeTextEditor, true);
