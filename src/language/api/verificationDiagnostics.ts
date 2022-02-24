@@ -69,3 +69,11 @@ export enum NodeVerificationStatus {
   ErrorVerifying = 7,
   Error = 8
 }
+
+export enum ScrollColor {
+  Unknown = '#00000000',
+  Error = '#fe536aa0',
+  ErrorActive = '#fe536ad0',
+  ErrorRange = '#fad00080',
+  Verified = '#62b45580'
+}

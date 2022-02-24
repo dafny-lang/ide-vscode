@@ -3,7 +3,7 @@ import { /*commands, */DecorationOptions, Range, window, ExtensionContext, works
 import { /*CancellationToken, */Diagnostic, Disposable } from 'vscode-languageclient';
 //import { LanguageConstants } from '../constants';
 
-import { IVerificationDiagnosticsParams, LineVerificationStatus } from '../language/api/verificationDiagnostics';
+import { IVerificationDiagnosticsParams, LineVerificationStatus, ScrollColor } from '../language/api/verificationDiagnostics';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath, toVsRange } from '../tools/vscode';
 
@@ -56,12 +56,23 @@ export default class VerificationDiagnosticsView {
     = Array(LineVerificationStatus.NumberOfLineDiagnostics).fill([]);
 
   private constructor(context: ExtensionContext) {
+    let grayMode = false;
+
     function iconOf(path: string): TextEditorDecorationType {
       const icon = context.asAbsolutePath(`images/${path}.png`);
       return window.createTextEditorDecorationType({
         isWholeLine: true,
         rangeBehavior: 1,
-        gutterIconPath: icon
+        gutterIconPath: icon,
+        overviewRulerColor:
+          grayMode ? (path === 'resolution-error' ? ScrollColor.Error : ScrollColor.Unknown)
+            : path.startsWith('error-range')
+              ? ScrollColor.ErrorRange
+              : path.startsWith('error')
+                ? ScrollColor.Error
+                : path.startsWith('verified')
+                  ? ScrollColor.Verified
+                  : ScrollColor.Unknown
       });
     }
     function makeIcon(...paths: string[]): DecorationType {
@@ -93,6 +104,7 @@ export default class VerificationDiagnosticsView {
       [ LineVerificationStatus.Verifying, makeIcon('verifying', 'verifying-2') ],
       [ LineVerificationStatus.ResolutionError, makeIcon('resolution-error') ]
     ]);
+    grayMode = true;
     this.grayedeDecorations = new Map<LineVerificationStatus, DecorationType>([
       [ LineVerificationStatus.Scheduled, makeIcon('scheduled') ],
       [ LineVerificationStatus.Error, makeIcon('error_gray') ],
@@ -117,7 +129,8 @@ export default class VerificationDiagnosticsView {
     this.relatedDecorations = window.createTextEditorDecorationType({
       isWholeLine: false,
       rangeBehavior: 1,
-      outline: '#fe536aa0 2px solid'
+      outline: '#fe536aa0 2px solid',
+      overviewRulerColor: ScrollColor.ErrorActive
       // textDecoration: 'underline overline #fe536ac0'
       // backgroundColor: '#fe536a50'
     });
@@ -131,7 +144,8 @@ export default class VerificationDiagnosticsView {
     this.relatedDecorationsPartialActive = window.createTextEditorDecorationType({
       isWholeLine: false,
       rangeBehavior: 1,
-      outline: '#fe536a 2px dashed'
+      outline: '#fe536a 2px dashed',
+      overviewRulerColor: ScrollColor.ErrorActive
       // textDecoration: 'underline overline #fe536ac0'
       // backgroundColor: '#fe536a50'
     });
