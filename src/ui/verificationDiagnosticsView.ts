@@ -52,10 +52,8 @@ export default class VerificationDiagnosticsView {
   // Alternates between 0 and 1
   private animationFrame: number = 0;
 
-  private static readonly emptyLinearVerificationDiagnostics: LinearVerificationDiagnostics = {
-    errorGraph: { },
-    decorations: Array(LineVerificationStatus.NumberOfLineDiagnostics).fill([])
-  };
+  private static readonly emptyLinearVerificationDiagnostics: Range[][]
+    = Array(LineVerificationStatus.NumberOfLineDiagnostics).fill([]);
 
   private constructor(context: ExtensionContext) {
     function iconOf(path: string): TextEditorDecorationType {
@@ -137,7 +135,7 @@ export default class VerificationDiagnosticsView {
       // textDecoration: 'underline overline #fe536ac0'
       // backgroundColor: '#fe536a50'
     });
-    this.textEditorWatcher = window.onDidChangeTextEditorSelection((e) => this.onTextChange(e));
+    this.textEditorWatcher = window.onDidChangeTextEditorSelection((e) => this.onTextChange(e, false));
   }
 
   public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): VerificationDiagnosticsView {
@@ -269,13 +267,25 @@ export default class VerificationDiagnosticsView {
     }
   }
 
-  public onTextChange(e: TextEditorSelectionChangeEvent): void {
+  private readonly lastResolvedDocumentStates: Map<string, string> = new Map();
+
+  public onTextChange(e: TextEditorSelectionChangeEvent | undefined = undefined, storeDocumentState: boolean = false): void {
     const editor: TextEditor | undefined = window.activeTextEditor;
     if(editor == null) {
       return;
     }
     const documentPath = editor.document.uri.toString();
     const data = this.dataByDocument.get(documentPath);
+    const currentText = editor.document.getText();
+    // Only works if we have the same text as the last resolved document states
+    if(this.lastResolvedDocumentStates.get(documentPath) !== currentText) {
+      if(storeDocumentState) {
+        this.lastResolvedDocumentStates.set(documentPath, currentText);
+      } else {
+        return;
+      }
+    }
+
     const resetRelatedDecorations = () => {
       editor.setDecorations(this.relatedDecorations, []);
       editor.setDecorations(this.relatedDecorationsPartial, []);
@@ -286,7 +296,7 @@ export default class VerificationDiagnosticsView {
       return;
     }
     const errorGraph = data.errorGraph;
-    const selection = e.selections[0];
+    const selection = e === undefined ? editor.selection : e.selections[0];
     const line = selection.start.line;
     const errorGraphLine = errorGraph[line];
     if(errorGraphLine == null) {
@@ -348,7 +358,9 @@ export default class VerificationDiagnosticsView {
     if(editor == null) {
       return;
     }
-    editor.setDecorations(this.relatedDecorations, []);
+    if(!animateOnly) {
+      this.onTextChange(undefined, true);
+    }
     const documentPath = editor.document.uri.toString();
     const originalData = this.dataByDocument.get(documentPath);
     if(originalData == null) {
@@ -361,8 +373,7 @@ export default class VerificationDiagnosticsView {
         { decorationSet: this.grayedeDecorations, active: resolutionFailed } ];
 
     for(const { decorationSet, active } of decorationSets) {
-      const data: LinearVerificationDiagnostics = active ? originalData : VerificationDiagnosticsView.emptyLinearVerificationDiagnostics;
-      const decorations = data.decorations;
+      const decorations: Range[][] = active ? originalData.decorations : VerificationDiagnosticsView.emptyLinearVerificationDiagnostics;
       for(let lineVerificationStatus = 0; lineVerificationStatus < LineVerificationStatus.NumberOfLineDiagnostics; lineVerificationStatus++) {
         const ranges = decorations[lineVerificationStatus];
         const decorationType = decorationSet.get(lineVerificationStatus);
@@ -505,27 +516,36 @@ export default class VerificationDiagnosticsView {
     this.setDisplayedVerificationDiagnostics(documentPath, newData);
   }
 
+  private static readonly obsoleteLineVerificationStatus: LineVerificationStatus[] = [
+    LineVerificationStatus.ErrorObsolete,
+    LineVerificationStatus.VerifiedObsolete,
+    LineVerificationStatus.ErrorRangeObsolete,
+    LineVerificationStatus.ErrorRangeStartObsolete,
+    LineVerificationStatus.ErrorRangeEndObsolete
+  ];
+  private static readonly verifyingLineVerificationStatus: LineVerificationStatus[] = [
+    LineVerificationStatus.Verifying,
+    LineVerificationStatus.ErrorVerifying,
+    LineVerificationStatus.ErrorRangeEndVerifying,
+    LineVerificationStatus.ErrorRangeVerifying,
+    LineVerificationStatus.ErrorRangeStartVerifying,
+    LineVerificationStatus.VerifiedVerifying
+  ];
+
   // Takes care of delaying the display of verification diagnostics to not interfere with UX.
   private setDisplayedVerificationDiagnostics(documentPath: string, newData: LinearVerificationDiagnostics) {
     const previousValue = this.dataByDocument.get(documentPath);
     const ranges = newData.decorations;
     clearInterval(this.animationCallback as any);
-    const mustBeDelayed = (ranges: Range[][], previousDecorations: Range[][]) => (
+    const mustBeDelayed = (ranges: Range[][], previousRanges: Range[][]) => (
       (ranges[LineVerificationStatus.ResolutionError].length >= 1
-          && previousDecorations[LineVerificationStatus.ResolutionError].length === 0)
-      || ((ranges[LineVerificationStatus.ErrorObsolete].length >= 1
-           || ranges[LineVerificationStatus.VerifiedObsolete].length >= 1
-           || ranges[LineVerificationStatus.ErrorRangeObsolete].length >= 1
-           || ranges[LineVerificationStatus.ErrorRangeStartObsolete].length >= 1
-           || ranges[LineVerificationStatus.ErrorRangeEndObsolete].length >= 1)
-          && ranges[LineVerificationStatus.Verifying].length === 0
-          && ranges[LineVerificationStatus.ErrorVerifying].length === 0
-          && ranges[LineVerificationStatus.ErrorRangeEndVerifying].length === 0
-          && ranges[LineVerificationStatus.ErrorRangeVerifying].length === 0
-          && ranges[LineVerificationStatus.ErrorRangeStartVerifying].length === 0
-          && ranges[LineVerificationStatus.VerifiedVerifying].length === 0)
+          && previousRanges[LineVerificationStatus.ResolutionError].length === 0)
+      || (VerificationDiagnosticsView.obsoleteLineVerificationStatus.some(status => ranges[status].length >= 1)
+          && VerificationDiagnosticsView.verifyingLineVerificationStatus.every(status => ranges[status].length === 0)
+          && VerificationDiagnosticsView.obsoleteLineVerificationStatus.every(status => previousRanges[status].length === 0)
+      )
     );
-    if(mustBeDelayed(ranges, (previousValue === undefined ? VerificationDiagnosticsView.emptyLinearVerificationDiagnostics : previousValue).decorations)) {
+    if(mustBeDelayed(ranges, (previousValue === undefined ? VerificationDiagnosticsView.emptyLinearVerificationDiagnostics : previousValue.decorations))) {
       // Delay for 1 second resolution errors so that we don't interrupt the verification workflow if not necessary.
       this.animationCallback = setTimeout(() => {
         this.dataByDocument.set(documentPath, newData);
