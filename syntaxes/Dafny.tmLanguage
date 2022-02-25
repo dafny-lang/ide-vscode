@@ -510,7 +510,7 @@
 					<key>include</key>
 					<string>#comments-inline</string>
 				</dict>
-				<!--dict> Turn on if we want to support nested method calls
+				<!--dict> Turning it on causes performance problems, I don't know why
 					<key>include</key>
 					<string>$self</string>
 				</dict-->
