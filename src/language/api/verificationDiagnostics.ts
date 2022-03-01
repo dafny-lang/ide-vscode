@@ -29,33 +29,35 @@ export interface NodeDiagnostic {
 export enum LineVerificationStatus {
   // Default value for every line, before the renderer figures it out.
   Unknown = 0,
-  // For first-time computation not actively computing but soon
+  // For first-time computation not actively computing but soon. Synonym of "obsolete"
   // (scheduledComputation)
   Scheduled = 1,
   // For first-time computations, actively computing
   Verifying = 2,
   VerifiedObsolete = 3,
   VerifiedVerifying = 4,
-  // Also applicable for empty spaces if they are not surrounded by errors.
+  // Also applicable for empty spaces if they are not surrounded by errors. 
   Verified = 5,
+  // Dafny tried to do something but couldn't (timeout, out of resources...)
+  Inconclusive = 6,
   // For containers of other diagnostics nodes (e.g. methods)
-  ErrorRangeObsolete = 6,
-  ErrorRangeVerifying = 7,
-  ErrorRange = 8,
+  ErrorRangeObsolete = 7,
+  ErrorRangeVerifying = 8,
+  ErrorRange = 9,
   // For specific lines which have errors on it.
-  ErrorObsolete = 9,
-  ErrorVerifying = 10,
-  Error = 11,
+  ErrorObsolete = 10,
+  ErrorVerifying = 11,
+  Error = 12,
   // For lines containing resolution or parse errors
-  ResolutionError = 12,
+  ResolutionError = 13,
   // Cosmetics, not part of server's output
-  ErrorRangeStart = 13,
-  ErrorRangeStartObsolete = 14,
-  ErrorRangeStartVerifying = 15,
-  ErrorRangeEnd = 16,
-  ErrorRangeEndObsolete = 17,
-  ErrorRangeEndVerifying = 18,
-  NumberOfLineDiagnostics = 19
+  ErrorRangeStart = 14,
+  ErrorRangeStartObsolete = 15,
+  ErrorRangeStartVerifying = 16,
+  ErrorRangeEnd = 17,
+  ErrorRangeEndObsolete = 18,
+  ErrorRangeEndVerifying = 19,
+  NumberOfLineDiagnostics = 20
 }
 
 export enum NodeVerificationStatus {
@@ -65,9 +67,10 @@ export enum NodeVerificationStatus {
   VerifiedObsolete = 3,
   VerifiedVerifying = 4,
   Verified = 5,
-  ErrorObsolete = 6,
-  ErrorVerifying = 7,
-  Error = 8
+  Inconclusive = 6,
+  ErrorObsolete = 7,
+  ErrorVerifying = 8,
+  Error = 9
 }
 
 export enum ScrollColor {
