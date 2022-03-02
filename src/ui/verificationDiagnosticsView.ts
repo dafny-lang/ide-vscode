@@ -33,7 +33,7 @@ type DecorationSet = Map<LineVerificationStatus, DecorationType>;
 
 interface DecorationSetRanges {
   // First array indexed by LineVerificationStatus
-  decorations: Range[][];
+  decorations: Map<LineVerificationStatus, Range[]>;
 }
 interface LinearVerificationDiagnostics extends DecorationSetRanges {
   errorGraph: ErrorGraph;
@@ -52,8 +52,15 @@ export default class VerificationDiagnosticsView {
   // Alternates between 0 and 1
   private animationFrame: number = 0;
 
-  private static readonly emptyLinearVerificationDiagnostics: Range[][]
-    = Array(LineVerificationStatus.NumberOfLineDiagnostics).fill([]);
+  private static FillLineVerificationStatusMap(): Map<LineVerificationStatus, Range[]> {
+    return new Map(
+      Object.keys(LineVerificationStatus)
+        .filter(key => parseInt(key, 10) >= 0)
+        .map(key => [ parseInt(key, 10) as LineVerificationStatus, [] ]));
+  }
+
+  private static readonly emptyLinearVerificationDiagnostics: Map<LineVerificationStatus, Range[]>
+    = VerificationDiagnosticsView.FillLineVerificationStatusMap();
 
   private constructor(context: ExtensionContext) {
     let grayMode = false;
@@ -89,6 +96,9 @@ export default class VerificationDiagnosticsView {
       [ LineVerificationStatus.Error, makeIcon('error') ],
       [ LineVerificationStatus.ErrorObsolete, makeIcon('error-obsolete') ],
       [ LineVerificationStatus.ErrorVerifying, makeIcon('error-verifying', 'error-verifying-2') ],
+      [ LineVerificationStatus.ErrorRangeAssertionVerifiedObsolete, makeIcon('error-range-verified-obsolete') ],
+      [ LineVerificationStatus.ErrorRangeAssertionVerifiedVerifying, makeIcon('error-range-verified-verifying', 'error-range-verified-verifying-2') ],
+      [ LineVerificationStatus.ErrorRangeAssertionVerified, makeIcon('error-range-verified') ],
       [ LineVerificationStatus.ErrorRange, makeIcon('error-range') ],
       [ LineVerificationStatus.ErrorRangeStart, makeIcon('error-range-start') ],
       [ LineVerificationStatus.ErrorRangeStartObsolete, makeIcon('error-range-start-obsolete') ],
@@ -110,6 +120,9 @@ export default class VerificationDiagnosticsView {
       [ LineVerificationStatus.Error, makeIcon('error_gray') ],
       [ LineVerificationStatus.ErrorObsolete, makeIcon('error-obsolete_gray') ],
       [ LineVerificationStatus.ErrorVerifying, makeIcon('error-verifying_gray') ],
+      [ LineVerificationStatus.ErrorRangeAssertionVerifiedObsolete, makeIcon('error-range-verified-obsolete-gray') ],
+      [ LineVerificationStatus.ErrorRangeAssertionVerifiedVerifying, makeIcon('error-range-verified-obsolete-gray') ],
+      [ LineVerificationStatus.ErrorRangeAssertionVerified, makeIcon('error-range-verified-obsolete-gray') ],
       [ LineVerificationStatus.ErrorRange, makeIcon('error-range_gray') ],
       [ LineVerificationStatus.ErrorRangeStart, makeIcon('error-range-start_gray') ],
       [ LineVerificationStatus.ErrorRangeStartObsolete, makeIcon('error-range-start_gray') ],
@@ -288,6 +301,9 @@ export default class VerificationDiagnosticsView {
     if(editor == null) {
       return;
     }
+    if(e !== undefined && e.kind === undefined) {
+      return;
+    }
     const documentPath = editor.document.uri.toString();
     const data = this.dataByDocument.get(documentPath);
     const currentText = editor.document.getText();
@@ -305,7 +321,12 @@ export default class VerificationDiagnosticsView {
       editor.setDecorations(this.relatedDecorationsPartial, []);
       editor.setDecorations(this.relatedDecorationsPartialActive, []);
     };
-    if(data == null || data.decorations[LineVerificationStatus.ResolutionError].length > 0) {
+    if(data == null) {
+      resetRelatedDecorations();
+      return;
+    }
+    const errorDecorations = data.decorations.get(LineVerificationStatus.ResolutionError);
+    if(errorDecorations != null && errorDecorations.length > 0) {
       resetRelatedDecorations();
       return;
     }
@@ -380,16 +401,21 @@ export default class VerificationDiagnosticsView {
     if(originalData == null) {
       return;
     }
-    const resolutionFailed = originalData.decorations[LineVerificationStatus.ResolutionError].length > 0;
+    const resolutionErrors = originalData.decorations.get(LineVerificationStatus.ResolutionError);
+    const resolutionFailed = resolutionErrors != null && resolutionErrors.length > 0;
     const decorationSets: { decorationSet: DecorationSet, active: boolean }[]
       = [
         { decorationSet: this.normalDecorations, active: !resolutionFailed },
         { decorationSet: this.grayedeDecorations, active: resolutionFailed } ];
 
     for(const { decorationSet, active } of decorationSets) {
-      const decorations: Range[][] = active ? originalData.decorations : VerificationDiagnosticsView.emptyLinearVerificationDiagnostics;
-      for(let lineVerificationStatus = 0; lineVerificationStatus < LineVerificationStatus.NumberOfLineDiagnostics; lineVerificationStatus++) {
-        const ranges = decorations[lineVerificationStatus];
+      const decorations: Map<LineVerificationStatus, Range[]> = active ? originalData.decorations : VerificationDiagnosticsView.emptyLinearVerificationDiagnostics;
+      for(const enumMember in LineVerificationStatus) {
+        if(!(parseInt(enumMember, 10) >= 0)) {
+          continue;
+        }
+        const lineVerificationStatus: LineVerificationStatus = parseInt(enumMember, 10);
+        const ranges = this.getRanges(decorations, lineVerificationStatus);
         const decorationType = decorationSet.get(lineVerificationStatus);
         if(decorationType === undefined) {
           continue;
@@ -488,16 +514,13 @@ export default class VerificationDiagnosticsView {
     return errorGraph;
   }
 
-  private getRangesOfLineStatus(params: IVerificationDiagnosticsParams): Range[][] {
+  private getRangesOfLineStatus(params: IVerificationDiagnosticsParams): Map<LineVerificationStatus, Range[]> {
     //// Per-line diagnostics
     const lineDiagnostics = this.addCosmetics(params.perLineDiagnostic);
 
     let previousLineDiagnostic = -1;
     let initialDiagnosticLine = -1;
-    const ranges: Range[][] = Array(LineVerificationStatus.NumberOfLineDiagnostics);
-    for(let i = 0; i < ranges.length; i++) {
-      ranges[i] = [];
-    }
+    const ranges: Map<LineVerificationStatus, Range[]> = VerificationDiagnosticsView.FillLineVerificationStatusMap();
 
     // <= so that we add a virtual final line to commit the last range.
     for(let line = 0; line <= lineDiagnostics.length; line++) {
@@ -505,7 +528,7 @@ export default class VerificationDiagnosticsView {
       if(lineDiagnostic !== previousLineDiagnostic) {
         if(previousLineDiagnostic !== -1) { // Never assigned before
           const range = new Range(initialDiagnosticLine, 1, line - 1, 1);
-          ranges[previousLineDiagnostic].push(range);
+          ranges.get(previousLineDiagnostic)?.push(range);
         }
         previousLineDiagnostic = lineDiagnostic;
         initialDiagnosticLine = line;
@@ -546,19 +569,27 @@ export default class VerificationDiagnosticsView {
     LineVerificationStatus.VerifiedVerifying
   ];
 
+  private getRanges(ranges: Map<LineVerificationStatus, Range[]>, status: LineVerificationStatus): Range[] {
+    let r = ranges.get(status);
+    if(r === undefined) {
+      r = [];
+      ranges.set(status, r);
+    }
+    return r;
+  }
+
   // Takes care of delaying the display of verification diagnostics to not interfere with UX.
   private setDisplayedVerificationDiagnostics(documentPath: string, newData: LinearVerificationDiagnostics) {
     const previousValue = this.dataByDocument.get(documentPath);
     const ranges = newData.decorations;
     clearInterval(this.animationCallback as any);
-    const mustBeDelayed = (ranges: Range[][], previousRanges: Range[][]) => (
-      (ranges[LineVerificationStatus.ResolutionError].length >= 1
-          && previousRanges[LineVerificationStatus.ResolutionError].length === 0)
-      || (VerificationDiagnosticsView.obsoleteLineVerificationStatus.some(status => ranges[status].length >= 1)
-          && VerificationDiagnosticsView.verifyingLineVerificationStatus.every(status => ranges[status].length === 0)
-          && VerificationDiagnosticsView.obsoleteLineVerificationStatus.every(status => previousRanges[status].length === 0)
-      )
-    );
+    const mustBeDelayed = (ranges: Map<LineVerificationStatus, Range[]>, previousRanges: Map<LineVerificationStatus, Range[]>) =>
+      (this.getRanges(ranges, LineVerificationStatus.ResolutionError).length >= 1
+          && this.getRanges(previousRanges, LineVerificationStatus.ResolutionError).length === 0)
+      || (VerificationDiagnosticsView.obsoleteLineVerificationStatus.some(status => this.getRanges(ranges, status).length >= 1)
+          && VerificationDiagnosticsView.verifyingLineVerificationStatus.every(status => this.getRanges(ranges, status).length === 0)
+          && VerificationDiagnosticsView.obsoleteLineVerificationStatus.every(status => this.getRanges(previousRanges, status).length === 0)
+      );
     if(mustBeDelayed(ranges, (previousValue === undefined ? VerificationDiagnosticsView.emptyLinearVerificationDiagnostics : previousValue.decorations))) {
       // Delay for 1 second resolution errors so that we don't interrupt the verification workflow if not necessary.
       this.animationCallback = setTimeout(() => {
@@ -570,12 +601,12 @@ export default class VerificationDiagnosticsView {
       this.refreshDisplayedVerificationDiagnostics(window.activeTextEditor);
     }
     // Animated properties
-    if(ranges[LineVerificationStatus.Verifying].length > 0
-      || ranges[LineVerificationStatus.VerifiedVerifying].length > 0
-      || ranges[LineVerificationStatus.ErrorVerifying].length > 0
-      || ranges[LineVerificationStatus.ErrorRangeVerifying].length > 0
-      || ranges[LineVerificationStatus.ErrorRangeStartVerifying].length > 0
-      || ranges[LineVerificationStatus.ErrorRangeStartVerifying].length > 0) {
+    if(this.getRanges(ranges, LineVerificationStatus.Verifying).length > 0
+      || this.getRanges(ranges, LineVerificationStatus.VerifiedVerifying).length > 0
+      || this.getRanges(ranges, LineVerificationStatus.ErrorVerifying).length > 0
+      || this.getRanges(ranges, LineVerificationStatus.ErrorRangeVerifying).length > 0
+      || this.getRanges(ranges, LineVerificationStatus.ErrorRangeStartVerifying).length > 0
+      || this.getRanges(ranges, LineVerificationStatus.ErrorRangeStartVerifying).length > 0) {
       this.animationCallback = setInterval(() => {
         this.animationFrame = 1 - this.animationFrame;
         this.refreshDisplayedVerificationDiagnostics(window.activeTextEditor, true);

@@ -36,7 +36,7 @@ export enum LineVerificationStatus {
   Verifying = 2,
   VerifiedObsolete = 3,
   VerifiedVerifying = 4,
-  // Also applicable for empty spaces if they are not surrounded by errors. 
+  // Also applicable for empty spaces if they are not surrounded by errors.
   Verified = 5,
   // Dafny tried to do something but couldn't (timeout, out of resources...)
   Inconclusive = 6,
@@ -44,20 +44,24 @@ export enum LineVerificationStatus {
   ErrorRangeObsolete = 7,
   ErrorRangeVerifying = 8,
   ErrorRange = 9,
+  // For individual assertions in error ranges
+  ErrorRangeAssertionVerifiedObsolete = 10,
+  ErrorRangeAssertionVerifiedVerifying = 11,
+  ErrorRangeAssertionVerified = 12,
   // For specific lines which have errors on it.
-  ErrorObsolete = 10,
-  ErrorVerifying = 11,
-  Error = 12,
+  ErrorObsolete = 13,
+  ErrorVerifying = 14,
+  Error = 15,
   // For lines containing resolution or parse errors
-  ResolutionError = 13,
+  ResolutionError = 16,
   // Cosmetics, not part of server's output
-  ErrorRangeStart = 14,
-  ErrorRangeStartObsolete = 15,
-  ErrorRangeStartVerifying = 16,
-  ErrorRangeEnd = 17,
-  ErrorRangeEndObsolete = 18,
-  ErrorRangeEndVerifying = 19,
-  NumberOfLineDiagnostics = 20
+  ErrorRangeStart = 17,
+  ErrorRangeStartObsolete = 18,
+  ErrorRangeStartVerifying = 19,
+  ErrorRangeEnd = 20,
+  ErrorRangeEndObsolete = 21,
+  ErrorRangeEndVerifying = 22,
+  NumberOfLineDiagnostics = 23
 }
 
 export enum NodeVerificationStatus {
