@@ -60,8 +60,7 @@ export enum LineVerificationStatus {
   ErrorRangeStartVerifying = 19,
   ErrorRangeEnd = 20,
   ErrorRangeEndObsolete = 21,
-  ErrorRangeEndVerifying = 22,
-  NumberOfLineDiagnostics = 23
+  ErrorRangeEndVerifying = 22
 }
 
 export enum NodeVerificationStatus {
