@@ -15,7 +15,8 @@ const GhostDecoration: DecorationRenderOptions = {
 };
 
 export default class GhostDiagnosticsView {
-  private readonly dataByDocument = new Map<string, { diagnostics: Diagnostic[], decoration: TextEditorDecorationType }>();
+  private readonly dataByDocument = new Map<string, Diagnostic[]>();
+  private readonly decoration = window.createTextEditorDecorationType(GhostDecoration);
 
   private constructor() {}
 
@@ -23,7 +24,7 @@ export default class GhostDiagnosticsView {
     const instance = new GhostDiagnosticsView();
     context.subscriptions.push(
       workspace.onDidCloseTextDocument(document => instance.clearGhostDiagnostics(document.uri.toString())),
-      window.onDidChangeActiveTextEditor(editor => instance.refreshDisplayedGhostDiagnostics(editor)),
+      window.onDidChangeActiveTextEditor(editor => instance.handleEditorChange(editor)),
       languageClient.onGhostDiagnostics(params => instance.updateGhostDiagnostics(params)),
       instance
     );
@@ -37,12 +38,18 @@ export default class GhostDiagnosticsView {
     if(diagnostics.length === 0) {
       return;
     }
-    const decoration = window.createTextEditorDecorationType(GhostDecoration);
-    this.dataByDocument.set(documentPath, { diagnostics, decoration });
+    this.dataByDocument.set(documentPath, diagnostics);
     this.refreshDisplayedGhostDiagnostics(window.activeTextEditor);
   }
 
-  public refreshDisplayedGhostDiagnostics(editor?: TextEditor): void {
+  private handleEditorChange(editor?: TextEditor): void {
+    if(editor == null) {
+      return;
+    }
+    this.refreshDisplayedGhostDiagnostics(editor);
+  }
+
+  private refreshDisplayedGhostDiagnostics(editor?: TextEditor): void {
     if(editor == null) {
       return;
     }
@@ -51,16 +58,12 @@ export default class GhostDiagnosticsView {
     if(data == null) {
       return;
     }
-    const decorators = data.diagnostics.map(diagnostic => GhostDiagnosticsView.createDecorator(diagnostic));
-    editor.setDecorations(data.decoration, decorators);
+    const decorators = data.map(diagnostic => GhostDiagnosticsView.createDecorator(diagnostic));
+    editor.setDecorations(this.decoration, decorators);
   }
 
   private clearGhostDiagnostics(documentPath: string): void {
-    const data = this.dataByDocument.get(documentPath);
-    if(data != null) {
-      data.decoration.dispose();
-      this.dataByDocument.delete(documentPath);
-    }
+    this.dataByDocument.delete(documentPath);
   }
 
   private static createDecorator(diagnostic: Diagnostic): DecorationOptions {
@@ -71,8 +74,6 @@ export default class GhostDiagnosticsView {
   }
 
   public dispose(): void {
-    for(const [ _, { decoration } ] of this.dataByDocument) {
-      decoration.dispose();
-    }
+    this.decoration.dispose();
   }
 }
