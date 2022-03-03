@@ -24,7 +24,7 @@ export default class GhostDiagnosticsView {
     const instance = new GhostDiagnosticsView();
     context.subscriptions.push(
       workspace.onDidCloseTextDocument(document => instance.clearGhostDiagnostics(document.uri.toString())),
-      window.onDidChangeActiveTextEditor(editor => instance.handleEditorChange(editor)),
+      window.onDidChangeActiveTextEditor(editor => instance.refreshDisplayedGhostDiagnostics(editor)),
       languageClient.onGhostDiagnostics(params => instance.updateGhostDiagnostics(params)),
       instance
     );
@@ -40,13 +40,6 @@ export default class GhostDiagnosticsView {
     }
     this.dataByDocument.set(documentPath, diagnostics);
     this.refreshDisplayedGhostDiagnostics(window.activeTextEditor);
-  }
-
-  private handleEditorChange(editor?: TextEditor): void {
-    if(editor == null) {
-      return;
-    }
-    this.refreshDisplayedGhostDiagnostics(editor);
   }
 
   private refreshDisplayedGhostDiagnostics(editor?: TextEditor): void {
