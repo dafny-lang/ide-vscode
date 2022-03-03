@@ -1,4 +1,4 @@
-import { DecorationOptions, TextEditorDecorationType, window, ExtensionContext, workspace, DecorationRenderOptions, TextEditor } from 'vscode';
+import { DecorationOptions, window, ExtensionContext, workspace, DecorationRenderOptions, TextEditor } from 'vscode';
 import { Diagnostic } from 'vscode-languageclient';
 
 import { IGhostDiagnosticsParams } from '../language/api/ghostDiagnostics';
