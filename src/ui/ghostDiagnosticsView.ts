@@ -15,7 +15,7 @@ const GhostDecoration: DecorationRenderOptions = {
 };
 
 export default class GhostDiagnosticsView {
-  private readonly dataByDocument = new Map<string, Diagnostic[]>();
+  private readonly diagnosticsByDocument = new Map<string, Diagnostic[]>();
   private readonly decoration = window.createTextEditorDecorationType(GhostDecoration);
 
   private constructor() {}
@@ -38,7 +38,7 @@ export default class GhostDiagnosticsView {
     if(diagnostics.length === 0) {
       return;
     }
-    this.dataByDocument.set(documentPath, diagnostics);
+    this.diagnosticsByDocument.set(documentPath, diagnostics);
     this.refreshDisplayedGhostDiagnostics(window.activeTextEditor);
   }
 
@@ -47,16 +47,16 @@ export default class GhostDiagnosticsView {
       return;
     }
     const documentPath = editor.document.uri.toString();
-    const data = this.dataByDocument.get(documentPath);
-    if(data == null) {
+    const diagnostics = this.diagnosticsByDocument.get(documentPath);
+    if(diagnostics == null) {
       return;
     }
-    const decorators = data.map(diagnostic => GhostDiagnosticsView.createDecorator(diagnostic));
+    const decorators = diagnostics.map(diagnostic => GhostDiagnosticsView.createDecorator(diagnostic));
     editor.setDecorations(this.decoration, decorators);
   }
 
   private clearGhostDiagnostics(documentPath: string): void {
-    this.dataByDocument.delete(documentPath);
+    this.diagnosticsByDocument.delete(documentPath);
   }
 
   private static createDecorator(diagnostic: Diagnostic): DecorationOptions {
