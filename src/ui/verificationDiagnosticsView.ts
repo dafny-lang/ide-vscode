@@ -3,20 +3,13 @@ import { /*commands, */DecorationOptions, Range, window, ExtensionContext, works
 import { /*CancellationToken, */Diagnostic, Disposable } from 'vscode-languageclient';
 //import { LanguageConstants } from '../constants';
 
-import { IVerificationDiagnosticsParams, LineVerificationStatus, ScrollColor } from '../language/api/verificationDiagnostics';
+import { IVerificationDiagnosticsParams, LineVerificationStatus, ScrollColor, NodeDiagnostic } from '../language/api/verificationDiagnostics';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath, toVsRange } from '../tools/vscode';
 
 interface ErrorGraph {
-  [line: number]: Map<Range, Range[]>;
+  [line: number]: Map<Range, { primary: Range[], secondary: Range[] } >;
 }
-
-/*// TODO: Find a way to not depend on this function
-function rangeOf(r: any): Range {
-  return new Range(
-    new Position(r.start.line, r.start.character),
-    new Position(r.end.line, r.end.character));
-}*/
 
 type DecorationType = undefined | {
   type: 'static',
@@ -45,6 +38,8 @@ export default class VerificationDiagnosticsView {
   private readonly relatedDecorations: TextEditorDecorationType;
   private readonly relatedDecorationsPartial: TextEditorDecorationType;
   private readonly relatedDecorationsPartialActive: TextEditorDecorationType;
+  private readonly secondaryRelatedDecorations: TextEditorDecorationType;
+
   private readonly textEditorWatcher?: Disposable;
 
   private readonly dataByDocument = new Map<string, LinearVerificationDiagnostics>();
@@ -161,6 +156,14 @@ export default class VerificationDiagnosticsView {
       overviewRulerColor: ScrollColor.ErrorActive
       // textDecoration: 'underline overline #fe536ac0'
       // backgroundColor: '#fe536a50'
+    });
+    this.secondaryRelatedDecorations = window.createTextEditorDecorationType({
+      isWholeLine: false,
+      rangeBehavior: 1,
+      //outline: '#fe536aa0 1px dashed',
+      overviewRulerColor: ScrollColor.ErrorActive,
+      // textDecoration: 'underline overline #fc5daf'
+      backgroundColor: '#fe536aa0'
     });
     this.textEditorWatcher = window.onDidChangeTextEditorSelection((e) => this.onTextChange(e, false));
   }
@@ -320,6 +323,7 @@ export default class VerificationDiagnosticsView {
       editor.setDecorations(this.relatedDecorations, []);
       editor.setDecorations(this.relatedDecorationsPartial, []);
       editor.setDecorations(this.relatedDecorationsPartialActive, []);
+      editor.setDecorations(this.secondaryRelatedDecorations, []);
     };
     if(data == null) {
       resetRelatedDecorations();
@@ -348,16 +352,17 @@ export default class VerificationDiagnosticsView {
 
     // Determine which keys is the closest to the selection.
     const closestKey = this.closestRange(selection, keys);
-    const ranges = [], partialRanges = [], partialActiveRanges = [];
+    const ranges = [], partialRanges = [], partialActiveRanges = [], secondaryRanges = [];
     for(const key of keys) {
       const closest = closestKey === key;
-      const relatedRanges = errorGraphLine.get(key) ?? [];
-      if(relatedRanges.length <= 1) {
+      const relatedRanges = errorGraphLine.get(key) ?? { primary: [], secondary: [] };
+      if(relatedRanges.primary.length <= 1) {
         ranges.push(key);
       } else { // Partial error
         if(closest || keys.length === 1) {
           partialActiveRanges.push(key);
-          partialActiveRanges.push(...relatedRanges);
+          partialActiveRanges.push(...relatedRanges.primary);
+          secondaryRanges.push(...relatedRanges.secondary);
         } else {
           partialRanges.push(key);
         }
@@ -366,6 +371,7 @@ export default class VerificationDiagnosticsView {
     editor.setDecorations(this.relatedDecorations, ranges);
     editor.setDecorations(this.relatedDecorationsPartial, partialRanges);
     editor.setDecorations(this.relatedDecorationsPartialActive, partialActiveRanges);
+    editor.setDecorations(this.secondaryRelatedDecorations, secondaryRanges);
   }
 
   private closestRange(selection: Range, ranges: Range[]) {
@@ -439,14 +445,15 @@ export default class VerificationDiagnosticsView {
     return range1.start.line <= range2.end.line && range1.end.line >= range2.start.line;
   }
 
-  private addEntry(errorGraph: ErrorGraph, range1: Range, range2: Range | null) {
+  private addEntry(errorGraph: ErrorGraph, range1: Range, range2: Range, secondaryRanges: Range[]) {
     const line = range1.start.line;
     if(errorGraph[line] === undefined) {
       errorGraph[line] = new Map();
     }
-    if(range2 != null) {
-      errorGraph[line].set(range1, (errorGraph[line].get(range1) ?? []).concat([ range2 ]));
-    }
+    const value = errorGraph[line].get(range1) ?? { primary:[], secondary:[] };
+    value.primary = value.primary.concat([ range2 ]);
+    value.secondary = value.secondary.concat(secondaryRanges);
+    errorGraph[line].set(range1, value);
   }
 
   private isNotErrorLine(diagnostic: LineVerificationStatus): boolean {
@@ -482,10 +489,10 @@ export default class VerificationDiagnosticsView {
     return lineDiagnostics;
   }
   // TODO: Find a way to not depend on this function
-  private rangeOf(r: any): Range {
+  private rangeOf(r: any, lineOffset: number = 0, charOffset: number = 0): Range {
     return new Range(
-      new Position(r.start.line, r.start.character),
-      new Position(r.end.line, r.end.character));
+      new Position(r.start.line as number + lineOffset, r.start.character as number + charOffset),
+      new Position(r.end.line as number + lineOffset, r.end.character as number + charOffset));
   }
 
   // For every error and related error, returns a mapping from line to affected ranges
@@ -494,8 +501,19 @@ export default class VerificationDiagnosticsView {
     const errorGraph: ErrorGraph = {
     };
     for(const diagnostic of diagnostics) {
+      if(diagnostic.range.start.line === 0) {
+        continue;
+      }
       const range = this.rangeOf(diagnostic.range);
-      this.addEntry(errorGraph, range, range);
+      // Look for the node which matches this diagnostic, and return the secondary ranges.
+      let secondaryRanges: Range[] | undefined;
+      try {
+        secondaryRanges = this.getSecondaryRangesArray(
+          params.perNodeDiagnostic, this.rangeOf(diagnostic.range, 1, 1)) ?? [];
+      } catch(e: unknown) {
+        console.log(e);
+      }
+      this.addEntry(errorGraph, range, range, secondaryRanges ?? []);
       if(Array.isArray(diagnostic.relatedInformation)) {
         for(const relatedInformation of diagnostic.relatedInformation as any[]) {
           const location = relatedInformation.location;
@@ -504,14 +522,38 @@ export default class VerificationDiagnosticsView {
           }
           const locationRange = this.rangeOf(location.range);
           if(params.uri === location.uri) {
-            this.addEntry(errorGraph, range, locationRange);
-            this.addEntry(errorGraph, locationRange, range);
-            this.addEntry(errorGraph, locationRange, locationRange);
+            this.addEntry(errorGraph, range, locationRange, []);
+            this.addEntry(errorGraph, locationRange, range, secondaryRanges ?? []);
+            this.addEntry(errorGraph, locationRange, locationRange, []);
           }
         }
       }
     }
     return errorGraph;
+  }
+  private getSecondaryRangesArray(children: NodeDiagnostic[], range: Range): Range[] | undefined {
+    for(const nodeDiagnostic of children) {
+      const potentialSecondaryRange = this.getSecondaryRanges(nodeDiagnostic, range);
+      if(potentialSecondaryRange !== undefined) {
+        return potentialSecondaryRange;
+      }
+    }
+    return undefined;
+  }
+
+  private getSecondaryRanges(nodeDiagnostic: NodeDiagnostic, range: Range): Range[] | undefined {
+    const nodeDiagnosticRange = this.rangeOf(nodeDiagnostic.range);
+    if(nodeDiagnosticRange === undefined) {
+      return undefined;
+    }
+    const intersection = nodeDiagnosticRange.intersection(range);
+    if(intersection === undefined || intersection.isEmpty) {
+      return undefined;
+    }
+    if(range.contains(nodeDiagnosticRange)) {
+      return nodeDiagnostic.relatedRanges.map(x => this.rangeOf(x, -1, -1));
+    }
+    return this.getSecondaryRangesArray(nodeDiagnostic.children, range);
   }
 
   private getRangesOfLineStatus(params: IVerificationDiagnosticsParams): Map<LineVerificationStatus, Range[]> {

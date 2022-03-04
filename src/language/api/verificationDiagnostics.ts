@@ -24,6 +24,7 @@ export interface NodeDiagnostic {
   range: Range;
   children: NodeDiagnostic[];
   status: NodeVerificationStatus;
+  relatedRanges: Range[];
 }
 
 export enum LineVerificationStatus {
