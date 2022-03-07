@@ -43,7 +43,7 @@ export default class VerificationDiagnosticsView {
   private readonly textEditorWatcher?: Disposable;
 
   private readonly dataByDocument = new Map<string, LinearVerificationDiagnostics>();
-  private animationCallback: unknown = 0;
+  private animationCallback: any = 0;
   // Alternates between 0 and 1
   private animationFrame: number = 0;
 
@@ -624,7 +624,7 @@ export default class VerificationDiagnosticsView {
   private setDisplayedVerificationDiagnostics(documentPath: string, newData: LinearVerificationDiagnostics) {
     const previousValue = this.dataByDocument.get(documentPath);
     const ranges = newData.decorations;
-    clearInterval(this.animationCallback as any);
+    clearInterval(this.animationCallback);
     const mustBeDelayed = (ranges: Map<LineVerificationStatus, Range[]>, previousRanges: Map<LineVerificationStatus, Range[]>) =>
       (this.getRanges(ranges, LineVerificationStatus.ResolutionError).length >= 1
           && this.getRanges(previousRanges, LineVerificationStatus.ResolutionError).length === 0)
@@ -640,6 +640,7 @@ export default class VerificationDiagnosticsView {
       }, 2000);
     } else {
       this.dataByDocument.set(documentPath, newData);
+      this.animationFrame = 1 - this.animationFrame;
       this.refreshDisplayedVerificationDiagnostics(window.activeTextEditor);
     }
     // Animated properties
@@ -648,7 +649,8 @@ export default class VerificationDiagnosticsView {
       || this.getRanges(ranges, LineVerificationStatus.ErrorVerifying).length > 0
       || this.getRanges(ranges, LineVerificationStatus.ErrorRangeVerifying).length > 0
       || this.getRanges(ranges, LineVerificationStatus.ErrorRangeStartVerifying).length > 0
-      || this.getRanges(ranges, LineVerificationStatus.ErrorRangeStartVerifying).length > 0) {
+      || this.getRanges(ranges, LineVerificationStatus.ErrorRangeAssertionVerifiedVerifying).length > 0
+      || this.getRanges(ranges, LineVerificationStatus.ErrorRangeEndVerifying).length > 0) {
       this.animationCallback = setInterval(() => {
         this.animationFrame = 1 - this.animationFrame;
         this.refreshDisplayedVerificationDiagnostics(window.activeTextEditor, true);

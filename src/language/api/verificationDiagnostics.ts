@@ -23,7 +23,8 @@ export interface NodeDiagnostic {
   resourceCount: integer;
   range: Range;
   children: NodeDiagnostic[];
-  status: NodeVerificationStatus;
+  statusCurrent: CurrentStatus;
+  statusVerification: VerificationStatus;
   relatedRanges: Range[];
 }
 
@@ -35,46 +36,43 @@ export enum LineVerificationStatus {
   Scheduled = 1,
   // For first-time computations, actively computing
   Verifying = 2,
-  VerifiedObsolete = 3,
-  VerifiedVerifying = 4,
+  VerifiedObsolete = 201,
+  VerifiedVerifying = 202,
   // Also applicable for empty spaces if they are not surrounded by errors.
-  Verified = 5,
-  // Dafny tried to do something but couldn't (timeout, out of resources...)
-  Inconclusive = 6,
+  Verified = 200,
   // For containers of other diagnostics nodes (e.g. methods)
-  ErrorRangeObsolete = 7,
-  ErrorRangeVerifying = 8,
-  ErrorRange = 9,
+  ErrorRangeObsolete = 301,
+  ErrorRangeVerifying = 302,
+  ErrorRange = 300,
   // For individual assertions in error ranges
-  ErrorRangeAssertionVerifiedObsolete = 10,
-  ErrorRangeAssertionVerifiedVerifying = 11,
-  ErrorRangeAssertionVerified = 12,
-  // For specific lines which have errors on it.
-  ErrorObsolete = 13,
-  ErrorVerifying = 14,
-  Error = 15,
+  ErrorRangeAssertionVerifiedObsolete = 351,
+  ErrorRangeAssertionVerifiedVerifying = 352,
+  ErrorRangeAssertionVerified = 350,
+  // For specific lines which have errors on it. They take over verified assertions
+  ErrorObsolete = 401,
+  ErrorVerifying = 402,
+  Error = 400,
   // For lines containing resolution or parse errors
   ResolutionError = 16,
   // Cosmetics, not part of server's output
-  ErrorRangeStart = 17,
-  ErrorRangeStartObsolete = 18,
-  ErrorRangeStartVerifying = 19,
-  ErrorRangeEnd = 20,
-  ErrorRangeEndObsolete = 21,
-  ErrorRangeEndVerifying = 22
+  ErrorRangeStart = 310,
+  ErrorRangeStartObsolete = 311,
+  ErrorRangeStartVerifying = 312,
+  ErrorRangeEnd = 320,
+  ErrorRangeEndObsolete = 321,
+  ErrorRangeEndVerifying = 322
 }
 
-export enum NodeVerificationStatus {
+export enum VerificationStatus {
   Unknown = 0,
-  Scheduled = 1,
-  Verifying = 2,
-  VerifiedObsolete = 3,
-  VerifiedVerifying = 4,
-  Verified = 5,
-  Inconclusive = 6,
-  ErrorObsolete = 7,
-  ErrorVerifying = 8,
-  Error = 9
+  Verified = 200,
+  Error = 400
+}
+
+export enum CurrentStatus {
+  Current = 0,
+  Obsolete = 1,
+  Verifying = 2
 }
 
 export enum ScrollColor {
