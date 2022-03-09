@@ -2,6 +2,8 @@
 import { /*commands, */DecorationOptions, Range, window, ExtensionContext, workspace, TextEditor, /*languages, Hover, TextDocument, Selection, CodeActionContext, ProviderResult, Command, CodeAction, CodeActionKind, WorkspaceEdit, Position,*/ TextEditorDecorationType, TextEditorSelectionChangeEvent, Position } from 'vscode';
 import { /*CancellationToken, */Diagnostic, Disposable } from 'vscode-languageclient';
 //import { LanguageConstants } from '../constants';
+import Configuration from '../configuration';
+import { ConfigurationConstants } from '../constants';
 
 import { IVerificationDiagnosticsParams, LineVerificationStatus, ScrollColor, NodeDiagnostic } from '../language/api/verificationDiagnostics';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
@@ -371,7 +373,10 @@ export default class VerificationDiagnosticsView {
     editor.setDecorations(this.relatedDecorations, ranges);
     editor.setDecorations(this.relatedDecorationsPartial, partialRanges);
     editor.setDecorations(this.relatedDecorationsPartialActive, partialActiveRanges);
-    editor.setDecorations(this.secondaryRelatedDecorations, secondaryRanges);
+    // TODO: should be visible only if an option is activated
+    if(Configuration.get<boolean>(ConfigurationConstants.LanguageServer.DisplayVerificationTrace)) {
+      editor.setDecorations(this.secondaryRelatedDecorations, secondaryRanges);
+    }
   }
 
   private closestRange(selection: Range, ranges: Range[]) {
@@ -509,7 +514,7 @@ export default class VerificationDiagnosticsView {
       let secondaryRanges: Range[] | undefined;
       try {
         secondaryRanges = this.getSecondaryRangesArray(
-          params.perNodeDiagnostic, this.rangeOf(diagnostic.range, 1, 1)) ?? [];
+          params.perNodeDiagnostic, this.rangeOf(diagnostic.range)) ?? [];
       } catch(e: unknown) {
         console.log(e);
       }
@@ -551,7 +556,7 @@ export default class VerificationDiagnosticsView {
       return undefined;
     }
     if(range.contains(nodeDiagnosticRange)) {
-      return nodeDiagnostic.relatedRanges.map(x => this.rangeOf(x, -1, -1));
+      return nodeDiagnostic.relatedRanges.map(x => this.rangeOf(x));
     }
     return this.getSecondaryRangesArray(nodeDiagnostic.children, range);
   }

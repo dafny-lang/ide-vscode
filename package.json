@@ -155,6 +155,11 @@
           "default": "true",
           "description": "Mark ghost statements in the code (requires restart and Dafny 3.4.0+)"
         },
+        "dafny.displayVerificationTrace": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show some relevant places in the path that led to an possibly failing assertion"
+        },
         "dafny.dafnyPlugins": {
           "type": "array",
           "items": {
