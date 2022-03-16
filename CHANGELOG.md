@@ -1,5 +1,11 @@
 # Release Notes
 
+## 2.3.0
+
+- Update Dafny and language server to [v3.5.0](https://github.com/dafny-lang/dafny/releases/tag/v3.5.0)
+- Fix bug causing the red error squiggles to disappear
+- Improved syntax highlighting
+
 ## 2.2.0
 
 - Add option to specify the preferred dafny version for automatic installation
