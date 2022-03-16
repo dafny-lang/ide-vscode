@@ -26,6 +26,8 @@ export interface NodeDiagnostic {
   statusCurrent: CurrentStatus;
   statusVerification: VerificationStatus;
   relatedRanges: Range[];
+  immediatelyRelatedRanges?: Range[];
+  dynamicallyRelatedRanges?: Range[];
 }
 
 export enum LineVerificationStatus {

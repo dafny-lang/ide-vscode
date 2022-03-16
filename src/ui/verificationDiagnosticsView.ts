@@ -5,12 +5,17 @@ import { /*CancellationToken, */Diagnostic, Disposable } from 'vscode-languagecl
 import Configuration from '../configuration';
 import { ConfigurationConstants } from '../constants';
 
-import { IVerificationDiagnosticsParams, LineVerificationStatus, ScrollColor, NodeDiagnostic } from '../language/api/verificationDiagnostics';
+import { IVerificationDiagnosticsParams, VerificationStatus, LineVerificationStatus, ScrollColor, NodeDiagnostic } from '../language/api/verificationDiagnostics';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath, toVsRange } from '../tools/vscode';
 
+interface ErrorGraphInfo {
+  primary: Range[];
+  secondary: Range[];
+}
+
 interface ErrorGraph {
-  [line: number]: Map<Range, { primary: Range[], secondary: Range[] } >;
+  [line: number]: Map<Range, ErrorGraphInfo>;
 }
 
 type DecorationType = undefined | {
@@ -450,15 +455,28 @@ export default class VerificationDiagnosticsView {
     return range1.start.line <= range2.end.line && range1.end.line >= range2.start.line;
   }
 
-  private addEntry(errorGraph: ErrorGraph, range1: Range, range2: Range, secondaryRanges: Range[]) {
+  private addRelated(errorGraph: ErrorGraph, range1: Range, valueModifier: (e: ErrorGraphInfo) => ErrorGraphInfo) {
     const line = range1.start.line;
     if(errorGraph[line] === undefined) {
       errorGraph[line] = new Map();
     }
-    const value = errorGraph[line].get(range1) ?? { primary:[], secondary:[] };
-    value.primary = value.primary.concat([ range2 ]);
-    value.secondary = value.secondary.concat(secondaryRanges);
+    let value = errorGraph[line].get(range1) ?? { primary:[], secondary:[] };
+    value = valueModifier(value);
     errorGraph[line].set(range1, value);
+  }
+
+  private addImmediatelyRelated(errorGraph: ErrorGraph, range1: Range, range2: Range) {
+    this.addRelated(errorGraph, range1, (value: ErrorGraphInfo) => {
+      value.primary = value.primary.concat([ range2 ]);
+      return value;
+    });
+  }
+
+  private addLooselyRelated(errorGraph: ErrorGraph, range1: Range, secondaryRanges: Range[]) {
+    this.addRelated(errorGraph, range1, (value: ErrorGraphInfo) => {
+      value.secondary = value.secondary.concat(secondaryRanges);
+      return value;
+    });
   }
 
   private isNotErrorLine(diagnostic: LineVerificationStatus): boolean {
@@ -502,63 +520,51 @@ export default class VerificationDiagnosticsView {
 
   // For every error and related error, returns a mapping from line to affected ranges
   private getErrorGraph(params: IVerificationDiagnosticsParams): ErrorGraph {
-    const diagnostics: Diagnostic[] = params.diagnostics;
-    const errorGraph: ErrorGraph = {
-    };
-    for(const diagnostic of diagnostics) {
-      if(diagnostic.range.start.line === 0) {
-        continue;
-      }
-      const range = this.rangeOf(diagnostic.range);
-      // Look for the node which matches this diagnostic, and return the secondary ranges.
-      let secondaryRanges: Range[] | undefined;
-      try {
-        secondaryRanges = this.getSecondaryRangesArray(
-          params.perNodeDiagnostic, this.rangeOf(diagnostic.range)) ?? [];
-      } catch(e: unknown) {
-        console.log(e);
-      }
-      this.addEntry(errorGraph, range, range, secondaryRanges ?? []);
-      if(Array.isArray(diagnostic.relatedInformation)) {
-        for(const relatedInformation of diagnostic.relatedInformation as any[]) {
-          const location = relatedInformation.location;
-          if(location == null || location.range == null) {
-            continue;
-          }
-          const locationRange = this.rangeOf(location.range);
-          if(params.uri === location.uri) {
-            this.addEntry(errorGraph, range, locationRange, []);
-            this.addEntry(errorGraph, locationRange, range, secondaryRanges ?? []);
-            this.addEntry(errorGraph, locationRange, locationRange, []);
-          }
-        }
-      }
+    const errorGraph: ErrorGraph = {};
+    for(const node of params.perNodeDiagnostic) {
+      this.buildGraph(errorGraph, node);
     }
     return errorGraph;
   }
-  private getSecondaryRangesArray(children: NodeDiagnostic[], range: Range): Range[] | undefined {
+  private buildGraphArray(errorGraph: ErrorGraph, children: NodeDiagnostic[]) {
     for(const nodeDiagnostic of children) {
-      const potentialSecondaryRange = this.getSecondaryRanges(nodeDiagnostic, range);
-      if(potentialSecondaryRange !== undefined) {
-        return potentialSecondaryRange;
-      }
+      this.buildGraph(errorGraph, nodeDiagnostic);
     }
-    return undefined;
   }
 
-  private getSecondaryRanges(nodeDiagnostic: NodeDiagnostic, range: Range): Range[] | undefined {
+  private rangeArrayOf(x: any): Range[] {
+    if(x === undefined) {
+      return [];
+    } else {
+      return (x as any[]).map(x => this.rangeOf(x));
+    }
+  }
+
+  private buildGraph(errorGraph: ErrorGraph, nodeDiagnostic: NodeDiagnostic) {
     const nodeDiagnosticRange = this.rangeOf(nodeDiagnostic.range);
     if(nodeDiagnosticRange === undefined) {
-      return undefined;
+      return;
     }
-    const intersection = nodeDiagnosticRange.intersection(range);
-    if(intersection === undefined || intersection.isEmpty) {
-      return undefined;
+    if(nodeDiagnostic.statusVerification === VerificationStatus.Error
+       && nodeDiagnostic.children.length == 0
+    ) {
+      const immediatelyRelatedRanges = this.rangeArrayOf(nodeDiagnostic.immediatelyRelatedRanges);
+      const dynamicallyRelatedRanges = this.rangeArrayOf(nodeDiagnostic.dynamicallyRelatedRanges);
+      const relatedRanges = this.rangeArrayOf(nodeDiagnostic.relatedRanges);
+      const allImmediateRanges: Range[] = [ nodeDiagnosticRange ].concat(immediatelyRelatedRanges);
+      for(const range1 of allImmediateRanges) {
+        this.addLooselyRelated(errorGraph, range1, relatedRanges);
+        // We set a pointer from an immediately related range to a dynamically related range
+        // but not the other way round because these are requires of other functions.
+        for(const range2dynamic of dynamicallyRelatedRanges) {
+          this.addImmediatelyRelated(errorGraph, range1, range2dynamic);
+        }
+        for(const range2 of allImmediateRanges) {
+          this.addImmediatelyRelated(errorGraph, range1, range2);
+        }
+      }
     }
-    if(range.contains(nodeDiagnosticRange)) {
-      return nodeDiagnostic.relatedRanges.map(x => this.rangeOf(x));
-    }
-    return this.getSecondaryRangesArray(nodeDiagnostic.children, range);
+    this.buildGraphArray(errorGraph, nodeDiagnostic.children);
   }
 
   private getRangesOfLineStatus(params: IVerificationDiagnosticsParams): Map<LineVerificationStatus, Range[]> {
