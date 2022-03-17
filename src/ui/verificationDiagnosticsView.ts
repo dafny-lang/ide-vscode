@@ -546,7 +546,7 @@ export default class VerificationDiagnosticsView {
       return;
     }
     if(nodeDiagnostic.statusVerification === VerificationStatus.Error
-       && nodeDiagnostic.children.length == 0
+       && nodeDiagnostic.children.length === 0
     ) {
       const immediatelyRelatedRanges = this.rangeArrayOf(nodeDiagnostic.immediatelyRelatedRanges);
       const dynamicallyRelatedRanges = this.rangeArrayOf(nodeDiagnostic.dynamicallyRelatedRanges);
