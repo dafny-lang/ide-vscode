@@ -361,7 +361,7 @@ export default class VerificationDiagnosticsView {
     const closestKey = this.closestRange(selection, keys);
     const ranges = [], partialRanges = [], partialActiveRanges = [], secondaryRanges = [];
     for(const key of keys) {
-      const closest = closestKey === key;
+      const closest = closestKey.isEqual(key);
       const relatedRanges = errorGraphLine.get(key) ?? { primary: [], secondary: [] };
       if(relatedRanges.primary.length <= 1) {
         ranges.push(key);
