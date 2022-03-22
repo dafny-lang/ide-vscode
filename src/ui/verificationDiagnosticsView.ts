@@ -336,11 +336,6 @@ export default class VerificationDiagnosticsView {
       resetRelatedDecorations();
       return;
     }
-    const errorDecorations = data.decorations.get(LineVerificationStatus.ResolutionError);
-    if(errorDecorations != null && errorDecorations.length > 0) {
-      resetRelatedDecorations();
-      return;
-    }
     const errorGraph = data.errorGraph;
     const selection = e === undefined ? editor.selection : e.selections[0];
     const line = selection.start.line;
@@ -596,7 +591,17 @@ export default class VerificationDiagnosticsView {
     const documentPath = getVsDocumentPath(params);
     //this.clearVerificationDiagnostics(documentPath);
 
-    const errorGraph = this.getErrorGraph(params);
+    let errorGraph: ErrorGraph = {};
+    for(const diagnostic of params.diagnostics) {
+      if(diagnostic.source !== 'Verifier') {
+        const range = this.rangeOf(diagnostic.range);
+        this.addImmediatelyRelated(errorGraph, range, range);
+      }
+    }
+    // We don't display related verification ranges if there are resolution errors.
+    if(Object.keys(errorGraph).length === 0) {
+      errorGraph = this.getErrorGraph(params);
+    }
     const ranges = this.getRangesOfLineStatus(params);
 
     const newData: LinearVerificationDiagnostics = {
