@@ -24,7 +24,8 @@ export namespace ConfigurationConstants {
     export const VerificationCachingPolicy = 'verificationCachingPolicy';
     export const MarkGhostStatements = 'markGhostStatements';
     export const DafnyPlugins = 'dafnyPlugins';
-    export const DisplayVerificationTrace = "displayVerificationTrace";
+    export const DisplayVerificationDiagnostics = 'displayVerificationDiagnostics';
+    export const DisplayVerificationTrace = 'displayVerificationTrace';
   }
 
   export namespace Compiler {
