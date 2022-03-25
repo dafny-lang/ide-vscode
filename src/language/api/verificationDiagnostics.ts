@@ -5,8 +5,7 @@ export interface IVerificationDiagnosticsParams {
   uri: DocumentUri;
   version?: integer;
   diagnostics: Diagnostic[];
-  perNodeDiagnostic: NodeDiagnostic[];// of size linesCount
-  linesCount: integer;
+  perNodeDiagnostic: NodeDiagnostic[];
   diagnosticsAreResolutionErrors: boolean;
   perLineDiagnostic: LineVerificationStatus[];
 }
@@ -55,7 +54,7 @@ export enum LineVerificationStatus {
   ErrorVerifying = 402,
   Error = 400,
   // For lines containing resolution or parse errors
-  ResolutionError = 16,
+  ResolutionError = 500,
   // Cosmetics, not part of server's output
   ErrorRangeStart = 310,
   ErrorRangeStartObsolete = 311,
