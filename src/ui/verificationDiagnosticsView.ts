@@ -36,6 +36,7 @@ interface DecorationSetRanges {
   decorations: Map<LineVerificationStatus, Range[]>;
 }
 interface LinearVerificationDiagnostics extends DecorationSetRanges {
+  version: number | undefined;
   errorGraph: ErrorGraph;
 }
 
@@ -587,7 +588,17 @@ export default class VerificationDiagnosticsView {
     return ranges;
   }
 
+  private areParamsOutdated(params: IVerificationDiagnosticsParams): boolean {
+    const documentPath = getVsDocumentPath(params);
+    const previousVersion = this.dataByDocument.get(documentPath)?.version;
+    return (previousVersion !== undefined && params.version !== undefined
+      && params.version < previousVersion);
+  }
+
   private updateVerificationDiagnostics(params: IVerificationDiagnosticsParams): void {
+    if(this.areParamsOutdated(params)) {
+      return;
+    }
     const documentPath = getVsDocumentPath(params);
     //this.clearVerificationDiagnostics(documentPath);
 
@@ -606,7 +617,8 @@ export default class VerificationDiagnosticsView {
 
     const newData: LinearVerificationDiagnostics = {
       decorations: ranges,
-      errorGraph: errorGraph };
+      errorGraph: errorGraph,
+      version: params.version };
 
     this.setDisplayedVerificationDiagnostics(documentPath, newData);
   }
