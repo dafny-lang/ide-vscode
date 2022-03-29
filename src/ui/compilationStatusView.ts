@@ -29,7 +29,7 @@ function toStatusMessage(status: CompilationStatus, message?: string | null): st
 
 interface DocumentStatusMessage {
   status: string;
-  version: number | undefined;
+  version?: number;
 }
 
 export default class CompilationStatusView {
@@ -73,8 +73,7 @@ export default class CompilationStatusView {
     this.documentStatusMessages.set(
       getVsDocumentPath(params),
       { status: toStatusMessage(params.status, params.message),
-        version: params.version
-      }
+        version: params.version }
     );
     this.updateActiveDocumentStatus();
   }
@@ -83,9 +82,7 @@ export default class CompilationStatusView {
   private verificationStarted(params: IVerificationStartedParams): void {
     this.documentStatusMessages.set(
       getVsDocumentPath(params),
-      { status: Messages.CompilationStatus.Verifying,
-        version: undefined
-      }
+      { status: Messages.CompilationStatus.Verifying }
     );
     this.updateActiveDocumentStatus();
   }
@@ -93,9 +90,7 @@ export default class CompilationStatusView {
   private verificationCompleted(params: IVerificationCompletedParams): void {
     this.documentStatusMessages.set(
       getVsDocumentPath(params),
-      { status: params.verified ? Messages.CompilationStatus.Verified : Messages.CompilationStatus.NotVerified,
-        version: undefined
-      }
+      { status: params.verified ? Messages.CompilationStatus.Verified : Messages.CompilationStatus.NotVerified }
     );
     this.updateActiveDocumentStatus();
   }
