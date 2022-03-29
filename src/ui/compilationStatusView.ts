@@ -27,7 +27,7 @@ function toStatusMessage(status: CompilationStatus, message?: string | null): st
   }
 }
 
-interface DocumentStatusMessage {
+interface IDocumentStatusMessage {
   status: string;
   version?: number;
 }
@@ -35,7 +35,7 @@ interface DocumentStatusMessage {
 export default class CompilationStatusView {
   // We store the message string for easier backwards compatibility with the
   // legacy status messages.
-  private readonly documentStatusMessages = new Map<string, DocumentStatusMessage>();
+  private readonly documentStatusMessages = new Map<string, IDocumentStatusMessage>();
 
   private constructor(private readonly statusBarItem: StatusBarItem) {}
 
@@ -62,7 +62,7 @@ export default class CompilationStatusView {
 
   private areParamsOutdated(params: ICompilationStatusParams): boolean {
     const previous = this.documentStatusMessages.get(getVsDocumentPath(params));
-    return previous?.version !== undefined && params.version !== undefined
+    return previous?.version != null && params.version != null
        && previous.version > params.version;
   }
 
@@ -73,7 +73,8 @@ export default class CompilationStatusView {
     this.documentStatusMessages.set(
       getVsDocumentPath(params),
       { status: toStatusMessage(params.status, params.message),
-        version: params.version }
+        version: params.version
+      }
     );
     this.updateActiveDocumentStatus();
   }
