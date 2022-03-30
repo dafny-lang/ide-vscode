@@ -419,14 +419,14 @@ export default class VerificationDiagnosticsView {
   // For every error and related error, returns a mapping from line to affected ranges
   private getErrorGraph(params: IVerificationDiagnosticsParams): ErrorGraph {
     const errorGraph: ErrorGraph = {};
-    for(const node of params.perNodeDiagnostic) {
-      this.buildGraph(errorGraph, node);
+    for(const verificationTree of params.verificationTrees) {
+      this.buildGraph(errorGraph, verificationTree);
     }
     return errorGraph;
   }
   private buildGraphArray(errorGraph: ErrorGraph, children: IVerificationTree[]) {
-    for(const nodeDiagnostic of children) {
-      this.buildGraph(errorGraph, nodeDiagnostic);
+    for(const verificationTree of children) {
+      this.buildGraph(errorGraph, verificationTree);
     }
   }
 
@@ -438,18 +438,18 @@ export default class VerificationDiagnosticsView {
     }
   }
 
-  private buildGraph(errorGraph: ErrorGraph, nodeDiagnostic: IVerificationTree) {
-    const nodeDiagnosticRange = this.rangeOf(nodeDiagnostic.range);
-    if(nodeDiagnosticRange === undefined) {
+  private buildGraph(errorGraph: ErrorGraph, verificationTree: IVerificationTree) {
+    const verificationTreeRange = this.rangeOf(verificationTree.range);
+    if(verificationTreeRange === undefined) {
       return;
     }
-    if(nodeDiagnostic.statusVerification === VerificationStatus.Error
-       && nodeDiagnostic.children.length === 0
+    if(verificationTree.statusVerification === VerificationStatus.Error
+       && verificationTree.children.length === 0
     ) {
-      const immediatelyRelatedRanges = this.rangeArrayOf(nodeDiagnostic.immediatelyRelatedRanges);
-      const dynamicallyRelatedRanges = this.rangeArrayOf(nodeDiagnostic.dynamicallyRelatedRanges);
-      const relatedRanges = this.rangeArrayOf(nodeDiagnostic.relatedRanges);
-      const allImmediateRanges: Range[] = [ nodeDiagnosticRange ].concat(immediatelyRelatedRanges);
+      const immediatelyRelatedRanges = this.rangeArrayOf(verificationTree.immediatelyRelatedRanges);
+      const dynamicallyRelatedRanges = this.rangeArrayOf(verificationTree.dynamicallyRelatedRanges);
+      const relatedRanges = this.rangeArrayOf(verificationTree.relatedRanges);
+      const allImmediateRanges: Range[] = [ verificationTreeRange ].concat(immediatelyRelatedRanges);
       for(const range1 of allImmediateRanges) {
         this.addLooselyRelated(errorGraph, range1, relatedRanges);
         // We set a pointer from an immediately related range to a dynamically related range
@@ -462,7 +462,7 @@ export default class VerificationDiagnosticsView {
         }
       }
     }
-    this.buildGraphArray(errorGraph, nodeDiagnostic.children);
+    this.buildGraphArray(errorGraph, verificationTree.children);
   }
 
   private getRangesOfLineStatus(params: IVerificationDiagnosticsParams): Map<LineVerificationStatus, Range[]> {

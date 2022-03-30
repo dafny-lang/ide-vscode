@@ -5,7 +5,7 @@ export interface IVerificationDiagnosticsParams {
   uri: DocumentUri;
   version?: integer;
   diagnostics: Diagnostic[];
-  perNodeDiagnostic: IVerificationTree[];
+  verificationTrees: IVerificationTree[];
   diagnosticsAreResolutionErrors: boolean;
   perLineDiagnostic: LineVerificationStatus[];
 }
