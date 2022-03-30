@@ -51,7 +51,7 @@ export default class VerificationDiagnosticsView {
   private readonly textEditorWatcher?: Disposable;
 
   private readonly dataByDocument = new Map<string, LinearVerificationDiagnostics>();
-  private animationCallback: any = 0;
+  private animationCallback: NodeJS.Timeout | undefined = undefined;
   // Alternates between 0 and 1
   private animationFrame: number = 0;
 
@@ -652,7 +652,9 @@ export default class VerificationDiagnosticsView {
   private setDisplayedVerificationDiagnostics(documentPath: string, newData: LinearVerificationDiagnostics) {
     const previousValue = this.dataByDocument.get(documentPath);
     const ranges = newData.decorations;
-    clearInterval(this.animationCallback);
+    if(this.animationCallback !== undefined) {
+      clearInterval(this.animationCallback);
+    }
     const mustBeDelayed = (ranges: Map<LineVerificationStatus, Range[]>, previousRanges: Map<LineVerificationStatus, Range[]>) =>
       (this.getRanges(ranges, LineVerificationStatus.ResolutionError).length >= 1
           && this.getRanges(previousRanges, LineVerificationStatus.ResolutionError).length === 0)
