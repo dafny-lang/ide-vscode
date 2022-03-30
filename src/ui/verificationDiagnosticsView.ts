@@ -96,21 +96,21 @@ export default class VerificationDiagnosticsView {
     }
     this.normalDecorations = new Map<LineVerificationStatus, DecorationType>([
       [ LineVerificationStatus.Scheduled, makeIcon('scheduled') ],
-      [ LineVerificationStatus.Error, makeIcon('error') ],
-      [ LineVerificationStatus.ErrorObsolete, makeIcon('error-obsolete') ],
-      [ LineVerificationStatus.ErrorVerifying, makeIcon('error-verifying', 'error-verifying-2') ],
-      [ LineVerificationStatus.ErrorRangeAssertionVerifiedObsolete, makeIcon('error-range-verified-obsolete') ],
-      [ LineVerificationStatus.ErrorRangeAssertionVerifiedVerifying, makeIcon('error-range-verified-verifying', 'error-range-verified-verifying-2') ],
-      [ LineVerificationStatus.ErrorRangeAssertionVerified, makeIcon('error-range-verified') ],
-      [ LineVerificationStatus.ErrorRange, makeIcon('error-range') ],
-      [ LineVerificationStatus.ErrorRangeStart, makeIcon('error-range-start') ],
-      [ LineVerificationStatus.ErrorRangeStartObsolete, makeIcon('error-range-start-obsolete') ],
-      [ LineVerificationStatus.ErrorRangeStartVerifying, makeIcon('error-range-start-verifying', 'error-range-start-verifying-2') ],
-      [ LineVerificationStatus.ErrorRangeEnd, makeIcon('error-range-end') ],
-      [ LineVerificationStatus.ErrorRangeEndObsolete, makeIcon('error-range-end-obsolete') ],
-      [ LineVerificationStatus.ErrorRangeEndVerifying, makeIcon('error-range-end-verifying', 'error-range-end-verifying-2') ],
-      [ LineVerificationStatus.ErrorRangeObsolete, makeIcon('error-range-obsolete') ],
-      [ LineVerificationStatus.ErrorRangeVerifying, makeIcon('error-range-verifying', 'error-range-verifying-2') ],
+      [ LineVerificationStatus.AssertionFailed, makeIcon('error') ],
+      [ LineVerificationStatus.AssertionFailedObsolete, makeIcon('error-obsolete') ],
+      [ LineVerificationStatus.AssertionFailedVerifying, makeIcon('error-verifying', 'error-verifying-2') ],
+      [ LineVerificationStatus.AssertionVerifiedInErrorContextObsolete, makeIcon('error-range-verified-obsolete') ],
+      [ LineVerificationStatus.AssertionVerifiedInErrorContextVerifying, makeIcon('error-range-verified-verifying', 'error-range-verified-verifying-2') ],
+      [ LineVerificationStatus.AssertionVerifiedInErrorContext, makeIcon('error-range-verified') ],
+      [ LineVerificationStatus.ErrorContext, makeIcon('error-range') ],
+      [ LineVerificationStatus.ErrorContextStart, makeIcon('error-range-start') ],
+      [ LineVerificationStatus.ErrorContextStartObsolete, makeIcon('error-range-start-obsolete') ],
+      [ LineVerificationStatus.ErrorContextStartVerifying, makeIcon('error-range-start-verifying', 'error-range-start-verifying-2') ],
+      [ LineVerificationStatus.ErrorContextEnd, makeIcon('error-range-end') ],
+      [ LineVerificationStatus.ErrorContextEndObsolete, makeIcon('error-range-end-obsolete') ],
+      [ LineVerificationStatus.ErrorContextEndVerifying, makeIcon('error-range-end-verifying', 'error-range-end-verifying-2') ],
+      [ LineVerificationStatus.ErrorContextObsolete, makeIcon('error-range-obsolete') ],
+      [ LineVerificationStatus.ErrorContextVerifying, makeIcon('error-range-verifying', 'error-range-verifying-2') ],
       [ LineVerificationStatus.VerifiedObsolete, makeIcon('verified-obsolete') ],
       [ LineVerificationStatus.VerifiedVerifying, makeIcon('verified-verifying', 'verified-verifying-2') ],
       [ LineVerificationStatus.Verified, makeIcon('verified') ],
@@ -120,21 +120,21 @@ export default class VerificationDiagnosticsView {
     grayMode = true;
     this.grayedeDecorations = new Map<LineVerificationStatus, DecorationType>([
       [ LineVerificationStatus.Scheduled, makeIcon('scheduled') ],
-      [ LineVerificationStatus.Error, makeIcon('error_gray') ],
-      [ LineVerificationStatus.ErrorObsolete, makeIcon('error-obsolete_gray') ],
-      [ LineVerificationStatus.ErrorVerifying, makeIcon('error-verifying_gray') ],
-      [ LineVerificationStatus.ErrorRangeAssertionVerifiedObsolete, makeIcon('error-range-verified-obsolete-gray') ],
-      [ LineVerificationStatus.ErrorRangeAssertionVerifiedVerifying, makeIcon('error-range-verified-obsolete-gray') ],
-      [ LineVerificationStatus.ErrorRangeAssertionVerified, makeIcon('error-range-verified-obsolete-gray') ],
-      [ LineVerificationStatus.ErrorRange, makeIcon('error-range_gray') ],
-      [ LineVerificationStatus.ErrorRangeStart, makeIcon('error-range-start_gray') ],
-      [ LineVerificationStatus.ErrorRangeStartObsolete, makeIcon('error-range-start_gray') ],
-      [ LineVerificationStatus.ErrorRangeStartVerifying, makeIcon('error-range-start_gray') ],
-      [ LineVerificationStatus.ErrorRangeEnd, makeIcon('error-range-end_gray') ],
-      [ LineVerificationStatus.ErrorRangeEndObsolete, makeIcon('error-range-end_gray') ],
-      [ LineVerificationStatus.ErrorRangeEndVerifying, makeIcon('error-range-end_gray') ],
-      [ LineVerificationStatus.ErrorRangeObsolete, makeIcon('error-range-obsolete_gray') ],
-      [ LineVerificationStatus.ErrorRangeVerifying, makeIcon('error-range-verifying_gray') ],
+      [ LineVerificationStatus.AssertionFailed, makeIcon('error_gray') ],
+      [ LineVerificationStatus.AssertionFailedObsolete, makeIcon('error-obsolete_gray') ],
+      [ LineVerificationStatus.AssertionFailedVerifying, makeIcon('error-verifying_gray') ],
+      [ LineVerificationStatus.AssertionVerifiedInErrorContextObsolete, makeIcon('error-range-verified-obsolete-gray') ],
+      [ LineVerificationStatus.AssertionVerifiedInErrorContextVerifying, makeIcon('error-range-verified-obsolete-gray') ],
+      [ LineVerificationStatus.AssertionVerifiedInErrorContext, makeIcon('error-range-verified-obsolete-gray') ],
+      [ LineVerificationStatus.ErrorContext, makeIcon('error-range_gray') ],
+      [ LineVerificationStatus.ErrorContextStart, makeIcon('error-range-start_gray') ],
+      [ LineVerificationStatus.ErrorContextStartObsolete, makeIcon('error-range-start_gray') ],
+      [ LineVerificationStatus.ErrorContextStartVerifying, makeIcon('error-range-start_gray') ],
+      [ LineVerificationStatus.ErrorContextEnd, makeIcon('error-range-end_gray') ],
+      [ LineVerificationStatus.ErrorContextEndObsolete, makeIcon('error-range-end_gray') ],
+      [ LineVerificationStatus.ErrorContextEndVerifying, makeIcon('error-range-end_gray') ],
+      [ LineVerificationStatus.ErrorContextObsolete, makeIcon('error-range-obsolete_gray') ],
+      [ LineVerificationStatus.ErrorContextVerifying, makeIcon('error-range-verifying_gray') ],
       [ LineVerificationStatus.VerifiedObsolete, makeIcon('verified_gray') ],
       [ LineVerificationStatus.VerifiedVerifying, makeIcon('verified_gray') ],
       [ LineVerificationStatus.Verified, makeIcon('verified_gray') ],
@@ -397,12 +397,12 @@ export default class VerificationDiagnosticsView {
       }
       const lineDiagnostic = lineDiagnostics[line];
       if(this.isNotErrorLine(previousLineDiagnostic)) {
-        if(lineDiagnostic === LineVerificationStatus.ErrorRange) {
-          lineDiagnostics[line] = direction === 1 ? LineVerificationStatus.ErrorRangeStart : LineVerificationStatus.ErrorRangeEnd;
-        } else if(lineDiagnostic === LineVerificationStatus.ErrorRangeObsolete) {
-          lineDiagnostics[line] = direction === 1 ? LineVerificationStatus.ErrorRangeStartObsolete : LineVerificationStatus.ErrorRangeEndObsolete;
-        } else if(lineDiagnostic === LineVerificationStatus.ErrorRangeVerifying) {
-          lineDiagnostics[line] = direction === 1 ? LineVerificationStatus.ErrorRangeStartVerifying : LineVerificationStatus.ErrorRangeEndVerifying;
+        if(lineDiagnostic === LineVerificationStatus.ErrorContext) {
+          lineDiagnostics[line] = direction === 1 ? LineVerificationStatus.ErrorContextStart : LineVerificationStatus.ErrorContextEnd;
+        } else if(lineDiagnostic === LineVerificationStatus.ErrorContextObsolete) {
+          lineDiagnostics[line] = direction === 1 ? LineVerificationStatus.ErrorContextStartObsolete : LineVerificationStatus.ErrorContextEndObsolete;
+        } else if(lineDiagnostic === LineVerificationStatus.ErrorContextVerifying) {
+          lineDiagnostics[line] = direction === 1 ? LineVerificationStatus.ErrorContextStartVerifying : LineVerificationStatus.ErrorContextEndVerifying;
         }
       }
       previousLineDiagnostic = lineDiagnostic;
@@ -526,18 +526,18 @@ export default class VerificationDiagnosticsView {
   }
 
   private static readonly obsoleteLineVerificationStatus: LineVerificationStatus[] = [
-    LineVerificationStatus.ErrorObsolete,
+    LineVerificationStatus.AssertionFailedObsolete,
     LineVerificationStatus.VerifiedObsolete,
-    LineVerificationStatus.ErrorRangeObsolete,
-    LineVerificationStatus.ErrorRangeStartObsolete,
-    LineVerificationStatus.ErrorRangeEndObsolete
+    LineVerificationStatus.ErrorContextObsolete,
+    LineVerificationStatus.ErrorContextStartObsolete,
+    LineVerificationStatus.ErrorContextEndObsolete
   ];
   private static readonly verifyingLineVerificationStatus: LineVerificationStatus[] = [
     LineVerificationStatus.Verifying,
-    LineVerificationStatus.ErrorVerifying,
-    LineVerificationStatus.ErrorRangeEndVerifying,
-    LineVerificationStatus.ErrorRangeVerifying,
-    LineVerificationStatus.ErrorRangeStartVerifying,
+    LineVerificationStatus.AssertionFailedVerifying,
+    LineVerificationStatus.ErrorContextEndVerifying,
+    LineVerificationStatus.ErrorContextVerifying,
+    LineVerificationStatus.ErrorContextStartVerifying,
     LineVerificationStatus.VerifiedVerifying
   ];
 
@@ -578,11 +578,11 @@ export default class VerificationDiagnosticsView {
     // Animated properties
     if(this.getRanges(ranges, LineVerificationStatus.Verifying).length > 0
       || this.getRanges(ranges, LineVerificationStatus.VerifiedVerifying).length > 0
-      || this.getRanges(ranges, LineVerificationStatus.ErrorVerifying).length > 0
-      || this.getRanges(ranges, LineVerificationStatus.ErrorRangeVerifying).length > 0
-      || this.getRanges(ranges, LineVerificationStatus.ErrorRangeStartVerifying).length > 0
-      || this.getRanges(ranges, LineVerificationStatus.ErrorRangeAssertionVerifiedVerifying).length > 0
-      || this.getRanges(ranges, LineVerificationStatus.ErrorRangeEndVerifying).length > 0) {
+      || this.getRanges(ranges, LineVerificationStatus.AssertionFailedVerifying).length > 0
+      || this.getRanges(ranges, LineVerificationStatus.ErrorContextVerifying).length > 0
+      || this.getRanges(ranges, LineVerificationStatus.ErrorContextStartVerifying).length > 0
+      || this.getRanges(ranges, LineVerificationStatus.AssertionVerifiedInErrorContextVerifying).length > 0
+      || this.getRanges(ranges, LineVerificationStatus.ErrorContextEndVerifying).length > 0) {
       this.animationCallback = setInterval(() => {
         this.animationFrame = 1 - this.animationFrame;
         this.refreshDisplayedVerificationDiagnostics(window.activeTextEditor, true);

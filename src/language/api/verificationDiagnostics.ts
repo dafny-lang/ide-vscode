@@ -44,26 +44,26 @@ export enum LineVerificationStatus {
   // Also applicable for empty spaces if they are not surrounded by errors.
   Verified = 200,
   // For containers of other diagnostics nodes (e.g. methods)
-  ErrorRangeObsolete = 301,
-  ErrorRangeVerifying = 302,
-  ErrorRange = 300,
+  ErrorContextObsolete = 301,
+  ErrorContextVerifying = 302,
+  ErrorContext = 300,
   // For individual assertions in error ranges
-  ErrorRangeAssertionVerifiedObsolete = 351,
-  ErrorRangeAssertionVerifiedVerifying = 352,
-  ErrorRangeAssertionVerified = 350,
+  AssertionVerifiedInErrorContextObsolete = 351,
+  AssertionVerifiedInErrorContextVerifying = 352,
+  AssertionVerifiedInErrorContext = 350,
   // For specific lines which have errors on it. They take over verified assertions
-  ErrorObsolete = 401,
-  ErrorVerifying = 402,
-  Error = 400,
+  AssertionFailedObsolete = 401,
+  AssertionFailedVerifying = 402,
+  AssertionFailed = 400,
   // For lines containing resolution or parse errors
   ResolutionError = 500,
   // Cosmetics, not part of server's output
-  ErrorRangeStart = 310,
-  ErrorRangeStartObsolete = 311,
-  ErrorRangeStartVerifying = 312,
-  ErrorRangeEnd = 320,
-  ErrorRangeEndObsolete = 321,
-  ErrorRangeEndVerifying = 322
+  ErrorContextStart = 310,
+  ErrorContextStartObsolete = 311,
+  ErrorContextStartVerifying = 312,
+  ErrorContextEnd = 320,
+  ErrorContextEndObsolete = 321,
+  ErrorContextEndVerifying = 322
 }
 
 export enum VerificationStatus {
