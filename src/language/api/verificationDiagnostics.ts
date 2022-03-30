@@ -1,10 +1,25 @@
 import { Position } from 'vscode';
-import { Diagnostic, DocumentUri, Range, integer } from 'vscode-languageclient';
+import { DocumentUri, integer } from 'vscode-languageclient';
+
+export interface IPosition {
+  line: number;
+  character: number;
+}
+
+export interface IRange {
+  start: IPosition;
+  end: IPosition;
+}
+
+export interface IDiagnostic {
+  range: IRange;
+  source: string;
+}
 
 export interface IVerificationDiagnosticsParams {
   uri: DocumentUri;
   version?: integer;
-  diagnostics: Diagnostic[];
+  diagnostics: IDiagnostic[];
   verificationTrees: IVerificationTree[];
   diagnosticsAreResolutionErrors: boolean;
   perLineDiagnostic: LineVerificationStatus[];
@@ -20,13 +35,13 @@ export interface IVerificationTree {
   endTime: integer;
   timeSpent: integer;
   resourceCount: integer;
-  range: Range;
+  range: IRange;
   children: IVerificationTree[];
   statusCurrent: CurrentStatus;
   statusVerification: VerificationStatus;
-  relatedRanges: Range[];
-  immediatelyRelatedRanges?: Range[];
-  dynamicallyRelatedRanges?: Range[];
+  relatedRanges: IRange[];
+  immediatelyRelatedRanges?: IRange[];
+  dynamicallyRelatedRanges?: IRange[];
 }
 
 // Except for cosmetics, this enumeration is a copy-paste from Dafny's

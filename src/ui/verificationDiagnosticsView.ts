@@ -5,7 +5,7 @@ import { /*CancellationToken, */Diagnostic, Disposable } from 'vscode-languagecl
 import Configuration from '../configuration';
 import { ConfigurationConstants } from '../constants';
 
-import { IVerificationDiagnosticsParams, VerificationStatus, LineVerificationStatus, ScrollColor, IVerificationTree, obsoleteLineVerificationStatus, verifyingLineVerificationStatus } from '../language/api/verificationDiagnostics';
+import { IVerificationDiagnosticsParams, VerificationStatus, LineVerificationStatus, ScrollColor, IVerificationTree, obsoleteLineVerificationStatus, verifyingLineVerificationStatus, IRange } from '../language/api/verificationDiagnostics';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath, toVsRange } from '../tools/vscode';
 
@@ -410,10 +410,10 @@ export default class VerificationDiagnosticsView {
     return lineDiagnostics;
   }
   // TODO: Find a way to not depend on this function
-  private rangeOf(r: any, lineOffset: number = 0, charOffset: number = 0): Range {
+  private rangeOf(r: IRange, lineOffset: number = 0, charOffset: number = 0): Range {
     return new Range(
-      new Position(r.start.line as number + lineOffset, r.start.character as number + charOffset),
-      new Position(r.end.line as number + lineOffset, r.end.character as number + charOffset));
+      new Position(r.start.line + lineOffset, r.start.character + charOffset),
+      new Position(r.end.line + lineOffset, r.end.character + charOffset));
   }
 
   // For every error and related error, returns a mapping from line to affected ranges
