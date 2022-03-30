@@ -5,7 +5,7 @@ import { /*CancellationToken, */Diagnostic, Disposable } from 'vscode-languagecl
 import Configuration from '../configuration';
 import { ConfigurationConstants } from '../constants';
 
-import { IVerificationDiagnosticsParams, VerificationStatus, LineVerificationStatus, ScrollColor, INodeDiagnostic } from '../language/api/verificationDiagnostics';
+import { IVerificationDiagnosticsParams, VerificationStatus, LineVerificationStatus, ScrollColor, INodeDiagnostic, obsoleteLineVerificationStatus, verifyingLineVerificationStatus } from '../language/api/verificationDiagnostics';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath, toVsRange } from '../tools/vscode';
 
@@ -525,21 +525,6 @@ export default class VerificationDiagnosticsView {
     this.setDisplayedVerificationDiagnostics(documentPath, newData);
   }
 
-  private static readonly obsoleteLineVerificationStatus: LineVerificationStatus[] = [
-    LineVerificationStatus.AssertionFailedObsolete,
-    LineVerificationStatus.VerifiedObsolete,
-    LineVerificationStatus.ErrorContextObsolete,
-    LineVerificationStatus.ErrorContextStartObsolete,
-    LineVerificationStatus.ErrorContextEndObsolete
-  ];
-  private static readonly verifyingLineVerificationStatus: LineVerificationStatus[] = [
-    LineVerificationStatus.Verifying,
-    LineVerificationStatus.AssertionFailedVerifying,
-    LineVerificationStatus.ErrorContextEndVerifying,
-    LineVerificationStatus.ErrorContextVerifying,
-    LineVerificationStatus.ErrorContextStartVerifying,
-    LineVerificationStatus.VerifiedVerifying
-  ];
 
   private getRanges(ranges: Map<LineVerificationStatus, Range[]>, status: LineVerificationStatus): Range[] {
     let r = ranges.get(status);
@@ -560,9 +545,9 @@ export default class VerificationDiagnosticsView {
     const mustBeDelayed = (ranges: Map<LineVerificationStatus, Range[]>, previousRanges: Map<LineVerificationStatus, Range[]>) =>
       (this.getRanges(ranges, LineVerificationStatus.ResolutionError).length >= 1
           && this.getRanges(previousRanges, LineVerificationStatus.ResolutionError).length === 0)
-      || (VerificationDiagnosticsView.obsoleteLineVerificationStatus.some(status => this.getRanges(ranges, status).length >= 1)
-          && VerificationDiagnosticsView.verifyingLineVerificationStatus.every(status => this.getRanges(ranges, status).length === 0)
-          && VerificationDiagnosticsView.obsoleteLineVerificationStatus.every(status => this.getRanges(previousRanges, status).length === 0)
+      || (obsoleteLineVerificationStatus.some(status => this.getRanges(ranges, status).length >= 1)
+          && verifyingLineVerificationStatus.every(status => this.getRanges(ranges, status).length === 0)
+          && obsoleteLineVerificationStatus.every(status => this.getRanges(previousRanges, status).length === 0)
       );
     if(mustBeDelayed(ranges, (previousValue === undefined ? VerificationDiagnosticsView.emptyLinearVerificationDiagnostics : previousValue.decorations))) {
       // Delay for 1 second resolution errors so that we don't interrupt the verification workflow if not necessary.

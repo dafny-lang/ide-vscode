@@ -85,3 +85,19 @@ export enum ScrollColor {
   ErrorRange = '#fad00080',
   Verified = '#62b45580'
 }
+
+export const obsoleteLineVerificationStatus: LineVerificationStatus[] = [
+  LineVerificationStatus.AssertionFailedObsolete,
+  LineVerificationStatus.VerifiedObsolete,
+  LineVerificationStatus.ErrorContextObsolete,
+  LineVerificationStatus.ErrorContextStartObsolete,
+  LineVerificationStatus.ErrorContextEndObsolete
+];
+export const verifyingLineVerificationStatus: LineVerificationStatus[] = [
+  LineVerificationStatus.Verifying,
+  LineVerificationStatus.AssertionFailedVerifying,
+  LineVerificationStatus.ErrorContextEndVerifying,
+  LineVerificationStatus.ErrorContextVerifying,
+  LineVerificationStatus.ErrorContextStartVerifying,
+  LineVerificationStatus.VerifiedVerifying
+];
