@@ -72,7 +72,8 @@ export default class CompilationStatusView {
     }
     this.documentStatusMessages.set(
       getVsDocumentPath(params),
-      { status: toStatusMessage(params.status, params.message),
+      {
+        status: toStatusMessage(params.status, params.message),
         version: params.version
       }
     );
