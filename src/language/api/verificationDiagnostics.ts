@@ -58,7 +58,7 @@ export enum LineVerificationStatus {
   VerifiedVerifying = 202,
   // Also applicable for empty spaces if they are not surrounded by errors.
   Verified = 200,
-  // For containers of other diagnostics nodes (e.g. methods)
+ // For trees containing children with errors (e.g. methods)
   ErrorContextObsolete = 301,
   ErrorContextVerifying = 302,
   ErrorContext = 300,
