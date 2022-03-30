@@ -5,12 +5,12 @@ export interface IVerificationDiagnosticsParams {
   uri: DocumentUri;
   version?: integer;
   diagnostics: Diagnostic[];
-  perNodeDiagnostic: INodeDiagnostic[];
+  perNodeDiagnostic: IVerificationTree[];
   diagnosticsAreResolutionErrors: boolean;
   perLineDiagnostic: LineVerificationStatus[];
 }
 
-export interface INodeDiagnostic {
+export interface IVerificationTree {
   displayName: string;
   identifier: string;
   position: Position;
@@ -21,7 +21,7 @@ export interface INodeDiagnostic {
   timeSpent: integer;
   resourceCount: integer;
   range: Range;
-  children: INodeDiagnostic[];
+  children: IVerificationTree[];
   statusCurrent: CurrentStatus;
   statusVerification: VerificationStatus;
   relatedRanges: Range[];

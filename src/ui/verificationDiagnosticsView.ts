@@ -5,7 +5,7 @@ import { /*CancellationToken, */Diagnostic, Disposable } from 'vscode-languagecl
 import Configuration from '../configuration';
 import { ConfigurationConstants } from '../constants';
 
-import { IVerificationDiagnosticsParams, VerificationStatus, LineVerificationStatus, ScrollColor, INodeDiagnostic, obsoleteLineVerificationStatus, verifyingLineVerificationStatus } from '../language/api/verificationDiagnostics';
+import { IVerificationDiagnosticsParams, VerificationStatus, LineVerificationStatus, ScrollColor, IVerificationTree, obsoleteLineVerificationStatus, verifyingLineVerificationStatus } from '../language/api/verificationDiagnostics';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath, toVsRange } from '../tools/vscode';
 
@@ -424,7 +424,7 @@ export default class VerificationDiagnosticsView {
     }
     return errorGraph;
   }
-  private buildGraphArray(errorGraph: ErrorGraph, children: INodeDiagnostic[]) {
+  private buildGraphArray(errorGraph: ErrorGraph, children: IVerificationTree[]) {
     for(const nodeDiagnostic of children) {
       this.buildGraph(errorGraph, nodeDiagnostic);
     }
@@ -438,7 +438,7 @@ export default class VerificationDiagnosticsView {
     }
   }
 
-  private buildGraph(errorGraph: ErrorGraph, nodeDiagnostic: INodeDiagnostic) {
+  private buildGraph(errorGraph: ErrorGraph, nodeDiagnostic: IVerificationTree) {
     const nodeDiagnosticRange = this.rangeOf(nodeDiagnostic.range);
     if(nodeDiagnosticRange === undefined) {
       return;
