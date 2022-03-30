@@ -5,12 +5,12 @@ export interface IVerificationDiagnosticsParams {
   uri: DocumentUri;
   version?: integer;
   diagnostics: Diagnostic[];
-  perNodeDiagnostic: NodeDiagnostic[];
+  perNodeDiagnostic: INodeDiagnostic[];
   diagnosticsAreResolutionErrors: boolean;
   perLineDiagnostic: LineVerificationStatus[];
 }
 
-export interface NodeDiagnostic {
+export interface INodeDiagnostic {
   displayName: string;
   identifier: string;
   position: Position;
@@ -21,7 +21,7 @@ export interface NodeDiagnostic {
   timeSpent: integer;
   resourceCount: integer;
   range: Range;
-  children: NodeDiagnostic[];
+  children: INodeDiagnostic[];
   statusCurrent: CurrentStatus;
   statusVerification: VerificationStatus;
   relatedRanges: Range[];
@@ -29,6 +29,8 @@ export interface NodeDiagnostic {
   dynamicallyRelatedRanges?: Range[];
 }
 
+// Except for cosmetics, this enumeration is a copy-paste from Dafny's
+// Source/DafnyLanguageServer/Workspace/Notifications/VerificationDiagnosticsParams.cs
 export enum LineVerificationStatus {
   // Default value for every line, before the renderer figures it out.
   Unknown = 0,

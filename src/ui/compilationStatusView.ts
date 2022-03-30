@@ -1,11 +1,9 @@
 import { StatusBarAlignment, StatusBarItem, TextDocument, window, workspace, ExtensionContext } from 'vscode';
-
 import { CompilationStatus, ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from '../language/api/compilationStatus';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath } from '../tools/vscode';
 import { enableOnlyForDafnyDocuments } from '../tools/visibility';
 import { Messages } from './messages';
-import { ENGINE_METHOD_PKEY_ASN1_METHS } from 'constants';
 
 const StatusBarPriority = 10;
 
