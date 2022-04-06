@@ -19,7 +19,6 @@ export interface IDiagnostic {
 export interface IVerificationDiagnosticsParams {
   uri: DocumentUri;
   version?: integer;
-  diagnostics: IDiagnostic[];
   verificationTrees: IVerificationTree[];
   diagnosticsAreResolutionErrors: boolean;
   perLineDiagnostic: LineVerificationStatus[];
@@ -48,7 +47,7 @@ export interface IVerificationTree {
 // Source/DafnyLanguageServer/Workspace/Notifications/VerificationDiagnosticsParams.cs
 export enum LineVerificationStatus {
   // Default value for every line, before the renderer figures it out.
-  Unknown = 0,
+  Nothing = 0,
   // For first-time computation not actively computing but soon. Synonym of "obsolete"
   // (scheduledComputation)
   Scheduled = 1,

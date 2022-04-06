@@ -1,5 +1,5 @@
 /* eslint-disable max-depth */
-import { /*commands, */DecorationOptions, Range, window, ExtensionContext, workspace, TextEditor, /*languages, Hover, TextDocument, Selection, CodeActionContext, ProviderResult, Command, CodeAction, CodeActionKind, WorkspaceEdit, Position,*/ TextEditorDecorationType, TextEditorSelectionChangeEvent, Position } from 'vscode';
+import { /*commands, */DecorationOptions, Range, window, ExtensionContext, workspace, TextEditor, /*languages, Hover, TextDocument, Selection, CodeActionContext, ProviderResult, Command, CodeAction, CodeActionKind, WorkspaceEdit, Position,*/ TextEditorDecorationType, TextEditorSelectionChangeEvent, Position, languages, Uri } from 'vscode';
 import { /*CancellationToken, */Diagnostic, Disposable } from 'vscode-languageclient';
 //import { LanguageConstants } from '../constants';
 import Configuration from '../configuration';
@@ -379,7 +379,7 @@ export default class VerificationDiagnosticsView {
 
   private isNotErrorLine(diagnostic: LineVerificationStatus): boolean {
     return (diagnostic === LineVerificationStatus.Scheduled
-      || diagnostic === LineVerificationStatus.Unknown
+      || diagnostic === LineVerificationStatus.Nothing
       || diagnostic === LineVerificationStatus.Verified
       || diagnostic === LineVerificationStatus.VerifiedObsolete
       || diagnostic === LineVerificationStatus.VerifiedVerifying
@@ -505,9 +505,10 @@ export default class VerificationDiagnosticsView {
     //this.clearVerificationDiagnostics(documentPath);
 
     let errorGraph: ErrorGraph = {};
-    for(const diagnostic of params.diagnostics) {
+    const diagnostics = languages.getDiagnostics(Uri.parse(params.uri));
+    for(const diagnostic of diagnostics) {
       if(diagnostic.source !== 'Verifier') {
-        const range = this.rangeOf(diagnostic.range);
+        const range = diagnostic.range;
         this.addImmediatelyRelated(errorGraph, range, range);
       }
     }
