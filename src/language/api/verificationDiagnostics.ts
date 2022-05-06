@@ -1,4 +1,3 @@
-import { Position } from 'vscode';
 import { DocumentUri, integer } from 'vscode-languageclient';
 
 export interface IPosition {
@@ -20,25 +19,6 @@ export interface IVerificationStatusGutter {
   uri: DocumentUri;
   version?: integer;
   perLineStatus: LineVerificationStatus[];
-}
-
-export interface IVerificationTree {
-  displayName: string;
-  identifier: string;
-  position: Position;
-  started: boolean;
-  finished: boolean;
-  startTime: integer;
-  endTime: integer;
-  timeSpent: integer;
-  resourceCount: integer;
-  range: IRange;
-  children: IVerificationTree[];
-  statusCurrent: CurrentStatus;
-  statusVerification: VerificationStatus;
-  relatedRanges: IRange[];
-  immediatelyRelatedRanges?: IRange[];
-  dynamicallyRelatedRanges?: IRange[];
 }
 
 // Except for cosmetics, this enumeration is a copy-paste from Dafny's
@@ -76,18 +56,6 @@ export enum LineVerificationStatus {
   ErrorContextEnd = 320,
   ErrorContextEndObsolete = 321,
   ErrorContextEndVerifying = 322
-}
-
-export enum VerificationStatus {
-  Unknown = 0,
-  Verified = 200,
-  Error = 400
-}
-
-export enum CurrentStatus {
-  Current = 0,
-  Obsolete = 1,
-  Verifying = 2
 }
 
 export enum ScrollColor {

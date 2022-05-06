@@ -107,8 +107,8 @@ export class DafnyLanguageClient extends LanguageClient {
     return this.onNotification('dafny/ghost/diagnostics', callback);
   }
 
-  public onVerificationDiagnostics(callback: (params: IVerificationDiagnosticsParams) => void): Disposable {
-    return this.onNotification('dafny/verification/diagnostics', callback);
+  public onVerificationStatusGutter(callback: (params: IVerificationDiagnosticsParams) => void): Disposable {
+    return this.onNotification('dafny/verification/status/gutter', callback);
   }
 
   public onCompilationStatus(callback: (params: ICompilationStatusParams) => void): Disposable {

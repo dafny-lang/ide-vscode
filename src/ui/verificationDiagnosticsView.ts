@@ -1,22 +1,11 @@
 /* eslint-disable max-depth */
-import { /*commands, */DecorationOptions, Range, window, ExtensionContext, workspace, TextEditor, /*languages, Hover, TextDocument, Selection, CodeActionContext, ProviderResult, Command, CodeAction, CodeActionKind, WorkspaceEdit, Position,*/ TextEditorDecorationType, TextEditorSelectionChangeEvent, Position, languages, Uri } from 'vscode';
+import { /*commands, */DecorationOptions, Range, window, ExtensionContext, workspace, TextEditor, /*languages, Hover, TextDocument, Selection, CodeActionContext, ProviderResult, Command, CodeAction, CodeActionKind, WorkspaceEdit, Position,*/ TextEditorDecorationType, Position } from 'vscode';
 import { /*CancellationToken, */Diagnostic, Disposable } from 'vscode-languageclient';
 //import { LanguageConstants } from '../constants';
-import Configuration from '../configuration';
-import { ConfigurationConstants } from '../constants';
 
-import { IVerificationStatusGutter, VerificationStatus, LineVerificationStatus, ScrollColor, IVerificationTree, obsoleteLineVerificationStatus, verifyingLineVerificationStatus, IRange } from '../language/api/verificationDiagnostics';
+import { IVerificationStatusGutter, LineVerificationStatus, ScrollColor, obsoleteLineVerificationStatus, verifyingLineVerificationStatus, IRange } from '../language/api/verificationDiagnostics';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath, toVsRange } from '../tools/vscode';
-
-interface ErrorGraphInfo {
-  primary: Range[];
-  secondary: Range[];
-}
-
-interface ErrorGraph {
-  [line: number]: Map<Range, ErrorGraphInfo>;
-}
 
 type DecorationType = undefined | {
   type: 'static',
@@ -37,7 +26,6 @@ interface DecorationSetRanges {
 }
 interface LinearVerificationDiagnostics extends DecorationSetRanges {
   version: number | undefined;
-  errorGraph: ErrorGraph;
 }
 
 export default class VerificationDiagnosticsView {
@@ -173,7 +161,6 @@ export default class VerificationDiagnosticsView {
       // textDecoration: 'underline overline #fc5daf'
       backgroundColor: '#fe536aa0'
     });
-    this.textEditorWatcher = window.onDidChangeTextEditorSelection((e) => this.onTextChange(e, false));
   }
 
   public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): VerificationDiagnosticsView {
@@ -181,118 +168,9 @@ export default class VerificationDiagnosticsView {
     context.subscriptions.push(
       workspace.onDidCloseTextDocument(document => instance.clearVerificationDiagnostics(document.uri.toString())),
       window.onDidChangeActiveTextEditor(editor => instance.refreshDisplayedVerificationDiagnostics(editor)),
-      languageClient.onVerificationDiagnostics(params => instance.updateVerificationDiagnostics(params))
+      languageClient.onVerificationStatusGutter(params => instance.updateVerificationDiagnostics(params))
     );
     return instance;
-  }
-
-  /////////////////// Related error rendering ///////////////////
-  private rangeDistance(range1: Range, range2: Range): number {
-    if(range1.intersection(range2)?.isEmpty === false
-       || range1.contains(range2)
-       || range2.contains(range1)) {
-      return 0;
-    }
-    if(range1.end.line < range2.start.line) {
-      return (range2.start.line - range1.end.line) * 1000;
-    } else if(range2.end.line < range1.start.line) {
-      return (range1.start.line - range2.end.line) * 1000;
-    } else {
-      // Same line
-      if(range1.end.character < range2.start.character) {
-        return range2.start.character - range1.end.character;
-      } else {
-        return range1.start.character - range2.end.character;
-      }
-    }
-  }
-
-  private readonly lastResolvedDocumentStates: Map<string, string> = new Map();
-
-  public onTextChange(e: TextEditorSelectionChangeEvent | undefined = undefined, storeDocumentState: boolean = false): void {
-    const editor: TextEditor | undefined = window.activeTextEditor;
-    if(editor == null) {
-      return;
-    }
-    if(e !== undefined && e.kind === undefined) {
-      return;
-    }
-    const documentPath = editor.document.uri.toString();
-    const data = this.dataByDocument.get(documentPath);
-    const currentText = editor.document.getText();
-    // Only works if we have the same text as the last resolved document states
-    if(this.lastResolvedDocumentStates.get(documentPath) !== currentText) {
-      if(storeDocumentState) {
-        this.lastResolvedDocumentStates.set(documentPath, currentText);
-      } else {
-        return;
-      }
-    }
-
-    const resetRelatedDecorations = () => {
-      editor.setDecorations(this.relatedDecorations, []);
-      editor.setDecorations(this.relatedDecorationsPartial, []);
-      editor.setDecorations(this.relatedDecorationsPartialActive, []);
-      editor.setDecorations(this.secondaryRelatedDecorations, []);
-    };
-    if(data == null) {
-      resetRelatedDecorations();
-      return;
-    }
-    const errorGraph = data.errorGraph;
-    const selection = e === undefined ? editor.selection : e.selections[0];
-    const line = selection.start.line;
-    const errorGraphLine = errorGraph[line];
-    if(errorGraphLine == null) {
-      resetRelatedDecorations();
-      return;
-    }
-    // Highlights all ranges on the line
-    // Highlights ranges under cursor and dependency with active highlighting
-    const keys = [ ...errorGraphLine.keys() ];
-    if(keys.length === 0) {
-      resetRelatedDecorations();
-      return;
-    }
-
-    // Determine which keys is the closest to the selection.
-    const closestKey = this.closestRange(selection, keys);
-    const ranges = [], partialRanges = [], partialActiveRanges = [], secondaryRanges = [];
-    for(const key of keys) {
-      const closest = closestKey.isEqual(key);
-      const relatedRanges = errorGraphLine.get(key) ?? { primary: [], secondary: [] };
-      if(relatedRanges.primary.length <= 1) {
-        ranges.push(key);
-      } else { // Partial error
-        if(closest || keys.length === 1) {
-          partialActiveRanges.push(key);
-          partialActiveRanges.push(...relatedRanges.primary);
-          secondaryRanges.push(...relatedRanges.secondary);
-        } else {
-          partialRanges.push(key);
-        }
-      }
-    }
-    editor.setDecorations(this.relatedDecorations, ranges);
-    editor.setDecorations(this.relatedDecorationsPartial, partialRanges);
-    editor.setDecorations(this.relatedDecorationsPartialActive, partialActiveRanges);
-    // TODO: should be visible only if an option is activated
-    if(Configuration.get<boolean>(ConfigurationConstants.LanguageServer.DisplayVerificationTrace)) {
-      editor.setDecorations(this.secondaryRelatedDecorations, secondaryRanges);
-    }
-  }
-
-  private closestRange(selection: Range, ranges: Range[]) {
-    let closestKey = ranges[0];
-    let currentDistance = -1;
-    for(const key of ranges) {
-      const newDistance = this.rangeDistance(key, selection);
-      if(newDistance < currentDistance || currentDistance < 0) {
-        closestKey = key;
-        currentDistance = newDistance;
-      }
-    }
-    return closestKey;
   }
 
   /////////////////// Gutter rendering ///////////////////
@@ -306,9 +184,6 @@ export default class VerificationDiagnosticsView {
   public refreshDisplayedVerificationDiagnostics(editor?: TextEditor, animateOnly: boolean = false): void {
     if(editor == null) {
       return;
-    }
-    if(!animateOnly) {
-      this.onTextChange(undefined, true);
     }
     const documentPath = editor.document.uri.toString();
     const originalData = this.dataByDocument.get(documentPath);
@@ -349,33 +224,6 @@ export default class VerificationDiagnosticsView {
       this.dataByDocument.delete(documentPath);
     }
   }
-  private rangesIntersect(range1: Range, range2: Range): boolean {
-    return range1.start.line <= range2.end.line && range1.end.line >= range2.start.line;
-  }
-
-  private addRelated(errorGraph: ErrorGraph, range1: Range, valueModifier: (e: ErrorGraphInfo) => ErrorGraphInfo) {
-    const line = range1.start.line;
-    if(errorGraph[line] === undefined) {
-      errorGraph[line] = new Map();
-    }
-    let value = errorGraph[line].get(range1) ?? { primary:[], secondary:[] };
-    value = valueModifier(value);
-    errorGraph[line].set(range1, value);
-  }
-
-  private addImmediatelyRelated(errorGraph: ErrorGraph, range1: Range, range2: Range) {
-    this.addRelated(errorGraph, range1, (value: ErrorGraphInfo) => {
-      value.primary = value.primary.concat([ range2 ]);
-      return value;
-    });
-  }
-
-  private addLooselyRelated(errorGraph: ErrorGraph, range1: Range, secondaryRanges: Range[]) {
-    this.addRelated(errorGraph, range1, (value: ErrorGraphInfo) => {
-      value.secondary = value.secondary.concat(secondaryRanges);
-      return value;
-    });
-  }
 
   private isNotErrorLine(diagnostic: LineVerificationStatus): boolean {
     return (diagnostic === LineVerificationStatus.Scheduled
@@ -409,65 +257,10 @@ export default class VerificationDiagnosticsView {
     }
     return lineDiagnostics;
   }
-  // TODO: Find a way to not depend on this function
-  private rangeOf(r: IRange, lineOffset: number = 0, charOffset: number = 0): Range {
-    return new Range(
-      new Position(r.start.line + lineOffset, r.start.character + charOffset),
-      new Position(r.end.line + lineOffset, r.end.character + charOffset));
-  }
-
-  // For every error and related error, returns a mapping from line to affected ranges
-  private getErrorGraph(params: IVerificationStatusGutter): ErrorGraph {
-    const errorGraph: ErrorGraph = {};
-    for(const verificationTree of params.verificationTrees) {
-      this.buildGraph(errorGraph, verificationTree);
-    }
-    return errorGraph;
-  }
-  private buildGraphArray(errorGraph: ErrorGraph, children: IVerificationTree[]) {
-    for(const verificationTree of children) {
-      this.buildGraph(errorGraph, verificationTree);
-    }
-  }
-
-  private rangeArrayOf(x: any): Range[] {
-    if(x === undefined) {
-      return [];
-    } else {
-      return (x as any[]).map(x => this.rangeOf(x));
-    }
-  }
-
-  private buildGraph(errorGraph: ErrorGraph, verificationTree: IVerificationTree) {
-    const verificationTreeRange = this.rangeOf(verificationTree.range);
-    if(verificationTreeRange === undefined) {
-      return;
-    }
-    if(verificationTree.statusVerification === VerificationStatus.Error
-       && verificationTree.children.length === 0
-    ) {
-      const immediatelyRelatedRanges = this.rangeArrayOf(verificationTree.immediatelyRelatedRanges);
-      const dynamicallyRelatedRanges = this.rangeArrayOf(verificationTree.dynamicallyRelatedRanges);
-      const relatedRanges = this.rangeArrayOf(verificationTree.relatedRanges);
-      const allImmediateRanges: Range[] = [ verificationTreeRange ].concat(immediatelyRelatedRanges);
-      for(const range1 of allImmediateRanges) {
-        this.addLooselyRelated(errorGraph, range1, relatedRanges);
-        // We set a pointer from an immediately related range to a dynamically related range
-        // but not the other way round because these are requires of other functions.
-        for(const range2dynamic of dynamicallyRelatedRanges) {
-          this.addImmediatelyRelated(errorGraph, range1, range2dynamic);
-        }
-        for(const range2 of allImmediateRanges) {
-          this.addImmediatelyRelated(errorGraph, range1, range2);
-        }
-      }
-    }
-    this.buildGraphArray(errorGraph, verificationTree.children);
-  }
 
   private getRangesOfLineStatus(params: IVerificationStatusGutter): Map<LineVerificationStatus, Range[]> {
     //// Per-line diagnostics
-    const lineDiagnostics = this.addCosmetics(params.perLineDiagnostic);
+    const lineDiagnostics = this.addCosmetics(params.perLineStatus);
 
     let previousLineDiagnostic = -1;
     let initialDiagnosticLine = -1;
@@ -502,25 +295,10 @@ export default class VerificationDiagnosticsView {
       return;
     }
     const documentPath = getVsDocumentPath(params);
-    //this.clearVerificationDiagnostics(documentPath);
-
-    let errorGraph: ErrorGraph = {};
-    const diagnostics = languages.getDiagnostics(Uri.parse(params.uri));
-    for(const diagnostic of diagnostics) {
-      if(diagnostic.source !== 'Verifier') {
-        const range = diagnostic.range;
-        this.addImmediatelyRelated(errorGraph, range, range);
-      }
-    }
-    // We don't display related verification ranges if there are resolution errors.
-    if(Object.keys(errorGraph).length === 0) {
-      errorGraph = this.getErrorGraph(params);
-    }
     const ranges = this.getRangesOfLineStatus(params);
 
     const newData: LinearVerificationDiagnostics = {
       decorations: ranges,
-      errorGraph: errorGraph,
       version: params.version };
 
     this.setDisplayedVerificationDiagnostics(documentPath, newData);
