@@ -16,12 +16,10 @@ export interface IDiagnostic {
   source: string;
 }
 
-export interface IVerificationDiagnosticsParams {
+export interface IVerificationStatusGutter {
   uri: DocumentUri;
   version?: integer;
-  verificationTrees: IVerificationTree[];
-  diagnosticsAreResolutionErrors: boolean;
-  perLineDiagnostic: LineVerificationStatus[];
+  perLineStatus: LineVerificationStatus[];
 }
 
 export interface IVerificationTree {

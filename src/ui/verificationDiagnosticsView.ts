@@ -5,7 +5,7 @@ import { /*CancellationToken, */Diagnostic, Disposable } from 'vscode-languagecl
 import Configuration from '../configuration';
 import { ConfigurationConstants } from '../constants';
 
-import { IVerificationDiagnosticsParams, VerificationStatus, LineVerificationStatus, ScrollColor, IVerificationTree, obsoleteLineVerificationStatus, verifyingLineVerificationStatus, IRange } from '../language/api/verificationDiagnostics';
+import { IVerificationStatusGutter, VerificationStatus, LineVerificationStatus, ScrollColor, IVerificationTree, obsoleteLineVerificationStatus, verifyingLineVerificationStatus, IRange } from '../language/api/verificationDiagnostics';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath, toVsRange } from '../tools/vscode';
 
@@ -417,7 +417,7 @@ export default class VerificationDiagnosticsView {
   }
 
   // For every error and related error, returns a mapping from line to affected ranges
-  private getErrorGraph(params: IVerificationDiagnosticsParams): ErrorGraph {
+  private getErrorGraph(params: IVerificationStatusGutter): ErrorGraph {
     const errorGraph: ErrorGraph = {};
     for(const verificationTree of params.verificationTrees) {
       this.buildGraph(errorGraph, verificationTree);
@@ -465,7 +465,7 @@ export default class VerificationDiagnosticsView {
     this.buildGraphArray(errorGraph, verificationTree.children);
   }
 
-  private getRangesOfLineStatus(params: IVerificationDiagnosticsParams): Map<LineVerificationStatus, Range[]> {
+  private getRangesOfLineStatus(params: IVerificationStatusGutter): Map<LineVerificationStatus, Range[]> {
     //// Per-line diagnostics
     const lineDiagnostics = this.addCosmetics(params.perLineDiagnostic);
 
@@ -490,14 +490,14 @@ export default class VerificationDiagnosticsView {
     return ranges;
   }
 
-  private areParamsOutdated(params: IVerificationDiagnosticsParams): boolean {
+  private areParamsOutdated(params: IVerificationStatusGutter): boolean {
     const documentPath = getVsDocumentPath(params);
     const previousVersion = this.dataByDocument.get(documentPath)?.version;
     return (previousVersion !== undefined && params.version !== undefined
       && params.version < previousVersion);
   }
 
-  private updateVerificationDiagnostics(params: IVerificationDiagnosticsParams): void {
+  private updateVerificationDiagnostics(params: IVerificationStatusGutter): void {
     if(this.areParamsOutdated(params)) {
       return;
     }
