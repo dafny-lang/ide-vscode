@@ -22,7 +22,7 @@ function getLanguageServerLaunchArgs(): string[] {
     getVerifierCachingPolicy(),
     getVerifierVirtualCoresArgument(),
     getMarkGhostStatementsArgument(),
-    getDisplayVerificationDiagnosticsArgument(),
+    getDisplayGutterStatusArgument(),
     ...getDafnyPluginsArgument(),
     ...launchArgs
   ];
@@ -50,8 +50,8 @@ function getVerifierVirtualCoresArgument(): string {
   return `--verifier:vcscores=${Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationVirtualCores)}`;
 }
 
-function getDisplayVerificationDiagnosticsArgument(): string {
-  return `--verifier:diagnostics=${Configuration.get<string>(ConfigurationConstants.LanguageServer.DisplayVerificationDiagnostics)}`;
+function getDisplayGutterStatusArgument(): string {
+  return `--verifier:gutterStatus=${Configuration.get<string>(ConfigurationConstants.LanguageServer.DisplayGutterStatus)}`;
 }
 
 function getMarkGhostStatementsArgument(): string {

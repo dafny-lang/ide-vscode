@@ -155,7 +155,7 @@
           "default": "true",
           "description": "Mark ghost statements in the code (requires restart and Dafny 3.4.0+)"
         },
-        "dafny.displayVerificationDiagnostics": {
+        "dafny.displayGutterStatus": {
           "type": "boolean",
           "default": "true",
           "description": "Display verification diagnostics in the gutter and on hover in the code (requires restart and Dafny 3.5.0+)"
