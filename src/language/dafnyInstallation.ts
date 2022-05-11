@@ -114,13 +114,43 @@ export class DafnyInstaller {
       await this.extractArchive(archive);
       await workspace.fs.delete(archive, { useTrash: false });
       this.writeStatus('Dafny installation completed');
-      return true;
+      if(os.type() === 'Darwin' && os.arch() !== 'x64') {
+        // Need to build from source and move all files from Binary/ to the current foldre
+        this.writeStatus('Found a non-supported architecture OSX:' + os.arch() + '. Going to install from source and replace the automated installation.\n');
+        return await this.installFromSource();
+      } else {
+        return true;
+      }
     } catch(error: unknown) {
       this.writeStatus('Dafny installation failed:');
       this.writeStatus(`> ${error}`);
       console.error('dafny installation failed', error);
       return false;
     }
+  }
+
+  private async installFromSource() {
+    const { execSync } = require('child_process');
+    const execLog = (command: string) => {
+      this.writeStatus(`Executing: ${command}\n`);
+      execSync(command);
+    };
+    const installationPath = this.getCustomInstallationPath(os.arch());
+    await mkdirAsync(installationPath.fsPath, { recursive: true });
+    this.writeStatus(`Installing Dafny from source in ${installationPath.fsPath}.\n`);
+    const process = require('process');
+    process.chdir(installationPath.fsPath);
+    execLog('git clone --recurse-submodules https://github.com/dafny-lang/dafny.git');
+    process.chdir(Utils.joinPath(installationPath, 'dafny').fsPath);
+    execLog('make exe');
+    const Binaries = Utils.joinPath(installationPath, 'dafny', 'Binaries').fsPath;
+    process.chdir(Binaries);
+    execLog('wget https://github.com/Z3Prover/z3/releases/download/Z3-4.8.5/z3-4.8.5-x64-osx-10.14.2.zip');
+    execLog('unzip z3-4.8.5-x64-osx-10.14.2.zip');
+    execLog('mv z3-4.8.5-x64-osx-10.14.2 z3');
+    process.chdir(this.getInstallationPath().fsPath);
+    execLog(`cp -R ${Binaries}/* ./dafny/`);
+    return true;
   }
 
   public isCustomInstallation(): boolean {
@@ -193,6 +223,13 @@ export class DafnyInstaller {
     return Utils.joinPath(
       this.context.extensionUri,
       ...LanguageServerConstants.GetResourceFolder(getConfiguredVersion())
+    );
+  }
+
+  private getCustomInstallationPath(typeArch: string): Uri {
+    return Utils.joinPath(
+      this.getInstallationPath(),
+      ...[ 'custom', typeArch ]
     );
   }
 
