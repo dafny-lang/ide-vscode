@@ -140,11 +140,13 @@ export class DafnyInstaller {
     this.writeStatus(`Installing Dafny from source in ${installationPath.fsPath}.\n`);
     const process = require('process');
     process.chdir(installationPath.fsPath);
+    execLog('brew install dotnet-sdk');
     execLog('git clone --recurse-submodules https://github.com/dafny-lang/dafny.git');
     process.chdir(Utils.joinPath(installationPath, 'dafny').fsPath);
     execLog('make exe');
     const Binaries = Utils.joinPath(installationPath, 'dafny', 'Binaries').fsPath;
     process.chdir(Binaries);
+    execLog('brew install wget');
     execLog('wget https://github.com/Z3Prover/z3/releases/download/Z3-4.8.5/z3-4.8.5-x64-osx-10.14.2.zip');
     execLog('unzip z3-4.8.5-x64-osx-10.14.2.zip');
     execLog('mv z3-4.8.5-x64-osx-10.14.2 z3');
