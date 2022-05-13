@@ -143,6 +143,8 @@ export class DafnyInstaller {
     execLog('brew install dotnet-sdk');
     execLog('git clone --recurse-submodules https://github.com/dafny-lang/dafny.git');
     process.chdir(Utils.joinPath(installationPath, 'dafny').fsPath);
+    execLog('git fetch --all --tags');
+    execLog('git checkout v' + getConfiguredVersion());
     execLog('make exe');
     const Binaries = Utils.joinPath(installationPath, 'dafny', 'Binaries').fsPath;
     process.chdir(Binaries);
