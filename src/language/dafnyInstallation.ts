@@ -137,6 +137,15 @@ export class DafnyInstaller {
     this.writeStatus(`Executing: ${command}`);
     await execAsync(command);
   }
+  private GetZ3FileNameOSX(): string {
+    const z3v = LanguageServerConstants.Z3VersionForCustomInstallation;
+    return `z3-${z3v}-x64-osx-10.14.2`;
+  }
+  private GetZ3DownloadUrlOSX(): string {
+    const z3v = LanguageServerConstants.Z3VersionForCustomInstallation;
+    const z3filenameOsx = this.GetZ3FileNameOSX();
+    return `https://github.com/Z3Prover/z3/releases/download/Z3-${z3v}/${z3filenameOsx}.zip`;
+  }
 
   private async installFromSource() {
     const installationPath = this.getCustomInstallationPath(os.arch());
@@ -153,8 +162,8 @@ export class DafnyInstaller {
     const binaries = Utils.joinPath(installationPath, 'dafny', 'Binaries').fsPath;
     processChdir(binaries);
     await this.execLog('brew install wget');
-    const z3urlOsx = LanguageServerConstants.GetZ3DownloadUrlOSX();
-    const z3filenameOsx = LanguageServerConstants.GetZ3FileNameOSX();
+    const z3urlOsx = this.GetZ3DownloadUrlOSX();
+    const z3filenameOsx = this.GetZ3FileNameOSX();
     await this.execLog(`wget ${z3urlOsx}`);
     await this.execLog(`unzip ${z3filenameOsx}.zip`);
     await this.execLog(`mv ${z3filenameOsx} z3`);
