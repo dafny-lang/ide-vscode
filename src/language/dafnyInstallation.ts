@@ -11,6 +11,10 @@ import * as extract from 'extract-zip';
 
 import { ConfigurationConstants, LanguageServerConstants } from '../constants';
 import Configuration from '../configuration';
+import { exec } from 'child_process';
+import { chdir as processChdir, cwd as processCwd } from 'process';
+
+const execAsync = promisify(exec);
 
 const ArchiveFileName = 'dafny.zip';
 const mkdirAsync = promisify(fs.mkdir);
@@ -115,8 +119,8 @@ export class DafnyInstaller {
       await workspace.fs.delete(archive, { useTrash: false });
       this.writeStatus('Dafny installation completed');
       if(os.type() === 'Darwin' && os.arch() !== 'x64') {
-        // Need to build from source and move all files from Binary/ to the current foldre
-        this.writeStatus('Found a non-supported architecture OSX:' + os.arch() + '. Going to install from source and replace the automated installation.\n');
+        // Need to build from source and move all files from Binary/ to the out/resource folder
+        this.writeStatus(`Found a non-supported architecture OSX:${os.arch()}. Going to install from source and replace the automated installation.`);
         return await this.installFromSource();
       } else {
         return true;
@@ -129,31 +133,32 @@ export class DafnyInstaller {
     }
   }
 
+  private async execLog(command: string) {
+    this.writeStatus(`Executing: ${command}`);
+    await execAsync(command);
+  }
+
   private async installFromSource() {
-    const { execSync } = require('child_process');
-    const execLog = (command: string) => {
-      this.writeStatus(`Executing: ${command}\n`);
-      execSync(command);
-    };
     const installationPath = this.getCustomInstallationPath(os.arch());
     await mkdirAsync(installationPath.fsPath, { recursive: true });
     this.writeStatus(`Installing Dafny from source in ${installationPath.fsPath}.\n`);
-    const process = require('process');
-    process.chdir(installationPath.fsPath);
-    execLog('brew install dotnet-sdk');
-    execLog('git clone --recurse-submodules https://github.com/dafny-lang/dafny.git');
-    process.chdir(Utils.joinPath(installationPath, 'dafny').fsPath);
-    execLog('git fetch --all --tags');
-    execLog('git checkout v' + getConfiguredVersion());
-    execLog('make exe');
-    const Binaries = Utils.joinPath(installationPath, 'dafny', 'Binaries').fsPath;
-    process.chdir(Binaries);
-    execLog('brew install wget');
-    execLog('wget https://github.com/Z3Prover/z3/releases/download/Z3-4.8.5/z3-4.8.5-x64-osx-10.14.2.zip');
-    execLog('unzip z3-4.8.5-x64-osx-10.14.2.zip');
-    execLog('mv z3-4.8.5-x64-osx-10.14.2 z3');
-    process.chdir(this.getInstallationPath().fsPath);
-    execLog(`cp -R ${Binaries}/* ./dafny/`);
+    const previousDirectory = processCwd();
+    processChdir(installationPath.fsPath);
+    await this.execLog('brew install dotnet-sdk');
+    await this.execLog('git clone --recurse-submodules https://github.com/dafny-lang/dafny.git');
+    processChdir(Utils.joinPath(installationPath, 'dafny').fsPath);
+    await this.execLog('git fetch --all --tags');
+    await this.execLog(`git checkout v${getConfiguredVersion()}`);
+    await this.execLog('make exe');
+    const binaries = Utils.joinPath(installationPath, 'dafny', 'Binaries').fsPath;
+    processChdir(binaries);
+    await this.execLog('brew install wget');
+    await this.execLog('wget https://github.com/Z3Prover/z3/releases/download/Z3-4.8.5/z3-4.8.5-x64-osx-10.14.2.zip');
+    await this.execLog('unzip z3-4.8.5-x64-osx-10.14.2.zip');
+    await this.execLog('mv z3-4.8.5-x64-osx-10.14.2 z3');
+    processChdir(this.getInstallationPath().fsPath);
+    await this.execLog(`cp -R ${binaries}/* ./dafny/`);
+    processChdir(previousDirectory);
     return true;
   }
 
@@ -232,8 +237,7 @@ export class DafnyInstaller {
 
   private getCustomInstallationPath(typeArch: string): Uri {
     return Utils.joinPath(
-      this.getInstallationPath(),
-      ...[ 'custom', typeArch ]
+      this.getInstallationPath(), 'custom', typeArch
     );
   }
 
