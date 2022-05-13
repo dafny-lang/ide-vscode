@@ -145,7 +145,7 @@ export class DafnyInstaller {
     const previousDirectory = processCwd();
     processChdir(installationPath.fsPath);
     await this.execLog('brew install dotnet-sdk');
-    await this.execLog('git clone --recurse-submodules https://github.com/dafny-lang/dafny.git');
+    await this.execLog(`git clone --recurse-submodules ${LanguageServerConstants.DafnyGitUrl}`);
     processChdir(Utils.joinPath(installationPath, 'dafny').fsPath);
     await this.execLog('git fetch --all --tags');
     await this.execLog(`git checkout v${getConfiguredVersion()}`);
@@ -153,9 +153,11 @@ export class DafnyInstaller {
     const binaries = Utils.joinPath(installationPath, 'dafny', 'Binaries').fsPath;
     processChdir(binaries);
     await this.execLog('brew install wget');
-    await this.execLog('wget https://github.com/Z3Prover/z3/releases/download/Z3-4.8.5/z3-4.8.5-x64-osx-10.14.2.zip');
-    await this.execLog('unzip z3-4.8.5-x64-osx-10.14.2.zip');
-    await this.execLog('mv z3-4.8.5-x64-osx-10.14.2 z3');
+    const z3urlOsx = LanguageServerConstants.GetZ3DownloadUrlOSX();
+    const z3filenameOsx = LanguageServerConstants.GetZ3FileNameOSX();
+    await this.execLog(`wget ${z3urlOsx}`);
+    await this.execLog(`unzip ${z3filenameOsx}.zip`);
+    await this.execLog(`mv ${z3filenameOsx} z3`);
     processChdir(this.getInstallationPath().fsPath);
     await this.execLog(`cp -R ${binaries}/* ./dafny/`);
     processChdir(previousDirectory);

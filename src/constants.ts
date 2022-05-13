@@ -47,7 +47,18 @@ export namespace LanguageServerConstants {
   export const Latest = 'latest';
   export const LatestVersion = '3.5.0';
   export const UnknownVersion = 'unknown';
+  export const DafnyGitUrl = 'https://github.com/dafny-lang/dafny.git';
   export const DownloadBaseUri = 'https://github.com/dafny-lang/dafny/releases/download';
+  export const Z3VersionForCustomInstallation = '4.8.5';
+  export function GetZ3FileNameOSX(): string {
+    const z3v = LanguageServerConstants.Z3VersionForCustomInstallation;
+    return `z3-${z3v}-x64-osx-10.14.2`;
+  }
+  export function GetZ3DownloadUrlOSX(): string {
+    const z3v = LanguageServerConstants.Z3VersionForCustomInstallation;
+    const z3filenameOsx = GetZ3FileNameOSX();
+    return `https://github.com/Z3Prover/z3/releases/download/Z3-${z3v}/${z3filenameOsx}.zip`;
+  }
 
   export function GetResourceFolder(version: string): string[] {
     return [ 'out', 'resources', version ];
