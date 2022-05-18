@@ -47,7 +47,9 @@ export namespace LanguageServerConstants {
   export const Latest = 'latest';
   export const LatestVersion = '3.5.0';
   export const UnknownVersion = 'unknown';
+  export const DafnyGitUrl = 'https://github.com/dafny-lang/dafny.git';
   export const DownloadBaseUri = 'https://github.com/dafny-lang/dafny/releases/download';
+  export const Z3VersionForCustomInstallation = '4.8.5';
 
   export function GetResourceFolder(version: string): string[] {
     return [ 'out', 'resources', version ];
