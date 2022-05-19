@@ -2,7 +2,7 @@
 import { Range, window, ExtensionContext, workspace, TextEditor, TextEditorDecorationType } from 'vscode';
 import { Disposable } from 'vscode-languageclient';
 import {
-  IVerificationDiagnosticsParams,
+  IVerificationGutterStatusParams,
   LineVerificationStatus,
   ScrollColor,
   obsoleteLineVerificationStatus,
@@ -230,7 +230,7 @@ export default class VerificationDiagnosticsView {
 
   // Converts the IVerificationStatusGutter to a map from line verification status
   // to an array of ranges that VSCode can consume.
-  private getRangesOfLineStatus(params: IVerificationDiagnosticsParams): Map<LineVerificationStatus, Range[]> {
+  private getRangesOfLineStatus(params: IVerificationGutterStatusParams): Map<LineVerificationStatus, Range[]> {
     const perLineStatus = this.addCosmetics(params.perLineStatus);
 
     let previousLineStatus = -1;
@@ -253,7 +253,7 @@ export default class VerificationDiagnosticsView {
   }
 
   // Returns true if the params are for a different version of this document
-  private areParamsOutdated(params: IVerificationDiagnosticsParams): boolean {
+  private areParamsOutdated(params: IVerificationGutterStatusParams): boolean {
     const documentPath = getVsDocumentPath(params);
     const previousVersion = this.dataByDocument.get(documentPath)?.version;
     return (previousVersion !== undefined && params.version !== undefined
@@ -261,7 +261,7 @@ export default class VerificationDiagnosticsView {
   }
 
   // Entry point when receiving IVErificationStatusGutter
-  private updateVerificationStatusGutter(params: IVerificationDiagnosticsParams): void {
+  private updateVerificationStatusGutter(params: IVerificationGutterStatusParams): void {
     if(this.areParamsOutdated(params)) {
       return;
     }

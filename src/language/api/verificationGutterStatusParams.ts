@@ -1,6 +1,6 @@
 import { DocumentUri, integer } from 'vscode-languageclient';
 
-export interface IVerificationDiagnosticsParams {
+export interface IVerificationGutterStatusParams {
   uri: DocumentUri;
   version?: integer;
   perLineStatus: LineVerificationStatus[];

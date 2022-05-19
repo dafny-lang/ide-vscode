@@ -8,7 +8,7 @@ import { DafnyDocumentFilter } from '../tools/vscode';
 import { ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from './api/compilationStatus';
 import { ICounterExampleItem, ICounterExampleParams } from './api/counterExample';
 import { IGhostDiagnosticsParams } from './api/ghostDiagnostics';
-import { IVerificationDiagnosticsParams } from './api/verificationGutterStatusParams';
+import { IVerificationGutterStatusParams as IVerificationGutterStatusParams } from './api/verificationGutterStatusParams';
 import { getLanguageServerRuntimePath } from './dafnyInstallation';
 
 const LanguageServerId = 'dafny-vscode';
@@ -107,7 +107,7 @@ export class DafnyLanguageClient extends LanguageClient {
     return this.onNotification('dafny/ghost/diagnostics', callback);
   }
 
-  public onVerificationStatusGutter(callback: (params: IVerificationDiagnosticsParams) => void): Disposable {
+  public onVerificationStatusGutter(callback: (params: IVerificationGutterStatusParams) => void): Disposable {
     return this.onNotification('dafny/verification/status/gutter', callback);
   }
 
