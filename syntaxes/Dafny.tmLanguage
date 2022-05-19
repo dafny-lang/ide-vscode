@@ -276,6 +276,13 @@
 					<string>\*/</string>
 					<key>name</key>
 					<string>comment.block.dafny</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#comments-inline</string>
+						</dict>
+					</array>
 				</dict>
 				<dict>
 					<key>captures</key>
