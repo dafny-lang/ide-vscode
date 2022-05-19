@@ -1,3 +1,9 @@
+/*
+function nestedCommentShouldHighlightCorrectlyIssue157() {
+  /* 2 */ 1
+}
+*/
+
 // Issue #136
 lemma Mylemma()
 {
