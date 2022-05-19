@@ -6,7 +6,7 @@ import CompileCommands from './compileCommands';
 import CounterExamplesView from './counterExamplesView';
 import DafnyVersionView from './dafnyVersionView';
 import GhostDiagnosticsView from './ghostDiagnosticsView';
-import VerificationDiagnosticsView from './verificationDiagnosticsView';
+import VerificationDiagnosticsView from './verificationGutterStatusView';
 
 export default async function createAndRegisterDafnyIntegration(
   context: ExtensionContext,
