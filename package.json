@@ -158,7 +158,7 @@
         "dafny.displayGutterStatus": {
           "type": "boolean",
           "default": "true",
-          "description": "Display verification diagnostics in the gutter and on hover in the code (requires restart and Dafny 3.5.0+)"
+          "description": "Display verification status in the gutter (requires restart and Dafny 3.7.0+)"
         },
         "dafny.dafnyPlugins": {
           "type": "array",

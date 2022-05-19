@@ -1,20 +1,5 @@
 import { DocumentUri, integer } from 'vscode-languageclient';
 
-export interface IPosition {
-  line: number;
-  character: number;
-}
-
-export interface IRange {
-  start: IPosition;
-  end: IPosition;
-}
-
-export interface IDiagnostic {
-  range: IRange;
-  source: string;
-}
-
 export interface IVerificationStatusGutter {
   uri: DocumentUri;
   version?: integer;
@@ -79,5 +64,14 @@ export const verifyingLineVerificationStatus: LineVerificationStatus[] = [
   LineVerificationStatus.ErrorContextEndVerifying,
   LineVerificationStatus.ErrorContextVerifying,
   LineVerificationStatus.ErrorContextStartVerifying,
-  LineVerificationStatus.VerifiedVerifying
+  LineVerificationStatus.VerifiedVerifying,
+  LineVerificationStatus.AssertionVerifiedInErrorContextVerifying
+];
+export const nonErrorLineVerificationStatus: LineVerificationStatus[] = [
+  LineVerificationStatus.Scheduled,
+  LineVerificationStatus.Nothing,
+  LineVerificationStatus.Verified,
+  LineVerificationStatus.VerifiedObsolete,
+  LineVerificationStatus.VerifiedVerifying,
+  LineVerificationStatus.Verifying
 ];

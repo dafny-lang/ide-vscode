@@ -1,13 +1,20 @@
 /* eslint-disable max-depth */
-import { /*commands, */DecorationOptions, Range, window, ExtensionContext, workspace, TextEditor, /*languages, Hover, TextDocument, Selection, CodeActionContext, ProviderResult, Command, CodeAction, CodeActionKind, WorkspaceEdit, Position,*/ TextEditorDecorationType, Position } from 'vscode';
-import { /*CancellationToken, */Diagnostic, Disposable } from 'vscode-languageclient';
-//import { LanguageConstants } from '../constants';
-
-import { IVerificationStatusGutter, LineVerificationStatus, ScrollColor, obsoleteLineVerificationStatus, verifyingLineVerificationStatus, IRange } from '../language/api/verificationDiagnostics';
+import { Range, window, ExtensionContext, workspace, TextEditor, TextEditorDecorationType } from 'vscode';
+import { Disposable } from 'vscode-languageclient';
+import {
+  IVerificationStatusGutter,
+  LineVerificationStatus,
+  ScrollColor,
+  obsoleteLineVerificationStatus,
+  verifyingLineVerificationStatus,
+  nonErrorLineVerificationStatus } from '../language/api/verificationDiagnostics';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
-import { getVsDocumentPath, toVsRange } from '../tools/vscode';
+import { getVsDocumentPath } from '../tools/vscode';
 
-type DecorationType = undefined | {
+const DELAY_IF_RESOLUTION_ERROR = 2000;
+const ANIMATION_INTERVAL = 200;
+
+type GutterDecorationType = undefined | {
   type: 'static',
   path: string,
   icon: TextEditorDecorationType
@@ -18,27 +25,23 @@ type DecorationType = undefined | {
 };
 
 // Indexed by LineVerificationStatus
-type DecorationSet = Map<LineVerificationStatus, DecorationType>;
+type GutterDecorationSet = Map<LineVerificationStatus, GutterDecorationType>;
 
-interface DecorationSetRanges {
+interface GutterDecorationSetRanges {
   // First array indexed by LineVerificationStatus
   decorations: Map<LineVerificationStatus, Range[]>;
 }
-interface LinearVerificationDiagnostics extends DecorationSetRanges {
+interface LinearVerificationGutterStatus extends GutterDecorationSetRanges {
   version: number | undefined;
 }
 
 export default class VerificationDiagnosticsView {
-  private readonly normalDecorations: DecorationSet;
-  private readonly grayedeDecorations: DecorationSet;
-  private readonly relatedDecorations: TextEditorDecorationType;
-  private readonly relatedDecorationsPartial: TextEditorDecorationType;
-  private readonly relatedDecorationsPartialActive: TextEditorDecorationType;
-  private readonly secondaryRelatedDecorations: TextEditorDecorationType;
+  private readonly normalDecorations: GutterDecorationSet;
+  private readonly grayedDecorations: GutterDecorationSet;
 
   private readonly textEditorWatcher?: Disposable;
 
-  private readonly dataByDocument = new Map<string, LinearVerificationDiagnostics>();
+  private readonly dataByDocument = new Map<string, LinearVerificationGutterStatus>();
   private animationCallback: NodeJS.Timeout | undefined = undefined;
   // Alternates between 0 and 1
   private animationFrame: number = 0;
@@ -73,7 +76,7 @@ export default class VerificationDiagnosticsView {
                   : ScrollColor.Unknown
       });
     }
-    function makeIcon(...paths: string[]): DecorationType {
+    function makeIcon(...paths: string[]): GutterDecorationType {
       if(paths.length === 1) {
         return { type: 'static', path: paths[0], icon: iconOf(paths[0]) };
       } else if(paths.length > 1) {
@@ -82,7 +85,7 @@ export default class VerificationDiagnosticsView {
         return undefined;
       }
     }
-    this.normalDecorations = new Map<LineVerificationStatus, DecorationType>([
+    this.normalDecorations = new Map<LineVerificationStatus, GutterDecorationType>([
       [ LineVerificationStatus.Scheduled, makeIcon('scheduled') ],
       [ LineVerificationStatus.AssertionFailed, makeIcon('error') ],
       [ LineVerificationStatus.AssertionFailedObsolete, makeIcon('error-obsolete') ],
@@ -106,7 +109,7 @@ export default class VerificationDiagnosticsView {
       [ LineVerificationStatus.ResolutionError, makeIcon('resolution-error') ]
     ]);
     grayMode = true;
-    this.grayedeDecorations = new Map<LineVerificationStatus, DecorationType>([
+    this.grayedDecorations = new Map<LineVerificationStatus, GutterDecorationType>([
       [ LineVerificationStatus.Scheduled, makeIcon('scheduled') ],
       [ LineVerificationStatus.AssertionFailed, makeIcon('error_gray') ],
       [ LineVerificationStatus.AssertionFailedObsolete, makeIcon('error-obsolete_gray') ],
@@ -129,59 +132,31 @@ export default class VerificationDiagnosticsView {
       [ LineVerificationStatus.Verifying, makeIcon('verified_gray') ],
       [ LineVerificationStatus.ResolutionError, makeIcon('resolution-error') ]
     ]);
-    // For dynamic error highlighting
-    this.relatedDecorations = window.createTextEditorDecorationType({
-      isWholeLine: false,
-      rangeBehavior: 1,
-      outline: '#fe536aa0 2px solid',
-      overviewRulerColor: ScrollColor.ErrorActive
-      // textDecoration: 'underline overline #fe536ac0'
-      // backgroundColor: '#fe536a50'
-    });
-    this.relatedDecorationsPartial = window.createTextEditorDecorationType({
-      isWholeLine: false,
-      rangeBehavior: 1,
-      outline: '#fe536aa0 2px dashed'
-      // textDecoration: 'underline overline #fe536ac0'
-      // backgroundColor: '#fe536a50'
-    });
-    this.relatedDecorationsPartialActive = window.createTextEditorDecorationType({
-      isWholeLine: false,
-      rangeBehavior: 1,
-      outline: '#fe536a 2px dashed',
-      overviewRulerColor: ScrollColor.ErrorActive
-      // textDecoration: 'underline overline #fe536ac0'
-      // backgroundColor: '#fe536a50'
-    });
-    this.secondaryRelatedDecorations = window.createTextEditorDecorationType({
-      isWholeLine: false,
-      rangeBehavior: 1,
-      //outline: '#fe536aa0 1px dashed',
-      overviewRulerColor: ScrollColor.ErrorActive,
-      // textDecoration: 'underline overline #fc5daf'
-      backgroundColor: '#fe536aa0'
-    });
   }
 
   public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): VerificationDiagnosticsView {
     const instance = new VerificationDiagnosticsView(context);
     context.subscriptions.push(
       workspace.onDidCloseTextDocument(document => instance.clearVerificationDiagnostics(document.uri.toString())),
-      window.onDidChangeActiveTextEditor(editor => instance.refreshDisplayedVerificationDiagnostics(editor)),
-      languageClient.onVerificationStatusGutter(params => instance.updateVerificationDiagnostics(params))
+      window.onDidChangeActiveTextEditor(editor => instance.refreshDisplayedVerificationGutterStatuses(editor)),
+      languageClient.onVerificationStatusGutter(params => instance.updateVerificationStatusGutter(params))
     );
     return instance;
   }
 
   /////////////////// Gutter rendering ///////////////////
 
+  // For every decoration in the set of animated decorations,
+  // sets all their ranges to empty except for the one corresponding to the animation frame.
   private animateIcon(editor: TextEditor, iconFrames: TextEditorDecorationType[], ranges: Range[]) {
     for(let i = 0; i < iconFrames.length; i++) {
       editor.setDecorations(iconFrames[i], this.animationFrame === i ? ranges : []);
     }
   }
 
-  public refreshDisplayedVerificationDiagnostics(editor?: TextEditor, animateOnly: boolean = false): void {
+  // Display the gutter icons with respect to the right animation frame.
+  // Display icons in gray if there is at least one resolution error.
+  public refreshDisplayedVerificationGutterStatuses(editor?: TextEditor, animateOnly: boolean = false): void {
     if(editor == null) {
       return;
     }
@@ -192,10 +167,10 @@ export default class VerificationDiagnosticsView {
     }
     const resolutionErrors = originalData.decorations.get(LineVerificationStatus.ResolutionError);
     const resolutionFailed = resolutionErrors != null && resolutionErrors.length > 0;
-    const decorationSets: { decorationSet: DecorationSet, active: boolean }[]
+    const decorationSets: { decorationSet: GutterDecorationSet, active: boolean }[]
       = [
         { decorationSet: this.normalDecorations, active: !resolutionFailed },
-        { decorationSet: this.grayedeDecorations, active: resolutionFailed } ];
+        { decorationSet: this.grayedDecorations, active: resolutionFailed } ];
 
     for(const { decorationSet, active } of decorationSets) {
       const decorations: Map<LineVerificationStatus, Range[]> = active ? originalData.decorations : VerificationDiagnosticsView.emptyLinearVerificationDiagnostics;
@@ -220,20 +195,15 @@ export default class VerificationDiagnosticsView {
   private clearVerificationDiagnostics(documentPath: string): void {
     const data = this.dataByDocument.get(documentPath);
     if(data != null) {
-      //data.decoration.dispose();
       this.dataByDocument.delete(documentPath);
     }
   }
 
-  private isNotErrorLine(diagnostic: LineVerificationStatus): boolean {
-    return (diagnostic === LineVerificationStatus.Scheduled
-      || diagnostic === LineVerificationStatus.Nothing
-      || diagnostic === LineVerificationStatus.Verified
-      || diagnostic === LineVerificationStatus.VerifiedObsolete
-      || diagnostic === LineVerificationStatus.VerifiedVerifying
-      || diagnostic === LineVerificationStatus.Verifying);
+  private isNotErrorLine(lineStatus: LineVerificationStatus): boolean {
+    return nonErrorLineVerificationStatus.includes(lineStatus);
   }
 
+  // Replace "error context" by "error context start" and "error context end" at the right place.
   private addCosmetics(lineDiagnostics: LineVerificationStatus[]): LineVerificationStatus[] {
     let previousLineDiagnostic = LineVerificationStatus.Verified;
     let direction = 1;
@@ -258,31 +228,31 @@ export default class VerificationDiagnosticsView {
     return lineDiagnostics;
   }
 
+  // Converts the IVerificationStatusGutter to a map from line verification status
+  // to an array of ranges that VSCode can consume.
   private getRangesOfLineStatus(params: IVerificationStatusGutter): Map<LineVerificationStatus, Range[]> {
-    //// Per-line diagnostics
-    const lineDiagnostics = this.addCosmetics(params.perLineStatus);
+    const perLineStatus = this.addCosmetics(params.perLineStatus);
 
-    let previousLineDiagnostic = -1;
-    let initialDiagnosticLine = -1;
+    let previousLineStatus = -1;
+    let initialStatusLine = -1;
     const ranges: Map<LineVerificationStatus, Range[]> = VerificationDiagnosticsView.FillLineVerificationStatusMap();
 
     // <= so that we add a virtual final line to commit the last range.
-    for(let line = 0; line <= lineDiagnostics.length; line++) {
-      const lineDiagnostic = line === lineDiagnostics.length ? -1 : lineDiagnostics[line];
-      if(lineDiagnostic !== previousLineDiagnostic) {
-        if(previousLineDiagnostic !== -1) { // Never assigned before
-          const range = new Range(initialDiagnosticLine, 1, line - 1, 1);
-          ranges.get(previousLineDiagnostic)?.push(range);
+    for(let line = 0; line <= perLineStatus.length; line++) {
+      const lineDiagnostic = line === perLineStatus.length ? -1 : perLineStatus[line];
+      if(lineDiagnostic !== previousLineStatus) {
+        if(previousLineStatus !== -1) { // Never assigned before
+          const range = new Range(initialStatusLine, 1, line - 1, 1);
+          ranges.get(previousLineStatus)?.push(range);
         }
-        previousLineDiagnostic = lineDiagnostic;
-        initialDiagnosticLine = line;
-      } else {
-        // Just continue
+        previousLineStatus = lineDiagnostic;
+        initialStatusLine = line;
       }
     }
     return ranges;
   }
 
+  // Returns true if the params are for a different version of this document
   private areParamsOutdated(params: IVerificationStatusGutter): boolean {
     const documentPath = getVsDocumentPath(params);
     const previousVersion = this.dataByDocument.get(documentPath)?.version;
@@ -290,21 +260,23 @@ export default class VerificationDiagnosticsView {
       && params.version < previousVersion);
   }
 
-  private updateVerificationDiagnostics(params: IVerificationStatusGutter): void {
+  // Entry point when receiving IVErificationStatusGutter
+  private updateVerificationStatusGutter(params: IVerificationStatusGutter): void {
     if(this.areParamsOutdated(params)) {
       return;
     }
     const documentPath = getVsDocumentPath(params);
     const ranges = this.getRangesOfLineStatus(params);
 
-    const newData: LinearVerificationDiagnostics = {
+    const newData: LinearVerificationGutterStatus = {
       decorations: ranges,
       version: params.version };
 
-    this.setDisplayedVerificationDiagnostics(documentPath, newData);
+    this.setDisplayedVerificationStatusGutter(documentPath, newData);
   }
 
-
+  // Gets the ranges associated to a line verification status
+  // Adds an empty array if necessary
   private getRanges(ranges: Map<LineVerificationStatus, Range[]>, status: LineVerificationStatus): Range[] {
     let r = ranges.get(status);
     if(r === undefined) {
@@ -314,51 +286,46 @@ export default class VerificationDiagnosticsView {
     return r;
   }
 
-  // Takes care of delaying the display of verification diagnostics to not interfere with UX.
-  private setDisplayedVerificationDiagnostics(documentPath: string, newData: LinearVerificationDiagnostics) {
+  // Given current data and previous data, should we delay the display of the new data?
+  private mustBeDelayed(ranges: Map<LineVerificationStatus, Range[]>, previousRanges: Map<LineVerificationStatus, Range[]>): boolean {
+    return (this.getRanges(ranges, LineVerificationStatus.ResolutionError).length >= 1
+            && this.getRanges(previousRanges, LineVerificationStatus.ResolutionError).length === 0)
+        || (obsoleteLineVerificationStatus.some(status => this.getRanges(ranges, status).length >= 1)
+            && verifyingLineVerificationStatus.every(status => this.getRanges(ranges, status).length === 0)
+            && obsoleteLineVerificationStatus.every(status => this.getRanges(previousRanges, status).length === 0));
+  }
+
+  // Assigns the line verification gutter statuses to the given document.
+  // Launches the animation if necessary, including delaying if necessary
+  private setDisplayedVerificationStatusGutter(documentPath: string, newData: LinearVerificationGutterStatus) {
     const previousValue = this.dataByDocument.get(documentPath);
     const ranges = newData.decorations;
     if(this.animationCallback !== undefined) {
       clearInterval(this.animationCallback);
     }
-    const mustBeDelayed = (ranges: Map<LineVerificationStatus, Range[]>, previousRanges: Map<LineVerificationStatus, Range[]>) =>
-      (this.getRanges(ranges, LineVerificationStatus.ResolutionError).length >= 1
-          && this.getRanges(previousRanges, LineVerificationStatus.ResolutionError).length === 0)
-      || (obsoleteLineVerificationStatus.some(status => this.getRanges(ranges, status).length >= 1)
-          && verifyingLineVerificationStatus.every(status => this.getRanges(ranges, status).length === 0)
-          && obsoleteLineVerificationStatus.every(status => this.getRanges(previousRanges, status).length === 0)
-      );
-    if(mustBeDelayed(ranges, (previousValue === undefined ? VerificationDiagnosticsView.emptyLinearVerificationDiagnostics : previousValue.decorations))) {
-      // Delay for 1 second resolution errors so that we don't interrupt the verification workflow if not necessary.
+    const previousRanges = previousValue === undefined ? VerificationDiagnosticsView.emptyLinearVerificationDiagnostics : previousValue.decorations;
+    if(this.mustBeDelayed(ranges, previousRanges)) {
+      // Delay resolution errors so that we don't interrupt the verification workflow if they are corrected fast enough.
       this.animationCallback = setTimeout(() => {
         this.dataByDocument.set(documentPath, newData);
-        this.refreshDisplayedVerificationDiagnostics(window.activeTextEditor);
-      }, 2000);
+        this.refreshDisplayedVerificationGutterStatuses(window.activeTextEditor);
+      }, DELAY_IF_RESOLUTION_ERROR);
     } else {
       this.dataByDocument.set(documentPath, newData);
-      this.animationFrame = 1 - this.animationFrame;
-      this.refreshDisplayedVerificationDiagnostics(window.activeTextEditor);
+      this.nextAnimationStep();
+      this.refreshDisplayedVerificationGutterStatuses(window.activeTextEditor);
     }
     // Animated properties
-    if(this.getRanges(ranges, LineVerificationStatus.Verifying).length > 0
-      || this.getRanges(ranges, LineVerificationStatus.VerifiedVerifying).length > 0
-      || this.getRanges(ranges, LineVerificationStatus.AssertionFailedVerifying).length > 0
-      || this.getRanges(ranges, LineVerificationStatus.ErrorContextVerifying).length > 0
-      || this.getRanges(ranges, LineVerificationStatus.ErrorContextStartVerifying).length > 0
-      || this.getRanges(ranges, LineVerificationStatus.AssertionVerifiedInErrorContextVerifying).length > 0
-      || this.getRanges(ranges, LineVerificationStatus.ErrorContextEndVerifying).length > 0) {
+    if(verifyingLineVerificationStatus.some(line =>this.getRanges(ranges, line).length > 0)) {
       this.animationCallback = setInterval(() => {
-        this.animationFrame = 1 - this.animationFrame;
-        this.refreshDisplayedVerificationDiagnostics(window.activeTextEditor, true);
-      }, 200);
+        this.nextAnimationStep();
+        this.refreshDisplayedVerificationGutterStatuses(window.activeTextEditor, true);
+      }, ANIMATION_INTERVAL);
     }
   }
 
-  private static createDecorator(diagnostic: Diagnostic): DecorationOptions {
-    return {
-      range: toVsRange(diagnostic.range),
-      hoverMessage: diagnostic.message
-    };
+  private nextAnimationStep() {
+    this.animationFrame = 1 - this.animationFrame;
   }
 
   public dispose(): void {
@@ -374,8 +341,5 @@ export default class VerificationDiagnosticsView {
         decoration.icons.forEach(icon => icon.dispose());
       }
     }
-    this.relatedDecorations.dispose();
-    this.relatedDecorationsPartial.dispose();
-    this.relatedDecorationsPartialActive.dispose();
   }
 }
