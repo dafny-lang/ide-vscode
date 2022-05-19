@@ -35,7 +35,7 @@ interface LinearVerificationGutterStatus extends GutterDecorationSetRanges {
   version: number | undefined;
 }
 
-export default class VerificationDiagnosticsView {
+export default class VerificationGutterStatusView {
   private readonly normalDecorations: GutterDecorationSet;
   private readonly grayedDecorations: GutterDecorationSet;
 
@@ -54,7 +54,7 @@ export default class VerificationDiagnosticsView {
   }
 
   private static readonly emptyLinearVerificationDiagnostics: Map<LineVerificationStatus, Range[]>
-    = VerificationDiagnosticsView.FillLineVerificationStatusMap();
+    = VerificationGutterStatusView.FillLineVerificationStatusMap();
 
   private constructor(context: ExtensionContext) {
     let grayMode = false;
@@ -134,8 +134,8 @@ export default class VerificationDiagnosticsView {
     ]);
   }
 
-  public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): VerificationDiagnosticsView {
-    const instance = new VerificationDiagnosticsView(context);
+  public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): VerificationGutterStatusView {
+    const instance = new VerificationGutterStatusView(context);
     context.subscriptions.push(
       workspace.onDidCloseTextDocument(document => instance.clearVerificationDiagnostics(document.uri.toString())),
       window.onDidChangeActiveTextEditor(editor => instance.refreshDisplayedVerificationGutterStatuses(editor)),
@@ -173,7 +173,7 @@ export default class VerificationDiagnosticsView {
         { decorationSet: this.grayedDecorations, active: resolutionFailed } ];
 
     for(const { decorationSet, active } of decorationSets) {
-      const decorations: Map<LineVerificationStatus, Range[]> = active ? originalData.decorations : VerificationDiagnosticsView.emptyLinearVerificationDiagnostics;
+      const decorations: Map<LineVerificationStatus, Range[]> = active ? originalData.decorations : VerificationGutterStatusView.emptyLinearVerificationDiagnostics;
       for(const enumMember in LineVerificationStatus) {
         if(!(parseInt(enumMember, 10) >= 0)) {
           continue;
@@ -235,7 +235,7 @@ export default class VerificationDiagnosticsView {
 
     let previousLineStatus = -1;
     let initialStatusLine = -1;
-    const ranges: Map<LineVerificationStatus, Range[]> = VerificationDiagnosticsView.FillLineVerificationStatusMap();
+    const ranges: Map<LineVerificationStatus, Range[]> = VerificationGutterStatusView.FillLineVerificationStatusMap();
 
     // <= so that we add a virtual final line to commit the last range.
     for(let line = 0; line <= perLineStatus.length; line++) {
@@ -303,7 +303,7 @@ export default class VerificationDiagnosticsView {
     if(this.animationCallback !== undefined) {
       clearInterval(this.animationCallback);
     }
-    const previousRanges = previousValue === undefined ? VerificationDiagnosticsView.emptyLinearVerificationDiagnostics : previousValue.decorations;
+    const previousRanges = previousValue === undefined ? VerificationGutterStatusView.emptyLinearVerificationDiagnostics : previousValue.decorations;
     if(this.mustBeDelayed(ranges, previousRanges)) {
       // Delay resolution errors so that we don't interrupt the verification workflow if they are corrected fast enough.
       this.animationCallback = setTimeout(() => {
