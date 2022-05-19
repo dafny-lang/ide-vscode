@@ -25,7 +25,6 @@ export namespace ConfigurationConstants {
     export const MarkGhostStatements = 'markGhostStatements';
     export const DafnyPlugins = 'dafnyPlugins';
     export const DisplayGutterStatus = 'displayGutterStatus';
-    export const DisplayVerificationTrace = 'displayVerificationTrace';
   }
 
   export namespace Compiler {

@@ -160,11 +160,6 @@
           "default": "true",
           "description": "Display verification diagnostics in the gutter and on hover in the code (requires restart and Dafny 3.5.0+)"
         },
-        "dafny.displayVerificationTrace": {
-          "type": "boolean",
-          "default": false,
-          "description": "Show some relevant places in the path that led to an possibly failing assertion. Requires verification diagnostics to be on."
-        },
         "dafny.dafnyPlugins": {
           "type": "array",
           "items": {
