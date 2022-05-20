@@ -9,9 +9,10 @@ export default async function checkAndInformAboutInstallation(): Promise<boolean
 }
 
 async function checkDotnetInstallation(): Promise<boolean> {
-  if(!await hasSupportedDotnetVersion()) {
+  const answer = await hasSupportedDotnetVersion();
+  if(answer !== '') {
     const selection = await window.showErrorMessage(
-      Messages.Dotnet.NoCompatibleInstallation,
+      answer,
       Messages.Dotnet.ChangeConfiguration,
       Messages.Dotnet.VisitDownload
     );
