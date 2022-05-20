@@ -207,7 +207,7 @@
         },
         "dafny.dotnetExecutablePath": {
           "type": "string",
-          "description": "The absolute path of dotnet. Only necessary if dotnet is not in system PATH (you'll get an error if that's the case)."
+          "description": "The absolute path of the dotnet binary. Only necessary if dotnet is not in system PATH (you'll get an error if that's the case)."
         },
         "dafny.colorCounterExamples": {
           "type": "object",
