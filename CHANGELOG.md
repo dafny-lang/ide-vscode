@@ -1,5 +1,13 @@
 # Release Notes
 
+## 2.4.0
+
+- Update Dafny and language server to [v3.6.0](https://github.com/dafny-lang/dafny/releases/tag/v3.6.0)
+- Fix issue related to Dafny installation on OSX M1 architectures
+- Fix not sending obsolete notification to user
+- Fix: Nested comments now displayed correctly
+- Feat: Verification gutter icons
+
 ## 2.3.0
 
 - Update Dafny and language server to [v3.5.0](https://github.com/dafny-lang/dafny/releases/tag/v3.5.0)
