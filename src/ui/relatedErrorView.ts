@@ -29,12 +29,11 @@ export default class RelatedErrorView {
     context.subscriptions.push(
       workspace.onDidCloseTextDocument(document => RelatedErrorView.instance.clearRelatedErrors(document.uri.toString())),
       window.onDidChangeActiveTextEditor(editor => RelatedErrorView.instance.refreshRelatedErrors(editor)),
-      /*languageClient.onNotification('textDocument/publishDiagnostics', (params: IPublishDiagnosticsParams) => {
-        RelatedErrorView.instance.updateRelatedErrors(params);
-        return params;
-      }),*/
       RelatedErrorView.instance
     );
+    languageClient.onPublishDiagnostics((uri: Uri, diagnostics: Diagnostic[]) => {
+      RelatedErrorView.instance.updateRelatedErrors(uri, diagnostics);
+    });
     return RelatedErrorView.instance;
   }
   public updateRelatedErrors(uri: Uri, diagnostics: Diagnostic[]): void {
