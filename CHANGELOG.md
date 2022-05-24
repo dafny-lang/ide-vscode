@@ -6,7 +6,6 @@
 - Fix issue related to Dafny installation on OSX M1 architectures
 - Fix not sending obsolete notification to user
 - Fix: Nested comments now displayed correctly
-- Feat: Verification gutter icons
 
 ## 2.3.0
 
