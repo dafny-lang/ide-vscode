@@ -5,10 +5,10 @@ import { getVsDocumentPath } from '../tools/vscode';
 
 const RelatedErrorDecoration: DecorationRenderOptions = {
   dark: {
-    textDecoration: 'underline wavy red 1px'
+    textDecoration: 'underline wavy #F14C4C 1px'
   },
   light: {
-    textDecoration: 'underline wavy red 1px'
+    textDecoration: 'underline wavy #E83120 1px'
   }
 };
 
