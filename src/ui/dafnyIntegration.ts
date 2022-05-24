@@ -6,6 +6,7 @@ import CompileCommands from './compileCommands';
 import CounterExamplesView from './counterExamplesView';
 import DafnyVersionView from './dafnyVersionView';
 import GhostDiagnosticsView from './ghostDiagnosticsView';
+import RelatedErrorView from './relatedErrorView';
 
 export default async function createAndRegisterDafnyIntegration(
   context: ExtensionContext,
@@ -16,5 +17,6 @@ export default async function createAndRegisterDafnyIntegration(
   GhostDiagnosticsView.createAndRegister(context, languageClient);
   CompileCommands.createAndRegister(context);
   CompilationStatusView.createAndRegister(context, languageClient);
+  RelatedErrorView.createAndRegister(context, languageClient);
   await DafnyVersionView.createAndRegister(context, languageServerVersion);
 }
