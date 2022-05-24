@@ -1,10 +1,11 @@
-import { ExtensionContext, Disposable, OutputChannel } from 'vscode';
-import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
+import { ExtensionContext, Disposable, OutputChannel, Uri, Diagnostic } from 'vscode';
+import { HandleDiagnosticsSignature, LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
 
 import Configuration from '../configuration';
 import { ConfigurationConstants } from '../constants';
 import { getDotnetExecutablePath } from '../dotnet';
 import { DafnyDocumentFilter } from '../tools/vscode';
+import RelatedErrorView from '../ui/relatedErrorView';
 import { ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from './api/compilationStatus';
 import { ICounterExampleItem, ICounterExampleParams } from './api/counterExample';
 import { IGhostDiagnosticsParams } from './api/ghostDiagnostics';
@@ -92,7 +93,13 @@ export class DafnyLanguageClient extends LanguageClient {
     };
     const clientOptions: LanguageClientOptions = {
       documentSelector: [ DafnyDocumentFilter ],
-      diagnosticCollectionName: LanguageServerId
+      diagnosticCollectionName: LanguageServerId,
+      middleware: {
+        handleDiagnostics: (uri: Uri, diagnostics: Diagnostic[], next: HandleDiagnosticsSignature) => {
+          RelatedErrorView.instance.updateRelatedErrors(uri, diagnostics);
+          next(uri, diagnostics);
+        }
+      }
     };
     return new DafnyLanguageClient(LanguageServerId, LanguageServerName, serverOptions, clientOptions);
   }
