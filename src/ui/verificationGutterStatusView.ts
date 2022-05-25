@@ -308,11 +308,16 @@ export default class VerificationGutterStatusView {
 
   // Given current data and previous data, should we delay the display of the new data?
   private mustBeDelayed(ranges: Map<LineVerificationStatus, Range[]>, previousRanges: Map<LineVerificationStatus, Range[]>): boolean {
-    return (this.getRanges(ranges, LineVerificationStatus.ResolutionError).length >= 1
-            && this.getRanges(previousRanges, LineVerificationStatus.ResolutionError).length === 0)
-        || (obsoleteLineVerificationStatus.some(status => this.getRanges(ranges, status).length >= 1)
-            && verifyingLineVerificationStatus.every(status => this.getRanges(ranges, status).length === 0)
-            && obsoleteLineVerificationStatus.every(status => this.getRanges(previousRanges, status).length === 0));
+    const thereIsAResolutionError = this.getRanges(ranges, LineVerificationStatus.ResolutionError).length >= 1;
+    const thereWasNoResolutionErrorBefore = this.getRanges(previousRanges, LineVerificationStatus.ResolutionError).length === 0;
+    const firstTimeResolutionError = thereIsAResolutionError && thereWasNoResolutionErrorBefore;
+
+    const thereIsALineMarkedObsolete = obsoleteLineVerificationStatus.some(status => this.getRanges(ranges, status).length >= 1);
+    const noLineIsCurrentlyVerifying = verifyingLineVerificationStatus.every(status => this.getRanges(ranges, status).length === 0);
+    const thereWasNoObsoleteStatusBefore = obsoleteLineVerificationStatus.every(status => this.getRanges(previousRanges, status).length === 0);
+
+    const firstTimeEverythingIsObsolete = thereIsALineMarkedObsolete && noLineIsCurrentlyVerifying && thereWasNoObsoleteStatusBefore;
+    return firstTimeResolutionError || firstTimeEverythingIsObsolete;
   }
 
   // Assigns the line verification gutter statuses to the given document.
