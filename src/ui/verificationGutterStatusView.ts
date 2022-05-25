@@ -179,16 +179,26 @@ export default class VerificationGutterStatusView {
           continue;
         }
         const lineVerificationStatus: LineVerificationStatus = parseInt(enumMember, 10);
-        const ranges = this.getRanges(decorations, lineVerificationStatus);
-        const decorationType = decorationSet.get(lineVerificationStatus);
-        if(decorationType === undefined) {
-          continue;
-        } else if(decorationType.type === 'static' && !animateOnly) {
-          editor.setDecorations(decorationType.icon, ranges);
-        } else if(decorationType.type === 'dynamic') {
-          this.animateIcon(editor, decorationType.icons, ranges);
-        }
+        this.addDecorationFor(lineVerificationStatus, decorations, decorationSet, animateOnly, editor);
       }
+    }
+  }
+
+  // eslint-disable-next-line max-params
+  private addDecorationFor(
+    lineVerificationStatus: LineVerificationStatus,
+    decorations: Map<LineVerificationStatus, Range[]>,
+    decorationSet: GutterDecorationSet,
+    animateOnly: boolean,
+    editor: TextEditor) {
+    const ranges = this.getRanges(decorations, lineVerificationStatus);
+    const decorationType = decorationSet.get(lineVerificationStatus);
+    // eslint-disable-next-line no-empty
+    if(decorationType === undefined) {
+    } else if(decorationType.type === 'static' && !animateOnly) {
+      editor.setDecorations(decorationType.icon, ranges);
+    } else if(decorationType.type === 'dynamic') {
+      this.animateIcon(editor, decorationType.icons, ranges);
     }
   }
 
@@ -199,33 +209,43 @@ export default class VerificationGutterStatusView {
     }
   }
 
-  private isNotErrorLine(lineStatus: LineVerificationStatus): boolean {
-    return nonErrorLineVerificationStatus.includes(lineStatus);
+  private isErrorLine(lineStatus: LineVerificationStatus): boolean {
+    return !nonErrorLineVerificationStatus.includes(lineStatus);
+  }
+
+  private addCosmeticsLine(lineStatus: LineVerificationStatus, beginning: boolean): LineVerificationStatus {
+    if(lineStatus === LineVerificationStatus.ErrorContext) {
+      return beginning ? LineVerificationStatus.ErrorContextStart : LineVerificationStatus.ErrorContextEnd;
+    } else if(lineStatus === LineVerificationStatus.ErrorContextObsolete) {
+      return beginning ? LineVerificationStatus.ErrorContextStartObsolete : LineVerificationStatus.ErrorContextEndObsolete;
+    } else if(lineStatus === LineVerificationStatus.ErrorContextVerifying) {
+      return beginning ? LineVerificationStatus.ErrorContextStartVerifying : LineVerificationStatus.ErrorContextEndVerifying;
+    } else {
+      return lineStatus;
+    }
   }
 
   // Replace "error context" by "error context start" and "error context end" at the right place.
   private addCosmetics(lineDiagnostics: LineVerificationStatus[]): LineVerificationStatus[] {
+    const newLineDiagnostics = [ ...lineDiagnostics ];
     let previousLineDiagnostic = LineVerificationStatus.Verified;
-    let direction = 1;
-    for(let line = 0; line >= 0; line += direction) {
-      if(line === lineDiagnostics.length) {
-        direction = -1;
-        previousLineDiagnostic = LineVerificationStatus.Verified;
-        continue;
-      }
-      const lineDiagnostic = lineDiagnostics[line];
-      if(this.isNotErrorLine(previousLineDiagnostic)) {
-        if(lineDiagnostic === LineVerificationStatus.ErrorContext) {
-          lineDiagnostics[line] = direction === 1 ? LineVerificationStatus.ErrorContextStart : LineVerificationStatus.ErrorContextEnd;
-        } else if(lineDiagnostic === LineVerificationStatus.ErrorContextObsolete) {
-          lineDiagnostics[line] = direction === 1 ? LineVerificationStatus.ErrorContextStartObsolete : LineVerificationStatus.ErrorContextEndObsolete;
-        } else if(lineDiagnostic === LineVerificationStatus.ErrorContextVerifying) {
-          lineDiagnostics[line] = direction === 1 ? LineVerificationStatus.ErrorContextStartVerifying : LineVerificationStatus.ErrorContextEndVerifying;
-        }
+    for(let line = 0; line < newLineDiagnostics.length; line += 1) {
+      const lineDiagnostic = newLineDiagnostics[line];
+      if(!this.isErrorLine(previousLineDiagnostic)) {
+        newLineDiagnostics[line] = this.addCosmeticsLine(lineDiagnostic, true);
       }
       previousLineDiagnostic = lineDiagnostic;
     }
-    return lineDiagnostics;
+    previousLineDiagnostic = LineVerificationStatus.Verified;
+    for(let line = newLineDiagnostics.length - 1; line >= 0; line--) {
+      const lineDiagnostic = newLineDiagnostics[line];
+      if(!this.isErrorLine(previousLineDiagnostic)) {
+        newLineDiagnostics[line] = this.addCosmeticsLine(lineDiagnostic, false);
+      }
+      previousLineDiagnostic = lineDiagnostic;
+    }
+
+    return newLineDiagnostics;
   }
 
   // Converts the IVerificationStatusGutter to a map from line verification status
