@@ -193,10 +193,7 @@ export default class VerificationGutterStatusView {
   }
 
   private clearVerificationDiagnostics(documentPath: string): void {
-    const data = this.dataByDocument.get(documentPath);
-    if(data != null) {
-      this.dataByDocument.delete(documentPath);
-    }
+    this.dataByDocument.delete(documentPath);
   }
 
   private isNotErrorLine(lineStatus: LineVerificationStatus): boolean {
