@@ -4,11 +4,17 @@ import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath } from '../tools/vscode';
 
 const RelatedErrorDecoration: DecorationRenderOptions = {
+  // Normal error: #F14C4C
+  // Normal warning: #CCA700
+  // The color below is the average of the two
   dark: {
-    textDecoration: 'underline wavy #F14C4C 1px'
+    textDecoration: 'underline wavy #DF7A26 1px'
   },
+  // Normal error: #E83120
+  // Normal warning: #BF8803
+  // The color below is the average of the two
   light: {
-    textDecoration: 'underline wavy #E83120 1px'
+    textDecoration: 'underline wavy #D45D12 1px'
   }
 };
 
