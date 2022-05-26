@@ -333,24 +333,26 @@ export default class VerificationGutterStatusView {
       clearInterval(this.animationCallback);
     }
     const previousRanges = previousValue === undefined ? VerificationGutterStatusView.emptyLinearVerificationDiagnostics : previousValue.decorations;
+    this.dataByDocument.set(documentPath, newData);
     if(this.mustBeDelayed(ranges, previousRanges)) {
       // Delay resolution errors so that we don't interrupt the verification workflow if they are corrected fast enough.
       this.animationCallback = setTimeout(() => {
-        this.dataByDocument.set(documentPath, newData);
-        this.refreshDisplayedVerificationGutterStatuses(window.activeTextEditor);
+        this.animateAndRefresh();
       }, DELAY_IF_RESOLUTION_ERROR);
     } else {
-      this.dataByDocument.set(documentPath, newData);
-      this.nextAnimationStep();
-      this.refreshDisplayedVerificationGutterStatuses(window.activeTextEditor);
+      this.animateAndRefresh();
     }
-    // Animated properties
-    if(verifyingLineVerificationStatus.some(line =>this.getRanges(ranges, line).length > 0)) {
+    const areSomeLinesAnimated = verifyingLineVerificationStatus.some(line =>this.getRanges(ranges, line).length > 0);
+    if(areSomeLinesAnimated) {
       this.animationCallback = setInterval(() => {
-        this.nextAnimationStep();
-        this.refreshDisplayedVerificationGutterStatuses(window.activeTextEditor, true);
+        this.animateAndRefresh(true);
       }, ANIMATION_INTERVAL);
     }
+  }
+
+  private animateAndRefresh(animationOnly: boolean = false) {
+    this.nextAnimationStep();
+    this.refreshDisplayedVerificationGutterStatuses(window.activeTextEditor, animationOnly);
   }
 
   private nextAnimationStep() {
