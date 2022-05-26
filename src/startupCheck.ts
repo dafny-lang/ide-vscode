@@ -1,7 +1,7 @@
 import { window, commands, Uri } from 'vscode';
 
 import { VSCodeCommands } from './commands';
-import { hasSupportedDotnetVersion } from './dotnet';
+import { checkSupportedDotnetVersion } from './dotnet';
 import { Messages } from './ui/messages';
 
 export default async function checkAndInformAboutInstallation(): Promise<boolean> {
@@ -9,8 +9,8 @@ export default async function checkAndInformAboutInstallation(): Promise<boolean
 }
 
 async function checkDotnetInstallation(): Promise<boolean> {
-  const answer = await hasSupportedDotnetVersion();
-  if(answer !== '') {
+  const answer = await checkSupportedDotnetVersion();
+  if(answer !== undefined) {
     const selection = await window.showErrorMessage(
       answer,
       Messages.Dotnet.ChangeConfiguration,

@@ -10,21 +10,23 @@ import { Messages } from './ui/messages';
 
 const ListRuntimesArg = '--list-runtimes';
 const execFileAsync = promisify(execFile);
+const lstatAsync = promisify(fs.lstat);
 
-// Returns an error message
-export async function hasSupportedDotnetVersion(): Promise<string> {
+// Returns an error message or undefined.
+export async function checkSupportedDotnetVersion(): Promise<string | undefined> {
   const { path: dotnetExecutable, manual } = await getDotnetExecutablePath();
   try {
-    if(!fs.lstatSync(dotnetExecutable).isFile()) {
+    const stats = await lstatAsync(dotnetExecutable) as fs.Stats;
+    if(!stats.isFile()) {
       return dotnetExecutable + Messages.Dotnet.IsNotAnExecutableFile;
     }
     const { stdout } = await execFileAsync(dotnetExecutable, [ ListRuntimesArg ]);
-    return DotnetConstants.SupportedRuntimesPattern.test(stdout) ? ''
+    return DotnetConstants.SupportedRuntimesPattern.test(stdout) ? undefined
       : dotnetExecutable + Messages.Dotnet.NotASupportedDotnetInstallation + stdout;
   } catch(error: unknown) {
     const errorMsg = `Error invoking ${dotnetExecutable} ${ListRuntimesArg}: ${error}`;
     console.error(errorMsg);
-    return manual ? errorMsg : Messages.Dotnet.NoCompatibleInstallation;
+    return manual ? `${errorMsg}\n${Messages.Dotnet.FailedDotnetExecution}` : Messages.Dotnet.NoCompatibleInstallation;
   }
 }
 

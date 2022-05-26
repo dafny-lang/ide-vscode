@@ -24,6 +24,7 @@ export namespace Messages {
   export namespace Dotnet {
     export const IsNotAnExecutableFile = ' is not an executable dotnet file.';
     export const NotASupportedDotnetInstallation = ' is not a compatible dotnet file. Dafny requires the ASP.NET Core Runtime 5.0 or 6.0, got ';
+    export const FailedDotnetExecution = 'Failed to execute dotnet. Dafny requires the ASP.NET Core Runtime 5.0 or 6.0.';
     export const NoCompatibleInstallation = 'No compatible dotnet runtime found. Dafny requires the ASP.NET Core Runtime 5.0 or 6.0.';
     export const ChangeConfiguration = 'Change dafny.dotnetExecutablePath';
     export const VisitDownload = 'Get dotnet';
