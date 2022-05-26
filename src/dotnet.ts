@@ -1,34 +1,44 @@
 import { execFile } from 'child_process';
 import { promisify } from 'util';
+import * as fs from 'fs';
 
 import * as which from 'which';
 
 import { ConfigurationConstants, DotnetConstants } from './constants';
 import Configuration from './configuration';
+import { Messages } from './ui/messages';
 
 const ListRuntimesArg = '--list-runtimes';
 const execFileAsync = promisify(execFile);
+const lstatAsync = promisify(fs.lstat);
 
-export async function hasSupportedDotnetVersion(): Promise<boolean> {
-  const dotnetExecutable = await getDotnetExecutablePath();
+// Returns an error message or undefined.
+export async function checkSupportedDotnetVersion(): Promise<string | undefined> {
+  const { path: dotnetExecutable, manual } = await getDotnetExecutablePath();
   try {
+    const stats = await lstatAsync(dotnetExecutable);
+    if(!stats.isFile()) {
+      return dotnetExecutable + Messages.Dotnet.IsNotAnExecutableFile;
+    }
     const { stdout } = await execFileAsync(dotnetExecutable, [ ListRuntimesArg ]);
-    return DotnetConstants.SupportedRuntimesPattern.test(stdout);
+    return DotnetConstants.SupportedRuntimesPattern.test(stdout) ? undefined
+      : dotnetExecutable + Messages.Dotnet.NotASupportedDotnetInstallation + stdout;
   } catch(error: unknown) {
-    console.error(`error invoking ${DotnetConstants.ExecutableName} ${ListRuntimesArg}: ${error}`);
+    const errorMsg = `Error invoking ${dotnetExecutable} ${ListRuntimesArg}: ${error}`;
+    console.error(errorMsg);
+    return manual ? `${errorMsg}\n${Messages.Dotnet.FailedDotnetExecution}` : Messages.Dotnet.NoCompatibleInstallation;
   }
-  return false;
 }
 
-export async function getDotnetExecutablePath(): Promise<string> {
+export async function getDotnetExecutablePath(): Promise<{ path: string, manual: boolean }> {
   const configuredPath = Configuration.get<string>(ConfigurationConstants.Dotnet.ExecutablePath).trim();
   if(configuredPath.length > 0) {
-    return configuredPath;
+    return { path: configuredPath, manual: true };
   }
   try {
     const resolvedPath = await which(DotnetConstants.ExecutableName);
-    return resolvedPath;
+    return { path: resolvedPath, manual: false };
   } catch(error: unknown) {
-    return DotnetConstants.ExecutableName;
+    return { path: DotnetConstants.ExecutableName, manual: false };
   }
 }
