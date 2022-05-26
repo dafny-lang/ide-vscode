@@ -57,80 +57,54 @@ export default class VerificationGutterStatusView {
     = VerificationGutterStatusView.FillLineVerificationStatusMap();
 
   private constructor(context: ExtensionContext) {
-    let grayMode = false;
-
-    function iconOf(path: string): TextEditorDecorationType {
-      const icon = context.asAbsolutePath(`images/${path}.png`);
-      return window.createTextEditorDecorationType({
-        isWholeLine: true,
-        rangeBehavior: 1,
-        gutterIconPath: icon,
-        overviewRulerColor:
-          grayMode ? (path === 'resolution-error' ? ScrollColor.Error : ScrollColor.Unknown)
-            : path.startsWith('error-range')
-              ? ScrollColor.ErrorRange
-              : path.startsWith('error')
-                ? ScrollColor.Error
-                : path.startsWith('verified')
-                  ? ScrollColor.Verified
-                  : ScrollColor.Unknown
-      });
-    }
-    function makeIcon(...paths: string[]): GutterDecorationType {
-      if(paths.length === 1) {
-        return { type: 'static', path: paths[0], icon: iconOf(paths[0]) };
-      } else if(paths.length > 1) {
-        return { type: 'dynamic', paths: paths, icons: paths.map(path => iconOf(path)) };
-      } else {
-        return undefined;
-      }
-    }
+    const icon = this.makeIconAux(false, context);
+    const grayIcon = this.makeIconAux(true, context);
+    const lvs = LineVerificationStatus;
     this.normalDecorations = new Map<LineVerificationStatus, GutterDecorationType>([
-      [ LineVerificationStatus.Scheduled, makeIcon('scheduled') ],
-      [ LineVerificationStatus.AssertionFailed, makeIcon('error') ],
-      [ LineVerificationStatus.AssertionFailedObsolete, makeIcon('error-obsolete') ],
-      [ LineVerificationStatus.AssertionFailedVerifying, makeIcon('error-verifying', 'error-verifying-2') ],
-      [ LineVerificationStatus.AssertionVerifiedInErrorContextObsolete, makeIcon('error-range-verified-obsolete') ],
-      [ LineVerificationStatus.AssertionVerifiedInErrorContextVerifying, makeIcon('error-range-verified-verifying', 'error-range-verified-verifying-2') ],
-      [ LineVerificationStatus.AssertionVerifiedInErrorContext, makeIcon('error-range-verified') ],
-      [ LineVerificationStatus.ErrorContext, makeIcon('error-range') ],
-      [ LineVerificationStatus.ErrorContextStart, makeIcon('error-range-start') ],
-      [ LineVerificationStatus.ErrorContextStartObsolete, makeIcon('error-range-start-obsolete') ],
-      [ LineVerificationStatus.ErrorContextStartVerifying, makeIcon('error-range-start-verifying', 'error-range-start-verifying-2') ],
-      [ LineVerificationStatus.ErrorContextEnd, makeIcon('error-range-end') ],
-      [ LineVerificationStatus.ErrorContextEndObsolete, makeIcon('error-range-end-obsolete') ],
-      [ LineVerificationStatus.ErrorContextEndVerifying, makeIcon('error-range-end-verifying', 'error-range-end-verifying-2') ],
-      [ LineVerificationStatus.ErrorContextObsolete, makeIcon('error-range-obsolete') ],
-      [ LineVerificationStatus.ErrorContextVerifying, makeIcon('error-range-verifying', 'error-range-verifying-2') ],
-      [ LineVerificationStatus.VerifiedObsolete, makeIcon('verified-obsolete') ],
-      [ LineVerificationStatus.VerifiedVerifying, makeIcon('verified-verifying', 'verified-verifying-2') ],
-      [ LineVerificationStatus.Verified, makeIcon('verified') ],
-      [ LineVerificationStatus.Verifying, makeIcon('verifying', 'verifying-2') ],
-      [ LineVerificationStatus.ResolutionError, makeIcon('resolution-error') ]
+      [ lvs.Scheduled, icon('scheduled') ],
+      [ lvs.AssertionFailed, icon('error') ],
+      [ lvs.AssertionFailedObsolete, icon('error-obsolete') ],
+      [ lvs.AssertionFailedVerifying, icon('error-verifying', 'error-verifying-2') ],
+      [ lvs.AssertionVerifiedInErrorContextObsolete, icon('error-range-verified-obsolete') ],
+      [ lvs.AssertionVerifiedInErrorContextVerifying, icon('error-range-verified-verifying', 'error-range-verified-verifying-2') ],
+      [ lvs.AssertionVerifiedInErrorContext, icon('error-range-verified') ],
+      [ lvs.ErrorContext, icon('error-range') ],
+      [ lvs.ErrorContextStart, icon('error-range-start') ],
+      [ lvs.ErrorContextStartObsolete, icon('error-range-start-obsolete') ],
+      [ lvs.ErrorContextStartVerifying, icon('error-range-start-verifying', 'error-range-start-verifying-2') ],
+      [ lvs.ErrorContextEnd, icon('error-range-end') ],
+      [ lvs.ErrorContextEndObsolete, icon('error-range-end-obsolete') ],
+      [ lvs.ErrorContextEndVerifying, icon('error-range-end-verifying', 'error-range-end-verifying-2') ],
+      [ lvs.ErrorContextObsolete, icon('error-range-obsolete') ],
+      [ lvs.ErrorContextVerifying, icon('error-range-verifying', 'error-range-verifying-2') ],
+      [ lvs.VerifiedObsolete, icon('verified-obsolete') ],
+      [ lvs.VerifiedVerifying, icon('verified-verifying', 'verified-verifying-2') ],
+      [ lvs.Verified, icon('verified') ],
+      [ lvs.Verifying, icon('verifying', 'verifying-2') ],
+      [ lvs.ResolutionError, icon('resolution-error') ]
     ]);
-    grayMode = true;
     this.grayedDecorations = new Map<LineVerificationStatus, GutterDecorationType>([
-      [ LineVerificationStatus.Scheduled, makeIcon('scheduled') ],
-      [ LineVerificationStatus.AssertionFailed, makeIcon('error_gray') ],
-      [ LineVerificationStatus.AssertionFailedObsolete, makeIcon('error-obsolete_gray') ],
-      [ LineVerificationStatus.AssertionFailedVerifying, makeIcon('error-verifying_gray') ],
-      [ LineVerificationStatus.AssertionVerifiedInErrorContextObsolete, makeIcon('error-range-verified-obsolete-gray') ],
-      [ LineVerificationStatus.AssertionVerifiedInErrorContextVerifying, makeIcon('error-range-verified-obsolete-gray') ],
-      [ LineVerificationStatus.AssertionVerifiedInErrorContext, makeIcon('error-range-verified-obsolete-gray') ],
-      [ LineVerificationStatus.ErrorContext, makeIcon('error-range_gray') ],
-      [ LineVerificationStatus.ErrorContextStart, makeIcon('error-range-start_gray') ],
-      [ LineVerificationStatus.ErrorContextStartObsolete, makeIcon('error-range-start_gray') ],
-      [ LineVerificationStatus.ErrorContextStartVerifying, makeIcon('error-range-start_gray') ],
-      [ LineVerificationStatus.ErrorContextEnd, makeIcon('error-range-end_gray') ],
-      [ LineVerificationStatus.ErrorContextEndObsolete, makeIcon('error-range-end_gray') ],
-      [ LineVerificationStatus.ErrorContextEndVerifying, makeIcon('error-range-end_gray') ],
-      [ LineVerificationStatus.ErrorContextObsolete, makeIcon('error-range-obsolete_gray') ],
-      [ LineVerificationStatus.ErrorContextVerifying, makeIcon('error-range-verifying_gray') ],
-      [ LineVerificationStatus.VerifiedObsolete, makeIcon('verified_gray') ],
-      [ LineVerificationStatus.VerifiedVerifying, makeIcon('verified_gray') ],
-      [ LineVerificationStatus.Verified, makeIcon('verified_gray') ],
-      [ LineVerificationStatus.Verifying, makeIcon('verified_gray') ],
-      [ LineVerificationStatus.ResolutionError, makeIcon('resolution-error') ]
+      [ lvs.Scheduled, grayIcon('scheduled') ],
+      [ lvs.AssertionFailed, grayIcon('error_gray') ],
+      [ lvs.AssertionFailedObsolete, grayIcon('error-obsolete_gray') ],
+      [ lvs.AssertionFailedVerifying, grayIcon('error-verifying_gray') ],
+      [ lvs.AssertionVerifiedInErrorContextObsolete, grayIcon('error-range-verified-obsolete_gray.png') ],
+      [ lvs.AssertionVerifiedInErrorContextVerifying, grayIcon('error-range-verified-obsolete_gray.png') ],
+      [ lvs.AssertionVerifiedInErrorContext, grayIcon('error-range-verified-obsolete_gray.png') ],
+      [ lvs.ErrorContext, grayIcon('error-range_gray') ],
+      [ lvs.ErrorContextStart, grayIcon('error-range-start_gray') ],
+      [ lvs.ErrorContextStartObsolete, grayIcon('error-range-start_gray') ],
+      [ lvs.ErrorContextStartVerifying, grayIcon('error-range-start_gray') ],
+      [ lvs.ErrorContextEnd, grayIcon('error-range-end_gray') ],
+      [ lvs.ErrorContextEndObsolete, grayIcon('error-range-end_gray') ],
+      [ lvs.ErrorContextEndVerifying, grayIcon('error-range-end_gray') ],
+      [ lvs.ErrorContextObsolete, grayIcon('error-range-obsolete_gray') ],
+      [ lvs.ErrorContextVerifying, grayIcon('error-range-verifying_gray') ],
+      [ lvs.VerifiedObsolete, grayIcon('verified_gray') ],
+      [ lvs.VerifiedVerifying, grayIcon('verified_gray') ],
+      [ lvs.Verified, grayIcon('verified_gray') ],
+      [ lvs.Verifying, grayIcon('verified_gray') ],
+      [ lvs.ResolutionError, grayIcon('resolution-error') ]
     ]);
   }
 
@@ -142,6 +116,39 @@ export default class VerificationGutterStatusView {
       languageClient.onVerificationStatusGutter(params => instance.updateVerificationStatusGutter(params))
     );
     return instance;
+  }
+
+  /// Creation of an decoration type
+  private iconOf(context: ExtensionContext, path: string, grayMode: boolean): TextEditorDecorationType {
+    const icon = context.asAbsolutePath(`images/${path}.png`);
+    return window.createTextEditorDecorationType({
+      isWholeLine: true,
+      rangeBehavior: 1,
+      gutterIconPath: icon,
+      overviewRulerColor:
+        grayMode ? (path === 'resolution-error' ? ScrollColor.Error : ScrollColor.Unknown)
+          : path.startsWith('error-range')
+            ? ScrollColor.ErrorRange
+            : path.startsWith('error')
+              ? ScrollColor.Error
+              : path.startsWith('verified')
+                ? ScrollColor.Verified
+                : ScrollColor.Unknown
+    });
+  }
+
+  /// Helper to create decoration types based on the mode and number of images
+  public makeIconAux(grayMode: boolean, context: ExtensionContext):
+      ((...paths: string[]) => GutterDecorationType) {
+    return (...paths: string[]): GutterDecorationType => {
+      if(paths.length === 1) {
+        return { type: 'static', path: paths[0], icon: this.iconOf(context, paths[0], grayMode) };
+      } else if(paths.length > 1) {
+        return { type: 'dynamic', paths: paths, icons: paths.map(path => this.iconOf(context, path, grayMode)) };
+      } else {
+        return undefined;
+      }
+    };
   }
 
   /////////////////// Gutter rendering ///////////////////
