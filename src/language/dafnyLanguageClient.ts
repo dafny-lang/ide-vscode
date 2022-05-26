@@ -1,5 +1,5 @@
-import { ExtensionContext, Disposable, OutputChannel } from 'vscode';
-import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
+import { ExtensionContext, Disposable, OutputChannel, Uri, Diagnostic } from 'vscode';
+import { HandleDiagnosticsSignature, LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
 
 import Configuration from '../configuration';
 import { ConfigurationConstants } from '../constants';
@@ -70,10 +70,15 @@ function getDafnyPluginsArgument(): string[] {
   );
 }
 
+type DiagnosticListener = (uri: Uri, diagnostics: Diagnostic[]) => void;
+
 export class DafnyLanguageClient extends LanguageClient {
+  private readonly diagnosticsListeners: DiagnosticListener[];
+
   // eslint-disable-next-line max-params
-  private constructor(id: string, name: string, serverOptions: ServerOptions, clientOptions: LanguageClientOptions, forceDebug?: boolean) {
+  private constructor(id: string, name: string, serverOptions: ServerOptions, clientOptions: LanguageClientOptions, diagnosticsListeners: DiagnosticListener[], forceDebug?: boolean) {
     super(id, name, serverOptions, clientOptions, forceDebug);
+    this.diagnosticsListeners = diagnosticsListeners;
   }
 
   public getCounterExamples(param: ICounterExampleParams): Promise<ICounterExampleItem[]> {
@@ -96,11 +101,20 @@ export class DafnyLanguageClient extends LanguageClient {
       run: { command: dotnetExecutable, args: launchArguments },
       debug: { command: dotnetExecutable, args: launchArguments }
     };
+    const diagnosticsListeners: ((uri: Uri, diagnostics: Diagnostic[]) => void)[] = [];
     const clientOptions: LanguageClientOptions = {
       documentSelector: [ DafnyDocumentFilter ],
-      diagnosticCollectionName: LanguageServerId
+      diagnosticCollectionName: LanguageServerId,
+      middleware: {
+        handleDiagnostics: (uri: Uri, diagnostics: Diagnostic[], next: HandleDiagnosticsSignature) => {
+          for(const handler of diagnosticsListeners) {
+            handler(uri, diagnostics);
+          }
+          next(uri, diagnostics);
+        }
+      }
     };
-    return new DafnyLanguageClient(LanguageServerId, LanguageServerName, serverOptions, clientOptions);
+    return new DafnyLanguageClient(LanguageServerId, LanguageServerName, serverOptions, clientOptions, diagnosticsListeners);
   }
 
   public onGhostDiagnostics(callback: (params: IGhostDiagnosticsParams) => void): Disposable {
@@ -117,6 +131,10 @@ export class DafnyLanguageClient extends LanguageClient {
 
   public onServerVersion(callback: (version: string) => void): Disposable {
     return this.onNotification('dafnyLanguageServerVersionReceived', callback);
+  }
+
+  public onPublishDiagnostics(callback: (uri: Uri, diagnostics: Diagnostic[]) => void): void {
+    this.diagnosticsListeners.push(callback);
   }
 
   // TODO Legacy verification status messages
