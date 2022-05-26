@@ -57,8 +57,8 @@ export default class VerificationGutterStatusView {
     = VerificationGutterStatusView.FillLineVerificationStatusMap();
 
   private constructor(context: ExtensionContext) {
-    const icon = this.makeIconAux(false, context);
-    const grayIcon = this.makeIconAux(true, context);
+    const icon = VerificationGutterStatusView.makeIconAux(false, context);
+    const grayIcon = VerificationGutterStatusView.makeIconAux(true, context);
     const lvs = LineVerificationStatus;
     this.normalDecorations = new Map<LineVerificationStatus, GutterDecorationType>([
       [ lvs.Scheduled, icon('scheduled') ],
@@ -119,7 +119,7 @@ export default class VerificationGutterStatusView {
   }
 
   /// Creation of an decoration type
-  private iconOf(context: ExtensionContext, path: string, grayMode: boolean): TextEditorDecorationType {
+  private static iconOf(context: ExtensionContext, path: string, grayMode: boolean): TextEditorDecorationType {
     const icon = context.asAbsolutePath(`images/${path}.png`);
     return window.createTextEditorDecorationType({
       isWholeLine: true,
@@ -138,7 +138,7 @@ export default class VerificationGutterStatusView {
   }
 
   /// Helper to create decoration types based on the mode and number of images
-  public makeIconAux(grayMode: boolean, context: ExtensionContext):
+  public static makeIconAux(grayMode: boolean, context: ExtensionContext):
       ((...paths: string[]) => GutterDecorationType) {
     return (...paths: string[]): GutterDecorationType => {
       if(paths.length === 1) {
