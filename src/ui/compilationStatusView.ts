@@ -1,5 +1,4 @@
 import { StatusBarAlignment, StatusBarItem, TextDocument, window, workspace, ExtensionContext } from 'vscode';
-
 import { CompilationStatus, ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from '../language/api/compilationStatus';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath } from '../tools/vscode';
@@ -23,7 +22,9 @@ function toStatusMessage(status: CompilationStatus, message?: string | null): st
   case CompilationStatus.VerificationSucceeded:
     return Messages.CompilationStatus.VerificationSucceeded;
   case CompilationStatus.VerificationFailed:
-    return Messages.CompilationStatus.VerificationFailed;
+    return message != null
+      ? `${Messages.CompilationStatus.VerificationFailed} ${message}`
+      : `${Messages.CompilationStatus.VerificationFailed}`;
   }
 }
 

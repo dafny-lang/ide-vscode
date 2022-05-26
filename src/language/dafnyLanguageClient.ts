@@ -8,6 +8,7 @@ import { DafnyDocumentFilter } from '../tools/vscode';
 import { ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from './api/compilationStatus';
 import { ICounterExampleItem, ICounterExampleParams } from './api/counterExample';
 import { IGhostDiagnosticsParams } from './api/ghostDiagnostics';
+import { IVerificationGutterStatusParams as IVerificationGutterStatusParams } from './api/verificationGutterStatusParams';
 import { getLanguageServerRuntimePath } from './dafnyInstallation';
 
 const LanguageServerId = 'dafny-vscode';
@@ -21,6 +22,7 @@ function getLanguageServerLaunchArgs(): string[] {
     getVerifierCachingPolicy(),
     getVerifierVirtualCoresArgument(),
     getMarkGhostStatementsArgument(),
+    getDisplayGutterStatusArgument(),
     ...getDafnyPluginsArgument(),
     ...launchArgs
   ];
@@ -46,6 +48,10 @@ function getVerifierCachingPolicy(): string {
 
 function getVerifierVirtualCoresArgument(): string {
   return `--verifier:vcscores=${Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationVirtualCores)}`;
+}
+
+function getDisplayGutterStatusArgument(): string {
+  return `--verifier:gutterStatus=${Configuration.get<string>(ConfigurationConstants.LanguageServer.DisplayGutterStatus)}`;
 }
 
 function getMarkGhostStatementsArgument(): string {
@@ -88,7 +94,7 @@ export class DafnyLanguageClient extends LanguageClient {
   }
 
   public static async create(context: ExtensionContext, statusOutput: OutputChannel): Promise<DafnyLanguageClient> {
-    const dotnetExecutable = await getDotnetExecutablePath();
+    const { path: dotnetExecutable } = await getDotnetExecutablePath();
     const launchArguments = [ getLanguageServerRuntimePath(context), ...getLanguageServerLaunchArgs() ];
     statusOutput.appendLine(`Language server arguments: ${DafnyLanguageClient.argumentsToCommandLine(launchArguments)}`);
     const serverOptions: ServerOptions = {
@@ -113,6 +119,10 @@ export class DafnyLanguageClient extends LanguageClient {
 
   public onGhostDiagnostics(callback: (params: IGhostDiagnosticsParams) => void): Disposable {
     return this.onNotification('dafny/ghost/diagnostics', callback);
+  }
+
+  public onVerificationStatusGutter(callback: (params: IVerificationGutterStatusParams) => void): Disposable {
+    return this.onNotification('dafny/verification/status/gutter', callback);
   }
 
   public onCompilationStatus(callback: (params: ICompilationStatusParams) => void): Disposable {

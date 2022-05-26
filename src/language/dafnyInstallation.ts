@@ -174,7 +174,8 @@ export class DafnyInstaller {
   }
 
   public isCustomInstallation(): boolean {
-    return getConfiguredLanguageServerRuntimePath() != null;
+    const configuredLanguageServerRuntimePath = getConfiguredLanguageServerRuntimePath();
+    return configuredLanguageServerRuntimePath != null && configuredLanguageServerRuntimePath !== '';
   }
 
   public async isLanguageServerRuntimeAccessible(): Promise<boolean> {
