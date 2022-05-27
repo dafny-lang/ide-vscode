@@ -153,7 +153,12 @@ export class DafnyInstaller {
     this.writeStatus(`Installing Dafny from source in ${installationPath.fsPath}.\n`);
     const previousDirectory = processCwd();
     processChdir(installationPath.fsPath);
-    await this.execLog('brew install dotnet-sdk');
+    try {
+      await this.execLog('brew install dotnet-sdk');
+    } catch(error: unknown) {
+      this.writeStatus('If you got `brew: command not found`, but brew is installed on your system, please follow https://apple.stackexchange.com/a/430904 and reinstall Dafny.');
+      return false;
+    }
     await this.execLog(`git clone --recurse-submodules ${LanguageServerConstants.DafnyGitUrl}`);
     processChdir(Utils.joinPath(installationPath, 'dafny').fsPath);
     await this.execLog('git fetch --all --tags');
