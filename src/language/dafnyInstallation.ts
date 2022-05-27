@@ -156,7 +156,7 @@ export class DafnyInstaller {
     try {
       await this.execLog('brew install dotnet-sdk');
     } catch(error: unknown) {
-      this.writeStatus('If you got `brew: command not found`, but brew is installed on your system, please add all brew commends to your ~/.zprofile, e.g. https://apple.stackexchange.com/a/430904 and reinstall Dafny.');
+      this.writeStatus('If you got `brew: command not found`, but brew is installed on your system, please add all brew commands to your ~/.zprofile, e.g. https://apple.stackexchange.com/a/430904 and reinstall Dafny.');
       return false;
     }
     await this.execLog(`git clone --recurse-submodules ${LanguageServerConstants.DafnyGitUrl}`);
