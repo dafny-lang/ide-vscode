@@ -8,6 +8,7 @@ import DafnyVersionView from './dafnyVersionView';
 import GhostDiagnosticsView from './ghostDiagnosticsView';
 import VerificationGutterStatusView from './verificationGutterStatusView';
 import RelatedErrorView from './relatedErrorView';
+import VerificationSymbolStatusView from './verificationSymbolStatusView';
 
 export default async function createAndRegisterDafnyIntegration(
   context: ExtensionContext,
@@ -17,6 +18,7 @@ export default async function createAndRegisterDafnyIntegration(
   CounterExamplesView.createAndRegister(context, languageClient);
   GhostDiagnosticsView.createAndRegister(context, languageClient);
   VerificationGutterStatusView.createAndRegister(context, languageClient);
+  VerificationSymbolStatusView.createAndRegister(context, languageClient);
   CompileCommands.createAndRegister(context);
   CompilationStatusView.createAndRegister(context, languageClient);
   RelatedErrorView.createAndRegister(context, languageClient);

@@ -9,6 +9,7 @@ import { ICompilationStatusParams, IVerificationCompletedParams, IVerificationSt
 import { ICounterExampleItem, ICounterExampleParams } from './api/counterExample';
 import { IGhostDiagnosticsParams } from './api/ghostDiagnostics';
 import { IVerificationGutterStatusParams as IVerificationGutterStatusParams } from './api/verificationGutterStatusParams';
+import { IVerificationSymbolStatusParams } from './api/verificationSymbolStatusParams';
 import { getLanguageServerRuntimePath } from './dafnyInstallation';
 
 const LanguageServerId = 'dafny-vscode';
@@ -123,6 +124,10 @@ export class DafnyLanguageClient extends LanguageClient {
 
   public onVerificationStatusGutter(callback: (params: IVerificationGutterStatusParams) => void): Disposable {
     return this.onNotification('dafny/verification/status/gutter', callback);
+  }
+
+  public onVerificationSymbolStatus(callback: (params: IVerificationSymbolStatusParams) => void): Disposable {
+    return this.onNotification('dafny/textDocument/symbolStatus', callback);
   }
 
   public onCompilationStatus(callback: (params: ICompilationStatusParams) => void): Disposable {

@@ -10,7 +10,7 @@ import { Messages } from './ui/messages';
 
 const ListRuntimesArg = '--list-runtimes';
 const execFileAsync = promisify(execFile);
-const lstatAsync = promisify(fs.lstat);
+const lstatAsync = promisify(fs.stat);
 
 // Returns an error message or undefined.
 export async function checkSupportedDotnetVersion(): Promise<string | undefined> {
