@@ -34,17 +34,9 @@ export default class VerificationSymbolStatusView {
     }
   }
 
-  private async createController(params: IVerificationSymbolStatusParams): Promise<FileState> {
+  private createController(params: IVerificationSymbolStatusParams): FileState {
     const controller = tests.createTestController('verificationStatus', 'Verification Status');
     const uri = Uri.parse(params.uri);
-    const document = await workspace.openTextDocument(uri.fsPath);
-    params.namedVerifiables.forEach(element => {
-      const vscodeRange = VerificationSymbolStatusView.convertRange(element.nameRange);
-      const nameText = document.getText(vscodeRange);
-      const testItem = controller.createTestItem(JSON.stringify(element.nameRange), nameText, Uri.parse(params.uri));
-      testItem.range = vscodeRange;
-      controller.items.add(testItem);
-    });
     const result = new FileState(controller, undefined);
     this.fileStates.set(uri.toString(), result);
     return result;
@@ -52,13 +44,25 @@ export default class VerificationSymbolStatusView {
 
   private async update(params: IVerificationSymbolStatusParams): Promise<void> {
     const uri = Uri.parse(params.uri);
-    const fileState = this.fileStates.get(uri.toString()) ?? await this.createController(params);
+    const fileState = this.fileStates.get(uri.toString()) ?? this.createController(params);
+
+
+    const document = await workspace.openTextDocument(uri.fsPath);
+    const newChildren = params.namedVerifiables.map(element => {
+      const vscodeRange = VerificationSymbolStatusView.convertRange(element.nameRange);
+      const nameText = document.getText(vscodeRange);
+      const testItem = fileState.controller.createTestItem(JSON.stringify(element.nameRange), nameText, uri);
+      testItem.range = vscodeRange;
+      return testItem;
+    });
+    fileState.controller.items.replace(newChildren);
 
     if(!fileState.run) {
       const items = params.namedVerifiables.map(f => fileState.controller.items.get(JSON.stringify(f.nameRange))!);
-      console.log("new run");
+      console.log('new run');
       fileState.run = fileState.controller.createTestRun(new TestRunRequest(items));
     }
+
     const run = fileState.run;
     let stillRunning = false;
     params.namedVerifiables.forEach((element, index) => {
