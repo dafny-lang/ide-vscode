@@ -1,5 +1,5 @@
 /* eslint-disable max-depth */
-import { commands, ExtensionContext, workspace, tests, Range, Position, Uri, TestRunRequest, TestController, TextDocumentChangeEvent, TestRun, DocumentSymbol, TestItem, TestItemCollection, TestMessage } from 'vscode';
+import { commands, ExtensionContext, workspace, tests, Range, Position, Uri, TestRunRequest, TestController, TextDocumentChangeEvent, TestRun, DocumentSymbol, TestItem, TestItemCollection, TestMessage, TextDocument } from 'vscode';
 import { Range as lspRange, Position as lspPosition } from 'vscode-languageclient';
 import { IVerificationSymbolStatusParams, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
@@ -48,31 +48,16 @@ export default class VerificationSymbolStatusView {
     const controller = fileState.controller;
 
     const rootSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[];
-    const itemMapping: Map<DocumentSymbol, TestItem> = new Map();
-
-    function updateMapping(parentChildren: TestItemCollection, symbols: DocumentSymbol[], range: Range): TestItem | undefined {
-      for(const symbol of symbols) {
-        if(symbol.range.contains(range)) {
-          let item = itemMapping.get(symbol);
-          if(!item) {
-            const nameText = document.getText(symbol.selectionRange);
-            item = controller.createTestItem(JSON.stringify(symbol.selectionRange), nameText, uri);
-            item.range = range;
-            itemMapping.set(symbol, item);
-            parentChildren.add(item);
-          }
-          return updateMapping(item.children, symbol.children, range) ?? item;
-        }
-      }
-      return undefined;
-    }
-
+    let items: TestItem[];
     const document = await workspace.openTextDocument(uri.fsPath);
-    fileState.controller.items.replace([]);
-    const items = params.namedVerifiables.map(element => {
-      const vscodeRange = VerificationSymbolStatusView.convertRange(element.nameRange);
-      return updateMapping(fileState.controller.items, rootSymbols, vscodeRange)!;
-    });
+    if(rootSymbols !== undefined) {
+
+      items = this.updateUsingSymbols(params, document, controller, rootSymbols);
+    } else {
+      console.log('No document symbols found');
+      items = params.namedVerifiables.map(f => VerificationSymbolStatusView.getItem(document,
+        VerificationSymbolStatusView.convertRange(f.nameRange), controller, uri));
+    }
 
     if(!fileState.run) {
       console.log('new run');
@@ -107,6 +92,55 @@ export default class VerificationSymbolStatusView {
       console.log('ending run');
       run.end();
     }
+  }
+
+  private updateUsingSymbols(params: IVerificationSymbolStatusParams, document: TextDocument,
+    controller: TestController, rootSymbols: DocumentSymbol[]): TestItem[] {
+
+    const itemMapping: Map<DocumentSymbol, TestItem> = new Map();
+    const uri = Uri.parse(params.uri);
+
+    function updateMapping(symbols: DocumentSymbol[], range: Range): TestItem | undefined {
+      for(const symbol of symbols) {
+        if(symbol.range.contains(range)) {
+          let item = itemMapping.get(symbol);
+          if(!item) {
+            const itemRange = symbol.selectionRange;
+            item = VerificationSymbolStatusView.getItem(document, itemRange, controller, uri);
+            itemMapping.set(symbol, item);
+          }
+          return updateMapping(symbol.children, range) ?? item;
+        }
+      }
+      return undefined;
+    }
+
+    const items = params.namedVerifiables.map(element => {
+      const vscodeRange = VerificationSymbolStatusView.convertRange(element.nameRange);
+      return updateMapping(rootSymbols, vscodeRange)!;
+    });
+
+    replaceChildren(rootSymbols, controller.items);
+    for(const [ symbol, item ] of itemMapping.entries()) {
+      replaceChildren(symbol.children, item.children);
+    }
+
+    function replaceChildren(childSymbols: DocumentSymbol[], childCollection: TestItemCollection) {
+      const newChildren = childSymbols.flatMap(child => {
+        const childItem = itemMapping.get(child);
+        return childItem ? [ childItem ] : [];
+      });
+      childCollection.replace(newChildren);
+    }
+
+    return items;
+  }
+
+  private static getItem(document: TextDocument, itemRange: Range, controller: TestController, uri: Uri) {
+    const nameText = document.getText(itemRange);
+    const item = controller.createTestItem(JSON.stringify(itemRange), nameText, uri);
+    item.range = itemRange;
+    return item;
   }
 
   private static convertRange(range: lspRange): Range {
