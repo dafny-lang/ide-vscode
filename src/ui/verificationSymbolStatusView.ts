@@ -1,5 +1,5 @@
 /* eslint-disable max-depth */
-import { ExtensionContext, workspace, tests, Range, Position, Uri, TestRunRequest, TestMessage, TestController, TextDocumentChangeEvent, TestRun } from 'vscode';
+import { commands, ExtensionContext, workspace, tests, Range, Position, Uri, TestRunRequest, TestController, TextDocumentChangeEvent, TestRun, DocumentSymbol, TestItem, TestItemCollection, TestMessage } from 'vscode';
 import { Range as lspRange, Position as lspPosition } from 'vscode-languageclient';
 import { IVerificationSymbolStatusParams, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
@@ -45,20 +45,36 @@ export default class VerificationSymbolStatusView {
   private async update(params: IVerificationSymbolStatusParams): Promise<void> {
     const uri = Uri.parse(params.uri);
     const fileState = this.fileStates.get(uri.toString()) ?? this.createController(params);
+    const controller = fileState.controller;
 
+    const rootSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[];
+    const itemMapping: Map<DocumentSymbol, TestItem> = new Map();
+
+    function updateMapping(parentChildren: TestItemCollection, symbols: DocumentSymbol[], range: Range): TestItem | undefined {
+      for(const symbol of symbols) {
+        if(symbol.range.contains(range)) {
+          let item = itemMapping.get(symbol);
+          if(!item) {
+            const nameText = document.getText(symbol.selectionRange);
+            item = controller.createTestItem(JSON.stringify(symbol.selectionRange), nameText, uri);
+            item.range = range;
+            itemMapping.set(symbol, item);
+            parentChildren.add(item);
+          }
+          return updateMapping(item.children, symbol.children, range) ?? item;
+        }
+      }
+      return undefined;
+    }
 
     const document = await workspace.openTextDocument(uri.fsPath);
-    const newChildren = params.namedVerifiables.map(element => {
+    fileState.controller.items.replace([]);
+    const items = params.namedVerifiables.map(element => {
       const vscodeRange = VerificationSymbolStatusView.convertRange(element.nameRange);
-      const nameText = document.getText(vscodeRange);
-      const testItem = fileState.controller.createTestItem(JSON.stringify(element.nameRange), nameText, uri);
-      testItem.range = vscodeRange;
-      return testItem;
+      return updateMapping(fileState.controller.items, rootSymbols, vscodeRange)!;
     });
-    fileState.controller.items.replace(newChildren);
 
     if(!fileState.run) {
-      const items = params.namedVerifiables.map(f => fileState.controller.items.get(JSON.stringify(f.nameRange))!);
       console.log('new run');
       fileState.run = fileState.controller.createTestRun(new TestRunRequest(items));
     }
@@ -66,7 +82,7 @@ export default class VerificationSymbolStatusView {
     const run = fileState.run;
     let stillRunning = false;
     params.namedVerifiables.forEach((element, index) => {
-      const testItem = fileState.controller.items.get(JSON.stringify(element.nameRange))!;
+      const testItem = items[index];
       switch(element.status) {
       case PublishedVerificationStatus.Stale: run.skipped(testItem);
         console.log(`stale ${index}`);
@@ -88,7 +104,7 @@ export default class VerificationSymbolStatusView {
       }
     });
     if(!stillRunning) {
-      console.log("ending run");
+      console.log('ending run');
       run.end();
     }
   }
