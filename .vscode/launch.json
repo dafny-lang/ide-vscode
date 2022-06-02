@@ -12,6 +12,9 @@
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}"
       ],
+      "env": {
+        "DAFNY_LANGUAGE_SERVER": "${env:CUSTOM_DAFNY_SERVER}", 
+      },
       "outFiles": [
         "${workspaceFolder}/dist/**/*.js"
       ],

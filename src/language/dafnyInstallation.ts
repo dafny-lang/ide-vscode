@@ -58,7 +58,8 @@ export function getLanguageServerRuntimePath(context: ExtensionContext): string 
 }
 
 function getConfiguredLanguageServerRuntimePath(): string | null {
-  return Configuration.get<string | null>(ConfigurationConstants.LanguageServer.RuntimePath);
+  const languageServerOverride = process.env['DAFNY_LANGUAGE_SERVER'];
+  return languageServerOverride ?? Configuration.get<string | null>(ConfigurationConstants.LanguageServer.RuntimePath);
 }
 
 function getDafnyPlatformSuffix(): string {
