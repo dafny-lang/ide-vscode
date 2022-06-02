@@ -17,7 +17,7 @@ export async function checkSupportedDotnetVersion(): Promise<string | undefined>
   const { path: dotnetExecutable, manual } = await getDotnetExecutablePath();
   try {
     const stats = await lstatAsync(dotnetExecutable);
-    if(!stats.isFile()) {
+    if(!stats.isFile() && !stats.isSymbolicLink()) {
       return dotnetExecutable + Messages.Dotnet.IsNotAnExecutableFile;
     }
     const { stdout } = await execFileAsync(dotnetExecutable, [ ListRuntimesArg ]);
