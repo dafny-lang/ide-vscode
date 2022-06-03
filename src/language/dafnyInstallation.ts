@@ -57,9 +57,10 @@ export function getLanguageServerRuntimePath(context: ExtensionContext): string 
   return path.join(context.extensionPath, configuredPath);
 }
 
-function getConfiguredLanguageServerRuntimePath(): string | null {
-  const languageServerOverride = process.env['DAFNY_LANGUAGE_SERVER'];
-  return languageServerOverride ?? Configuration.get<string | null>(ConfigurationConstants.LanguageServer.RuntimePath);
+function getConfiguredLanguageServerRuntimePath(): string {
+  const languageServerOverride = process.env['DAFNY_LANGUAGE_SERVER'] ?? '';
+  const languageServerSetting = Configuration.get<string | null>(ConfigurationConstants.LanguageServer.RuntimePath) ?? '';
+  return languageServerOverride || languageServerSetting;
 }
 
 function getDafnyPlatformSuffix(): string {
@@ -180,8 +181,7 @@ export class DafnyInstaller {
   }
 
   public isCustomInstallation(): boolean {
-    const configuredLanguageServerRuntimePath = getConfiguredLanguageServerRuntimePath();
-    return configuredLanguageServerRuntimePath != null && configuredLanguageServerRuntimePath !== '';
+    return getConfiguredLanguageServerRuntimePath() !== '';
   }
 
   public async isLanguageServerRuntimeAccessible(): Promise<boolean> {
