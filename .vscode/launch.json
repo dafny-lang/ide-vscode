@@ -21,7 +21,7 @@
       "preLaunchTask": "${defaultBuildTask}"
     },
     {
-      "name": "Run with custom server",
+      "name": "Run with $DAFNY_LANGUAGE_SERVER",
       "type": "extensionHost",
       "request": "launch",
       "args": [
