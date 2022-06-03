@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
 
-import { workspace, ExtensionContext, Uri, OutputChannel, FileSystemError } from 'vscode';
+import { workspace, ExtensionContext, Uri, OutputChannel, FileSystemError, window } from 'vscode';
 import { Utils } from 'vscode-uri';
 
 import got from 'got';
@@ -59,6 +59,9 @@ export function getLanguageServerRuntimePath(context: ExtensionContext): string 
 
 function getConfiguredLanguageServerRuntimePath(): string {
   const languageServerOverride = process.env['DAFNY_LANGUAGE_SERVER'] ?? '';
+  if(languageServerOverride) {
+    window.showInformationMessage('Using Dafny language server configured in $DAFNY_LANGUAGE_SERVER');
+  }
   const languageServerSetting = Configuration.get<string | null>(ConfigurationConstants.LanguageServer.RuntimePath) ?? '';
   return languageServerOverride || languageServerSetting;
 }
