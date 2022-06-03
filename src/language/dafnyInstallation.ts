@@ -135,9 +135,9 @@ export class DafnyInstaller {
     }
   }
 
-  private async execLog(command: string) {
+  private async execLog(command: string): Promise<{ stderr: string, stdout: string }> {
     this.writeStatus(`Executing: ${command}`);
-    await execAsync(command);
+    return await execAsync(command);
   }
   private GetZ3FileNameOSX(): string {
     const z3v = LanguageServerConstants.Z3VersionForCustomInstallation;
@@ -159,6 +159,19 @@ export class DafnyInstaller {
       await this.execLog('brew install dotnet-sdk');
     } catch(error: unknown) {
       this.writeStatus('If you got `brew: command not found`, but brew is installed on your system, please add all brew commands to your ~/.zprofile, e.g. https://apple.stackexchange.com/a/430904 and reinstall Dafny.');
+      return false;
+    }
+    try {
+      const result = (await this.execLog('javac -version')).stdout;
+      if(!(/javac \d+\.\d+/.exec(result))) {
+        throw '';
+      }
+    } catch(error: unknown) {
+      const errorMsg = error === '' ? 'Javac not found' : `${error}`;
+      this.writeStatus(`${errorMsg}. Please install a valid JDK`
+       + ' and ensure that the path containing javac is in the PATH environment variable. '
+       + 'You can obtain a free open-source JDK 1.8 from here: '
+       + 'https://aws.amazon.com/corretto/');
       return false;
     }
     await this.execLog(`git clone --recurse-submodules ${LanguageServerConstants.DafnyGitUrl}`);
