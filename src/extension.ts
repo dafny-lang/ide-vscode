@@ -63,7 +63,7 @@ class ExtensionRuntime {
   }
 
   private async initializeClient(): Promise<void> {
-    this.statusOutput.appendLine(`starting Dafny from ${getLanguageServerRuntimePath(this.context)}`);
+    this.statusOutput.appendLine(`Starting Dafny from ${getLanguageServerRuntimePath(this.context)}`);
     await this.startClientAndWaitForVersion();
   }
 
@@ -112,13 +112,14 @@ class ExtensionRuntime {
 
   public async restart(): Promise<void> {
     this.statusOutput.appendLine('Terminating Dafny...');
-    try {
-      await this.dispose();
-    } catch(e: unknown) {
-      this.statusOutput.appendLine(`Exception while stopping the language server. Restarting anyway.${e}`);
+    await this.dispose();
+    // The first subscription is the statusOutput and should not be disposed.
+    for(let i = 1; i < this.context.subscriptions.length; i++) {
+      this.context.subscriptions[i].dispose();
     }
-    this.statusOutput.appendLine('Starting Dafny...');
-    await this.startClientAndWaitForVersion();
+    this.context.subscriptions.splice(1, this.context.subscriptions.length);
+    await this.initializeClient();
+    await createAndRegisterDafnyIntegration(this.context, this.client!, this.languageServerVersion!);
     this.statusOutput.appendLine('Dafny is ready again.\nSorry for the trouble. Please file an issue by clicking the link below:\n' + fileIssueURL);
   }
 }
