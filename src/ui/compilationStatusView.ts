@@ -1,6 +1,5 @@
 import { StatusBarAlignment, StatusBarItem, TextDocument, window, workspace, commands, ExtensionContext } from 'vscode';
 import { CompilationStatus, ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from '../language/api/compilationStatus';
-import { restartServer } from '../extension';
 import { DafnyCommands } from '../commands';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath } from '../tools/vscode';
@@ -50,7 +49,6 @@ export default class CompilationStatusView {
     const statusBarActionView = new StatusBarActionView();
     context.subscriptions.push(
       commands.registerCommand(DafnyCommands.OpenStatusBarMenu, () => statusBarActionView.openStatusBarMenu()),
-      commands.registerCommand(DafnyCommands.RestartServer, restartServer),
       languageClient.onCompilationStatus(params => view.compilationStatusChanged(params)),
       languageClient.onVerificationStarted(params => view.verificationStarted(params)),
       languageClient.onVerificationCompleted(params => view.verificationCompleted(params)),
