@@ -43,7 +43,7 @@ interface StatusBarAction {
 
 const RestartDafny: StatusBarAction = {
   label: 'Restart Dafny',
-  description: 'Terminate the Dafny LSP server, relaunch it, and reverify the current file.',
+  description: 'Relaunches the Dafny Language Server and reverify the current file.',
   command: DafnyCommands.RestartServer
 };
 

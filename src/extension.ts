@@ -62,7 +62,7 @@ class ExtensionRuntime {
 
   private async initializeClient(): Promise<void> {
     this.statusOutput.appendLine(`starting Dafny from ${getLanguageServerRuntimePath(this.context)}`);
-    await this.ensure();
+    await this.startClientAndWaitForVersion();
   }
 
   private async getLanguageServerVersionAfterStartup(): Promise<string> {
@@ -101,15 +101,19 @@ class ExtensionRuntime {
     await this.client?.stop();
   }
 
-  public async ensure() {
+  public async startClientAndWaitForVersion() {
     this.client = this.client ?? await DafnyLanguageClient.create(this.context, this.statusOutput);
     this.client.start();
     await this.client.onReady();
     this.languageServerVersion = await this.getLanguageServerVersionAfterStartup();
   }
 
-  public async restart() {
-    await this.dispose();
-    await this.ensure();
+  public async restart(): Promise<void> {
+    try {
+      await this.dispose();
+    } catch(e: unknown) {
+      this.statusOutput.appendLine(`Exception while stopping the language server. Restarting anyway.${e}`);
+    }
+    await this.startClientAndWaitForVersion();
   }
 }
