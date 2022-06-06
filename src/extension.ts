@@ -7,6 +7,7 @@ import { DafnyInstaller, getLanguageServerRuntimePath, isConfiguredToInstallLate
 import { Messages } from './ui/messages';
 import createAndRegisterDafnyIntegration from './ui/dafnyIntegration';
 import { timeout } from './tools/timeout';
+import { fileIssueURL } from './ui/statusBarActionView';
 
 // Promise.any() is only available since Node.JS 15.
 import * as PromiseAny from 'promise.any';
@@ -109,11 +110,14 @@ class ExtensionRuntime {
   }
 
   public async restart(): Promise<void> {
+    this.statusOutput.appendLine('Terminating Dafny...');
     try {
       await this.dispose();
     } catch(e: unknown) {
       this.statusOutput.appendLine(`Exception while stopping the language server. Restarting anyway.${e}`);
     }
+    this.statusOutput.appendLine('Starting Dafny...');
     await this.startClientAndWaitForVersion();
+    this.statusOutput.appendLine('Dafny is ready again.\nSorry for the trouble. Please file an issue by clicking the link below:\n' + fileIssueURL);
   }
 }

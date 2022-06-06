@@ -6,6 +6,7 @@ import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath } from '../tools/vscode';
 import { enableOnlyForDafnyDocuments } from '../tools/visibility';
 import { Messages } from './messages';
+import StatusBarActionView from './statusBarActionView';
 
 const StatusBarPriority = 10;
 
@@ -35,18 +36,6 @@ interface IDocumentStatusMessage {
   version?: number;
 }
 
-interface StatusBarAction {
-  label: string;
-  description: string;
-  command: string;
-}
-
-const RestartDafny: StatusBarAction = {
-  label: 'Restart Dafny',
-  description: 'Relaunches the Dafny Language Server and reverify the current file.',
-  command: DafnyCommands.RestartServer
-};
-
 export default class CompilationStatusView {
   // We store the message string for easier backwards compatibility with the
   // legacy status messages.
@@ -58,8 +47,9 @@ export default class CompilationStatusView {
     const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, StatusBarPriority);
     statusBarItem.command = DafnyCommands.OpenStatusBarMenu;
     const view = new CompilationStatusView(statusBarItem);
+    const statusBarActionView = new StatusBarActionView();
     context.subscriptions.push(
-      commands.registerCommand(DafnyCommands.OpenStatusBarMenu, () => view.openStatusBarMenu()),
+      commands.registerCommand(DafnyCommands.OpenStatusBarMenu, () => statusBarActionView.openStatusBarMenu()),
       commands.registerCommand(DafnyCommands.RestartServer, restartServer),
       languageClient.onCompilationStatus(params => view.compilationStatusChanged(params)),
       languageClient.onVerificationStarted(params => view.verificationStarted(params)),
@@ -71,17 +61,6 @@ export default class CompilationStatusView {
       statusBarItem
     );
     return view;
-  }
-
-  private async openStatusBarMenu() {
-    const targets: StatusBarAction[] = [
-      RestartDafny
-    ];
-    const target = await window.showQuickPick(targets, {
-      matchOnDescription: true,
-      placeHolder: 'Pick an action'
-    });
-    target && commands.executeCommand(target.command);
   }
 
   private documentClosed(document: TextDocument): void {
