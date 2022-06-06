@@ -102,7 +102,7 @@ class ExtensionRuntime {
   }
 
   public async ensure() {
-    this.client = this.client ?? await DafnyLanguageClient.create(this.context);
+    this.client = this.client ?? await DafnyLanguageClient.create(this.context, this.statusOutput);
     this.client.start();
     await this.client.onReady();
     this.languageServerVersion = await this.getLanguageServerVersionAfterStartup();

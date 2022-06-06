@@ -1,5 +1,5 @@
-import { ExtensionContext, Disposable } from 'vscode';
-import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
+import { ExtensionContext, Disposable, OutputChannel, Uri, Diagnostic } from 'vscode';
+import { HandleDiagnosticsSignature, LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
 
 import Configuration from '../configuration';
 import { ConfigurationConstants } from '../constants';
@@ -8,6 +8,7 @@ import { DafnyDocumentFilter } from '../tools/vscode';
 import { ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from './api/compilationStatus';
 import { ICounterExampleItem, ICounterExampleParams } from './api/counterExample';
 import { IGhostDiagnosticsParams } from './api/ghostDiagnostics';
+import { IVerificationGutterStatusParams as IVerificationGutterStatusParams } from './api/verificationGutterStatusParams';
 import { getLanguageServerRuntimePath } from './dafnyInstallation';
 
 const LanguageServerId = 'dafny-vscode';
@@ -21,6 +22,8 @@ function getLanguageServerLaunchArgs(): string[] {
     getVerifierCachingPolicy(),
     getVerifierVirtualCoresArgument(),
     getMarkGhostStatementsArgument(),
+    getDisplayGutterStatusArgument(),
+    ...getDafnyPluginsArgument(),
     ...launchArgs
   ];
 }
@@ -47,36 +50,79 @@ function getVerifierVirtualCoresArgument(): string {
   return `--verifier:vcscores=${Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationVirtualCores)}`;
 }
 
+function getDisplayGutterStatusArgument(): string {
+  return `--verifier:gutterStatus=${Configuration.get<string>(ConfigurationConstants.LanguageServer.DisplayGutterStatus)}`;
+}
+
 function getMarkGhostStatementsArgument(): string {
   return `--ghost:markStatements=${Configuration.get<string>(ConfigurationConstants.LanguageServer.MarkGhostStatements)}`;
 }
 
+function getDafnyPluginsArgument(): string[] {
+  const plugins = Configuration.get<string[]>(ConfigurationConstants.LanguageServer.DafnyPlugins);
+  if(plugins === null || !Array.isArray(plugins)) {
+    return [];
+  }
+  return (
+    plugins
+      .filter(plugin => plugin !== null && plugin !== '')
+      .map((plugin, i) => `--dafny:plugins:${i}=${plugin}`)
+  );
+}
+
+type DiagnosticListener = (uri: Uri, diagnostics: Diagnostic[]) => void;
+
 export class DafnyLanguageClient extends LanguageClient {
+  private readonly diagnosticsListeners: DiagnosticListener[];
+
   // eslint-disable-next-line max-params
-  private constructor(id: string, name: string, serverOptions: ServerOptions, clientOptions: LanguageClientOptions, forceDebug?: boolean) {
+  private constructor(id: string, name: string, serverOptions: ServerOptions, clientOptions: LanguageClientOptions, diagnosticsListeners: DiagnosticListener[], forceDebug?: boolean) {
     super(id, name, serverOptions, clientOptions, forceDebug);
+    this.diagnosticsListeners = diagnosticsListeners;
   }
 
   public getCounterExamples(param: ICounterExampleParams): Promise<ICounterExampleItem[]> {
     return this.sendRequest<ICounterExampleItem[]>('dafny/counterExample', param);
   }
 
-  public static async create(context: ExtensionContext): Promise<DafnyLanguageClient> {
-    const dotnetExecutable = await getDotnetExecutablePath();
+  public static argumentsToCommandLine(launchArguments: string[]): string {
+    return launchArguments.map(oneArgument =>
+      (/\s|"|\\/.exec(oneArgument))
+        ? '"' + oneArgument.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'
+        : oneArgument
+    ).join(' ');
+  }
+
+  public static async create(context: ExtensionContext, statusOutput: OutputChannel): Promise<DafnyLanguageClient> {
+    const { path: dotnetExecutable } = await getDotnetExecutablePath();
     const launchArguments = [ getLanguageServerRuntimePath(context), ...getLanguageServerLaunchArgs() ];
+    statusOutput.appendLine(`Language server arguments: ${DafnyLanguageClient.argumentsToCommandLine(launchArguments)}`);
     const serverOptions: ServerOptions = {
       run: { command: dotnetExecutable, args: launchArguments },
       debug: { command: dotnetExecutable, args: launchArguments }
     };
+    const diagnosticsListeners: ((uri: Uri, diagnostics: Diagnostic[]) => void)[] = [];
     const clientOptions: LanguageClientOptions = {
       documentSelector: [ DafnyDocumentFilter ],
-      diagnosticCollectionName: LanguageServerId
+      diagnosticCollectionName: LanguageServerId,
+      middleware: {
+        handleDiagnostics: (uri: Uri, diagnostics: Diagnostic[], next: HandleDiagnosticsSignature) => {
+          for(const handler of diagnosticsListeners) {
+            handler(uri, diagnostics);
+          }
+          next(uri, diagnostics);
+        }
+      }
     };
-    return new DafnyLanguageClient(LanguageServerId, LanguageServerName, serverOptions, clientOptions);
+    return new DafnyLanguageClient(LanguageServerId, LanguageServerName, serverOptions, clientOptions, diagnosticsListeners);
   }
 
   public onGhostDiagnostics(callback: (params: IGhostDiagnosticsParams) => void): Disposable {
     return this.onNotification('dafny/ghost/diagnostics', callback);
+  }
+
+  public onVerificationStatusGutter(callback: (params: IVerificationGutterStatusParams) => void): Disposable {
+    return this.onNotification('dafny/verification/status/gutter', callback);
   }
 
   public onCompilationStatus(callback: (params: ICompilationStatusParams) => void): Disposable {
@@ -85,6 +131,10 @@ export class DafnyLanguageClient extends LanguageClient {
 
   public onServerVersion(callback: (version: string) => void): Disposable {
     return this.onNotification('dafnyLanguageServerVersionReceived', callback);
+  }
+
+  public onPublishDiagnostics(callback: (uri: Uri, diagnostics: Diagnostic[]) => void): void {
+    this.diagnosticsListeners.push(callback);
   }
 
   // TODO Legacy verification status messages

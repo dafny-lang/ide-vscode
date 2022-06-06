@@ -6,7 +6,22 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run Extension",
+      "name": "Run with default server",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js"
+      ],
+      "env": {
+        "DAFNY_LANGUAGE_SERVER": "",
+      },
+      "preLaunchTask": "${defaultBuildTask}"
+    },
+    {
+      "name": "Run with $DAFNY_LANGUAGE_SERVER",
       "type": "extensionHost",
       "request": "launch",
       "args": [

@@ -20,7 +20,7 @@ async function getTooltipText(context: ExtensionContext, languageServerVersion: 
 }
 
 async function getCompilerVersion(context: ExtensionContext): Promise<string> {
-  const dotnetPath = await getDotnetExecutablePath();
+  const { path: dotnetPath } = await getDotnetExecutablePath();
   const compilerPath = getCompilerRuntimePath(context);
   try {
     const { stdout } = await execFileAsync(dotnetPath, [ compilerPath, CompilerVersionArg ]);

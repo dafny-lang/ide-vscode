@@ -1,5 +1,4 @@
 import { StatusBarAlignment, StatusBarItem, TextDocument, window, workspace, commands, ExtensionContext } from 'vscode';
-
 import { CompilationStatus, ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from '../language/api/compilationStatus';
 import { restartServer } from '../extension';
 import { DafnyCommands } from '../commands';
@@ -25,8 +24,15 @@ function toStatusMessage(status: CompilationStatus, message?: string | null): st
   case CompilationStatus.VerificationSucceeded:
     return Messages.CompilationStatus.VerificationSucceeded;
   case CompilationStatus.VerificationFailed:
-    return Messages.CompilationStatus.VerificationFailed;
+    return message != null
+      ? `${Messages.CompilationStatus.VerificationFailed} ${message}`
+      : `${Messages.CompilationStatus.VerificationFailed}`;
   }
+}
+
+interface IDocumentStatusMessage {
+  status: string;
+  version?: number;
 }
 
 interface StatusBarAction {
@@ -44,7 +50,7 @@ const RestartDafny: StatusBarAction = {
 export default class CompilationStatusView {
   // We store the message string for easier backwards compatibility with the
   // legacy status messages.
-  private readonly documentStatusMessages = new Map<string, string>();
+  private readonly documentStatusMessages = new Map<string, IDocumentStatusMessage>();
 
   private constructor(private readonly statusBarItem: StatusBarItem) {}
 
@@ -83,18 +89,31 @@ export default class CompilationStatusView {
     this.updateActiveDocumentStatus();
   }
 
+  private areParamsOutdated(params: ICompilationStatusParams): boolean {
+    const previous = this.documentStatusMessages.get(getVsDocumentPath(params));
+    return previous?.version != null && params.version != null
+       && previous.version > params.version;
+  }
+
   private compilationStatusChanged(params: ICompilationStatusParams): void {
+    if(this.areParamsOutdated(params)) {
+      return;
+    }
     this.documentStatusMessages.set(
       getVsDocumentPath(params),
-      toStatusMessage(params.status, params.message)
+      {
+        status: toStatusMessage(params.status, params.message),
+        version: params.version
+      }
     );
     this.updateActiveDocumentStatus();
   }
 
+  // Legacy methods
   private verificationStarted(params: IVerificationStartedParams): void {
     this.documentStatusMessages.set(
       getVsDocumentPath(params),
-      Messages.CompilationStatus.Verifying
+      { status: Messages.CompilationStatus.Verifying }
     );
     this.updateActiveDocumentStatus();
   }
@@ -102,7 +121,7 @@ export default class CompilationStatusView {
   private verificationCompleted(params: IVerificationCompletedParams): void {
     this.documentStatusMessages.set(
       getVsDocumentPath(params),
-      params.verified ? Messages.CompilationStatus.Verified : Messages.CompilationStatus.NotVerified
+      { status: params.verified ? Messages.CompilationStatus.Verified : Messages.CompilationStatus.NotVerified }
     );
     this.updateActiveDocumentStatus();
   }
@@ -112,6 +131,6 @@ export default class CompilationStatusView {
     if(document == null) {
       return;
     }
-    this.statusBarItem.text = this.documentStatusMessages.get(document) ?? '';
+    this.statusBarItem.text = this.documentStatusMessages.get(document)?.status ?? '';
   }
 }

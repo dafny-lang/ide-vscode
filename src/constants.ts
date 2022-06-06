@@ -23,6 +23,8 @@ export namespace ConfigurationConstants {
     export const VerificationVirtualCores = 'verificationVirtualCores';
     export const VerificationCachingPolicy = 'verificationCachingPolicy';
     export const MarkGhostStatements = 'markGhostStatements';
+    export const DafnyPlugins = 'dafnyPlugins';
+    export const DisplayGutterStatus = 'displayGutterStatus';
   }
 
   export namespace Compiler {
@@ -44,9 +46,11 @@ export namespace DotnetConstants {
 
 export namespace LanguageServerConstants {
   export const Latest = 'latest';
-  export const LatestVersion = '3.3.0';
+  export const LatestVersion = '3.6.0';
   export const UnknownVersion = 'unknown';
+  export const DafnyGitUrl = 'https://github.com/dafny-lang/dafny.git';
   export const DownloadBaseUri = 'https://github.com/dafny-lang/dafny/releases/download';
+  export const Z3VersionForCustomInstallation = '4.8.5';
 
   export function GetResourceFolder(version: string): string[] {
     return [ 'out', 'resources', version ];

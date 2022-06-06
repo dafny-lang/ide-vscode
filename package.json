@@ -2,7 +2,7 @@
   "name": "ide-vscode",
   "displayName": "Dafny",
   "description": "Dafny for Visual Studio Code",
-  "version": "2.2.0",
+  "version": "2.4.1",
   "publisher": "dafny-lang",
   "repository": {
     "type": "git",
@@ -155,6 +155,19 @@
           "default": "true",
           "description": "Mark ghost statements in the code (requires restart and Dafny 3.4.0+)"
         },
+        "dafny.displayGutterStatus": {
+          "type": "boolean",
+          "default": "true",
+          "description": "Display verification status in the gutter (requires restart and Dafny 3.7.0+)"
+        },
+        "dafny.dafnyPlugins": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Absolute paths to assemblies to be used as plugins (requires restart and Dafny 3.4.0+).\nExample 1: /user/home/dafnyplugin.dll\nExample 2: /user/home/dafnyplugin.dll,oneArgument\nExample 3: /user/home/dafnyplugin.dll,\"argument with space and \\\" escaped quote\" secondArgument"
+        },
         "dafny.languageServerLaunchArgs": {
           "type": "array",
           "items": {
@@ -189,6 +202,9 @@
           "type": "string",
           "enum": [
             "latest",
+            "3.6.0",
+            "3.5.0",
+            "3.4.2",
             "3.3.0",
             "3.2.0"
           ],
@@ -197,7 +213,7 @@
         },
         "dafny.dotnetExecutablePath": {
           "type": "string",
-          "description": "The absolute path of dotnet. Only necessary if dotnet is not in system PATH (you'll get an error if that's the case)."
+          "description": "The absolute path of the dotnet binary. Only necessary if dotnet is not in system PATH (you'll get an error if that's the case)."
         },
         "dafny.colorCounterExamples": {
           "type": "object",
