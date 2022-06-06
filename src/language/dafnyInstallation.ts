@@ -60,7 +60,7 @@ export function getLanguageServerRuntimePath(context: ExtensionContext): string 
 function getConfiguredLanguageServerRuntimePath(): string {
   const languageServerOverride = process.env['DAFNY_LANGUAGE_SERVER'] ?? '';
   if(languageServerOverride) {
-    window.showInformationMessage('Using Dafny language server configured in $DAFNY_LANGUAGE_SERVER');
+    window.showInformationMessage(`Using $DAFNY_LANGUAGE_SERVER = ${languageServerOverride} for the server path`);
   }
   const languageServerSetting = Configuration.get<string | null>(ConfigurationConstants.LanguageServer.RuntimePath) ?? '';
   return languageServerOverride || languageServerSetting;
