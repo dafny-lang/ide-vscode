@@ -38,8 +38,6 @@ Actual behavior
 
 `.trimStart());
 
-export const needVerificationHelp = 'https://github.com/dafny-lang/dafny/discussions/new';
-
 interface StatusBarAction {
   label: string;
   description: string;
@@ -49,8 +47,8 @@ interface StatusBarAction {
 
 const INeedHelpWithMyProof: StatusBarAction = {
   label: 'Ask for help for a proof',
-  description: 'Post your question in Dafny discussions',
-  uri: needVerificationHelp
+  description: 'Post your question on StackOverflow with the Dafny tag',
+  uri: 'https://stackoverflow.com/questions/ask?tags=Dafny'
 };
 
 const ReportVerificationIssue = async (dafnyVersion: string, context: ExtensionContext): Promise<StatusBarAction> => ({
