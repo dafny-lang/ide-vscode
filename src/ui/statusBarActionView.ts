@@ -59,7 +59,7 @@ const ReportVerificationIssue = async (dafnyVersion: string, context: ExtensionC
 
 const RestartDafny: StatusBarAction = {
   label: 'Restart Dafny',
-  description: 'IF the Dafny verifier seems stuck',
+  description: 'If Dafny seems unresponsive',
   command: DafnyCommands.RestartServer
 };
 
