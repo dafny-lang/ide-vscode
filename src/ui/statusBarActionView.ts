@@ -48,7 +48,7 @@ interface StatusBarAction {
 const INeedHelpWithMyProof: StatusBarAction = {
   label: 'Ask for help for a proof',
   description: 'Post your question on StackOverflow with the Dafny tag',
-  uri: 'https://stackoverflow.com/questions/ask?tags=Dafny'
+  uri: 'https://stackoverflow.com/questions/ask?tags=dafny'
 };
 
 const ReportVerificationIssue = async (dafnyVersion: string, context: ExtensionContext): Promise<StatusBarAction> => ({
