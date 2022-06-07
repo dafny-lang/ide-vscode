@@ -46,7 +46,7 @@ export default class CompilationStatusView {
     const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, StatusBarPriority);
     statusBarItem.command = DafnyCommands.OpenStatusBarMenu;
     const view = new CompilationStatusView(statusBarItem);
-    const statusBarActionView = new StatusBarActionView(languageServerVersion, context);
+    const statusBarActionView = new StatusBarActionView(view, languageServerVersion, context);
     context.subscriptions.push(
       commands.registerCommand(DafnyCommands.OpenStatusBarMenu, () => statusBarActionView.openStatusBarMenu()),
       languageClient.onCompilationStatus(params => view.compilationStatusChanged(params)),
@@ -104,10 +104,18 @@ export default class CompilationStatusView {
   }
 
   private updateActiveDocumentStatus(): void {
+    const documentStatus = this.getCurrentDocumentStatus();
+    if(documentStatus == null) {
+      return;
+    }
+    this.statusBarItem.text = documentStatus;
+  }
+
+  public getCurrentDocumentStatus(): string | undefined {
     const document = window.activeTextEditor?.document.uri.toString();
     if(document == null) {
       return;
     }
-    this.statusBarItem.text = this.documentStatusMessages.get(document)?.status ?? '';
+    return this.documentStatusMessages.get(document)?.status ?? '';
   }
 }
