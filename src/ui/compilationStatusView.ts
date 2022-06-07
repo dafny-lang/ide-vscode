@@ -42,11 +42,11 @@ export default class CompilationStatusView {
 
   private constructor(private readonly statusBarItem: StatusBarItem) {}
 
-  public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): CompilationStatusView {
+  public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient, languageServerVersion: string): CompilationStatusView {
     const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, StatusBarPriority);
     statusBarItem.command = DafnyCommands.OpenStatusBarMenu;
     const view = new CompilationStatusView(statusBarItem);
-    const statusBarActionView = new StatusBarActionView();
+    const statusBarActionView = new StatusBarActionView(languageServerVersion, context);
     context.subscriptions.push(
       commands.registerCommand(DafnyCommands.OpenStatusBarMenu, () => statusBarActionView.openStatusBarMenu()),
       languageClient.onCompilationStatus(params => view.compilationStatusChanged(params)),

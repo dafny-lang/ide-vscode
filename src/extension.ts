@@ -117,9 +117,12 @@ class ExtensionRuntime {
     for(let i = 1; i < this.context.subscriptions.length; i++) {
       this.context.subscriptions[i].dispose();
     }
-    this.context.subscriptions.splice(1, this.context.subscriptions.length);
+    this.context.subscriptions.splice(1);
     await this.initializeClient();
     await createAndRegisterDafnyIntegration(this.context, this.client!, this.languageServerVersion!);
-    this.statusOutput.appendLine('Dafny is ready again.\nSorry for the trouble. Please file an issue by clicking the link below:\n' + fileIssueURL);
+    const issueURL = await fileIssueURL(this.languageServerVersion ?? '???', this.context);
+    this.statusOutput.appendLine(
+      'Dafny is ready again.\nIf you have time, please let us know why you needed to restart by filing an issue:\n'
+      + issueURL);
   }
 }
