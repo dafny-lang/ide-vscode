@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
 
-import { workspace, ExtensionContext, Uri, OutputChannel, FileSystemError } from 'vscode';
+import { workspace, ExtensionContext, Uri, OutputChannel, FileSystemError, window } from 'vscode';
 import { Utils } from 'vscode-uri';
 
 import got from 'got';
@@ -57,8 +57,13 @@ export function getLanguageServerRuntimePath(context: ExtensionContext): string 
   return path.join(context.extensionPath, configuredPath);
 }
 
-function getConfiguredLanguageServerRuntimePath(): string | null {
-  return Configuration.get<string | null>(ConfigurationConstants.LanguageServer.RuntimePath);
+function getConfiguredLanguageServerRuntimePath(): string {
+  const languageServerOverride = process.env['DAFNY_SERVER_OVERRIDE'] ?? '';
+  if(languageServerOverride) {
+    window.showInformationMessage(`Using $DAFNY_SERVER_OVERRIDE = ${languageServerOverride} for the server path`);
+  }
+  const languageServerSetting = Configuration.get<string | null>(ConfigurationConstants.LanguageServer.RuntimePath) ?? '';
+  return languageServerOverride || languageServerSetting;
 }
 
 function getDafnyPlatformSuffix(): string {
@@ -133,9 +138,9 @@ export class DafnyInstaller {
     }
   }
 
-  private async execLog(command: string) {
+  private async execLog(command: string): Promise<{ stderr: string, stdout: string }> {
     this.writeStatus(`Executing: ${command}`);
-    await execAsync(command);
+    return await execAsync(command);
   }
   private GetZ3FileNameOSX(): string {
     const z3v = LanguageServerConstants.Z3VersionForCustomInstallation;
@@ -159,6 +164,19 @@ export class DafnyInstaller {
       this.writeStatus('If you got `brew: command not found`, but brew is installed on your system, please add all brew commands to your ~/.zprofile, e.g. https://apple.stackexchange.com/a/430904 and reinstall Dafny.');
       return false;
     }
+    try {
+      const result = (await this.execLog('javac -version')).stdout;
+      if(!(/javac \d+\.\d+/.exec(result))) {
+        throw '';
+      }
+    } catch(error: unknown) {
+      const errorMsg = error === '' ? 'Javac not found' : `${error}`;
+      this.writeStatus(`${errorMsg}. Please install a valid JDK`
+       + ' and ensure that the path containing javac is in the PATH environment variable. '
+       + 'You can obtain a free open-source JDK 1.8 from here: '
+       + 'https://aws.amazon.com/corretto/');
+      return false;
+    }
     await this.execLog(`git clone --recurse-submodules ${LanguageServerConstants.DafnyGitUrl}`);
     processChdir(Utils.joinPath(installationPath, 'dafny').fsPath);
     await this.execLog('git fetch --all --tags');
@@ -179,8 +197,7 @@ export class DafnyInstaller {
   }
 
   public isCustomInstallation(): boolean {
-    const configuredLanguageServerRuntimePath = getConfiguredLanguageServerRuntimePath();
-    return configuredLanguageServerRuntimePath != null && configuredLanguageServerRuntimePath !== '';
+    return getConfiguredLanguageServerRuntimePath() !== '';
   }
 
   public async isLanguageServerRuntimeAccessible(): Promise<boolean> {

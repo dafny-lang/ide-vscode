@@ -6,12 +6,27 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run Extension",
+      "name": "Run with default server",
       "type": "extensionHost",
       "request": "launch",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}"
       ],
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js"
+      ],
+      "preLaunchTask": "${defaultBuildTask}"
+    },
+    {
+      "name": "Run with $DAFNY_DEV_SERVER",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}"
+      ],
+      "env": {
+        "DAFNY_SERVER_OVERRIDE": "${env:DAFNY_DEV_SERVER}",
+      },
       "outFiles": [
         "${workspaceFolder}/dist/**/*.js"
       ],

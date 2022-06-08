@@ -10,13 +10,12 @@ import { Messages } from './ui/messages';
 
 const ListRuntimesArg = '--list-runtimes';
 const execFileAsync = promisify(execFile);
-const lstatAsync = promisify(fs.stat);
 
 // Returns an error message or undefined.
 export async function checkSupportedDotnetVersion(): Promise<string | undefined> {
   const { path: dotnetExecutable, manual } = await getDotnetExecutablePath();
   try {
-    const stats = await lstatAsync(dotnetExecutable);
+    const stats = await fs.promises.stat(dotnetExecutable);
     if(!stats.isFile()) {
       return dotnetExecutable + Messages.Dotnet.IsNotAnExecutableFile;
     }

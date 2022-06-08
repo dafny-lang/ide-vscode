@@ -47,6 +47,8 @@ class ExtensionRuntime {
         return;
       }
     }
+    this.client?.stop();
+    this.client?.start()
     await this.initializeClient();
     if(!await this.updateDafnyIfNecessary(this.languageServerVersion!)) {
       this.statusOutput.appendLine('Dafny initialization failed');

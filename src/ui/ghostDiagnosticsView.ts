@@ -10,7 +10,7 @@ const GhostDecoration: DecorationRenderOptions = {
     backgroundColor: '#64646480'
   },
   light: {
-    backgroundColor: '#79797980'
+    backgroundColor: '#D3D3D380'
   }
 };
 
