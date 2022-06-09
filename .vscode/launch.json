@@ -15,18 +15,18 @@
       "outFiles": [
         "${workspaceFolder}/dist/**/*.js"
       ],
-      "env": {
-        "DAFNY_LANGUAGE_SERVER": "",
-      },
       "preLaunchTask": "${defaultBuildTask}"
     },
     {
-      "name": "Run with $DAFNY_LANGUAGE_SERVER",
+      "name": "Run with $DAFNY_DEV_SERVER",
       "type": "extensionHost",
       "request": "launch",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}"
       ],
+      "env": {
+        "DAFNY_SERVER_OVERRIDE": "${env:DAFNY_DEV_SERVER}",
+      },
       "outFiles": [
         "${workspaceFolder}/dist/**/*.js"
       ],
