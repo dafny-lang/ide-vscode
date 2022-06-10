@@ -112,7 +112,11 @@ class ExtensionRuntime {
 
   public async restart(): Promise<void> {
     this.statusOutput.appendLine('Terminating Dafny...');
-    await this.dispose();
+    try {
+      await this.dispose();
+    } catch(e: unknown) {
+      this.statusOutput.appendLine('Server did not respond...');
+    }
     // The first subscription is the statusOutput and should not be disposed.
     for(let i = 1; i < this.context.subscriptions.length; i++) {
       this.context.subscriptions[i].dispose();
