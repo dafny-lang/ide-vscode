@@ -1,3 +1,8 @@
+// Issue #176
+class ClassList {
+  ghost var classes: set<string>
+} //        ^^^^^^^ everything should be blue, not purple
+
 /*
 function nestedCommentShouldHighlightCorrectlyIssue157() {
   /* 2 */ 1
