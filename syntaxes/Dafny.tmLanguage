@@ -16,7 +16,7 @@
 	<array>
 		<dict>
 			<key>begin</key>
-			<string>(class)\s*([\w'?]+\b(?!&lt;))?\s*</string>
+			<string>(class\b)\s*([\w'?]+\b(?!&lt;))?\s*</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
