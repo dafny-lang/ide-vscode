@@ -1,5 +1,6 @@
 export namespace Messages {
   export namespace CompilationStatus {
+    export const ResolutionStarted = '$(sync~spin) Resolving...';
     export const ParsingFailed = '$(thumbsdown) Parsing Failed';
     export const ResolutionFailed = '$(thumbsdown) Resolution Failed';
     export const CompilationSucceeded = '$(book) Resolved (not verified)';

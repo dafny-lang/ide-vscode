@@ -9,6 +9,8 @@ const StatusBarPriority = 10;
 
 function toStatusMessage(status: CompilationStatus, message?: string | null): string {
   switch(status) {
+  case CompilationStatus.ResolutionStarted:
+    return Messages.CompilationStatus.ResolutionStarted;
   case CompilationStatus.ParsingFailed:
     return Messages.CompilationStatus.ParsingFailed;
   case CompilationStatus.ResolutionFailed:

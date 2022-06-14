@@ -1,6 +1,7 @@
 import { DocumentUri, integer } from 'vscode-languageclient';
 
 export enum CompilationStatus {
+  ResolutionStarted = 'ResolutionStarted',
   ParsingFailed = 'ParsingFailed',
   ResolutionFailed = 'ResolutionFailed',
   CompilationSucceeded = 'CompilationSucceeded',
