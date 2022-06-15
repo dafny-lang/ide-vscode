@@ -116,7 +116,7 @@ export class DafnyInstaller {
 
   public async install(): Promise<boolean> {
     this.statusOutput.show();
-    this.writeStatus('starting Dafny installation');
+    this.writeStatus('Starting Dafny installation');
     try {
       await this.cleanInstallDir();
       const archive = await this.downloadArchive(getDafnyDownloadAddress());

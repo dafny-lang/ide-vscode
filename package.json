@@ -250,6 +250,10 @@
       {
         "command": "dafny.hideCounterExample",
         "title": "Dafny: Hide CounterExample"
+      },
+      {
+        "command": "dafny.restartServer",
+        "title": "Dafny: Restart server"
       }
     ]
   },

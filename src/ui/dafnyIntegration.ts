@@ -18,7 +18,7 @@ export default async function createAndRegisterDafnyIntegration(
   GhostDiagnosticsView.createAndRegister(context, languageClient);
   VerificationGutterStatusView.createAndRegister(context, languageClient);
   CompileCommands.createAndRegister(context);
-  CompilationStatusView.createAndRegister(context, languageClient);
+  CompilationStatusView.createAndRegister(context, languageClient, languageServerVersion);
   RelatedErrorView.createAndRegister(context, languageClient);
   await DafnyVersionView.createAndRegister(context, languageServerVersion);
 }
