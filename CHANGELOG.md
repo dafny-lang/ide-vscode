@@ -1,5 +1,14 @@
 # Release Notes
 
+## 2.5.0
+
+- Update Dafny and language server to [v3.7.0](https://github.com/dafny-lang/dafny/releases/tag/v3.7.0)
+- Underline related errors in postconditions (https://github.com/dafny-lang/ide-vscode/pull/164)
+- Show verification status in the gutter (https://github.com/dafny-lang/ide-vscode/pull/147)
+- Make status bar clickable and open a Dafny command menu (https://github.com/dafny-lang/ide-vscode/pull/125)
+- Improved error messages
+- Various fixes
+
 ## 2.4.0
 
 - Update Dafny and language server to [v3.6.0](https://github.com/dafny-lang/dafny/releases/tag/v3.6.0)
