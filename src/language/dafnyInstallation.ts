@@ -119,15 +119,15 @@ export class DafnyInstaller {
     this.writeStatus('Starting Dafny installation');
     try {
       await this.cleanInstallDir();
-      const archive = await this.downloadArchive(getDafnyDownloadAddress());
-      await this.extractArchive(archive);
-      await workspace.fs.delete(archive, { useTrash: false });
-      this.writeStatus('Dafny installation completed');
       if(os.type() === 'Darwin' && os.arch() !== 'x64') {
         // Need to build from source and move all files from Binary/ to the out/resource folder
         this.writeStatus(`Found a non-supported architecture OSX:${os.arch()}. Going to install from source and replace the automated installation.`);
         return await this.installFromSource();
       } else {
+        const archive = await this.downloadArchive(getDafnyDownloadAddress());
+        await this.extractArchive(archive);
+        await workspace.fs.delete(archive, { useTrash: false });
+        this.writeStatus('Dafny installation completed');
         return true;
       }
     } catch(error: unknown) {
@@ -165,8 +165,9 @@ export class DafnyInstaller {
       return false;
     }
     try {
-      const result = (await this.execLog('javac -version')).stdout;
-      if(!(/javac \d+\.\d+/.exec(result))) {
+      const process = await this.execLog('javac -version');
+      if(!(/javac \d+\.\d+/.exec(process.stdout)) &&
+         !(/javac \d+\.\d+/.exec(process.stderr))) {
         throw '';
       }
     } catch(error: unknown) {
@@ -191,6 +192,7 @@ export class DafnyInstaller {
     await this.execLog(`unzip ${z3filenameOsx}.zip`);
     await this.execLog(`mv ${z3filenameOsx} z3`);
     processChdir(this.getInstallationPath().fsPath);
+    await this.execLog(`mkdir -p ./dafny/`);
     await this.execLog(`cp -R ${binaries}/* ./dafny/`);
     processChdir(previousDirectory);
     return true;
