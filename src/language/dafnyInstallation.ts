@@ -166,8 +166,8 @@ export class DafnyInstaller {
     }
     try {
       const process = await this.execLog('javac -version');
-      if(!(/javac \d+\.\d+/.exec(process.stdout)) &&
-         !(/javac \d+\.\d+/.exec(process.stderr))) {
+      if(!(/javac \d+\.\d+/.exec(process.stdout))
+         && !(/javac \d+\.\d+/.exec(process.stderr))) {
         throw '';
       }
     } catch(error: unknown) {
@@ -192,7 +192,7 @@ export class DafnyInstaller {
     await this.execLog(`unzip ${z3filenameOsx}.zip`);
     await this.execLog(`mv ${z3filenameOsx} z3`);
     processChdir(this.getInstallationPath().fsPath);
-    await this.execLog(`mkdir -p ./dafny/`);
+    await this.execLog('mkdir -p ./dafny/');
     await this.execLog(`cp -R ${binaries}/* ./dafny/`);
     processChdir(previousDirectory);
     return true;
