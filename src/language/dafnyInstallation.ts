@@ -121,7 +121,7 @@ export class DafnyInstaller {
       await this.cleanInstallDir();
       if(os.type() === 'Darwin' && os.arch() !== 'x64') {
         // Need to build from source and move all files from Binary/ to the out/resource folder
-        this.writeStatus(`Found a non-supported architecture OSX:${os.arch()}. Going to install from source and replace the automated installation.`);
+        this.writeStatus(`Found a non-supported architecture OSX:${os.arch()}. Going to install from source.`);
         return await this.installFromSource();
       } else {
         const archive = await this.downloadArchive(getDafnyDownloadAddress());
