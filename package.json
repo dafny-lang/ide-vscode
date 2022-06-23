@@ -292,7 +292,7 @@
   },
   "dependencies": {
     "extract-zip": "^2.0.1",
-    "got": "^11.8.2",
+    "got": "^11.8.5",
     "promise.any": "^2.0.2",
     "vscode-languageclient": "^7.0.0",
     "vscode-uri": "^3.0.2",
