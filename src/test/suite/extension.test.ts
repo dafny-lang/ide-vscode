@@ -39,7 +39,7 @@ suite('Dafny IDE Extension Installation', () => {
       'Starting Dafny installation\n'
      + 'deleting previous Dafny installation at \\tmp\\mockedUri\\out\\resources\\3.7.0\n'
      + 'Dafny installation failed:\n'
-     + '> Simulated error in delete\n' , m.writtenContent());
+     + '> Simulated error in delete\n', m.writtenContent());
     assert.strictEqual(false, result, 'Result is true');
   });
 });
