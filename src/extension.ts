@@ -16,7 +16,7 @@ const DafnyVersionTimeoutMs = 5_000;
 let extensionRuntime: ExtensionRuntime | undefined;
 
 export async function activate(context: ExtensionContext): Promise<void> {
-  if(!await checkAndInformAboutInstallation()) {
+  if(!await checkAndInformAboutInstallation(context)) {
     return;
   }
   const statusOutput = window.createOutputChannel(ExtensionConstants.ChannelName);
