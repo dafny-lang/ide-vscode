@@ -1,18 +1,6 @@
 name: AzurePipelines
 on: [push, pull_request]
 
-strategy:
-  matrix:
-    linux:
-      imageName: 'ubuntu-latest'
-    mac:
-      imageName: 'macos-latest'
-    windows:
-      imageName: 'windows-latest'
-
-pool:
-  vmImage: $(imageName)
-
 jobs:
   build:
     runs-on: ubuntu-latest
