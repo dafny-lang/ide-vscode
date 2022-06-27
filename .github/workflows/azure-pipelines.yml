@@ -15,9 +15,10 @@ jobs:
 
       - name: "Run tests"
         run: |
-          echo ">>> Compile vscode-test"
+          echo ">>> Compile ide-vscode"
           yarn && yarn compile
-          echo ">>> Compiled vscode-test"
+          echo ">>> Compiled ide-vscode"
+          ls
           cd sample
           echo ">>> Run sample integration test"
           yarn && yarn compile && yarn test
