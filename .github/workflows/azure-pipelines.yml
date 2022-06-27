@@ -15,6 +15,10 @@ jobs:
 
       - name: "Run tests"
         run: |
+          pwd
+          ls
+          cd ..
+          pwd
           ls
           echo ">>> Compile ide-vscode"
           yarn && yarn compile
