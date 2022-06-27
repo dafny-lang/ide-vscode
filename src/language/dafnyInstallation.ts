@@ -169,7 +169,7 @@ export class DafnyInstaller {
       > echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
       > eval "$(/opt/homebrew/bin/brew shellenv)"
 
-      and restart VSCode, possibly reinstalling Dafny.`);
+      and restart VSCode, which may reinstall Dafny.`);
       return false;
     }
     try {
