@@ -22,9 +22,7 @@ jobs:
           echo ">>> Compile ide-vscode"
           yarn && yarn compile
           echo ">>> Compiled ide-vscode"
-          ls
-          cd sample
-          echo ">>> Run sample integration test"
-          yarn && yarn compile && yarn test
+          echo ">>> Run integration test"
+          yarn test
         env:
           DISPLAY: ':99.0'
