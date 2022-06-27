@@ -18,9 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Install Node.js"
-        uses: NodeTool@0
-        with:
-          versionSpec: '10.x'
+        uses: actions/setup-node@v3
 
       - name: "Start xvfb"
         run: |
