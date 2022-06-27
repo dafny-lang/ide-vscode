@@ -18,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Run the VSCode integration tests"
-      #- task: NodeTool@0
-      #  inputs:
-      #    versionSpec: '10.x'
-      #  displayName: 'Install Node.js'
+        uses: NodeTool@0
+          inputs:
+            versionSpec: '10.x'
+          displayName: 'Install Node.js'
 
       - run: |
           /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
