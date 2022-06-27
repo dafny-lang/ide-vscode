@@ -1,7 +1,5 @@
-trigger:
-- '*'
-pr:
-- '*'
+name: CI
+on: [push, pull_request]
 
 strategy:
   matrix:
