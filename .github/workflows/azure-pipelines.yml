@@ -17,19 +17,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: "Run the VSCode integration tests"
+      - name: "Install Node.js"
         uses: NodeTool@0
-          inputs:
-            versionSpec: '10.x'
-          displayName: 'Install Node.js'
+        with:
+          versionSpec: '10.x'
 
-      - run: |
+      - name: "Start xvfb"
+        run: |
           /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo ">>> Started xvfb"
-        displayName: Start xvfb
         condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
 
-      - run: |
+      - name: "Run tests"
+        run: |
           echo ">>> Compile vscode-test"
           yarn && yarn compile
           echo ">>> Compiled vscode-test"
