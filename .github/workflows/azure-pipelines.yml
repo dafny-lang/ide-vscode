@@ -5,6 +5,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: "Prepare: Checkout Repository"
+        uses: actions/checkout@v2
       - name: "Install Node.js"
         uses: actions/setup-node@v3
 
@@ -15,9 +17,6 @@ jobs:
 
       - name: "Run tests"
         run: |
-          pwd
-          ls
-          cd ..
           pwd
           ls
           echo ">>> Compile ide-vscode"
