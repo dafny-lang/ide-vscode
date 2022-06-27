@@ -1,4 +1,4 @@
-name: CI
+name: AzurePipelines
 on: [push, pull_request]
 
 strategy:
@@ -13,7 +13,7 @@ strategy:
 pool:
   vmImage: $(imageName)
 
-steps:
+jobs:
 
 - task: NodeTool@0
   inputs:
