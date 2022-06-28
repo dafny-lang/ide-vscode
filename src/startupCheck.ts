@@ -1,4 +1,4 @@
-import { window, commands, Uri, ExtensionContext, Extension } from 'vscode';
+import { window, commands, Uri, ExtensionContext } from 'vscode';
 
 import { VSCodeCommands } from './commands';
 import { ConfigurationConstants } from './constants';
