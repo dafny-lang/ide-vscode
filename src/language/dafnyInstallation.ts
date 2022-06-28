@@ -161,7 +161,15 @@ export class DafnyInstaller {
     try {
       await this.execLog('brew install dotnet-sdk');
     } catch(error: unknown) {
-      this.writeStatus('If you got `brew: command not found`, but brew is installed on your system, please add all brew commands to your ~/.zprofile, e.g. https://apple.stackexchange.com/a/430904 and reinstall Dafny.');
+      this.writeStatus('An error occurred while running this command.');
+      this.writeStatus(`${error}`);
+      this.writeStatus(`If brew is installed on your system, this can usually be resolved by adding add all brew commands to your ~/.zprofile,
+      e.g. by running the script there https://apple.stackexchange.com/a/430904 :
+
+      > echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+      > eval "$(/opt/homebrew/bin/brew shellenv)"
+
+      and restart VSCode, which may reinstall Dafny.`);
       return false;
     }
     try {

@@ -11,5 +11,5 @@ export namespace DafnyCommands {
 export namespace VSCodeCommands {
   export const Open = 'vscode.open';
   export const SaveAs = 'workbench.action.files.saveAs';
-  export const ConfigureLanguageSettings = 'workbench.action.configureLanguageBasedSettings';
+  export const ConfigureDafnySettings = 'workbench.action.openSettings';
 }
