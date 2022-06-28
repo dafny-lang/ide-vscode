@@ -21,8 +21,8 @@ suite('Dafny IDE Extension Installation', () => {
 
   test('Installer checks', async () => {
     const context = MockingUtils.mockedContext();
-    const m = MockingUtils.mockedOutputChannelBuilder();
-    const installer = new DafnyInstaller(context, m.outputChannel);
+    const outputChannelBuilder = MockingUtils.mockedOutputChannelBuilder();
+    const installer = new DafnyInstaller(context, outputChannelBuilder.outputChannel);
     const execAsyncMock = MockingUtils.mockedExecAsync(MockingUtils.simpleCommandMap({
       [''] : { stderr: '', stdout: '' }
     }));
@@ -35,7 +35,7 @@ suite('Dafny IDE Extension Installation', () => {
     ]);
     assert.strictEqual(true, installer != null, 'Installer is not null');
     const result = await installer.install();
-    assert.strictEqual(m.writtenContent().replace(/\\/g, '/'),
+    assert.strictEqual(outputChannelBuilder.writtenContent().replace(/\\/g, '/'),
       'Starting Dafny installation\n'
       + 'deleting previous Dafny installation at /tmp/mockedUri/out/resources/3.7.0\n'
       + 'Dafny installation failed:\n'

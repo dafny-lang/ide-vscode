@@ -11,14 +11,14 @@ import * as extract from 'extract-zip';
 
 import { ConfigurationConstants, LanguageServerConstants } from '../constants';
 import Configuration from '../configuration';
-import { exec, PromiseWithChild } from 'child_process';
+import { exec } from 'child_process';
 import { chdir as processChdir, cwd as processCwd } from 'process';
 export interface ExecOutput {
   stdout: string;
   stderr: string;
 }
-export type ExecAsyncType = (command: string) => PromiseWithChild<ExecOutput>;
-const execAsync: ExecAsyncType = promisify(exec);
+const execAsync = promisify(exec);
+export type ExecAsyncType = typeof execAsync;
 
 const ArchiveFileName = 'dafny.zip';
 const mkdirAsync = promisify(fs.mkdir);
