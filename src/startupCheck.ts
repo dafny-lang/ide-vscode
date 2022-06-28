@@ -1,4 +1,4 @@
-import { window, commands, Uri, ExtensionContext, Extension } from 'vscode';
+import { window, commands, Uri, ExtensionContext } from 'vscode';
 
 import { VSCodeCommands } from './commands';
 import { ConfigurationConstants } from './constants';
@@ -17,7 +17,7 @@ async function checkDotnetInstallation(context: ExtensionContext): Promise<boole
       Messages.Dotnet.ChangeConfiguration,
       Messages.Dotnet.VisitDownload
     );
-    const extension = (context as unknown as { extension: Extension<void> }).extension;
+    const extension = context.extension;
     switch(selection) {
     case Messages.Dotnet.ChangeConfiguration:
       commands.executeCommand(VSCodeCommands.ConfigureDafnySettings,
