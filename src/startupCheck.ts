@@ -17,11 +17,10 @@ async function checkDotnetInstallation(context: ExtensionContext): Promise<boole
       Messages.Dotnet.ChangeConfiguration,
       Messages.Dotnet.VisitDownload
     );
-    const extension = context.extension;
     switch(selection) {
     case Messages.Dotnet.ChangeConfiguration:
       commands.executeCommand(VSCodeCommands.ConfigureDafnySettings,
-        `@ext:${extension.id} ${ConfigurationConstants.Dotnet.ExecutablePath}`);
+        `@ext:${context.extension.id} ${ConfigurationConstants.Dotnet.ExecutablePath}`);
       break;
     case Messages.Dotnet.VisitDownload:
       commands.executeCommand(VSCodeCommands.Open, Uri.parse(Messages.Dotnet.DownloadUri));
