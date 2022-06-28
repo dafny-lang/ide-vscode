@@ -1,5 +1,5 @@
 import { ExtensionContext, Disposable, OutputChannel, Uri, Diagnostic } from 'vscode';
-import { HandleDiagnosticsSignature, LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
+import { HandleDiagnosticsSignature, LanguageClient, LanguageClientOptions, ServerOptions, TextDocumentPositionParams } from 'vscode-languageclient/node';
 
 import Configuration from '../configuration';
 import { ConfigurationConstants } from '../constants';
@@ -149,5 +149,13 @@ export class DafnyLanguageClient extends LanguageClient {
 
   public onVerificationCompleted(callback: (params: IVerificationCompletedParams) => void): Disposable {
     return this.onNotification('dafny/verification/completed', callback);
+  }
+
+  public runVerification(params: TextDocumentPositionParams): Promise<boolean> {
+    return this.sendRequest<boolean>('dafny/textDocument/verifySymbol', params);
+  }
+
+  public cancelVerification(params: TextDocumentPositionParams): Promise<boolean> {
+    return this.sendRequest<boolean>('dafny/textDocument/cancelVerifySymbol', params);
   }
 }
