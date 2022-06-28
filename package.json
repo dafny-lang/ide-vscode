@@ -277,7 +277,7 @@
     "@types/mocha": "^9.1.0",
     "@types/node": "^12.12.70",
     "@types/promise.any": "^2.0.0",
-    "@types/vscode": "^1.52.0",
+    "@types/vscode": "^1.68.0",
     "@types/which": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^4.31.1",
     "@typescript-eslint/parser": "^4.31.1",
