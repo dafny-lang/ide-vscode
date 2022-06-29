@@ -123,11 +123,9 @@ export default class CounterexamplesView {
       .join(' ');
     // TODO earlier versions showed a warning that there are references present.
     const line = counterexample.position.line;
-    const character: number = counterexample.position.character;
-    const characterOffset: number = 1;
     return {
       range: new Range(
-        new Position(line, character + characterOffset),
+        new Position(line, counterexample.position.character as number + 1),
         new Position(line, Number.MAX_VALUE)
       ),
       renderOptions: {
