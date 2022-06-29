@@ -3,7 +3,7 @@ import { ExtensionContext } from 'vscode';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import CompilationStatusView from './compilationStatusView';
 import CompileCommands from './compileCommands';
-import CounterexamplesView from './counterexamplesView';
+import CounterexamplesView from './counterExamplesView';
 import DafnyVersionView from './dafnyVersionView';
 import GhostDiagnosticsView from './ghostDiagnosticsView';
 import VerificationGutterStatusView from './verificationGutterStatusView';
