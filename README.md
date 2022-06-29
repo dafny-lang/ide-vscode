@@ -8,7 +8,7 @@ This VSCode plugin requires the Dafny language server (shipped with the Dafny re
 - **Compile and Run** `.dfy` files.
 - **Verification** as one types.
 - **Syntax highlighting** thanks to [sublime-dafny](https://github.com/erggo/sublime-dafny). See file `LICENSE_sublime-dafny.rst` for license.
-- Display **Counterexample** for failing proof.
+- Display **counterexample** for failing proof.
 - **IntelliSense** to suggest symbols.
 - **GoToDefinition** to quickly navigate.
 - **Hover Information** for symbols.
