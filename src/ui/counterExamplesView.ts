@@ -116,7 +116,7 @@ export default class CounterExamplesView {
     const line = counterExample.position.line;
     return {
       range: new Range(
-        new Position(line, counterExample.position.character + 1),
+        new Position(line, counterExample.position.character as number + 1),
         new Position(line, Number.MAX_VALUE)
       ),
       renderOptions: {
