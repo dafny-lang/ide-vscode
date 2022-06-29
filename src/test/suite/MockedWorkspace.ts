@@ -12,7 +12,7 @@ export class MockedWorkspace {
   public getConfiguration(section: string): Map<string, string> {
     return this.sections[section];
   }
-  public setFileExpects(expectations: MethodMockup[]): void {
+  public setFSExpects(expectations: MethodMockup[]): void {
     this.fs = new MockedFileSystem(expectations);
   }
 }

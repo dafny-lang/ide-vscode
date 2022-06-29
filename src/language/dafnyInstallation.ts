@@ -13,12 +13,8 @@ import { ConfigurationConstants, LanguageServerConstants } from '../constants';
 import Configuration from '../configuration';
 import { exec } from 'child_process';
 import { chdir as processChdir, cwd as processCwd } from 'process';
-export interface ExecOutput {
-  stdout: string;
-  stderr: string;
-}
+
 const execAsync = promisify(exec);
-export type ExecAsyncType = typeof execAsync;
 
 const ArchiveFileName = 'dafny.zip';
 const mkdirAsync = promisify(fs.mkdir);
@@ -89,14 +85,10 @@ function getDafnyDownloadAddress(): string {
 }
 
 export class DafnyInstaller {
-  public execAsync: ExecAsyncType;
-
   public constructor(
     private readonly context: ExtensionContext,
     private readonly statusOutput: OutputChannel
-  ) {
-    this.execAsync = execAsync;
-  }
+  ) {}
 
   public isLatestKnownLanguageServerOrNewer(version: string): boolean {
     if(version === LanguageServerConstants.UnknownVersion) {

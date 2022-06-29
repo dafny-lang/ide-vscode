@@ -1,12 +1,18 @@
 import * as assert from 'assert';
+import * as proxyquire from 'proxyquire';
+import { MockingUtils, MockingExec } from './MockingUtils';
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
-import * as vscode from 'vscode';
+//import * as vscode from 'vscode';
+const vscode = require('vscode');
+const mockedExec = new MockingExec();
+proxyquire('child_process', {
+  exec: mockedExec.stub
+});
 //import { ShowDocumentRequest } from 'vscode-languageclient';
 import { DafnyInstaller } from '../../language/dafnyInstallation';
 import { Messages } from '../../ui/messages';
-import { MockingUtils } from './MockingUtils';
 
 
 const mockedWorkspace = MockingUtils.mockedWorkspace();
@@ -22,14 +28,13 @@ suite('Dafny IDE Extension Installation', () => {
   test('Installer checks', async () => {
     const context = MockingUtils.mockedContext();
     const outputChannelBuilder = MockingUtils.mockedOutputChannelBuilder();
-    const installer = new DafnyInstaller(context, outputChannelBuilder.outputChannel);
-    const execAsyncMock = MockingUtils.mockedExecAsync(MockingUtils.simpleCommandMap({
+    mockedExec.set(MockingUtils.simpleCommandMap({
       [''] : { stderr: '', stdout: '' }
     }));
-    installer.execAsync = execAsyncMock;
-    mockedWorkspace.setFileExpects([
-      f => {
-        assert.strictEqual('delete', f);
+    const installer = new DafnyInstaller(context, outputChannelBuilder.outputChannel);
+    mockedWorkspace.setFSExpects([
+      (methodName) => {
+        assert.strictEqual('delete', methodName);
         throw 'Simulated error in delete';
       }
     ]);

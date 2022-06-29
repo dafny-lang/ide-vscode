@@ -1,9 +1,29 @@
-import { PromiseWithChild } from 'child_process';
+
 import * as vscode from 'vscode';
 import { ConfigurationConstants, LanguageServerConstants } from '../../constants';
-import { ExecAsyncType, ExecOutput } from '../../language/dafnyInstallation';
 import { MockedOutputChannelBuilder } from './MockedOutputChannelBuilder';
 import { MockedWorkspace } from './MockedWorkspace';
+
+export interface ExecOutput {
+  stdout: string;
+  stderr: string;
+}
+export class MockingExec {
+  public stub: (command: string, callback: (error: unknown, stdout: string, stderr: string) => void) => void;
+
+  public constructor() {
+    this.stub = (command: string) => {
+      throw `Unexpected comand ${command}`;
+    };
+  }
+
+  public set(commandMap: (command: string) => { stdout: string, stderr: string }): void {
+    this.stub = (function (command: string, callback: (error: unknown | null, stdout: string, stderr: string) => void): void {
+      const commandResult = commandMap(command);
+      callback(null, commandResult.stdout, commandResult.stderr);
+    });
+  }
+}
 
 export class MockingUtils {
   /** Helper to create a commandMap from a command */
@@ -14,18 +34,6 @@ export class MockingUtils {
       }
       throw `Command ${command} not defined in execution table`;
     };
-  }
-
-  /** Helper to create a mocked execAsync that can perform any operation, including throwing exceptions */
-  public static mockedExecAsync(commandMap: (command: string) => ExecOutput): ExecAsyncType {
-    const result = (function (command: string): Promise<ExecOutput> {
-      try {
-        return Promise.resolve(commandMap(command));
-      } catch(e: unknown) {
-        return Promise.reject(e);
-      }
-    });
-    return result as unknown as (command: string) => PromiseWithChild<ExecOutput>;
   }
 
   public static mockedContext(): vscode.ExtensionContext {
