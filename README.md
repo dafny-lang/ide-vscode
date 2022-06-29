@@ -72,7 +72,7 @@ Press `F5` to compile and run the program.
 
 ![Compile](readmeResources/Compile.png)
 
-### Show Counter Example
+### Show Counterxamples
 
 Press `F7` to show counterexamples.
 
