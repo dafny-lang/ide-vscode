@@ -3,7 +3,7 @@ import { DecorationOptions, Position, Range, TextEditor, TextEditorDecorationTyp
 import { DafnyCommands } from '../commands';
 import Configuration from '../configuration';
 import { ConfigurationConstants } from '../constants';
-import { ICounterexampleItem, ICounterexampleParams } from '../language/api/counterexample';
+import { ICounterexampleItem, ICounterexampleParams } from '../language/api/counterExample';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { debounce, DebounceError } from '../tools/debounce';
 

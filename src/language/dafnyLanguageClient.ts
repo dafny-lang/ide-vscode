@@ -6,7 +6,7 @@ import { ConfigurationConstants } from '../constants';
 import { getDotnetExecutablePath } from '../dotnet';
 import { DafnyDocumentFilter } from '../tools/vscode';
 import { ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from './api/compilationStatus';
-import { ICounterexampleItem, ICounterexampleParams } from './api/counterexample';
+import { ICounterexampleItem, ICounterexampleParams } from './api/counterExample';
 import { IGhostDiagnosticsParams } from './api/ghostDiagnostics';
 import { IVerificationGutterStatusParams as IVerificationGutterStatusParams } from './api/verificationGutterStatusParams';
 import { getLanguageServerRuntimePath } from './dafnyInstallation';
