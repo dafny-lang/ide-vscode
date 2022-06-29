@@ -10,7 +10,7 @@ This VSCode plugin requires the Dafny language server (shipped with the Dafny re
 - **Syntax highlighting** thanks to [sublime-dafny](https://github.com/erggo/sublime-dafny). See file `LICENSE_sublime-dafny.rst` for license.
 - Display **counterexample** for failing proof.
 - **IntelliSense** to suggest symbols.
-- **GoToDefinition** to quickly navigate.
+- **Go to definition** to quickly navigate.
 - **Hover Information** for symbols.
 
 You can find [examples below](#examples).
