@@ -2,8 +2,8 @@ export namespace DafnyCommands {
   export const Compile = 'dafny.compile';
   export const CompileCustomArgs = 'dafny.compileCustomArgs';
   export const CompileAndRun = 'dafny.compileAndRun';
-  export const ShowCounterExample = 'dafny.showCounterExample';
-  export const HideCounterExample = 'dafny.hideCounterExample';
+  export const ShowCounterexample = 'dafny.showCounterexample';
+  export const HideCounterexample = 'dafny.hideCounterexample';
   export const OpenStatusBarMenu = 'dafny.openStatusBarMenu';
   export const RestartServer = 'dafny.restartServer';
 }
