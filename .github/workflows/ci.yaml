@@ -26,7 +26,8 @@ jobs:
       #    CI: true
       - name: "Prepare: Package VSCode Extension"
         uses: actions/setup-node@v1
-      - run: npm install -g vsce@1.96.1
+      - run: npm install -g npm@latest
+      - run: npm install -g vsce@2.9.2
       - run: vsce package --out dist/
 
 
