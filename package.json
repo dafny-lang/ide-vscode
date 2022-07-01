@@ -44,13 +44,13 @@
           "group": "7_Dafny@7"
         },
         {
-          "when": "editorTextFocus && editorLangId == dafny",
-          "command": "dafny.showCounterExample",
+          "when": "editorTextFocus && editorLangId == dafny && dafny.counterexampleMenu.CanShowCounterExample",
+          "command": "dafny.showCounterexample",
           "group": "7_Dafny@1"
         },
         {
-          "when": "editorTextFocus && editorLangId == dafny",
-          "command": "dafny.hideCounterExample",
+          "when": "editorTextFocus && editorLangId == dafny && !dafny.counterexampleMenu.CanShowCounterExample",
+          "command": "dafny.hideCounterexample",
           "group": "7_Dafny@2"
         }
       ]
@@ -75,12 +75,12 @@
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
-        "command": "dafny.showCounterExample",
+        "command": "dafny.showCounterexample",
         "key": "f7",
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
-        "command": "dafny.hideCounterExample",
+        "command": "dafny.hideCounterexample",
         "key": "f8",
         "when": "editorTextFocus && editorLangId == dafny"
       }
@@ -216,7 +216,7 @@
           "type": "string",
           "description": "The absolute path of the dotnet binary. Only necessary if dotnet is not in system PATH (you'll get an error if that's the case)."
         },
-        "dafny.colorCounterExamples": {
+        "dafny.colorCounterexamples": {
           "type": "object",
           "default": {
             "backgroundColor": null,
@@ -245,12 +245,12 @@
         "title": "Dafny: Compile and Run"
       },
       {
-        "command": "dafny.showCounterExample",
-        "title": "Dafny: Show CounterExample"
+        "command": "dafny.showCounterexample",
+        "title": "Dafny: Show Counterexample"
       },
       {
-        "command": "dafny.hideCounterExample",
-        "title": "Dafny: Hide CounterExample"
+        "command": "dafny.hideCounterexample",
+        "title": "Dafny: Hide Counterexample"
       },
       {
         "command": "dafny.restartServer",
