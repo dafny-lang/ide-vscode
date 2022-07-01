@@ -13,7 +13,7 @@ export class MockingExec {
 
   public constructor() {
     this.stub = (command: string) => {
-      throw `Unexpected comand ${command}`;
+      throw `Unexpected command ${command}`;
     };
   }
 
