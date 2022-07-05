@@ -7,10 +7,9 @@ import { MockingUtils, MockingExec } from './MockingUtils';
 //import * as vscode from 'vscode';
 const vscode = require('vscode');
 const mockedExec = new MockingExec();
-proxyquire('child_process', {
-  exec: mockedExec.stub
+const { DafnyInstaller } = proxyquire('../../language/dafnyInstallatio', {
+  'child_process': proxyquire('child_process', { exec: mockedExec.stub })
 });
-import { DafnyInstaller } from '../../language/dafnyInstallation';
 import { Messages } from '../../ui/messages';
 
 
