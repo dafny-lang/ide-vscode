@@ -10,7 +10,6 @@ const mockedExec = new MockingExec();
 proxyquire('child_process', {
   exec: mockedExec.stub
 });
-//import { ShowDocumentRequest } from 'vscode-languageclient';
 import { DafnyInstaller } from '../../language/dafnyInstallation';
 import { Messages } from '../../ui/messages';
 
