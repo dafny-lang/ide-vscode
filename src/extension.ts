@@ -1,6 +1,7 @@
 import { Disposable, ExtensionContext, OutputChannel, window, commands } from 'vscode';
 import { ExtensionConstants, LanguageServerConstants } from './constants';
 import { DafnyCommands } from './commands';
+
 import { DafnyLanguageClient } from './language/dafnyLanguageClient';
 import checkAndInformAboutInstallation from './startupCheck';
 import { DafnyInstaller, getLanguageServerRuntimePath, isConfiguredToInstallLatestDafny } from './language/dafnyInstallation';
@@ -32,7 +33,6 @@ export async function deactivate(): Promise<void> {
 export async function restartServer(): Promise<void> {
   await extensionRuntime?.restart();
 }
-
 class ExtensionRuntime {
   private readonly installer: DafnyInstaller;
   private client?: DafnyLanguageClient;
@@ -58,7 +58,7 @@ class ExtensionRuntime {
       return;
     }
     await createAndRegisterDafnyIntegration(this.context, this.client!, this.languageServerVersion!);
-    commands.registerCommand(DafnyCommands.RestartServer, restartServer),
+    commands.registerCommand(DafnyCommands.RestartServer, restartServer);
     this.statusOutput.appendLine('Dafny is ready');
   }
 
