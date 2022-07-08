@@ -44,7 +44,7 @@ async function getConfiguredTagAndVersionUncached(): Promise<[string, string]> {
   case LanguageServerConstants.LatestNightly: {
     const result: any = await (await fetch('https://api.github.com/repos/dafny-lang/dafny/releases/tags/nightly')).json();
     if(result.name !== undefined) {
-      const version = result.name.substring(6);
+      const version = result.name.substring("Dafny ".length);
       return [ 'nightly', version ];
     }
     version = LanguageServerConstants.LatestVersion;
