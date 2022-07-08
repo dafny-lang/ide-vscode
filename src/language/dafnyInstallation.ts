@@ -44,9 +44,14 @@ async function getConfiguredTagAndVersionUncached(): Promise<[string, string]> {
   case LanguageServerConstants.LatestNightly: {
     const result: any = await (await fetch('https://api.github.com/repos/dafny-lang/dafny/releases/tags/nightly')).json();
     if(result.name !== undefined) {
-      const version = result.name.substring("Dafny ".length);
-      return [ 'nightly', version ];
+      const name: string = result.name;
+      const versionPrefix = 'Dafny ';
+      if(name.startsWith(versionPrefix)) {
+        const version = name.substring(versionPrefix.length);
+        return [ 'nightly', version ];
+      }
     }
+    window.showWarningMessage('Failed to install latest nightly version of Dafny');
     version = LanguageServerConstants.LatestVersion;
   }
   }
