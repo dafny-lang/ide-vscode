@@ -32,7 +32,13 @@ async function getConfiguredVersion(): Promise<string> {
 
 let getConfiguredTagAndVersionCache: [string, string];
 async function getConfiguredTagAndVersion(): Promise<[string, string]> {
-  return getConfiguredTagAndVersionCache ?? (getConfiguredTagAndVersionCache = await getConfiguredTagAndVersionUncached());
+  if(getConfiguredTagAndVersionCache === undefined) {
+    const result = await getConfiguredTagAndVersionUncached();
+    if(getConfiguredTagAndVersionCache === undefined) {
+      getConfiguredTagAndVersionCache = result;
+    }
+  }
+  return getConfiguredTagAndVersionCache;
 }
 
 async function getConfiguredTagAndVersionUncached(): Promise<[string, string]> {
