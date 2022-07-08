@@ -1,7 +1,6 @@
 import { Disposable, ExtensionContext, OutputChannel, window, commands } from 'vscode';
 import { ExtensionConstants, LanguageServerConstants } from './constants';
 import { DafnyCommands } from './commands';
-
 import { DafnyLanguageClient } from './language/dafnyLanguageClient';
 import checkAndInformAboutInstallation from './startupCheck';
 import { DafnyInstaller, getLanguageServerRuntimePath, isConfiguredToInstallLatestDafny } from './language/dafnyInstallation';
