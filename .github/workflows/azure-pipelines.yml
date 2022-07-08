@@ -1,0 +1,28 @@
+name: AzurePipelines
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Prepare: Checkout Repository"
+        uses: actions/checkout@v2
+      - name: "Install Node.js"
+        uses: actions/setup-node@v3
+
+      - name: "Start xvfb"
+        run: |
+          /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          echo ">>> Started xvfb"
+
+      - name: "Run tests"
+        run: |
+          pwd
+          ls
+          echo ">>> Compile ide-vscode"
+          yarn && yarn compile
+          echo ">>> Compiled ide-vscode"
+          echo ">>> Run integration test"
+          yarn test
+        env:
+          DISPLAY: ':99.0'
