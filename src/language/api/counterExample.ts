@@ -1,10 +1,10 @@
 import { TextDocumentIdentifier, Position } from 'vscode-languageclient';
 
-export interface ICounterExampleItem {
+export interface ICounterexampleItem {
   position: Position;
   variables: { [name: string]: string };
 }
 
-export interface ICounterExampleParams {
+export interface ICounterexampleParams {
   textDocument: TextDocumentIdentifier;
 }

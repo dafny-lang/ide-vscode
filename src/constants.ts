@@ -34,8 +34,8 @@ export namespace ConfigurationConstants {
     export const CommandPrefix = 'terminalCommandPrefix';
   }
 
-  export namespace CounterExamples {
-    export const Color = 'colorCounterExamples';
+  export namespace Counterexamples {
+    export const Color = 'colorCounterexamples';
   }
 }
 
@@ -46,7 +46,7 @@ export namespace DotnetConstants {
 
 export namespace LanguageServerConstants {
   export const Latest = 'latest';
-  export const LatestVersion = '3.6.0';
+  export const LatestVersion = '3.7.0';
   export const UnknownVersion = 'unknown';
   export const DafnyGitUrl = 'https://github.com/dafny-lang/dafny.git';
   export const DownloadBaseUri = 'https://github.com/dafny-lang/dafny/releases/download';

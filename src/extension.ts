@@ -1,12 +1,13 @@
-import { Disposable, ExtensionContext, OutputChannel, window } from 'vscode';
+import { Disposable, ExtensionContext, OutputChannel, window, commands } from 'vscode';
 import { ExtensionConstants, LanguageServerConstants } from './constants';
-
+import { DafnyCommands } from './commands';
 import { DafnyLanguageClient } from './language/dafnyLanguageClient';
 import checkAndInformAboutInstallation from './startupCheck';
 import { DafnyInstaller, getLanguageServerRuntimePath, isConfiguredToInstallLatestDafny } from './language/dafnyInstallation';
 import { Messages } from './ui/messages';
 import createAndRegisterDafnyIntegration from './ui/dafnyIntegration';
 import { timeout } from './tools/timeout';
+import { fileIssueURL } from './ui/statusBarActionView';
 
 // Promise.any() is only available since Node.JS 15.
 import * as PromiseAny from 'promise.any';
@@ -15,7 +16,7 @@ const DafnyVersionTimeoutMs = 5_000;
 let extensionRuntime: ExtensionRuntime | undefined;
 
 export async function activate(context: ExtensionContext): Promise<void> {
-  if(!await checkAndInformAboutInstallation()) {
+  if(!await checkAndInformAboutInstallation(context)) {
     return;
   }
   const statusOutput = window.createOutputChannel(ExtensionConstants.ChannelName);
@@ -26,6 +27,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
 
 export async function deactivate(): Promise<void> {
   await extensionRuntime?.dispose();
+}
+
+export async function restartServer(): Promise<void> {
+  await extensionRuntime?.restart();
 }
 
 class ExtensionRuntime {
@@ -55,15 +60,13 @@ class ExtensionRuntime {
       return;
     }
     await createAndRegisterDafnyIntegration(this.context, this.client!, this.languageServerVersion!);
+    commands.registerCommand(DafnyCommands.RestartServer, restartServer),
     this.statusOutput.appendLine('Dafny is ready');
   }
 
   private async initializeClient(): Promise<void> {
-    this.statusOutput.appendLine(`starting Dafny from ${getLanguageServerRuntimePath(this.context)}`);
-    this.client = await DafnyLanguageClient.create(this.context, this.statusOutput);
-    this.client.start();
-    await this.client.onReady();
-    this.languageServerVersion = await this.getLanguageServerVersionAfterStartup();
+    this.statusOutput.appendLine(`Starting Dafny from ${getLanguageServerRuntimePath(this.context)}`);
+    await this.startClientAndWaitForVersion();
   }
 
   private async getLanguageServerVersionAfterStartup(): Promise<string> {
@@ -100,5 +103,32 @@ class ExtensionRuntime {
 
   public async dispose(): Promise<void> {
     await this.client?.stop();
+  }
+
+  public async startClientAndWaitForVersion() {
+    this.client = this.client ?? await DafnyLanguageClient.create(this.context, this.statusOutput);
+    this.client.start();
+    await this.client.onReady();
+    this.languageServerVersion = await this.getLanguageServerVersionAfterStartup();
+  }
+
+  public async restart(): Promise<void> {
+    this.statusOutput.appendLine('Terminating Dafny...');
+    try {
+      await this.dispose();
+    } catch(e: unknown) {
+      this.statusOutput.appendLine('Server did not respond...');
+    }
+    // The first subscription is the statusOutput and should not be disposed.
+    for(let i = 1; i < this.context.subscriptions.length; i++) {
+      this.context.subscriptions[i].dispose();
+    }
+    this.context.subscriptions.splice(1);
+    await this.initializeClient();
+    await createAndRegisterDafnyIntegration(this.context, this.client!, this.languageServerVersion!);
+    const issueURL = await fileIssueURL(this.languageServerVersion ?? '???', this.context);
+    this.statusOutput.appendLine(
+      'Dafny is ready again.\nIf you have time, please let us know why you needed to restart by filing an issue:\n'
+      + issueURL);
   }
 }

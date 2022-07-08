@@ -2,7 +2,7 @@
   "name": "ide-vscode",
   "displayName": "Dafny",
   "description": "Dafny for Visual Studio Code",
-  "version": "2.4.1",
+  "version": "2.5.0",
   "publisher": "dafny-lang",
   "repository": {
     "type": "git",
@@ -19,7 +19,7 @@
   },
   "icon": "logo.png",
   "engines": {
-    "vscode": "^1.52.0"
+    "vscode": "^1.68.0"
   },
   "categories": [
     "Programming Languages"
@@ -44,13 +44,13 @@
           "group": "7_Dafny@7"
         },
         {
-          "when": "editorTextFocus && editorLangId == dafny",
-          "command": "dafny.showCounterExample",
+          "when": "editorTextFocus && editorLangId == dafny && dafny.counterexampleMenu.CanShowCounterExample",
+          "command": "dafny.showCounterexample",
           "group": "7_Dafny@1"
         },
         {
-          "when": "editorTextFocus && editorLangId == dafny",
-          "command": "dafny.hideCounterExample",
+          "when": "editorTextFocus && editorLangId == dafny && !dafny.counterexampleMenu.CanShowCounterExample",
+          "command": "dafny.hideCounterexample",
           "group": "7_Dafny@2"
         }
       ]
@@ -75,12 +75,12 @@
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
-        "command": "dafny.showCounterExample",
+        "command": "dafny.showCounterexample",
         "key": "f7",
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
-        "command": "dafny.hideCounterExample",
+        "command": "dafny.hideCounterexample",
         "key": "f8",
         "when": "editorTextFocus && editorLangId == dafny"
       }
@@ -202,6 +202,7 @@
           "type": "string",
           "enum": [
             "latest",
+            "3.7.0",
             "3.6.0",
             "3.5.0",
             "3.4.2",
@@ -215,7 +216,7 @@
           "type": "string",
           "description": "The absolute path of the dotnet binary. Only necessary if dotnet is not in system PATH (you'll get an error if that's the case)."
         },
-        "dafny.colorCounterExamples": {
+        "dafny.colorCounterexamples": {
           "type": "object",
           "default": {
             "backgroundColor": null,
@@ -244,12 +245,16 @@
         "title": "Dafny: Compile and Run"
       },
       {
-        "command": "dafny.showCounterExample",
-        "title": "Dafny: Show CounterExample"
+        "command": "dafny.showCounterexample",
+        "title": "Dafny: Show Counterexample"
       },
       {
-        "command": "dafny.hideCounterExample",
-        "title": "Dafny: Hide CounterExample"
+        "command": "dafny.hideCounterexample",
+        "title": "Dafny: Hide Counterexample"
+      },
+      {
+        "command": "dafny.restartServer",
+        "title": "Dafny: Restart server"
       }
     ]
   },
@@ -272,7 +277,7 @@
     "@types/mocha": "^9.1.0",
     "@types/node": "^12.12.70",
     "@types/promise.any": "^2.0.0",
-    "@types/vscode": "^1.52.0",
+    "@types/vscode": "^1.68.0",
     "@types/which": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^4.31.1",
     "@typescript-eslint/parser": "^4.31.1",

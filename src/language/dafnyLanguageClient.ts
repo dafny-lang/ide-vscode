@@ -6,7 +6,7 @@ import { ConfigurationConstants } from '../constants';
 import { getDotnetExecutablePath } from '../dotnet';
 import { DafnyDocumentFilter } from '../tools/vscode';
 import { ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from './api/compilationStatus';
-import { ICounterExampleItem, ICounterExampleParams } from './api/counterExample';
+import { ICounterexampleItem, ICounterexampleParams } from './api/counterExample';
 import { IGhostDiagnosticsParams } from './api/ghostDiagnostics';
 import { IVerificationGutterStatusParams as IVerificationGutterStatusParams } from './api/verificationGutterStatusParams';
 import { IVerificationSymbolStatusParams } from './api/verificationSymbolStatusParams';
@@ -82,8 +82,8 @@ export class DafnyLanguageClient extends LanguageClient {
     this.diagnosticsListeners = diagnosticsListeners;
   }
 
-  public getCounterExamples(param: ICounterExampleParams): Promise<ICounterExampleItem[]> {
-    return this.sendRequest<ICounterExampleItem[]>('dafny/counterExample', param);
+  public getCounterexamples(param: ICounterexampleParams): Promise<ICounterexampleItem[]> {
+    return this.sendRequest<ICounterexampleItem[]>('dafny/counterExample', param);
   }
 
   public static argumentsToCommandLine(launchArguments: string[]): string {

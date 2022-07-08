@@ -1,14 +1,15 @@
-import { window, commands, Uri } from 'vscode';
+import { window, commands, Uri, ExtensionContext } from 'vscode';
 
 import { VSCodeCommands } from './commands';
+import { ConfigurationConstants } from './constants';
 import { checkSupportedDotnetVersion } from './dotnet';
 import { Messages } from './ui/messages';
 
-export default async function checkAndInformAboutInstallation(): Promise<boolean> {
-  return await checkDotnetInstallation();
+export default async function checkAndInformAboutInstallation(context: ExtensionContext): Promise<boolean> {
+  return await checkDotnetInstallation(context);
 }
 
-async function checkDotnetInstallation(): Promise<boolean> {
+async function checkDotnetInstallation(context: ExtensionContext): Promise<boolean> {
   const answer = await checkSupportedDotnetVersion();
   if(answer !== undefined) {
     const selection = await window.showErrorMessage(
@@ -18,7 +19,8 @@ async function checkDotnetInstallation(): Promise<boolean> {
     );
     switch(selection) {
     case Messages.Dotnet.ChangeConfiguration:
-      commands.executeCommand(VSCodeCommands.ConfigureLanguageSettings);
+      commands.executeCommand(VSCodeCommands.ConfigureDafnySettings,
+        `@ext:${context.extension.id} ${ConfigurationConstants.Dotnet.ExecutablePath}`);
       break;
     case Messages.Dotnet.VisitDownload:
       commands.executeCommand(VSCodeCommands.Open, Uri.parse(Messages.Dotnet.DownloadUri));

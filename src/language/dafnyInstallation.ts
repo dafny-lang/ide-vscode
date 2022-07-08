@@ -116,18 +116,18 @@ export class DafnyInstaller {
 
   public async install(): Promise<boolean> {
     this.statusOutput.show();
-    this.writeStatus('starting Dafny installation');
+    this.writeStatus('Starting Dafny installation');
     try {
       await this.cleanInstallDir();
-      const archive = await this.downloadArchive(getDafnyDownloadAddress());
-      await this.extractArchive(archive);
-      await workspace.fs.delete(archive, { useTrash: false });
-      this.writeStatus('Dafny installation completed');
       if(os.type() === 'Darwin' && os.arch() !== 'x64') {
         // Need to build from source and move all files from Binary/ to the out/resource folder
-        this.writeStatus(`Found a non-supported architecture OSX:${os.arch()}. Going to install from source and replace the automated installation.`);
+        this.writeStatus(`Found a non-supported architecture OSX:${os.arch()}. Going to install from source.`);
         return await this.installFromSource();
       } else {
+        const archive = await this.downloadArchive(getDafnyDownloadAddress());
+        await this.extractArchive(archive);
+        await workspace.fs.delete(archive, { useTrash: false });
+        this.writeStatus('Dafny installation completed');
         return true;
       }
     } catch(error: unknown) {
@@ -161,12 +161,21 @@ export class DafnyInstaller {
     try {
       await this.execLog('brew install dotnet-sdk');
     } catch(error: unknown) {
-      this.writeStatus('If you got `brew: command not found`, but brew is installed on your system, please add all brew commands to your ~/.zprofile, e.g. https://apple.stackexchange.com/a/430904 and reinstall Dafny.');
+      this.writeStatus('An error occurred while running this command.');
+      this.writeStatus(`${error}`);
+      this.writeStatus(`If brew is installed on your system, this can usually be resolved by adding add all brew commands to your ~/.zprofile,
+      e.g. by running the script there https://apple.stackexchange.com/a/430904 :
+
+      > echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+      > eval "$(/opt/homebrew/bin/brew shellenv)"
+
+      and restart VSCode, which may reinstall Dafny.`);
       return false;
     }
     try {
-      const result = (await this.execLog('javac -version')).stdout;
-      if(!(/javac \d+\.\d+/.exec(result))) {
+      const process = await this.execLog('javac -version');
+      if(!(/javac \d+\.\d+/.exec(process.stdout))
+         && !(/javac \d+\.\d+/.exec(process.stderr))) {
         throw '';
       }
     } catch(error: unknown) {
@@ -191,6 +200,7 @@ export class DafnyInstaller {
     await this.execLog(`unzip ${z3filenameOsx}.zip`);
     await this.execLog(`mv ${z3filenameOsx} z3`);
     processChdir(this.getInstallationPath().fsPath);
+    await this.execLog('mkdir -p ./dafny/');
     await this.execLog(`cp -R ${binaries}/* ./dafny/`);
     processChdir(previousDirectory);
     return true;

@@ -1,5 +1,6 @@
 export namespace Messages {
   export namespace CompilationStatus {
+    export const ResolutionStarted = '$(sync~spin) Resolving...';
     export const ParsingFailed = '$(thumbsdown) Parsing Failed';
     export const ResolutionFailed = '$(thumbsdown) Resolution Failed';
     export const CompilationSucceeded = '$(book) Resolved (not verified)';
@@ -26,7 +27,7 @@ export namespace Messages {
     export const NotASupportedDotnetInstallation = ' is not a compatible dotnet file. Dafny requires the ASP.NET Core Runtime 5.0 or 6.0, got ';
     export const FailedDotnetExecution = 'Failed to execute dotnet. Dafny requires the ASP.NET Core Runtime 5.0 or 6.0.';
     export const NoCompatibleInstallation = 'No compatible dotnet runtime found. Dafny requires the ASP.NET Core Runtime 5.0 or 6.0.';
-    export const ChangeConfiguration = 'Change dafny.dotnetExecutablePath';
+    export const ChangeConfiguration = 'Configure the absolute path to dotnet';
     export const VisitDownload = 'Get dotnet';
     export const DownloadUri = 'https://dotnet.microsoft.com/download/dotnet/6.0';
   }
