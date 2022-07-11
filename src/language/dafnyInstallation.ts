@@ -57,7 +57,7 @@ async function getConfiguredTagAndVersionUncached(): Promise<[string, string]> {
         return [ 'nightly', version ];
       }
     }
-    window.showWarningMessage('Failed to install latest nightly version of Dafny');
+    window.showWarningMessage('Failed to install latest nightly version of Dafny. Using latest stable version instead.');
     version = LanguageServerConstants.LatestVersion;
   }
   }
@@ -222,7 +222,7 @@ export class DafnyInstaller {
     await this.execLog(`git clone --recurse-submodules ${LanguageServerConstants.DafnyGitUrl}`);
     processChdir(Utils.joinPath(installationPath, 'dafny').fsPath);
     await this.execLog('git fetch --all --tags');
-    await this.execLog(`git checkout v${getConfiguredVersion()}`);
+    await this.execLog(`git checkout v${await getConfiguredVersion()}`);
     await this.execLog('make exe');
     const binaries = Utils.joinPath(installationPath, 'dafny', 'Binaries').fsPath;
     processChdir(binaries);
