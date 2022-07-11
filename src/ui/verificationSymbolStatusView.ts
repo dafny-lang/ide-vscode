@@ -24,6 +24,9 @@ export default class VerificationSymbolStatusView {
     private readonly languageClient: DafnyLanguageClient) {
   }
 
+  private startingRuns: boolean = false;
+  private itemsThatShouldFinish: Set<string> = new Set();
+  private queuedUpdates: IVerificationSymbolStatusParams[] = [];
   private readonly projectStates: Map<string, FileState> = new Map();
 
   private documentChanged(e: TextDocumentChangeEvent) {
@@ -47,16 +50,25 @@ export default class VerificationSymbolStatusView {
       //   throw new Error('run already busy');
       // }
 
+      this.startingRuns = true;
       const runningItems: TestItem[] = [];
       const runs = items.map(item => this.languageClient.runVerification({ position: item.range!.start, textDocument: { uri: uriString } }));
       for(const index in runs) {
         const success = await runs[index];
+        console.log(`Run call for ${items[index].label} returned ${success}`);
         if(success) {
           runningItems.push(items[index]);
         }
       }
+      this.startingRuns = false;
       if(runningItems.length) {
+        console.log(`Creating explicit test run for ${JSON.stringify(runningItems.length)}`);
         projectState.run = projectState.controller.createTestRun(new TestRunRequest(runningItems));
+        this.itemsThatShouldFinish = new Set(runningItems.map(i => i.id));
+        for(const queuedUpdate of this.queuedUpdates) {
+          this.update(queuedUpdate);
+        }
+        this.queuedUpdates = [];
       }
 
       cancellationToken.onCancellationRequested(() => {
@@ -93,6 +105,12 @@ export default class VerificationSymbolStatusView {
   }
 
   private async update(params: IVerificationSymbolStatusParams): Promise<void> {
+    if(this.startingRuns) {
+      this.queuedUpdates.push(params);
+      console.log('queuing update');
+      return;
+    }
+
     const uri = Uri.parse(params.uri);
     const projectState = this.projectStates.get(uri.toString()) ?? this.createController(params.uri);
     const controller = projectState.controller;
@@ -110,35 +128,43 @@ export default class VerificationSymbolStatusView {
     }
 
     if(!projectState.run) {
-      console.log('new run');
+      console.log(`Creating implicit test run for ${JSON.stringify(items.length)}`);
       projectState.run = projectState.controller.createTestRun(new TestRunRequest(items));
+      this.itemsThatShouldFinish.clear();
+    } else {
+      console.log('Processing update for existing run.');
     }
 
     const run = projectState.run;
-    let stillRunning = false;
     params.namedVerifiables.forEach((element, index) => {
       const testItem = items[index];
+      //console.log(`For ${JSON.stringify(testItem.label)}, setting state to ${element.status}`);
       switch(element.status) {
-      case PublishedVerificationStatus.Stale: run.skipped(testItem);
-        console.log(`stale ${index}`);
+      case PublishedVerificationStatus.Stale:
+        if(!this.itemsThatShouldFinish.has(testItem.id)) {
+          run.skipped(testItem);
+          console.log(`Update state for ${testItem.label} to stale`);
+        }
         break;
       case PublishedVerificationStatus.Error: run.failed(testItem, []);
-        console.log(`failed ${index}`);
+        console.log(`Update state for ${testItem.label} to failed`);
+        this.itemsThatShouldFinish.delete(testItem.id);
         break;
       case PublishedVerificationStatus.Correct: run.passed(testItem);
-        console.log(`correct ${index}`);
+        console.log(`Update state for ${testItem.label} to correct`);
+        this.itemsThatShouldFinish.delete(testItem.id);
         break;
       case PublishedVerificationStatus.Running: run.started(testItem);
-        console.log(`running ${index}`);
-        stillRunning = true;
+        console.log(`Update state for ${testItem.label} to running`);
+        this.itemsThatShouldFinish.add(testItem.id);
         break;
       case PublishedVerificationStatus.Queued: run.enqueued(testItem);
-        console.log(`queued ${index}`);
-        stillRunning = true;
+        console.log(`Update state for ${testItem.label} to queued`);
+        this.itemsThatShouldFinish.add(testItem.id);
         break;
       }
     });
-    if(!stillRunning) {
+    if(this.itemsThatShouldFinish.size === 0) {
       console.log('ending run');
       run.end();
       projectState.run = undefined;
