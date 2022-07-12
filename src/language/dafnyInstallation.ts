@@ -36,7 +36,7 @@ async function getConfiguredVersion(): Promise<string> {
 let getConfiguredTagAndVersionCache: [string, string];
 async function getConfiguredTagAndVersion(): Promise<[string, string]> {
   if(getConfiguredTagAndVersionCache === undefined) {
-    const result = await getConfiguredTagAndVersionUncached();
+    const result = await getConfiguredGitTagAndVersionUncached();
     if(getConfiguredTagAndVersionCache === undefined) {
       getConfiguredTagAndVersionCache = result;
     }
@@ -44,7 +44,7 @@ async function getConfiguredTagAndVersion(): Promise<[string, string]> {
   return getConfiguredTagAndVersionCache;
 }
 
-async function getConfiguredTagAndVersionUncached(): Promise<[string, string]> {
+async function getConfiguredGitTagAndVersionUncached(): Promise<[string, string]> {
   let version = Configuration.get<string>(ConfigurationConstants.PreferredVersion);
   switch(version) {
   case LanguageServerConstants.LatestStable:
