@@ -1,3 +1,10 @@
+// Issue #194
+method f(x: OtherModule.CustomType, z: int) {
+          //^ module should be white, `CustomType` should be blue
+  var y := OtherModule.methodName();
+}
+
+
 // Issue #176
 class ClassList {
   ghost var classes: set<string>
