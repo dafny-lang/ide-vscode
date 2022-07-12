@@ -57,7 +57,8 @@ async function getConfiguredTagAndVersionUncached(): Promise<[string, string]> {
         return [ 'nightly', version ];
       }
     }
-    window.showWarningMessage('Failed to install latest nightly version of Dafny. Using latest stable version instead.');
+    window.showWarningMessage('Failed to install latest nightly version of Dafny. Using latest stable version instead.\n'
+      + `The name of the nightly release we found was: ${result.name}`);
     version = LanguageServerConstants.LatestVersion;
   }
   }
