@@ -50,7 +50,7 @@ export class MockingUtils {
   public static mockedWorkspace(): MockedWorkspace {
     return new MockedWorkspace({
       [ConfigurationConstants.SectionName]: new Map<string, string>([
-        [ ConfigurationConstants.PreferredVersion, LanguageServerConstants.Latest ]
+        [ ConfigurationConstants.PreferredVersion, LanguageServerConstants.LatestStable ]
       ])
     });
   }
