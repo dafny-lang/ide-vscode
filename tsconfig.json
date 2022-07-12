@@ -5,6 +5,7 @@
     "lib": [
       "es2019"
     ],
+    "outDir": "out",
     "sourceMap": true,
     "strict": true,
     "alwaysStrict": true,
