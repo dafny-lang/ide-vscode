@@ -1,3 +1,9 @@
+// Issue #201
+const x := @"
+This is an escaped double quote ""
+This should be in the multiline string too
+"
+
 // Issue #194
 method f(x: OtherModule.CustomType, z: int) {
           //^ module should be white, `CustomType` should be blue
