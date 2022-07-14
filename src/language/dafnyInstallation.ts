@@ -24,8 +24,8 @@ const ArchiveFileName = 'dafny.zip';
 const mkdirAsync = promisify(fs.mkdir);
 
 // Equivalent to a || b but without ESLint warnings
-function ifNullOrEmpty(a: string | null, b: string): string {
-  return a === null || a === '' ? b : a;
+async function ifNullOrEmpty(a: string | null, b: () => Promise<string>): Promise<string> {
+  return a === null || a === '' ? await b() : Promise.resolve(a);
 }
 
 async function getConfiguredVersion(): Promise<string> {
@@ -73,9 +73,9 @@ export function isConfiguredToInstallLatestDafny(): boolean {
 }
 
 export async function getCompilerRuntimePath(context: ExtensionContext): Promise<string> {
-  const configuredPath = ifNullOrEmpty(
+  const configuredPath = await ifNullOrEmpty(
     Configuration.get<string | null>(ConfigurationConstants.Compiler.RuntimePath),
-    LanguageServerConstants.GetDefaultCompilerPath(await getConfiguredVersion())
+    async () => LanguageServerConstants.GetDefaultCompilerPath(await getConfiguredVersion())
   );
   if(!path.isAbsolute(configuredPath)) {
     return path.join(context.extensionPath, configuredPath);
@@ -84,9 +84,9 @@ export async function getCompilerRuntimePath(context: ExtensionContext): Promise
 }
 
 export async function getLanguageServerRuntimePath(context: ExtensionContext): Promise<string> {
-  const configuredPath = ifNullOrEmpty(
+  const configuredPath = await ifNullOrEmpty(
     getConfiguredLanguageServerRuntimePath(),
-    LanguageServerConstants.GetDefaultPath(await getConfiguredVersion())
+    async () => LanguageServerConstants.GetDefaultPath(await getConfiguredVersion())
   );
   if(path.isAbsolute(configuredPath)) {
     return configuredPath;
