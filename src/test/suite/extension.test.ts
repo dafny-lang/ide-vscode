@@ -43,7 +43,7 @@ suite('Dafny IDE Extension Installation', () => {
     const result = await installer.install();
     assert.strictEqual(outputChannelBuilder.writtenContent().replace(/\\/g, '/'),
       'Starting Dafny installation\n'
-      + 'deleting previous Dafny installation at /tmp/mockedUri/out/resources/'+LanguageServerConstants.LatestVersion+'\n'
+      + 'deleting previous Dafny installation at /tmp/mockedUri/out/resources/' + LanguageServerConstants.LatestVersion + '\n'
       + 'Dafny installation failed:\n'
       + '> Simulated error in delete\n'
     );
