@@ -2,7 +2,7 @@
   "name": "ide-vscode",
   "displayName": "Dafny",
   "description": "Dafny for Visual Studio Code",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "publisher": "dafny-lang",
   "repository": {
     "type": "git",
@@ -202,6 +202,7 @@
           "type": "string",
           "enum": [
             "latest",
+            "3.7.2",
             "3.7.0",
             "3.6.0",
             "3.5.0",
