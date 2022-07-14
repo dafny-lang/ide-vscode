@@ -87,18 +87,4 @@ export class MockingUtils {
       ])
     });
   }
-
-  public static mockedExpects(): MockedExpects {
-    new MockedExpects();
-  }
-}
-
-export class MockedExpects {
-  private checkpoints: { [name: string]: Checkpoint }
-
-  public newBoolean(): Checkpoint
-
-  class Checkpoint {
-    value()
-  }
 }
