@@ -74,7 +74,8 @@ suite('Compiler invocation', () => {
     for(const checkpoint in checkpoints) {
       assert.strictEqual(true, (checkpoints as any)[checkpoint], checkpoint);
     }
-    assert.strictEqual('<compiler command prefix>"<dotnet executable path>" "<extension path>\\<compiler runtime path>" "fileName.dfy" /out <arg1> arg2', textSent);
+    assert.strictEqual('<compiler command prefix>"<dotnet executable path>" "<extension path>/<compiler runtime path>" "fileName.dfy" /out <arg1> arg2',
+      textSent.replace(/\\/g, '/'));
     assert.strictEqual(true, returnValue, 'returnValue');
   });
 });
