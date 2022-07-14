@@ -1,5 +1,15 @@
 # Release Notes
 
+## 2.6.0
+- Update Dafny and language server to [v3.7.2](https://github.com/dafny-lang/dafny/releases/tag/v3.7.2)
+- Feat: Use nightly releases (https://github.com/dafny-lang/ide-vscode/pull/196)
+- Feat: Hide either "Show Counterexample" or "Hide Counterexample" from the menu, depending on the state (https://github.com/dafny-lang/ide-vscode/pull/191)
+- Fix: Multiline strings correctly highlighted (https://github.com/dafny-lang/ide-vscode/pull/202)
+- Fix: Highlighting of nested types (https://github.com/dafny-lang/ide-vscode/pull/199)
+- Fix: Missing images for the gutter (https://github.com/dafny-lang/ide-vscode/pull/200)
+- Fix: Better dotnet and brew install errors for Mac M1 (https://github.com/dafny-lang/ide-vscode/pull/186)
+- Fix: Better installation and java recognition for Mac M1 (https://github.com/dafny-lang/ide-vscode/pull/183)
+
 ## 2.5.0
 
 - Update Dafny and language server to [v3.7.0](https://github.com/dafny-lang/dafny/releases/tag/v3.7.0)
