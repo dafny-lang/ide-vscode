@@ -13,4 +13,4 @@
 6. Pull the most recent master branch of the extension.
 7. Add the tag with the command `git tag vA.B.C` and push it with `git push origin vA.B.C`
 
-This last step will trigger the Github bot, which will automatically release the new version.
+This last step will trigger the workflow, which will automatically release the new version.
