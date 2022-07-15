@@ -1,5 +1,8 @@
 # Release Notes
 
+## 2.6.1
+- Fixed the compiler command line (https://github.com/dafny-lang/ide-vscode/pull/205)
+
 ## 2.6.0
 - Update Dafny and language server to [v3.7.2](https://github.com/dafny-lang/dafny/releases/tag/v3.7.2)
 - Feat: Use nightly releases (https://github.com/dafny-lang/ide-vscode/pull/196)
