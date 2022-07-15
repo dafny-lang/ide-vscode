@@ -11,5 +11,6 @@
    Your commit message could be `chore: Bump version to A.B.C`
 5. Push this branch on the server, have it merged (after necessary approval)
 6. Pull the most recent master branch of the extension.
-7. Add the tag with the command `git tag vX.Y.Z` and push it with `git push origin vX.Y.Z`
+7. Add the tag with the command `git tag vA.B.C` and push it with `git push origin vA.B.C`
 
+This last step will trigger the workflow, which will automatically release the new version.
