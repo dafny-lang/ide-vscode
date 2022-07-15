@@ -1,5 +1,6 @@
 
 import * as vscode from 'vscode';
+import { Disposable } from 'vscode-languageclient';
 import { ConfigurationConstants, LanguageServerConstants } from '../../constants';
 import { MockedOutputChannelBuilder } from './MockedOutputChannelBuilder';
 import { MockedWorkspace } from './MockedWorkspace';
@@ -25,7 +26,33 @@ export class MockingExec {
   }
 }
 
+export interface CommandsType {
+  registeredCommands: { [command: string]: () => void };
+  registerCommand(s: string, callback: () => void): Disposable;
+}
+
+export class MockedCommands implements CommandsType {
+  public registeredCommands: { [command: string]: () => void } = {};
+
+  public registerCommand(command: string, callback: () => void): Disposable {
+    this.registeredCommands[command] = callback;
+    const self = this;
+    return {
+      dispose() {
+        for(const existingCommand in self.registeredCommands) {
+          if(existingCommand === command && self.registeredCommands[existingCommand] === callback) {
+            delete self.registeredCommands[existingCommand];
+          }
+        }
+      }
+    };
+  }
+}
+
 export class MockingUtils {
+  public static mockedCommands(): CommandsType {
+    return new MockedCommands();
+  }
   /** Helper to create a commandMap from a command */
   public static simpleCommandMap(executionTable: { [command: string]: ExecOutput }): (command: string) => ExecOutput {
     return (command: string) => {
@@ -39,7 +66,8 @@ export class MockingUtils {
   public static mockedContext(): vscode.ExtensionContext {
     return {
       subscriptions: [],
-      extensionUri: vscode.Uri.parse('/tmp/mockedUri')
+      extensionUri: vscode.Uri.parse('/tmp/mockedUri'),
+      extensionPath: '<extension path>'
     } as unknown as vscode.ExtensionContext;
   }
 
@@ -49,8 +77,13 @@ export class MockingUtils {
 
   public static mockedWorkspace(): MockedWorkspace {
     return new MockedWorkspace({
-      [ConfigurationConstants.SectionName]: new Map<string, string>([
-        [ ConfigurationConstants.PreferredVersion, LanguageServerConstants.LatestStable ]
+      [ConfigurationConstants.SectionName]: new Map<string, any>([
+        [ ConfigurationConstants.PreferredVersion, LanguageServerConstants.LatestStable ],
+        [ ConfigurationConstants.Compiler.CommandPrefix, '<compiler command prefix>' ],
+        [ ConfigurationConstants.Dotnet.ExecutablePath, '<dotnet executable path>' ],
+        [ ConfigurationConstants.Compiler.RuntimePath, '<compiler runtime path>' ],
+        [ ConfigurationConstants.Compiler.Arguments, [ '/out', '<arg1>', 'arg2' ] ],
+        [ ConfigurationConstants.Compiler.OutputDir, [ '<compiler output dir>' ] ]
       ])
     });
   }
