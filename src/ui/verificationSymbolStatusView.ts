@@ -1,5 +1,5 @@
 /* eslint-disable max-depth */
-import { commands, ExtensionContext, workspace, tests, Range, Position, Uri, TestRunRequest, TestController, TestRun, DocumentSymbol, TestItem, TestItemCollection, TextDocument, TestRunProfileKind } from 'vscode';
+import { commands, ExtensionContext, workspace, tests, Range, Position, Uri, TestRunRequest, TestController, TestRun, DocumentSymbol, TestItem, TestItemCollection, TextDocument, TestRunProfileKind, window } from 'vscode';
 import { Range as lspRange, Position as lspPosition } from 'vscode-languageclient';
 import { IVerificationSymbolStatusParams, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
@@ -8,6 +8,14 @@ export default class VerificationSymbolStatusView {
 
   public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): VerificationSymbolStatusView {
     const instance = new VerificationSymbolStatusView(context, languageClient);
+    window.onDidChangeActiveTextEditor(e => {
+      if(e !== undefined) {
+        const lastUpdate = instance.updatesPerFile.get(e.document.uri.toString());
+        if(lastUpdate !== undefined) {
+          instance.update(lastUpdate);
+        }
+      }
+    });
     context.subscriptions.push(
       languageClient.onVerificationSymbolStatus(params => instance.update(params))
     );
@@ -21,6 +29,7 @@ export default class VerificationSymbolStatusView {
   }
 
   private readonly itemRuns: Map<string, TestRun> = new Map();
+  private readonly updatesPerFile: Map<string, IVerificationSymbolStatusParams> = new Map();
   private readonly controller: TestController;
 
   // TODO this doesn't work yet with multiple files.
@@ -71,6 +80,7 @@ export default class VerificationSymbolStatusView {
   }
 
   private async update(params: IVerificationSymbolStatusParams): Promise<void> {
+    this.updatesPerFile.set(params.uri, params);
     const uri = Uri.parse(params.uri);
     const controller = this.controller;
 
@@ -112,7 +122,6 @@ export default class VerificationSymbolStatusView {
         run.passed(testItem);
         console.log(`Update state for ${testItem.label} to correct`);
         run.end();
-        this.itemRuns.delete(testItem.id);
         break;
       case PublishedVerificationStatus.Running:
         run.started(testItem);
