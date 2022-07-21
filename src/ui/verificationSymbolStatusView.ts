@@ -1,18 +1,13 @@
 /* eslint-disable max-depth */
-import { commands, ExtensionContext, workspace, tests, Range, Position, Uri, TestRunRequest, TestController, TextDocumentChangeEvent, TestRun, DocumentSymbol, TestItem, TestItemCollection, TextDocument, TestRunProfileKind } from 'vscode';
+import { commands, ExtensionContext, workspace, tests, Range, Position, Uri, TestRunRequest, TestController, TestRun, DocumentSymbol, TestItem, TestItemCollection, TextDocument, TestRunProfileKind } from 'vscode';
 import { Range as lspRange, Position as lspPosition } from 'vscode-languageclient';
 import { IVerificationSymbolStatusParams, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
-
-class FileState {
-  public constructor(public readonly controller: TestController, public run: TestRun | undefined) {}
-}
 
 export default class VerificationSymbolStatusView {
 
   public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): VerificationSymbolStatusView {
     const instance = new VerificationSymbolStatusView(context, languageClient);
-    workspace.onDidChangeTextDocument(e => instance.documentChanged(e));
     context.subscriptions.push(
       languageClient.onVerificationSymbolStatus(params => instance.update(params))
     );
@@ -22,37 +17,20 @@ export default class VerificationSymbolStatusView {
   private constructor(
     private readonly context: ExtensionContext,
     private readonly languageClient: DafnyLanguageClient) {
+    this.controller = this.createController();
   }
 
-  private startingRuns: boolean = false;
-  private itemsThatShouldFinish: Set<string> = new Set();
-  private queuedUpdates: IVerificationSymbolStatusParams[] = [];
-  private readonly projectStates: Map<string, FileState> = new Map();
-
-  private documentChanged(e: TextDocumentChangeEvent) {
-    const fileState = this.projectStates.get(e.document.uri.toString());
-    if(fileState) {
-      if(fileState.run) {
-        fileState.run.end();
-        fileState.run = undefined;
-      }
-    }
-  }
+  private readonly itemRuns: Map<string, TestRun> = new Map();
+  private readonly controller: TestController;
 
   // TODO this doesn't work yet with multiple files.
 
-  private createController(uriString: string): FileState {
+  private createController(): TestController {
     const controller = tests.createTestController('verificationStatus', 'Verification Status');
     controller.createRunProfile('Verify', TestRunProfileKind.Run, async (request, cancellationToken) => {
       const items: TestItem[] = this.getItemsInRun(request, controller);
-      const projectState = this.projectStates.get(uriString)!;
-      // if(projectState.run) {
-      //   throw new Error('run already busy');
-      // }
-
-      this.startingRuns = true;
       const runningItems: TestItem[] = [];
-      const runs = items.map(item => this.languageClient.runVerification({ position: item.range!.start, textDocument: { uri: uriString } }));
+      const runs = items.map(item => this.languageClient.runVerification({ position: item.range!.start, textDocument: { uri: item.uri!.toString() } }));
       for(const index in runs) {
         const success = await runs[index];
         console.log(`Run call for ${items[index].label} returned ${success}`);
@@ -60,26 +38,14 @@ export default class VerificationSymbolStatusView {
           runningItems.push(items[index]);
         }
       }
-      this.startingRuns = false;
-      if(runningItems.length) {
-        console.log(`Creating explicit test run for ${JSON.stringify(runningItems.length)}`);
-        projectState.run = projectState.controller.createTestRun(new TestRunRequest(runningItems));
-        this.itemsThatShouldFinish = new Set(runningItems.map(i => i.id));
-        for(const queuedUpdate of this.queuedUpdates) {
-          this.update(queuedUpdate);
-        }
-        this.queuedUpdates = [];
-      }
 
       cancellationToken.onCancellationRequested(() => {
         for(const item of items) {
-          this.languageClient.cancelVerification({ position: item.range!.start, textDocument: { uri: uriString } });
+          this.languageClient.cancelVerification({ position: item.range!.start, textDocument: { uri: item.uri!.toString() } });
         }
       });
     }, true);
-    const result = new FileState(controller, undefined);
-    this.projectStates.set(uriString, result);
-    return result;
+    return controller;
   }
 
   private getItemsInRun(run: TestRunRequest, controller: TestController): TestItem[] {
@@ -105,15 +71,8 @@ export default class VerificationSymbolStatusView {
   }
 
   private async update(params: IVerificationSymbolStatusParams): Promise<void> {
-    if(this.startingRuns) {
-      this.queuedUpdates.push(params);
-      console.log('queuing update');
-      return;
-    }
-
     const uri = Uri.parse(params.uri);
-    const projectState = this.projectStates.get(uri.toString()) ?? this.createController(params.uri);
-    const controller = projectState.controller;
+    const controller = this.controller;
 
     const rootSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[];
     let items: TestItem[];
@@ -127,48 +86,44 @@ export default class VerificationSymbolStatusView {
         VerificationSymbolStatusView.convertRange(f.nameRange), controller, uri));
     }
 
-    if(!projectState.run) {
-      console.log(`Creating implicit test run for ${JSON.stringify(items.length)}`);
-      projectState.run = projectState.controller.createTestRun(new TestRunRequest(items));
-      this.itemsThatShouldFinish.clear();
-    } else {
-      console.log('Processing update for existing run.');
-    }
-
-    const run = projectState.run;
     params.namedVerifiables.forEach((element, index) => {
       const testItem = items[index];
-      //console.log(`For ${JSON.stringify(testItem.label)}, setting state to ${element.status}`);
+      let run = this.itemRuns.get(testItem.id);
+
+      if(run === undefined) {
+        run = this.controller.createTestRun(new TestRunRequest([ testItem ]));
+        console.log('Created run.');
+        this.itemRuns.set(testItem.id, run);
+      }
       switch(element.status) {
       case PublishedVerificationStatus.Stale:
-        if(!this.itemsThatShouldFinish.has(testItem.id)) {
-          run.skipped(testItem);
-          console.log(`Update state for ${testItem.label} to stale`);
-        }
+        run.skipped(testItem);
+        console.log(`Update state for ${testItem.label} to stale`);
+        run.end();
+        this.itemRuns.delete(testItem.id);
         break;
-      case PublishedVerificationStatus.Error: run.failed(testItem, []);
+      case PublishedVerificationStatus.Error:
+        run.failed(testItem, []);
         console.log(`Update state for ${testItem.label} to failed`);
-        this.itemsThatShouldFinish.delete(testItem.id);
+        run.end();
+        this.itemRuns.delete(testItem.id);
         break;
-      case PublishedVerificationStatus.Correct: run.passed(testItem);
+      case PublishedVerificationStatus.Correct:
+        run.passed(testItem);
         console.log(`Update state for ${testItem.label} to correct`);
-        this.itemsThatShouldFinish.delete(testItem.id);
+        run.end();
+        this.itemRuns.delete(testItem.id);
         break;
-      case PublishedVerificationStatus.Running: run.started(testItem);
+      case PublishedVerificationStatus.Running:
+        run.started(testItem);
         console.log(`Update state for ${testItem.label} to running`);
-        this.itemsThatShouldFinish.add(testItem.id);
         break;
-      case PublishedVerificationStatus.Queued: run.enqueued(testItem);
+      case PublishedVerificationStatus.Queued:
+        run.enqueued(testItem);
         console.log(`Update state for ${testItem.label} to queued`);
-        this.itemsThatShouldFinish.add(testItem.id);
         break;
       }
     });
-    if(this.itemsThatShouldFinish.size === 0) {
-      console.log('ending run');
-      run.end();
-      projectState.run = undefined;
-    }
   }
 
   private updateUsingSymbols(params: IVerificationSymbolStatusParams, document: TextDocument,
