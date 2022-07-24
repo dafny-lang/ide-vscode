@@ -4,7 +4,15 @@ import { Range as lspRange, Position as lspPosition } from 'vscode-languageclien
 import { IVerificationSymbolStatusParams, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 
+interface ResolveablePromise<T> {
+  promise: Promise<T>;
+  resolve(value: T): void;
+}
 export default class VerificationSymbolStatusView {
+
+  public getFirstStatusForCurrentVersion(uriString: string): Promise<IVerificationSymbolStatusParams> {
+    return this.getFirstStatusForFilePromise(uriString).promise;
+  }
 
   public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): VerificationSymbolStatusView {
     const instance = new VerificationSymbolStatusView(context, languageClient);
@@ -16,10 +24,28 @@ export default class VerificationSymbolStatusView {
         }
       }
     });
+    workspace.onDidChangeTextDocument(e => {
+      const uriString = e.document.uri.toString();
+      instance.updatesPerFile.delete(uriString);
+      instance.updateListenersPerFile.delete(uriString);
+    });
     context.subscriptions.push(
       languageClient.onVerificationSymbolStatus(params => instance.update(params))
     );
     return instance;
+  }
+
+  private getFirstStatusForFilePromise(uriString: string): ResolveablePromise<IVerificationSymbolStatusParams> {
+    let listener = this.updateListenersPerFile.get(uriString);
+    if(listener === undefined) {
+      let storedResolve: (value: IVerificationSymbolStatusParams) => void;
+      const promise = new Promise<IVerificationSymbolStatusParams>((resolve) => {
+        storedResolve = resolve;
+      });
+      listener = { resolve: storedResolve!, promise };
+      this.updateListenersPerFile.set(uriString, listener);
+    }
+    return listener;
   }
 
   private constructor(
@@ -29,10 +55,9 @@ export default class VerificationSymbolStatusView {
   }
 
   private readonly itemRuns: Map<string, TestRun> = new Map();
+  private readonly updateListenersPerFile: Map<string, ResolveablePromise<IVerificationSymbolStatusParams>> = new Map();
   private readonly updatesPerFile: Map<string, IVerificationSymbolStatusParams> = new Map();
   private readonly controller: TestController;
-
-  // TODO this doesn't work yet with multiple files.
 
   private createController(): TestController {
     const controller = tests.createTestController('verificationStatus', 'Verification Status');
@@ -80,6 +105,7 @@ export default class VerificationSymbolStatusView {
   }
 
   private async update(params: IVerificationSymbolStatusParams): Promise<void> {
+    this.getFirstStatusForFilePromise(params.uri).resolve(params);
     this.updatesPerFile.set(params.uri, params);
     const uri = Uri.parse(params.uri);
     const controller = this.controller;
@@ -102,34 +128,28 @@ export default class VerificationSymbolStatusView {
 
       if(run === undefined) {
         run = this.controller.createTestRun(new TestRunRequest([ testItem ]));
-        console.log('Created run.');
         this.itemRuns.set(testItem.id, run);
       }
       switch(element.status) {
       case PublishedVerificationStatus.Stale:
         run.skipped(testItem);
-        console.log(`Update state for ${testItem.label} to stale`);
         run.end();
         this.itemRuns.delete(testItem.id);
         break;
       case PublishedVerificationStatus.Error:
         run.failed(testItem, []);
-        console.log(`Update state for ${testItem.label} to failed`);
         run.end();
         this.itemRuns.delete(testItem.id);
         break;
       case PublishedVerificationStatus.Correct:
         run.passed(testItem);
-        console.log(`Update state for ${testItem.label} to correct`);
         run.end();
         break;
       case PublishedVerificationStatus.Running:
         run.started(testItem);
-        console.log(`Update state for ${testItem.label} to running`);
         break;
       case PublishedVerificationStatus.Queued:
         run.enqueued(testItem);
-        console.log(`Update state for ${testItem.label} to queued`);
         break;
       }
     });

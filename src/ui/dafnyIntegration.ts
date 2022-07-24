@@ -17,8 +17,8 @@ export default async function createAndRegisterDafnyIntegration(
 ): Promise<void> {
   CounterexamplesView.createAndRegister(context, languageClient);
   GhostDiagnosticsView.createAndRegister(context, languageClient);
-  VerificationGutterStatusView.createAndRegister(context, languageClient);
-  VerificationSymbolStatusView.createAndRegister(context, languageClient);
+  const symbolStatusView = VerificationSymbolStatusView.createAndRegister(context, languageClient);
+  VerificationGutterStatusView.createAndRegister(context, languageClient, symbolStatusView);
   CompileCommands.createAndRegister(context);
   CompilationStatusView.createAndRegister(context, languageClient, languageServerVersion);
   RelatedErrorView.createAndRegister(context, languageClient);
