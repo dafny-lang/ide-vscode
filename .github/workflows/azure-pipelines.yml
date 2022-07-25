@@ -20,7 +20,7 @@ jobs:
           pwd
           ls
           echo ">>> Compile ide-vscode"
-          npm run compile-tests && npm run compile && npm run lint
+          npm install && npm run compile-tests && npm run compile && npm run lint
           echo ">>> Compiled ide-vscode"
           echo ">>> Run integration test"
           npm test
