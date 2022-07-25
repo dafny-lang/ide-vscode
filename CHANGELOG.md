@@ -1,5 +1,10 @@
 # Release Notes
 
+## 2.6.3
+Fixed typo (https://github.com/dafny-lang/ide-vscode/pull/216)
+Added variable declaration to avoid mixing a function call with a type declaration. (https://github.com/dafny-lang/ide-vscode/pull/222)
+Fix the CI (https://github.com/dafny-lang/ide-vscode/pull/223)
+
 ## 2.6.2
 - Update Dafny and language server to [v3.7.3](https://github.com/dafny-lang/dafny/releases/tag/v3.7.3)
 
