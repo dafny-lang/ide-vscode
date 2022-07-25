@@ -20,9 +20,9 @@ jobs:
           pwd
           ls
           echo ">>> Compile ide-vscode"
-          yarn && yarn compile
+          npm run compile-tests && npm run compile && npm run lint
           echo ">>> Compiled ide-vscode"
           echo ">>> Run integration test"
-          yarn test
+          npm test
         env:
           DISPLAY: ':99.0'
