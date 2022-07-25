@@ -1,5 +1,8 @@
 # Release Notes
 
+## 2.6.2
+- Update Dafny and language server to [v3.7.3](https://github.com/dafny-lang/dafny/releases/tag/v3.7.3)
+
 ## 2.6.1
 - Fixed the compiler command line (https://github.com/dafny-lang/ide-vscode/pull/205)
 
