@@ -17,10 +17,10 @@ export default async function createAndRegisterDafnyIntegration(
 ): Promise<void> {
   CounterexamplesView.createAndRegister(context, languageClient);
   GhostDiagnosticsView.createAndRegister(context, languageClient);
-  const symbolStatusView = VerificationSymbolStatusView.createAndRegister(context, languageClient);
+  const compilationStatusView = CompilationStatusView.createAndRegister(context, languageClient, languageServerVersion);
+  const symbolStatusView = VerificationSymbolStatusView.createAndRegister(context, languageClient, compilationStatusView);
   VerificationGutterStatusView.createAndRegister(context, languageClient, symbolStatusView);
   CompileCommands.createAndRegister(context);
-  CompilationStatusView.createAndRegister(context, languageClient, languageServerVersion);
   RelatedErrorView.createAndRegister(context, languageClient);
   await DafnyVersionView.createAndRegister(context, languageServerVersion);
 }

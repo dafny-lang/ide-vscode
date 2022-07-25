@@ -5,7 +5,7 @@ import Configuration from '../configuration';
 import { ConfigurationConstants } from '../constants';
 import { getDotnetExecutablePath } from '../dotnet';
 import { DafnyDocumentFilter } from '../tools/vscode';
-import { ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from './api/compilationStatus';
+import { ICompilationStatusParams } from './api/compilationStatus';
 import { ICounterexampleItem, ICounterexampleParams } from './api/counterExample';
 import { IGhostDiagnosticsParams } from './api/ghostDiagnostics';
 import { IVerificationGutterStatusParams as IVerificationGutterStatusParams } from './api/verificationGutterStatusParams';
@@ -140,15 +140,6 @@ export class DafnyLanguageClient extends LanguageClient {
 
   public onPublishDiagnostics(callback: (uri: Uri, diagnostics: Diagnostic[]) => void): void {
     this.diagnosticsListeners.push(callback);
-  }
-
-  // TODO Legacy verification status messages
-  public onVerificationStarted(callback: (params: IVerificationStartedParams) => void): Disposable {
-    return this.onNotification('dafny/verification/started', callback);
-  }
-
-  public onVerificationCompleted(callback: (params: IVerificationCompletedParams) => void): Disposable {
-    return this.onNotification('dafny/verification/completed', callback);
   }
 
   public runVerification(params: TextDocumentPositionParams): Promise<boolean> {

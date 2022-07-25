@@ -3,6 +3,8 @@ import { commands, ExtensionContext, workspace, tests, Range, Position, Uri, Tes
 import { Range as lspRange, Position as lspPosition } from 'vscode-languageclient';
 import { IVerificationSymbolStatusParams, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
+import CompilationStatusView from './compilationStatusView';
+import { Messages } from './messages';
 
 interface ResolveablePromise<T> {
   promise: Promise<T>;
@@ -14,8 +16,11 @@ export default class VerificationSymbolStatusView {
     return this.getFirstStatusForFilePromise(uriString).promise;
   }
 
-  public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): VerificationSymbolStatusView {
-    const instance = new VerificationSymbolStatusView(context, languageClient);
+  public static createAndRegister(
+    context: ExtensionContext,
+    languageClient: DafnyLanguageClient,
+    compilationStatusView: CompilationStatusView): VerificationSymbolStatusView {
+    const instance = new VerificationSymbolStatusView(context, languageClient, compilationStatusView);
     window.onDidChangeActiveTextEditor(e => {
       if(e !== undefined) {
         const lastUpdate = instance.updatesPerFile.get(e.document.uri.toString());
@@ -50,7 +55,8 @@ export default class VerificationSymbolStatusView {
 
   private constructor(
     private readonly context: ExtensionContext,
-    private readonly languageClient: DafnyLanguageClient) {
+    private readonly languageClient: DafnyLanguageClient,
+    private readonly compilationStatusView: CompilationStatusView) {
     this.controller = this.createController();
   }
 
@@ -105,6 +111,7 @@ export default class VerificationSymbolStatusView {
   }
 
   private async update(params: IVerificationSymbolStatusParams): Promise<void> {
+    this.updateStatusBar(params);
     this.getFirstStatusForFilePromise(params.uri).resolve(params);
     this.updatesPerFile.set(params.uri, params);
     const uri = Uri.parse(params.uri);
@@ -153,6 +160,38 @@ export default class VerificationSymbolStatusView {
         break;
       }
     });
+  }
+
+  private async updateStatusBar(params: IVerificationSymbolStatusParams) {
+    const completed = params.namedVerifiables.filter(v => v.status >= PublishedVerificationStatus.Error).length;
+    const running = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Running);
+    const total = params.namedVerifiables.length;
+    let message: string;
+    if(running.length > 0) {
+      let verifying: string;
+      if(running.length === 1) {
+        const document = await workspace.openTextDocument(Uri.parse(params.uri));
+        verifying = document.getText(VerificationSymbolStatusView.convertRange(running[0].nameRange));
+      } else {
+        verifying = `${running.length} proofs`;
+      }
+      message = `${Messages.CompilationStatus.Verifying} ${verifying}, completed ${completed}/${total}`;
+    } else {
+      const skipped = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Stale).length;
+      const errors = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Error).length;
+      const succeeded = completed - errors;
+
+      if(errors === 0) {
+        if(skipped === 0) {
+          message = Messages.CompilationStatus.VerificationSucceeded;
+        } else {
+          message = `Verified ${succeeded} proofs, skipped ${skipped}.`;
+        }
+      } else {
+        message = `${Messages.CompilationStatus.VerificationFailed} ${errors} proofs.`;
+      }
+    }
+    this.compilationStatusView.setDocumentStatusMessage(params.uri.toString(), message, params.version);
   }
 
   private updateUsingSymbols(params: IVerificationSymbolStatusParams, document: TextDocument,

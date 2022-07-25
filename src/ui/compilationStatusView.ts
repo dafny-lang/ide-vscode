@@ -1,5 +1,5 @@
 import { StatusBarAlignment, StatusBarItem, TextDocument, window, workspace, commands, ExtensionContext } from 'vscode';
-import { CompilationStatus, ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from '../language/api/compilationStatus';
+import { CompilationStatus, ICompilationStatusParams } from '../language/api/compilationStatus';
 import { DafnyCommands } from '../commands';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath } from '../tools/vscode';
@@ -9,7 +9,7 @@ import StatusBarActionView from './statusBarActionView';
 
 const StatusBarPriority = 10;
 
-function toStatusMessage(status: CompilationStatus, message?: string | null): string {
+function toStatusMessage(status: CompilationStatus): string {
   switch(status) {
   case CompilationStatus.ResolutionStarted:
     return Messages.CompilationStatus.ResolutionStarted;
@@ -19,21 +19,12 @@ function toStatusMessage(status: CompilationStatus, message?: string | null): st
     return Messages.CompilationStatus.ResolutionFailed;
   case CompilationStatus.CompilationSucceeded:
     return Messages.CompilationStatus.CompilationSucceeded;
-  case CompilationStatus.VerificationStarted:
-    return message != null
-      ? `${Messages.CompilationStatus.Verifying} ${message}...`
-      : `${Messages.CompilationStatus.Verifying}...`;
-  case CompilationStatus.VerificationSucceeded:
-    return Messages.CompilationStatus.VerificationSucceeded;
-  case CompilationStatus.VerificationFailed:
-    return message != null
-      ? `${Messages.CompilationStatus.VerificationFailed} ${message}`
-      : `${Messages.CompilationStatus.VerificationFailed}`;
+  default: throw new Error(`Should not handle status message ${status}`);
   }
 }
 
 interface IDocumentStatusMessage {
-  status: string;
+  message: string;
   version?: number;
 }
 
@@ -52,8 +43,6 @@ export default class CompilationStatusView {
     context.subscriptions.push(
       commands.registerCommand(DafnyCommands.OpenStatusBarMenu, () => statusBarActionView.openStatusBarMenu()),
       languageClient.onCompilationStatus(params => view.compilationStatusChanged(params)),
-      languageClient.onVerificationStarted(params => view.verificationStarted(params)),
-      languageClient.onVerificationCompleted(params => view.verificationCompleted(params)),
       workspace.onDidCloseTextDocument(document => view.documentClosed(document)),
       workspace.onDidChangeTextDocument(() => view.updateActiveDocumentStatus()),
       window.onDidChangeActiveTextEditor(() => view.updateActiveDocumentStatus()),
@@ -78,29 +67,21 @@ export default class CompilationStatusView {
     if(this.areParamsOutdated(params)) {
       return;
     }
+    if(params.status < CompilationStatus.VerificationStarted) {
+      this.setDocumentStatusMessage(
+        getVsDocumentPath(params),
+        toStatusMessage(params.status),
+        params.version);
+    }
+  }
+
+  public setDocumentStatusMessage(uriString: string, message: string, version: number | undefined): void {
     this.documentStatusMessages.set(
-      getVsDocumentPath(params),
+      uriString,
       {
-        status: toStatusMessage(params.status, params.message),
-        version: params.version
+        message,
+        version
       }
-    );
-    this.updateActiveDocumentStatus();
-  }
-
-  // Legacy methods
-  private verificationStarted(params: IVerificationStartedParams): void {
-    this.documentStatusMessages.set(
-      getVsDocumentPath(params),
-      { status: Messages.CompilationStatus.Verifying }
-    );
-    this.updateActiveDocumentStatus();
-  }
-
-  private verificationCompleted(params: IVerificationCompletedParams): void {
-    this.documentStatusMessages.set(
-      getVsDocumentPath(params),
-      { status: params.verified ? Messages.CompilationStatus.Verified : Messages.CompilationStatus.NotVerified }
     );
     this.updateActiveDocumentStatus();
   }
@@ -118,6 +99,6 @@ export default class CompilationStatusView {
     if(document == null) {
       return;
     }
-    return this.documentStatusMessages.get(document)?.status ?? '';
+    return this.documentStatusMessages.get(document)?.message ?? '';
   }
 }
