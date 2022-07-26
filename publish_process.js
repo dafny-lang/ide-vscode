@@ -51,13 +51,13 @@ function ok(answer) {
   return answer.toLowerCase() == "y" || answer == "";
 }
 
-async function ensureMaster(retry = true) {
-  var currentBranch = (await execAsync(" git branch --show-current")).stdout.trim();
+async function getCurrentBranch() {
+  return (await execAsync("git branch --show-current")).stdout.trim();
+}
+
+async function ensureMaster() {
+  var currentBranch = getCurrentBranch();
   if(currentBranch != "master") {
-    if(retry == false) {
-      console.log("Failed to checkout master");
-      throw ABORTED;
-    }
     console.log(`You need to be on the 'master' branch to release a new version.`);
     if(!ok(await question(`Switch from '${currentBranch}' to 'master'? ${ACCEPT_HINT}`))) {
       console.log("Publishing script aborted.");
@@ -65,7 +65,11 @@ async function ensureMaster(retry = true) {
     }
     console.log("switched to master branch");
     console.log((await execAsync("git checkout master")).stdout);
-    return ensureMaster(false);
+    currentBranch = getCurrentBranch();
+    if(currentBranch != "master") {
+      console.log("Failed to checkout master");
+      throw ABORTED;
+    }
   }
   await execAsync("git pull");
   console.log("Latest master checked out")
@@ -191,6 +195,80 @@ function close() {
   return false;
 }
 
+async function updatePackageJson(packageObj, newVersion, mostRecentDafnyRelease) {
+  packageObj["version"] = newVersion;
+  var versionList = packageObj["contributes"]["configuration"]["properties"]["dafny.preferredVersion"]["enum"];
+  // versionList starts with "latest", and then the last version
+  var previousDafnyVersion = versionList[1];
+  var updatedDafny = false;
+  if (previousDafnyVersion != mostRecentDafnyRelease) {
+    if (ok(await question(`The Dafny version in the package.json file (${previousDafnyVersion}) is not the latest (${mostRecentDafnyRelease}). Do you want to update it? ${ACCEPT_HINT}`))) {
+      var previousDafnyVersionListHead = versionList[1];
+      // If the previous dafny version is just different from mostRecentDafnyRelease by the patch number, replace it, otherwise insert it using splice
+      if (previousDafnyVersionListHead == mostRecentDafnyRelease.substring(0, mostRecentDafnyRelease.lastIndexOf("."))) {
+        versionList[1] = mostRecentDafnyRelease;
+      } else {
+        versionList.splice(1, 0, mostRecentDafnyRelease);
+      }
+
+      console.log("Updated Dafny version to " + mostRecentDafnyRelease);
+      var constantsContent = await fs.promises.readAsync(constantsFile, "utf8");
+      var constantsContentRegex = /const\s*LatestVersion\s*=\s*'\d+.\d+.\d+';/;
+      constantsContent.replace(constantsContentRegex, `const LatestVersion = '${mostRecentDafnyRelease}';`);
+      await fs.promises.writeAsync(constantsFile, constantsContent);
+      updatedDafny = true;
+    } else {
+      console.log("Ignoring new Dafny version.");
+    }
+  }
+  await writePackage(packageObj);
+  return updatedDafny;
+}
+
+async function UpdateChangeLog(currentChangeLogVersion, packageObj, updateChangeLogWith, newVersion) {
+  var allRecentCommitMessages = await getAllRecentCommitMessagesFormatted(currentChangeLogVersion);
+  if (packageObj["version"] == currentChangeLogVersion) {
+    await updateChangeLogWith(newVersion, allRecentCommitMessages);
+    console.log("I changed " + changeLogFile + " to reflect the new version.\nPlease make edits as needed and close the editing window.");
+    await execAsync(getCommandLine() + ' ' + changeLogFile);
+    if (!await question(`Ready to continue? ${ACCEPT_HINT}`)) {
+      console.log("Aborting.");
+      throw ABORTED;
+    }
+    currentChangeLogVersionCheck = (await changeLogAndVersion()).currentChangeLogVersion;
+    if (currentChangeLogVersionCheck != newVersion) {
+      console.log(`The last version was supposed to be ${newVersion}, but the changelog was updated to ${currentChangeLogVersionCheck}. Aborting publishing.`);
+      throw ABORTED;
+    }
+  } else {
+    console.log("ChangeLog.md already up-to-date");
+  }
+  return answer;
+}
+
+async function HandleFinalPublishingProcess(currentChangeLogVersion, lastPreparedTag) {
+  if ("v" + currentChangeLogVersion == lastPreparedTag) {
+    // Tag the current commit
+    console.log(`The changelog already mentions version ${currentChangeLogVersion}.\nYou now need to create the tag ${lastPreparedTag} and publish it to release this new version.`);
+    // ask for confirmation, and publish the tag.
+    if (ok(await question(`Create and publish the tag ${lastPreparedTag}? ${ACCEPT_HINT}`))) {
+      console.log(`Creating tag ${lastPreparedTag}...`);
+      await execAsync(`git tag ${lastPreparedTag}`);
+      console.log(`Publishing tag ${lastPreparedTag}...`);
+      await execAsync(`git push origin ${lastPreparedTag}`);
+      console.log(`${lastPreparedTag} published. The CI will take care of releasing the new VSCode extension.`);
+    } else {
+      console.log("Just run the script again when you are ready to publish the version. Aborting.");
+      throw ABORTED;
+    }
+  } else {
+    console.log("Something went wrong. I found " + lastPreparedTag + " in the last commit message, and this tag is not published yet.");
+    console.log("However, the changelog mentions a different version:" + currentChangeLogVersion);
+    console.log("Please fix the current state");
+    throw ABORTED;
+  }
+}
+
 async function Main() {
   try {
     // verify that we are on the master branch.
@@ -245,71 +323,3 @@ async function Main() {
 }
 Main();
 
-
-async function updatePackageJson(packageObj, newVersion, mostRecentDafnyRelease) {
-  packageObj["version"] = newVersion;
-  var previousDafnyVersion = packageObj["contributes"]["configuration"]["properties"]["dafny.preferredVersion"]["enum"][1];
-  var updatedDafny = false;
-  if (previousDafnyVersion != mostRecentDafnyRelease) {
-    if (ok(await question(`The Dafny version in the package.json file (${previousDafnyVersion}) is not the latest (${mostRecentDafnyRelease}). Do you want to update it? ${ACCEPT_HINT}`))) {
-      packageObj["contributes"]["configuration"]["properties"]["dafny.preferredVersion"]["enum"].splice(1, 0, mostRecentDafnyRelease);
-      console.log("Updated Dafny version to " + mostRecentDafnyRelease);
-      var constantsContent = await fs.promises.readAsync(constantsFile, "utf8");
-      var constantsContentRegex = /const\s*LatestVersion\s*=\s*'\d+.\d+.\d+';/;
-      constantsContent.replace(constantsContentRegex, `const LatestVersion = '${mostRecentDafnyRelease}';`);
-      await fs.promises.writeAsync(constantsFile, constantsContent);
-      updatedDafny = true;
-    } else {
-      console.log("Ignoring new Dafny version.");
-    }
-  }
-  await writePackage(packageObj);
-  return updatedDafny;
-}
-
-async function UpdateChangeLog(currentChangeLogVersion, packageObj, updateChangeLogWith, newVersion) {
-  var allRecentCommitMessages = await getAllRecentCommitMessagesFormatted(currentChangeLogVersion);
-  if (packageObj["version"] == currentChangeLogVersion) {
-    await updateChangeLogWith(newVersion, allRecentCommitMessages);
-    console.log("I changed " + changeLogFile + " to reflect the new version.\nPlease make edits as needed and close the editing window.");
-    await execAsync(getCommandLine() + ' ' + changeLogFile);
-    if (!await question(`Ready to continue? ${ACCEPT_HINT}`)) {
-      console.log("Aborting.");
-      throw ABORTED;
-    }
-    currentChangeLogVersionCheck = (await changeLogAndVersion()).currentChangeLogVersion;
-    if (currentChangeLogVersionCheck != newVersion) {
-      console.log(`The last version was supposed to be ${newVersion}, but the changelog was updated to ${currentChangeLogVersionCheck}. Aborting publishing.`);
-      throw ABORTED;
-    } else {
-      // This check does not work: Why?
-      //console.log("Check: the newly read version is "+currentChangeLogVersionCheck);
-    }
-  } else {
-    console.log("ChangeLog.md already up-to-date");
-  }
-  return answer;
-}
-
-async function HandleFinalPublishingProcess(currentChangeLogVersion, lastPreparedTag) {
-  if ("v" + currentChangeLogVersion == lastPreparedTag) {
-    // Tag the current commit
-    console.log(`The changelog already mentions version ${currentChangeLogVersion}.\nYou now need to create the tag ${lastPreparedTag} and publish it to release this new version.`);
-    // ask for confirmation, and publish the tag.
-    if (ok(await question(`Create and publish the tag ${lastPreparedTag}? ${ACCEPT_HINT}`))) {
-      console.log(`Creating tag ${lastPreparedTag}...`);
-      await execAsync(`git tag ${lastPreparedTag}`);
-      console.log(`Publishing tag ${lastPreparedTag}...`);
-      await execAsync(`git push origin ${lastPreparedTag}`);
-      console.log(`${lastPreparedTag} published. The CI will take care of releasing the new VSCode extension.`);
-    } else {
-      console.log("Just run the script again when you are ready to publish the version. Aborting.");
-      throw ABORTED;
-    }
-  } else {
-    console.log("Something went wrong. I found " + lastPreparedTag + " in the last commit message, and this tag is not published yet.");
-    console.log("However, the changelog mentions a different version:" + currentChangeLogVersion);
-    console.log("Please fix the current state");
-    throw ABORTED;
-  }
-}
