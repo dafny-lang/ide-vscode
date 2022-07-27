@@ -64,10 +64,11 @@ export default class VerificationSymbolStatusView {
   private readonly updateListenersPerFile: Map<string, ResolveablePromise<IVerificationSymbolStatusParams>> = new Map();
   private readonly updatesPerFile: Map<string, IVerificationSymbolStatusParams> = new Map();
   private readonly controller: TestController;
+  private automaticRunEnd: boolean = false;
 
   private createController(): TestController {
     const controller = tests.createTestController('verificationStatus', 'Verification Status');
-    controller.createRunProfile('Verify', TestRunProfileKind.Run, async (request, cancellationToken) => {
+    controller.createRunProfile('Verify', TestRunProfileKind.Run, async (request) => {
       const items: TestItem[] = this.getItemsInRun(request, controller);
       const runningItems: TestItem[] = [];
       const runs = items.map(item => this.languageClient.runVerification({ position: item.range!.start, textDocument: { uri: item.uri!.toString() } }));
@@ -79,11 +80,6 @@ export default class VerificationSymbolStatusView {
         }
       }
 
-      cancellationToken.onCancellationRequested(() => {
-        for(const item of items) {
-          this.languageClient.cancelVerification({ position: item.range!.start, textDocument: { uri: item.uri!.toString() } });
-        }
-      });
     }, true);
     return controller;
   }
@@ -135,23 +131,31 @@ export default class VerificationSymbolStatusView {
 
       if(run === undefined) {
         run = this.controller.createTestRun(new TestRunRequest([ testItem ]));
+        run.token.onCancellationRequested(() => {
+          if(!this.automaticRunEnd) {
+            this.languageClient.cancelVerification({ position: testItem.range!.start, textDocument: { uri: testItem.uri!.toString() } });
+          }
+        });
         this.itemRuns.set(testItem.id, run);
       }
+      const endRun = () => {
+        this.automaticRunEnd = true;
+        run!.end();
+        this.automaticRunEnd = false;
+        this.itemRuns.delete(testItem.id);
+      };
       switch(element.status) {
       case PublishedVerificationStatus.Stale:
         run.skipped(testItem);
-        run.end();
-        this.itemRuns.delete(testItem.id);
+        endRun();
         break;
       case PublishedVerificationStatus.Error:
         run.failed(testItem, []);
-        run.end();
-        this.itemRuns.delete(testItem.id);
+        endRun();
         break;
       case PublishedVerificationStatus.Correct:
         run.passed(testItem);
-        run.end();
-        this.itemRuns.delete(testItem.id);
+        endRun();
         break;
       case PublishedVerificationStatus.Running:
         run.started(testItem);
