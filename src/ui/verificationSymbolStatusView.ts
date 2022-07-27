@@ -151,6 +151,7 @@ export default class VerificationSymbolStatusView {
       case PublishedVerificationStatus.Correct:
         run.passed(testItem);
         run.end();
+        this.itemRuns.delete(testItem.id);
         break;
       case PublishedVerificationStatus.Running:
         run.started(testItem);
