@@ -74,7 +74,6 @@ export default class VerificationSymbolStatusView {
       const runs = items.map(item => this.languageClient.runVerification({ position: item.range!.start, textDocument: { uri: item.uri!.toString() } }));
       for(const index in runs) {
         const success = await runs[index];
-        console.log(`Run call for ${items[index].label} returned ${success}`);
         if(success) {
           runningItems.push(items[index]);
         }
@@ -120,7 +119,6 @@ export default class VerificationSymbolStatusView {
 
       items = this.updateUsingSymbols(params, document, controller, rootSymbols);
     } else {
-      console.log('No document symbols found');
       items = params.namedVerifiables.map(f => VerificationSymbolStatusView.getItem(document,
         VerificationSymbolStatusView.convertRange(f.nameRange), controller, uri));
     }
