@@ -63,11 +63,17 @@ export default class CompilationStatusView {
        && previous.version > params.version;
   }
 
+  private static readonly handledMessages = new Set([
+    CompilationStatus.ResolutionStarted,
+    CompilationStatus.ParsingFailed,
+    CompilationStatus.ResolutionFailed,
+    CompilationStatus.CompilationSucceeded ]);
+
   private compilationStatusChanged(params: ICompilationStatusParams): void {
     if(this.areParamsOutdated(params)) {
       return;
     }
-    if(params.status < CompilationStatus.VerificationStarted) {
+    if(CompilationStatusView.handledMessages.has(params.status)) {
       this.setDocumentStatusMessage(
         getVsDocumentPath(params),
         toStatusMessage(params.status),
