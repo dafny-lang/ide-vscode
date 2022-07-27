@@ -10,6 +10,21 @@ interface ResolveablePromise<T> {
   promise: Promise<T>;
   resolve(value: T): void;
 }
+/**
+ * This class shows verification tasks through the VSCode testing UI.
+ * Currently it does not use the test API as well as it could,
+ * because it creates a 'test run' for updates to each individual verification task.
+ * This causes the UI to show the message "1/1 tests passed" at the end of verification,
+ * even if a text document change triggered the verification of 5 tasks.
+ *
+ * The reason for this incorrect implementation is the LSP server
+ * has no concept of multiple verification task running as a group.
+ * So when two verification tasks are run as part of a change,
+ * it may first send updates for one task, still marking the other as 'stale',
+ * leading VSCode to think the stale task won't be verified.
+ *
+ * The current workaround is to start a separate run for the second task once it's no longer reported as stale.
+ */
 export default class VerificationSymbolStatusView {
 
   public getFirstStatusForCurrentVersion(uriString: string): Promise<IVerificationSymbolStatusParams> {
