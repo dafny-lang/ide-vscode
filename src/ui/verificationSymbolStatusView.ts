@@ -11,6 +11,11 @@ interface ResolveablePromise<T> {
   resolve(value: T): void;
 }
 
+interface ItemRunState {
+  run: TestRun;
+  startedRunningTime?: number;
+}
+
 /**
  * This class shows verification tasks through the VSCode testing UI.
  */
@@ -65,7 +70,7 @@ export default class VerificationSymbolStatusView {
   }
 
   private itemStates: Map<string, PublishedVerificationStatus> = new Map();
-  private itemRuns: Map<string, TestRun> = new Map();
+  private itemRuns: Map<string, ItemRunState> = new Map();
   private readonly runItemsLeft: Map<TestRun, number> = new Map();
   private readonly updateListenersPerFile: Map<string, ResolveablePromise<IVerificationSymbolStatusParams>> = new Map();
   private readonly updatesPerFile: Map<string, IVerificationSymbolStatusParams> = new Map();
@@ -125,10 +130,8 @@ export default class VerificationSymbolStatusView {
   private createRun(items: TestItem[]): TestRun {
     const run = this.controller.createTestRun(new TestRunRequest(items));
     for(const item of items) {
-      this.itemRuns.set(item.id, run);
+      this.itemRuns.set(item.id, { run });
     }
-    console.log('creating run');
-    (run as any).remainingCount = items.length;
     run.token.onCancellationRequested(() => {
       if(!this.automaticRunEnd) {
         for(const item of items) {
@@ -174,18 +177,18 @@ export default class VerificationSymbolStatusView {
     const newItemRuns = new Map();
     params.namedVerifiables.forEach((element, index) => {
       const testItem = items[index];
-      const run = this.itemRuns.get(testItem.id)!;
+      const itemRunState = this.itemRuns.get(testItem.id)!;
       if(this.itemStates.get(testItem.id) === element.status) {
-        newItemRuns.set(testItem.id, run);
+        newItemRuns.set(testItem.id, itemRunState);
         return;
       }
+      const { run, startedRunningTime } = itemRunState;
 
       const endRun = () => {
         const remaining = this.runItemsLeft.get(run)! - 1;
         this.itemRuns.delete(testItem.id);
         if(remaining === 0) {
           this.runItemsLeft.delete(run);
-          console.log('ending run');
           this.automaticRunEnd = true;
           run.end();
           this.automaticRunEnd = false;
@@ -193,28 +196,28 @@ export default class VerificationSymbolStatusView {
           this.runItemsLeft.set(run, remaining);
         }
       };
+      const getDuration = () => startedRunningTime === undefined ? undefined : Date.now() - startedRunningTime;
       switch(element.status) {
       case PublishedVerificationStatus.Stale: {
-        console.log('skipping ' + testItem.label + ': ' + testItem.id);
         run.skipped(testItem);
         endRun();
         break;
       }
       case PublishedVerificationStatus.Error:
-        run.failed(testItem, []);
+        run.failed(testItem, [], getDuration());
         endRun();
         break;
       case PublishedVerificationStatus.Correct:
-        run.passed(testItem);
+        run.passed(testItem, getDuration());
         endRun();
         break;
       case PublishedVerificationStatus.Running:
         run.started(testItem);
-        newItemRuns.set(testItem.id, run);
+        newItemRuns.set(testItem.id, { run, startedRunningTime: Date.now() });
         break;
       case PublishedVerificationStatus.Queued:
         run.enqueued(testItem);
-        newItemRuns.set(testItem.id, run);
+        newItemRuns.set(testItem.id, itemRunState);
         break;
       }
     });
