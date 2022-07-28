@@ -10,20 +10,9 @@ interface ResolveablePromise<T> {
   promise: Promise<T>;
   resolve(value: T): void;
 }
+
 /**
  * This class shows verification tasks through the VSCode testing UI.
- * Currently it does not use the test API as well as it could,
- * because it creates a 'test run' for updates to each individual verification task.
- * This causes the UI to show the message "1/1 tests passed" at the end of verification,
- * even if a text document change triggered the verification of 5 tasks.
- *
- * The reason for this incorrect implementation is the LSP server
- * has no concept of multiple verification task running as a group.
- * So when two verification tasks are run as part of a change,
- * it may first send updates for one task, still marking the other as 'stale',
- * leading VSCode to think the stale task won't be verified.
- *
- * The current workaround is to start a separate run for the second task once it's no longer reported as stale.
  */
 export default class VerificationSymbolStatusView {
 
@@ -75,17 +64,26 @@ export default class VerificationSymbolStatusView {
     this.controller = this.createController();
   }
 
-  private readonly itemRuns: Map<string, TestRun> = new Map();
+  private itemStates: Map<string, PublishedVerificationStatus> = new Map();
+  private itemRuns: Map<string, TestRun> = new Map();
+  private readonly runItemsLeft: Map<TestRun, number> = new Map();
   private readonly updateListenersPerFile: Map<string, ResolveablePromise<IVerificationSymbolStatusParams>> = new Map();
   private readonly updatesPerFile: Map<string, IVerificationSymbolStatusParams> = new Map();
   private readonly controller: TestController;
   private automaticRunEnd: boolean = false;
+  private processUpdateLock: Promise<void> = Promise.resolve();
 
   private createController(): TestController {
     const controller = tests.createTestController('verificationStatus', 'Verification Status');
     controller.createRunProfile('Verify', TestRunProfileKind.Run, async (request) => {
       const items: TestItem[] = this.getItemsInRun(request, controller);
       const runningItems: TestItem[] = [];
+      let outerResolve: () => void;
+      await this.processUpdateLock;
+      this.processUpdateLock = new Promise((resolve) => {
+        outerResolve = resolve;
+      });
+
       const runs = items.map(item => this.languageClient.runVerification({ position: item.range!.start, textDocument: { uri: item.uri!.toString() } }));
       for(const index in runs) {
         const success = await runs[index];
@@ -94,6 +92,10 @@ export default class VerificationSymbolStatusView {
         }
       }
 
+      if(runningItems.length > 0) {
+        this.createRun(runningItems);
+      }
+      outerResolve!();
     }, true);
     return controller;
   }
@@ -120,7 +122,27 @@ export default class VerificationSymbolStatusView {
     return result;
   }
 
+  private createRun(items: TestItem[]): TestRun {
+    const run = this.controller.createTestRun(new TestRunRequest(items));
+    for(const item of items) {
+      this.itemRuns.set(item.id, run);
+    }
+    console.log('creating run');
+    (run as any).remainingCount = items.length;
+    run.token.onCancellationRequested(() => {
+      if(!this.automaticRunEnd) {
+        for(const item of items) {
+          this.languageClient.cancelVerification({ position: item.range!.start, textDocument: { uri: item.uri!.toString() } });
+        }
+      }
+    });
+    this.runItemsLeft.set(run, items.length);
+    return run;
+  }
+
   private async update(params: IVerificationSymbolStatusParams): Promise<void> {
+    await this.processUpdateLock;
+
     this.updateStatusBar(params);
     this.getFirstStatusForFilePromise(params.uri).resolve(params);
     this.updatesPerFile.set(params.uri, params);
@@ -134,34 +156,50 @@ export default class VerificationSymbolStatusView {
 
       items = this.updateUsingSymbols(params, document, controller, rootSymbols);
     } else {
-      items = params.namedVerifiables.map(f => VerificationSymbolStatusView.getItem(document,
+      items = params.namedVerifiables.map(f => this.getItem(document,
         VerificationSymbolStatusView.convertRange(f.nameRange), controller, uri));
     }
 
+    const runningItemsWithoutRun = params.namedVerifiables.
+      map((element, index) => {
+        return { verifiable: element, testItem: items[index] };
+      }).
+      filter(({ verifiable, testItem }) => {
+        return this.itemStates.get(testItem.id) !== verifiable.status && this.itemRuns.get(testItem.id) === undefined;
+      }).map(r => r.testItem);
+    if(runningItemsWithoutRun.length > 0) {
+      this.createRun(runningItemsWithoutRun);
+    }
+
+    const newItemRuns = new Map();
     params.namedVerifiables.forEach((element, index) => {
       const testItem = items[index];
-      let run = this.itemRuns.get(testItem.id);
-
-      if(run === undefined) {
-        run = this.controller.createTestRun(new TestRunRequest([ testItem ]));
-        run.token.onCancellationRequested(() => {
-          if(!this.automaticRunEnd) {
-            this.languageClient.cancelVerification({ position: testItem.range!.start, textDocument: { uri: testItem.uri!.toString() } });
-          }
-        });
-        this.itemRuns.set(testItem.id, run);
+      const run = this.itemRuns.get(testItem.id)!;
+      if(this.itemStates.get(testItem.id) === element.status) {
+        newItemRuns.set(testItem.id, run);
+        return;
       }
+
       const endRun = () => {
-        this.automaticRunEnd = true;
-        run!.end();
-        this.automaticRunEnd = false;
+        const remaining = this.runItemsLeft.get(run)! - 1;
         this.itemRuns.delete(testItem.id);
+        if(remaining === 0) {
+          this.runItemsLeft.delete(run);
+          console.log('ending run');
+          this.automaticRunEnd = true;
+          run.end();
+          this.automaticRunEnd = false;
+        } else {
+          this.runItemsLeft.set(run, remaining);
+        }
       };
       switch(element.status) {
-      case PublishedVerificationStatus.Stale:
+      case PublishedVerificationStatus.Stale: {
+        console.log('skipping ' + testItem.label + ': ' + testItem.id);
         run.skipped(testItem);
         endRun();
         break;
+      }
       case PublishedVerificationStatus.Error:
         run.failed(testItem, []);
         endRun();
@@ -172,12 +210,16 @@ export default class VerificationSymbolStatusView {
         break;
       case PublishedVerificationStatus.Running:
         run.started(testItem);
+        newItemRuns.set(testItem.id, run);
         break;
       case PublishedVerificationStatus.Queued:
         run.enqueued(testItem);
+        newItemRuns.set(testItem.id, run);
         break;
       }
     });
+    this.itemStates = new Map(params.namedVerifiables.map((v, index) => [ items[index].id, v.status ]));
+    this.itemRuns = newItemRuns;
   }
 
   private async updateStatusBar(params: IVerificationSymbolStatusParams) {
@@ -218,20 +260,20 @@ export default class VerificationSymbolStatusView {
     const itemMapping: Map<DocumentSymbol, TestItem> = new Map();
     const uri = Uri.parse(params.uri);
 
-    function updateMapping(symbols: DocumentSymbol[], range: Range): TestItem | undefined {
+    const updateMapping = (symbols: DocumentSymbol[], range: Range): TestItem | undefined => {
       for(const symbol of symbols) {
         if(symbol.range.contains(range)) {
           let item = itemMapping.get(symbol);
           if(!item) {
             const itemRange = symbol.selectionRange;
-            item = VerificationSymbolStatusView.getItem(document, itemRange, controller, uri);
+            item = this.getItem(document, itemRange, controller, uri);
             itemMapping.set(symbol, item);
           }
           return updateMapping(symbol.children, range) ?? item;
         }
       }
       return undefined;
-    }
+    };
 
     const items = params.namedVerifiables.map(element => {
       const vscodeRange = VerificationSymbolStatusView.convertRange(element.nameRange);
@@ -254,7 +296,7 @@ export default class VerificationSymbolStatusView {
     return items;
   }
 
-  private static getItem(document: TextDocument, itemRange: Range, controller: TestController, uri: Uri) {
+  private getItem(document: TextDocument, itemRange: Range, controller: TestController, uri: Uri) {
     const nameText = document.getText(itemRange);
     const item = controller.createTestItem(JSON.stringify(itemRange), nameText, uri);
     item.range = itemRange;
