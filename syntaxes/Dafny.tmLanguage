@@ -14,6 +14,49 @@
 	<string>Dafny</string>
 	<key>patterns</key>
 	<array>
+	  <dict>
+			<key>begin</key>
+			<string>(\bvar\b)\s*</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.control.dafny</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>:=|:\||;</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>storage.type.dafny</string>
+				</dict>
+			</dict>
+			<key>name</key>
+			<string>meta.class.identifier.dafny</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#attributes</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#comments</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#comments-inline</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#generics</string>
+				</dict>
+			</array>
+		</dict>
 		<dict>
 			<key>begin</key>
 			<string>(class\b)\s*([\w'?]+\b(?!&lt;))?\s*</string>
@@ -311,9 +354,9 @@
 					<key>begin</key>
 					<string>@"</string>
 					<key>end</key>
-					<string>"</string>
+					<string>"(?!")</string>
 					<key>name</key>
-					<string>string.dafny</string>
+					<string>string.multiline.dafny</string>
 					<key>patterns</key>
 					<array>
 						<dict>
@@ -328,7 +371,7 @@
 					<key>end</key>
 					<string>("|\n)</string>
 					<key>name</key>
-					<string>string.dafny</string>
+					<string>string.singleline.dafny</string>
 					<key>patterns</key>
 					<array>
 						<dict>
@@ -487,7 +530,7 @@
 				</dict>
 				<dict>
 					<key>begin</key>
-					<string>(?<!\{|:):\s*([\w'?]+\b(?!&lt;))</string>
+					<string>(?<!\{|:):\s*(?:[\w'?]+\.)*([\w'?]+\b(?!&lt;))</string>
 					<key>beginCaptures</key>
 					<dict>
 						<key>1</key>

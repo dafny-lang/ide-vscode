@@ -1,7 +1,28 @@
+// Issue #221
+method Test() {
+  var list: List<A> := new C<A>();
+  if x == true { /** not a comment */
+    print "problem";
+  }
+}
+
+// Issue #201
+const x := @"
+This is an escaped double quote ""
+This should be in the multiline string too
+"
+
+// Issue #194
+method f(x: OtherModule.CustomType, z: int) {
+          //^ module should be white, `CustomType` should be blue
+  var y := OtherModule.methodName();
+}
+
+
 // Issue #176
 class ClassList {
   ghost var classes: set<string>
-} //        ^^^^^^^ everything should be blue, not purple
+} //        ^^^^^ class should not be highlighted.
 
 /*
 function nestedCommentShouldHighlightCorrectlyIssue157() {

@@ -62,7 +62,7 @@ class CommandFactory {
   public async createCompilerCommand(): Promise<string | undefined> {
     const commandPrefix = this.getCommandPrefix();
     const { path: dotnetPath } = await getDotnetExecutablePath();
-    const compilerPath = getCompilerRuntimePath(this.context);
+    const compilerPath = await getCompilerRuntimePath(this.context);
     const compilerArgs = await this.getCompilerArgs();
     if(compilerArgs == null) {
       return undefined;

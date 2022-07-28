@@ -13,6 +13,10 @@ import { ConfigurationConstants, LanguageServerConstants } from '../constants';
 import Configuration from '../configuration';
 import { exec } from 'child_process';
 import { chdir as processChdir, cwd as processCwd } from 'process';
+import { RequestInfo, RequestInit } from 'node-fetch';
+
+const fetch = (url: RequestInfo, init?: RequestInit) =>
+  import('node-fetch').then(({ default: fetch }) => fetch(url, init));
 
 const execAsync = promisify(exec);
 
@@ -20,25 +24,58 @@ const ArchiveFileName = 'dafny.zip';
 const mkdirAsync = promisify(fs.mkdir);
 
 // Equivalent to a || b but without ESLint warnings
-function ifNullOrEmpty(a: string | null, b: string): string {
-  return a === null || a === '' ? b : a;
+async function ifNullOrEmpty(a: string | null, b: () => Promise<string>): Promise<string> {
+  return a === null || a === '' ? await b() : Promise.resolve(a);
 }
 
-function getConfiguredVersion(): string {
-  const version = Configuration.get<string>(ConfigurationConstants.PreferredVersion);
-  return version === LanguageServerConstants.Latest
-    ? LanguageServerConstants.LatestVersion
-    : version;
+async function getConfiguredVersion(): Promise<string> {
+  const [ _, version ] = await getConfiguredTagAndVersion();
+  return version;
+}
+
+let getConfiguredTagAndVersionCache: [string, string];
+async function getConfiguredTagAndVersion(): Promise<[string, string]> {
+  if(getConfiguredTagAndVersionCache === undefined) {
+    const result = await getConfiguredGitTagAndVersionUncached();
+    if(getConfiguredTagAndVersionCache === undefined) {
+      getConfiguredTagAndVersionCache = result;
+    }
+  }
+  return getConfiguredTagAndVersionCache;
+}
+
+async function getConfiguredGitTagAndVersionUncached(): Promise<[string, string]> {
+  let version = Configuration.get<string>(ConfigurationConstants.PreferredVersion);
+  switch(version) {
+  case LanguageServerConstants.LatestStable:
+    version = LanguageServerConstants.LatestVersion;
+    break;
+  case LanguageServerConstants.LatestNightly: {
+    const result: any = await (await fetch('https://api.github.com/repos/dafny-lang/dafny/releases/tags/nightly')).json();
+    if(result.name !== undefined) {
+      const name: string = result.name;
+      const versionPrefix = 'Dafny ';
+      if(name.startsWith(versionPrefix)) {
+        const version = name.substring(versionPrefix.length);
+        return [ 'nightly', version ];
+      }
+    }
+    window.showWarningMessage('Failed to install latest nightly version of Dafny. Using latest stable version instead.\n'
+      + `The name of the nightly release we found was: ${result.name}`);
+    version = LanguageServerConstants.LatestVersion;
+  }
+  }
+  return [ `v${version}`, version ];
 }
 
 export function isConfiguredToInstallLatestDafny(): boolean {
-  return Configuration.get<string>(ConfigurationConstants.PreferredVersion) === LanguageServerConstants.Latest;
+  return Configuration.get<string>(ConfigurationConstants.PreferredVersion) === LanguageServerConstants.LatestStable;
 }
 
-export function getCompilerRuntimePath(context: ExtensionContext): string {
-  const configuredPath = ifNullOrEmpty(
+export async function getCompilerRuntimePath(context: ExtensionContext): Promise<string> {
+  const configuredPath = await ifNullOrEmpty(
     Configuration.get<string | null>(ConfigurationConstants.Compiler.RuntimePath),
-    LanguageServerConstants.GetDefaultCompilerPath(getConfiguredVersion())
+    async () => LanguageServerConstants.GetDefaultCompilerPath(await getConfiguredVersion())
   );
   if(!path.isAbsolute(configuredPath)) {
     return path.join(context.extensionPath, configuredPath);
@@ -46,10 +83,10 @@ export function getCompilerRuntimePath(context: ExtensionContext): string {
   return configuredPath;
 }
 
-export function getLanguageServerRuntimePath(context: ExtensionContext): string {
-  const configuredPath = ifNullOrEmpty(
+export async function getLanguageServerRuntimePath(context: ExtensionContext): Promise<string> {
+  const configuredPath = await ifNullOrEmpty(
     getConfiguredLanguageServerRuntimePath(),
-    LanguageServerConstants.GetDefaultPath(getConfiguredVersion())
+    async () => LanguageServerConstants.GetDefaultPath(await getConfiguredVersion())
   );
   if(path.isAbsolute(configuredPath)) {
     return configuredPath;
@@ -77,11 +114,11 @@ function getDafnyPlatformSuffix(): string {
   }
 }
 
-function getDafnyDownloadAddress(): string {
+async function getDafnyDownloadAddress(): Promise<string> {
   const baseUri = LanguageServerConstants.DownloadBaseUri;
-  const version = getConfiguredVersion();
+  const [ tag, version ] = await getConfiguredTagAndVersion();
   const suffix = getDafnyPlatformSuffix();
-  return `${baseUri}/v${version}/dafny-${version}-x64-${suffix}.zip`;
+  return `${baseUri}/${tag}/dafny-${version}-x64-${suffix}.zip`;
 }
 
 export class DafnyInstaller {
@@ -124,7 +161,7 @@ export class DafnyInstaller {
         this.writeStatus(`Found a non-supported architecture OSX:${os.arch()}. Going to install from source.`);
         return await this.installFromSource();
       } else {
-        const archive = await this.downloadArchive(getDafnyDownloadAddress());
+        const archive = await this.downloadArchive(await getDafnyDownloadAddress());
         await this.extractArchive(archive);
         await workspace.fs.delete(archive, { useTrash: false });
         this.writeStatus('Dafny installation completed');
@@ -153,7 +190,7 @@ export class DafnyInstaller {
   }
 
   private async installFromSource() {
-    const installationPath = this.getCustomInstallationPath(os.arch());
+    const installationPath = await this.getCustomInstallationPath(os.arch());
     await mkdirAsync(installationPath.fsPath, { recursive: true });
     this.writeStatus(`Installing Dafny from source in ${installationPath.fsPath}.\n`);
     const previousDirectory = processCwd();
@@ -189,7 +226,7 @@ export class DafnyInstaller {
     await this.execLog(`git clone --recurse-submodules ${LanguageServerConstants.DafnyGitUrl}`);
     processChdir(Utils.joinPath(installationPath, 'dafny').fsPath);
     await this.execLog('git fetch --all --tags');
-    await this.execLog(`git checkout v${getConfiguredVersion()}`);
+    await this.execLog(`git checkout v${await getConfiguredVersion()}`);
     await this.execLog('make exe');
     const binaries = Utils.joinPath(installationPath, 'dafny', 'Binaries').fsPath;
     processChdir(binaries);
@@ -199,7 +236,7 @@ export class DafnyInstaller {
     await this.execLog(`wget ${z3urlOsx}`);
     await this.execLog(`unzip ${z3filenameOsx}.zip`);
     await this.execLog(`mv ${z3filenameOsx} z3`);
-    processChdir(this.getInstallationPath().fsPath);
+    processChdir((await this.getInstallationPath()).fsPath);
     await this.execLog('mkdir -p ./dafny/');
     await this.execLog(`cp -R ${binaries}/* ./dafny/`);
     processChdir(previousDirectory);
@@ -211,7 +248,7 @@ export class DafnyInstaller {
   }
 
   public async isLanguageServerRuntimeAccessible(): Promise<boolean> {
-    const languageServerDll = getLanguageServerRuntimePath(this.context);
+    const languageServerDll = await getLanguageServerRuntimePath(this.context);
     try {
       await fs.promises.access(languageServerDll, fs.constants.R_OK);
       return true;
@@ -221,7 +258,7 @@ export class DafnyInstaller {
   }
 
   private async cleanInstallDir(): Promise<void> {
-    const installPath = this.getInstallationPath();
+    const installPath = await this.getInstallationPath();
     this.writeStatus(`deleting previous Dafny installation at ${installPath.fsPath}`);
     try {
       await workspace.fs.delete(
@@ -239,9 +276,9 @@ export class DafnyInstaller {
   }
 
   private async downloadArchive(downloadUri: string): Promise<Uri> {
-    await mkdirAsync(this.getInstallationPath().fsPath, { recursive: true });
+    await mkdirAsync((await this.getInstallationPath()).fsPath, { recursive: true });
+    const archivePath = await this.getZipPath();
     return await new Promise<Uri>((resolve, reject) => {
-      const archivePath = this.getZipPath();
       const archiveHandle = fs.createWriteStream(archivePath.fsPath);
       this.writeStatus(`downloading Dafny from ${downloadUri}`);
       const progressReporter = new ProgressReporter(this.statusOutput);
@@ -256,7 +293,7 @@ export class DafnyInstaller {
   }
 
   private async extractArchive(archivePath: Uri): Promise<void> {
-    const dirPath = this.getInstallationPath();
+    const dirPath = await this.getInstallationPath();
     this.writeStatus(`extracting Dafny to ${dirPath.fsPath}`);
     const progressReporter = new ProgressReporter(this.statusOutput);
     await extract(
@@ -268,20 +305,20 @@ export class DafnyInstaller {
     );
   }
 
-  private getZipPath(): Uri {
-    return Utils.joinPath(this.getInstallationPath(), ArchiveFileName);
+  private async getZipPath(): Promise<Uri> {
+    return Utils.joinPath(await this.getInstallationPath(), ArchiveFileName);
   }
 
-  private getInstallationPath(): Uri {
+  private async getInstallationPath(): Promise<Uri> {
     return Utils.joinPath(
       this.context.extensionUri,
-      ...LanguageServerConstants.GetResourceFolder(getConfiguredVersion())
+      ...LanguageServerConstants.GetResourceFolder(await getConfiguredVersion())
     );
   }
 
-  private getCustomInstallationPath(typeArch: string): Uri {
+  private async getCustomInstallationPath(typeArch: string): Promise<Uri> {
     return Utils.joinPath(
-      this.getInstallationPath(), 'custom', typeArch
+      await this.getInstallationPath(), 'custom', typeArch
     );
   }
 

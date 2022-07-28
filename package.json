@@ -2,7 +2,7 @@
   "name": "ide-vscode",
   "displayName": "Dafny",
   "description": "Dafny for Visual Studio Code",
-  "version": "2.5.0",
+  "version": "2.6.3",
   "publisher": "dafny-lang",
   "repository": {
     "type": "git",
@@ -127,7 +127,7 @@
         },
         "dafny.verificationTimeLimit": {
           "type": "number",
-          "default": "0",
+          "default": "20",
           "description": "Maximum number of time in seconds to verify a document, 0=infinite (requires restart)"
         },
         "dafny.verificationVirtualCores": {
@@ -202,12 +202,14 @@
           "type": "string",
           "enum": [
             "latest",
-            "3.7.0",
+            "3.7.3",
+            "3.7.2",
             "3.6.0",
             "3.5.0",
             "3.4.2",
             "3.3.0",
-            "3.2.0"
+            "3.2.0",
+            "latest nightly"
           ],
           "default": "latest",
           "description": "The preferred Dafny version to use (overriden by custom compiler and language server paths, requires restart)."
@@ -222,7 +224,7 @@
             "backgroundColor": null,
             "fontColor": null
           },
-          "description": "Customize the color (HEX) of Counter Examples. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults."
+          "description": "Customize the color (HEX) of counterexamples. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults."
         },
         "dafny.terminalCommandPrefix": {
           "type": "string",
@@ -267,16 +269,17 @@
     "watch": "webpack --watch",
     "package": "webpack --mode production --devtool hidden-source-map",
     "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p -w . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "lint": "eslint src --ext ts --max-warnings 0",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/src/test/runTest.js"
   },
   "devDependencies": {
     "@types/glob": "^7.1.4",
     "@types/mocha": "^9.1.0",
-    "@types/node": "^12.12.70",
+    "@types/node": "^16.11.43",
     "@types/promise.any": "^2.0.0",
+    "@types/proxyquire": "^1.3.28",
     "@types/vscode": "^1.68.0",
     "@types/which": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^4.31.1",
@@ -285,15 +288,17 @@
     "eslint": "^7.32.0",
     "glob": "^7.1.7",
     "mocha": "^9.2.0",
+    "node-fetch": "^3.2.6",
     "ts-loader": "^9.2.5",
     "typescript": "^4.4.3",
     "webpack": "^5.52.1",
-    "webpack-cli": "^4.5.0"
+    "webpack-cli": "^4.10.0"
   },
   "dependencies": {
     "extract-zip": "^2.0.1",
     "got": "^11.8.2",
     "promise.any": "^2.0.2",
+    "proxyquire": "^2.1.3",
     "vscode-languageclient": "^7.0.0",
     "vscode-uri": "^3.0.2",
     "which": "^2.0.2"

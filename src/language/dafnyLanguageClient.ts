@@ -96,7 +96,7 @@ export class DafnyLanguageClient extends LanguageClient {
 
   public static async create(context: ExtensionContext, statusOutput: OutputChannel): Promise<DafnyLanguageClient> {
     const { path: dotnetExecutable } = await getDotnetExecutablePath();
-    const launchArguments = [ getLanguageServerRuntimePath(context), ...getLanguageServerLaunchArgs() ];
+    const launchArguments = [ await getLanguageServerRuntimePath(context), ...getLanguageServerLaunchArgs() ];
     statusOutput.appendLine(`Language server arguments: ${DafnyLanguageClient.argumentsToCommandLine(launchArguments)}`);
     const serverOptions: ServerOptions = {
       run: { command: dotnetExecutable, args: launchArguments },
