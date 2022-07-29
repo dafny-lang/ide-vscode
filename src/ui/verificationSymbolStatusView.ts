@@ -53,7 +53,7 @@ export default class VerificationSymbolStatusView {
     });
     context.subscriptions.push(
       languageClient.onVerificationSymbolStatus(params => instance.update(params)),
-      languageClient.onCompilationStatus(params => compilationStatusView.compilationStatusChanged38(params))
+      languageClient.onCompilationStatus(params => compilationStatusView.compilationStatusChangedForBefore38(params))
     );
     return instance;
   }
@@ -79,8 +79,11 @@ export default class VerificationSymbolStatusView {
 
     workspace.onDidChangeTextDocument(e => {
       const uriString = e.document.uri.toString();
-      this.updatesPerFile.delete(uriString);
       this.updateListenersPerFile.delete(uriString);
+    });
+    workspace.onDidCloseTextDocument(e => {
+      const uriString = e.uri.toString();
+      this.updatesPerFile.delete(uriString);
     });
     context.subscriptions.push(
       languageClient.onVerificationSymbolStatus(params => this.update(params))
@@ -177,16 +180,21 @@ export default class VerificationSymbolStatusView {
     this.updatesPerFile.set(params.uri, params);
     const uri = Uri.parse(params.uri);
     const controller = this.controller;
-
-    const rootSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[];
+    let rootSymbols: DocumentSymbol[];
+    try {
+      rootSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[];
+    } catch(error: unknown) {
+      console.log('ba');
+      throw error;
+    }
     let items: TestItem[];
     const document = await workspace.openTextDocument(uri.fsPath);
     if(rootSymbols !== undefined) {
-
       items = this.updateUsingSymbols(params, document, controller, rootSymbols);
     } else {
       items = params.namedVerifiables.map(f => this.getItem(document,
         VerificationSymbolStatusView.convertRange(f.nameRange), controller, uri));
+      controller.items.replace(items);
       this.getItemsFilePromise(params.uri).resolve(items);
     }
 

@@ -20,15 +20,15 @@ function toStatusMessage(status: CompilationStatus, message?: string | null): st
   case CompilationStatus.CompilationSucceeded:
     return Messages.CompilationStatus.CompilationSucceeded;
 
-  // Not used from 3.8 on
+  // Backwards compatibility for versions of Dafny <= 3.8.0
   case CompilationStatus.VerificationStarted:
     return message != null
       ? `${Messages.CompilationStatus.Verifying} ${message}...`
       : `${Messages.CompilationStatus.Verifying}...`;
-  // Not used from 3.8 on
+  // Backwards compatibility for versions of Dafny <= 3.8.0
   case CompilationStatus.VerificationSucceeded:
     return Messages.CompilationStatus.VerificationSucceeded;
-  // Not used from 3.8 on
+  // Backwards compatibility for versions of Dafny <= 3.8.0
   case CompilationStatus.VerificationFailed:
     return message != null
       ? `${Messages.CompilationStatus.VerificationFailedOld} ${message}`
@@ -74,7 +74,7 @@ export default class CompilationStatusView {
     );
   }
 
-  // Not used from 3.8
+  // Backwards compatibility for versions of Dafny <= 3.8.0
   private verificationStarted(params: IVerificationStartedParams): void {
     this.documentStatusMessages.set(
       getVsDocumentPath(params),
@@ -83,7 +83,7 @@ export default class CompilationStatusView {
     this.updateActiveDocumentStatus();
   }
 
-  // Not used from 3.8
+  // Backwards compatibility for versions of Dafny <= 3.8.0
   private verificationCompleted(params: IVerificationCompletedParams): void {
     this.documentStatusMessages.set(
       getVsDocumentPath(params),
@@ -103,15 +103,13 @@ export default class CompilationStatusView {
        && previous.version > params.version;
   }
 
-
-
   private static readonly handledMessages = new Set([
     CompilationStatus.ResolutionStarted,
     CompilationStatus.ParsingFailed,
     CompilationStatus.ResolutionFailed,
     CompilationStatus.CompilationSucceeded ]);
 
-  public compilationStatusChanged38(params: ICompilationStatusParams): void {
+  public compilationStatusChangedForBefore38(params: ICompilationStatusParams): void {
     if(this.areParamsOutdated(params)) {
       return;
     }

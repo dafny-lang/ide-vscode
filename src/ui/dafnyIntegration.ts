@@ -9,7 +9,6 @@ import GhostDiagnosticsView from './ghostDiagnosticsView';
 import VerificationGutterStatusView from './verificationGutterStatusView';
 import RelatedErrorView from './relatedErrorView';
 import VerificationSymbolStatusView from './verificationSymbolStatusView';
-import * as dafnyInstallation from '../language/dafnyInstallation';
 
 export default async function createAndRegisterDafnyIntegration(
   context: ExtensionContext,
@@ -20,9 +19,8 @@ export default async function createAndRegisterDafnyIntegration(
   GhostDiagnosticsView.createAndRegister(context, languageClient);
   const compilationStatusView = CompilationStatusView.createAndRegister(context, languageClient, languageServerVersion);
   let symbolStatusView: VerificationSymbolStatusView | undefined = undefined;
-  const apiVersion = await dafnyInstallation.getServerApiVersion();
-  const usingDafny38OrHigher = dafnyInstallation.versionToNumeric('3.8.0') <= dafnyInstallation.versionToNumeric(apiVersion);
-  if(usingDafny38OrHigher) {
+  const serverSupportsSymbolStatusView = versionToNumeric('3.8.0') <= versionToNumeric(languageServerVersion);
+  if(serverSupportsSymbolStatusView) {
     symbolStatusView = VerificationSymbolStatusView.createAndRegister(context, languageClient, compilationStatusView);
   } else {
     compilationStatusView.registerBefore38Messages();
@@ -31,4 +29,9 @@ export default async function createAndRegisterDafnyIntegration(
   CompileCommands.createAndRegister(context);
   RelatedErrorView.createAndRegister(context, languageClient);
   await DafnyVersionView.createAndRegister(context, languageServerVersion);
+}
+
+function versionToNumeric(version: string): number {
+  const numbers = version.split('.').map(x => Number.parseInt(x));
+  return ((numbers[0] * 1000) + numbers[1]) * 1000 + numbers[2];
 }

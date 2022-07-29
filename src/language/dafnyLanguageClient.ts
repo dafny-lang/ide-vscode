@@ -142,12 +142,12 @@ export class DafnyLanguageClient extends LanguageClient {
     this.diagnosticsListeners.push(callback);
   }
 
-  // Removed as of Dafny 3.8
+  // Backward compatibility for versions of Dafny <= 3.8.0
   public onVerificationStarted(callback: (params: IVerificationStartedParams) => void): Disposable {
     return this.onNotification('dafny/verification/started', callback);
   }
 
-  // Removed as of Dafny 3.8
+  // Backward compatibility for versions of Dafny <= 3.8.0
   public onVerificationCompleted(callback: (params: IVerificationCompletedParams) => void): Disposable {
     return this.onNotification('dafny/verification/completed', callback);
   }
