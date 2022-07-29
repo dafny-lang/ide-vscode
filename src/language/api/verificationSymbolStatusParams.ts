@@ -10,6 +10,7 @@ export interface NamedVerifiableStatus {
   status: PublishedVerificationStatus;
 }
 
+// Taken from https://github.com/dafny-lang/dafny/blob/afd3138abffec0ddeace3f0d79bd7535290f39fd/Source/DafnyLanguageServer/Workspace/FileVerificationStatus.cs#L45
 export enum PublishedVerificationStatus {
   Stale = 0, // Not scheduled to be run
   Queued = 1, // Scheduled to be run but waiting for resources

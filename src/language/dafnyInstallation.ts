@@ -14,6 +14,7 @@ import Configuration from '../configuration';
 import { exec } from 'child_process';
 import { chdir as processChdir, cwd as processCwd } from 'process';
 import { RequestInfo, RequestInit } from 'node-fetch';
+import { integer } from 'vscode-languageclient';
 
 const fetch = (url: RequestInfo, init?: RequestInit) =>
   import('node-fetch').then(({ default: fetch }) => fetch(url, init));
@@ -26,6 +27,27 @@ const mkdirAsync = promisify(fs.mkdir);
 // Equivalent to a || b but without ESLint warnings
 async function ifNullOrEmpty(a: string | null, b: () => Promise<string>): Promise<string> {
   return a === null || a === '' ? await b() : Promise.resolve(a);
+}
+
+export async function getServerApiVersion(): Promise<string | undefined> {
+  const runtimePath = getConfiguredLanguageServerRuntimePath();
+  if(runtimePath !== '') {
+    return undefined;
+  }
+
+  const [ , version ] = await getConfiguredTagAndVersion();
+  if(!/(\d)\.(\d)\.(\d)/g.test(version)) {
+    return undefined;
+  }
+  return version;
+}
+
+export function versionToNumeric(version: string | undefined): number {
+  if(version === undefined) {
+    return Number.MAX_VALUE;
+  }
+  const numbers = version.split('.').map(x => Number.parseInt(x));
+  return ((numbers[0] * 1000) + numbers[1]) * 1000 + numbers[2];
 }
 
 async function getConfiguredVersion(): Promise<string> {

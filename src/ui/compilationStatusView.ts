@@ -1,5 +1,5 @@
 import { StatusBarAlignment, StatusBarItem, TextDocument, window, workspace, commands, ExtensionContext } from 'vscode';
-import { CompilationStatus, ICompilationStatusParams } from '../language/api/compilationStatus';
+import { CompilationStatus, ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from '../language/api/compilationStatus';
 import { DafnyCommands } from '../commands';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath } from '../tools/vscode';
@@ -9,7 +9,7 @@ import StatusBarActionView from './statusBarActionView';
 
 const StatusBarPriority = 10;
 
-function toStatusMessage(status: CompilationStatus): string {
+function toStatusMessage(status: CompilationStatus, message?: string | null): string {
   switch(status) {
   case CompilationStatus.ResolutionStarted:
     return Messages.CompilationStatus.ResolutionStarted;
@@ -19,7 +19,17 @@ function toStatusMessage(status: CompilationStatus): string {
     return Messages.CompilationStatus.ResolutionFailed;
   case CompilationStatus.CompilationSucceeded:
     return Messages.CompilationStatus.CompilationSucceeded;
-  default: throw new Error(`Should not handle status message ${status}`);
+
+  case CompilationStatus.VerificationStarted:
+    return message != null
+      ? `${Messages.CompilationStatus.Verifying} ${message}...`
+      : `${Messages.CompilationStatus.Verifying}...`;
+  case CompilationStatus.VerificationSucceeded:
+    return Messages.CompilationStatus.VerificationSucceeded;
+  case CompilationStatus.VerificationFailed:
+    return message != null
+      ? `${Messages.CompilationStatus.VerificationFailed} ${message}`
+      : `${Messages.CompilationStatus.VerificationFailed}`;
   }
 }
 
@@ -33,16 +43,17 @@ export default class CompilationStatusView {
   // legacy status messages.
   private readonly documentStatusMessages = new Map<string, IDocumentStatusMessage>();
 
-  private constructor(private readonly statusBarItem: StatusBarItem) {}
+  private constructor(private readonly statusBarItem: StatusBarItem,
+    private readonly languageClient: DafnyLanguageClient,
+    private readonly context: ExtensionContext) {}
 
   public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient, languageServerVersion: string): CompilationStatusView {
     const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, StatusBarPriority);
     statusBarItem.command = DafnyCommands.OpenStatusBarMenu;
-    const view = new CompilationStatusView(statusBarItem);
+    const view = new CompilationStatusView(statusBarItem, languageClient, context);
     const statusBarActionView = new StatusBarActionView(view, languageServerVersion, context);
     context.subscriptions.push(
       commands.registerCommand(DafnyCommands.OpenStatusBarMenu, () => statusBarActionView.openStatusBarMenu()),
-      languageClient.onCompilationStatus(params => view.compilationStatusChanged(params)),
       workspace.onDidCloseTextDocument(document => view.documentClosed(document)),
       workspace.onDidChangeTextDocument(() => view.updateActiveDocumentStatus()),
       window.onDidChangeActiveTextEditor(() => view.updateActiveDocumentStatus()),
@@ -52,16 +63,44 @@ export default class CompilationStatusView {
     return view;
   }
 
+  public registerBefore38Messages(): void {
+    this.context.subscriptions.push(
+      this.languageClient.onCompilationStatus(params => this.compilationStatusChanged(params)),
+      this.languageClient.onVerificationStarted(params => this.verificationStarted(params)),
+      this.languageClient.onVerificationCompleted(params => this.verificationCompleted(params))
+    );
+  }
+
+  // Not used from 3.8
+  private verificationStarted(params: IVerificationStartedParams): void {
+    this.documentStatusMessages.set(
+      getVsDocumentPath(params),
+      { message: Messages.CompilationStatus.Verifying }
+    );
+    this.updateActiveDocumentStatus();
+  }
+
+  // Not used from 3.8
+  private verificationCompleted(params: IVerificationCompletedParams): void {
+    this.documentStatusMessages.set(
+      getVsDocumentPath(params),
+      { message: params.verified ? Messages.CompilationStatus.Verified : Messages.CompilationStatus.NotVerified }
+    );
+    this.updateActiveDocumentStatus();
+  }
+
   private documentClosed(document: TextDocument): void {
     this.documentStatusMessages.delete(document.uri.toString());
     this.updateActiveDocumentStatus();
   }
 
-  private areParamsOutdated(params: ICompilationStatusParams): boolean {
+  public areParamsOutdated(params: ICompilationStatusParams): boolean {
     const previous = this.documentStatusMessages.get(getVsDocumentPath(params));
     return previous?.version != null && params.version != null
        && previous.version > params.version;
   }
+
+
 
   private static readonly handledMessages = new Set([
     CompilationStatus.ResolutionStarted,
@@ -69,7 +108,7 @@ export default class CompilationStatusView {
     CompilationStatus.ResolutionFailed,
     CompilationStatus.CompilationSucceeded ]);
 
-  private compilationStatusChanged(params: ICompilationStatusParams): void {
+  public compilationStatusChanged38(params: ICompilationStatusParams): void {
     if(this.areParamsOutdated(params)) {
       return;
     }
@@ -79,6 +118,16 @@ export default class CompilationStatusView {
         toStatusMessage(params.status),
         params.version);
     }
+  }
+
+  private compilationStatusChanged(params: ICompilationStatusParams): void {
+    if(this.areParamsOutdated(params)) {
+      return;
+    }
+    this.setDocumentStatusMessage(
+      getVsDocumentPath(params),
+      toStatusMessage(params.status),
+      params.version);
   }
 
   public setDocumentStatusMessage(uriString: string, message: string, version: number | undefined): void {

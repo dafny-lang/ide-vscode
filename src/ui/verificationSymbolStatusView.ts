@@ -1,6 +1,7 @@
 /* eslint-disable max-depth */
 import { commands, ExtensionContext, workspace, tests, Range, Position, Uri, TestRunRequest, TestController, TestRun, DocumentSymbol, TestItem, TestItemCollection, TextDocument, TestRunProfileKind, window } from 'vscode';
 import { Range as lspRange, Position as lspPosition } from 'vscode-languageclient';
+import { CompilationStatus, ICompilationStatusParams } from '../language/api/compilationStatus';
 import { IVerificationSymbolStatusParams, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import CompilationStatusView from './compilationStatusView';
@@ -14,6 +15,14 @@ interface ResolveablePromise<T> {
 interface ItemRunState {
   run: TestRun;
   startedRunningTime?: number;
+}
+
+export function createAndRegister(
+  context: ExtensionContext,
+  languageClient: DafnyLanguageClient,
+  compilationStatusView: CompilationStatusView): VerificationSymbolStatusView {
+  const instance = new VerificationSymbolStatusView(context, languageClient, compilationStatusView);
+  return instance;
 }
 
 /**
@@ -44,7 +53,8 @@ export default class VerificationSymbolStatusView {
       instance.updateListenersPerFile.delete(uriString);
     });
     context.subscriptions.push(
-      languageClient.onVerificationSymbolStatus(params => instance.update(params))
+      languageClient.onVerificationSymbolStatus(params => instance.update(params)),
+      languageClient.onCompilationStatus(params => compilationStatusView.compilationStatusChanged38(params))
     );
     return instance;
   }
@@ -62,11 +72,29 @@ export default class VerificationSymbolStatusView {
     return listener;
   }
 
-  private constructor(
+  public constructor(
     private readonly context: ExtensionContext,
     private readonly languageClient: DafnyLanguageClient,
     private readonly compilationStatusView: CompilationStatusView) {
     this.controller = this.createController();
+
+    workspace.onDidChangeTextDocument(e => {
+      const uriString = e.document.uri.toString();
+      this.updatesPerFile.delete(uriString);
+      this.updateListenersPerFile.delete(uriString);
+    });
+    context.subscriptions.push(
+      languageClient.onVerificationSymbolStatus(params => this.update(params))
+    );
+
+    window.onDidChangeActiveTextEditor(e => {
+      if(e !== undefined) {
+        const lastUpdate = this.updatesPerFile.get(e.document.uri.toString());
+        if(lastUpdate !== undefined) {
+          this.update(lastUpdate);
+        }
+      }
+    });
   }
 
   private itemStates: Map<string, PublishedVerificationStatus> = new Map();
@@ -231,14 +259,9 @@ export default class VerificationSymbolStatusView {
     const total = params.namedVerifiables.length;
     let message: string;
     if(running.length > 0) {
-      let verifying: string;
-      if(running.length === 1) {
-        const document = await workspace.openTextDocument(Uri.parse(params.uri));
-        verifying = document.getText(VerificationSymbolStatusView.convertRange(running[0].nameRange));
-      } else {
-        verifying = `${running.length} proofs`;
-      }
-      message = `${Messages.CompilationStatus.Verifying} ${verifying}, completed ${completed}/${total}`;
+      const document = await workspace.openTextDocument(Uri.parse(params.uri));
+      const verifying = running.map(item => document.getText(VerificationSymbolStatusView.convertRange(item.nameRange))).join(', ');
+      message = `$(sync~spin) Verified ${completed}/${total}, verifying ${verifying}`;
     } else {
       const skipped = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Stale).length;
       const errors = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Error).length;
@@ -248,10 +271,10 @@ export default class VerificationSymbolStatusView {
         if(skipped === 0) {
           message = Messages.CompilationStatus.VerificationSucceeded;
         } else {
-          message = `Verified ${succeeded} proofs, skipped ${skipped}.`;
+          message = `Verified ${succeeded} declarations, skipped ${skipped}.`;
         }
       } else {
-        message = `${Messages.CompilationStatus.VerificationFailed} ${errors} proofs.`;
+        message = `${Messages.CompilationStatus.VerificationFailed} ${errors} declarations.`;
       }
     }
     this.compilationStatusView.setDocumentStatusMessage(params.uri.toString(), message, params.version);

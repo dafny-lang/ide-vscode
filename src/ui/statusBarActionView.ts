@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import { promisify } from 'util';
 import CompilationStatusView from './compilationStatusView';
 import { Messages } from './messages';
+import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 
 const readFileAsync = promisify(fs.readFile);
 
@@ -76,7 +77,8 @@ export default class StatusBarActionView {
       RestartDafny
     ];
     const currentDocumentStatus = this.compilationStatusView.getCurrentDocumentStatus();
-    if(currentDocumentStatus === Messages.CompilationStatus.VerificationFailed
+    if(currentDocumentStatus === Messages.CompilationStatus.VerificationFailedOld
+      || currentDocumentStatus?.startsWith(Messages.CompilationStatus.VerificationFailed) === true
       || (currentDocumentStatus?.includes('Verifying') ?? false)) {
       targets.splice(0, 0, INeedHelpWithMyProof);
     }

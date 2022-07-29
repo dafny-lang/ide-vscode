@@ -6,7 +6,8 @@ export namespace Messages {
     export const CompilationSucceeded = '$(book) Resolved (not verified)';
     export const Verifying = '$(sync~spin) Verifying';
     export const VerificationSucceeded = '$(thumbsup) Verification Succeeded';
-    export const VerificationFailed = '$(thumbsdown) Failed to verify';
+    export const VerificationFailedOld = '$(thumbsdown) Verification Failed';
+    export const VerificationFailed = '$(thumbsdown) Could not prove';
 
     export const Verified = '$(thumbsup) Verified';
     export const NotVerified = '$(thumbsdown) Not Verified';
