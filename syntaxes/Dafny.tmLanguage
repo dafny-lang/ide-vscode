@@ -26,17 +26,17 @@
 				</dict>
 			</dict>
 			<key>end</key>
-			<string>:=|:\||;</string>
-			<key>endCaptures</key>
+			<string>:=|:\||;|(?=const|least|greatest|predicate|function|method|lemma|var|type|datatype|newtype)</string>
+			<!--key>endCaptures</key>
 			<dict>
 				<key>1</key>
 				<dict>
 					<key>name</key>
 					<string>storage.type.dafny</string>
 				</dict>
-			</dict>
+			</dict-->
 			<key>name</key>
-			<string>meta.class.identifier.dafny</string>
+			<string>meta.vardecl.dafny</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -54,6 +54,10 @@
 				<dict>
 					<key>include</key>
 					<string>#generics</string>
+				</dict>
+			  <dict>
+				  <key>include</key>
+				  <string>#formalTypeDeclaration</string>
 				</dict>
 			</array>
 		</dict>
@@ -131,6 +135,23 @@
 	</array>
 	<key>repository</key>
 	<dict>
+	  <key>formalTypeDeclaration</key>
+		<dict>
+			<key>name</key>
+			<string>meta.type.formaldeclaration</string>
+			<key>begin</key>
+			<string>(?<!\{|:):\s*(?:[\w'?]+\.)*([\w'?]+\b(?!&lt;))</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>storage.type.dafny</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>(?=&lt;|\s*|,|\)|\}|requires|ensures|modifies|var|const|method|function|datatype|type|newtype|lemma|least|greatest|predicate)</string>
+		</dict>
 		<key>genericfunctioncalls</key>
 		<dict>
 			<key>begin</key>
@@ -529,20 +550,8 @@
 					</array>
 				</dict>
 				<dict>
-					<key>begin</key>
-					<string>(?<!\{|:):\s*(?:[\w'?]+\.)*([\w'?]+\b(?!&lt;))</string>
-					<key>beginCaptures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>storage.type.dafny</string>
-						</dict>
-					</dict>
-					<key>end</key>
-					<string>(?=&lt;|\s*|,|\)|\}|requires|ensures|modifies)</string>
-					<key>name</key>
-					<string>meta.type.formaldeclaration</string>
+				  <key>include</key>
+					<string>#formalTypeDeclaration</string>
 				</dict>
 				<dict>
 					<key>include</key>
