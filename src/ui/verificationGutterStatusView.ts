@@ -262,8 +262,17 @@ export default class VerificationGutterStatusView {
     const perLineStatus = this.addCosmetics(params.perLineStatus);
 
     const symbolParams = (await this.symbolStatusView?.getFirstStatusForCurrentVersion(params.uri)) ?? [];
-    const linesToSkip = [ -1, ...symbolParams.map(testItem => testItem.range!.start.line).sort((a, b) => a - b), perLineStatus.length ];
-    const ranges: Map<LineVerificationStatus, Range[]> = VerificationGutterStatusView.FillLineVerificationStatusMap();
+    const originalLinesToSkip = symbolParams.map(testItem => testItem.range!.start.line).sort((a, b) => a - b);
+
+    return VerificationGutterStatusView.perLineStatusToRanges(perLineStatus, originalLinesToSkip);
+  }
+
+  public static perLineStatusToRanges(
+    perLineStatus: LineVerificationStatus[],
+    originalLinesToSkip: number[]): Map<LineVerificationStatus, Range[]> {
+
+    const linesToSkip = [ -1, ...originalLinesToSkip, perLineStatus.length ];
+    const result: Map<LineVerificationStatus, Range[]> = VerificationGutterStatusView.FillLineVerificationStatusMap();
 
     for(let skipLineIndex = 0; skipLineIndex < linesToSkip.length; skipLineIndex++) {
       let previousLineStatus = -1;
@@ -278,14 +287,14 @@ export default class VerificationGutterStatusView {
         if(lineDiagnostic !== previousLineStatus || line === end) {
           if(previousLineStatus !== -1) { // Was assigned before
             const range = new Range(initialStatusLine, 1, line - 1, 1);
-            ranges.get(previousLineStatus)?.push(range);
+            result.get(previousLineStatus)?.push(range);
           }
           previousLineStatus = lineDiagnostic;
           initialStatusLine = line;
         }
       }
     }
-    return ranges;
+    return result;
   }
 
   // Returns true if the params are for a different version of this document
