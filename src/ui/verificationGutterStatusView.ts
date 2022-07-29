@@ -261,8 +261,8 @@ export default class VerificationGutterStatusView {
   private async getRangesOfLineStatus(params: IVerificationGutterStatusParams): Promise<Map<LineVerificationStatus, Range[]>> {
     const perLineStatus = this.addCosmetics(params.perLineStatus);
 
-    const symbolParams = (await this.symbolStatusView?.getFirstStatusForCurrentVersion(params.uri)) ?? { namedVerifiables: [] };
-    const linesToSkip = [ -1, ...symbolParams.namedVerifiables.map(v => v.nameRange.start.line).sort((a, b) => a - b), perLineStatus.length ];
+    const symbolParams = (await this.symbolStatusView?.getFirstStatusForCurrentVersion(params.uri)) ?? [];
+    const linesToSkip = [ -1, ...symbolParams.map(testItem => testItem.range!.start.line).sort((a, b) => a - b), perLineStatus.length ];
     const ranges: Map<LineVerificationStatus, Range[]> = VerificationGutterStatusView.FillLineVerificationStatusMap();
 
     for(let skipLineIndex = 0; skipLineIndex < linesToSkip.length; skipLineIndex++) {

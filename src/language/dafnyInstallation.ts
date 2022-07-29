@@ -14,7 +14,6 @@ import Configuration from '../configuration';
 import { exec } from 'child_process';
 import { chdir as processChdir, cwd as processCwd } from 'process';
 import { RequestInfo, RequestInit } from 'node-fetch';
-import { integer } from 'vscode-languageclient';
 
 const fetch = (url: RequestInfo, init?: RequestInit) =>
   import('node-fetch').then(({ default: fetch }) => fetch(url, init));

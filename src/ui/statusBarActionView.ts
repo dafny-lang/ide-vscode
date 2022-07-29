@@ -6,7 +6,6 @@ import * as fs from 'fs';
 import { promisify } from 'util';
 import CompilationStatusView from './compilationStatusView';
 import { Messages } from './messages';
-import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 
 const readFileAsync = promisify(fs.readFile);
 

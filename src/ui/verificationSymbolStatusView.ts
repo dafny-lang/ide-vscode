@@ -1,7 +1,6 @@
 /* eslint-disable max-depth */
 import { commands, ExtensionContext, workspace, tests, Range, Position, Uri, TestRunRequest, TestController, TestRun, DocumentSymbol, TestItem, TestItemCollection, TextDocument, TestRunProfileKind, window } from 'vscode';
 import { Range as lspRange, Position as lspPosition } from 'vscode-languageclient';
-import { CompilationStatus, ICompilationStatusParams } from '../language/api/compilationStatus';
 import { IVerificationSymbolStatusParams, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import CompilationStatusView from './compilationStatusView';
@@ -30,8 +29,8 @@ export function createAndRegister(
  */
 export default class VerificationSymbolStatusView {
 
-  public getFirstStatusForCurrentVersion(uriString: string): Promise<IVerificationSymbolStatusParams> {
-    return this.getFirstStatusForFilePromise(uriString).promise;
+  public getFirstStatusForCurrentVersion(uriString: string): Promise<TestItem[]> {
+    return this.getItemsFilePromise(uriString).promise;
   }
 
   public static createAndRegister(
@@ -59,11 +58,11 @@ export default class VerificationSymbolStatusView {
     return instance;
   }
 
-  private getFirstStatusForFilePromise(uriString: string): ResolveablePromise<IVerificationSymbolStatusParams> {
+  private getItemsFilePromise(uriString: string): ResolveablePromise<TestItem[]> {
     let listener = this.updateListenersPerFile.get(uriString);
     if(listener === undefined) {
-      let storedResolve: (value: IVerificationSymbolStatusParams) => void;
-      const promise = new Promise<IVerificationSymbolStatusParams>((resolve) => {
+      let storedResolve: (value: TestItem[]) => void;
+      const promise = new Promise<TestItem[]>((resolve) => {
         storedResolve = resolve;
       });
       listener = { resolve: storedResolve!, promise };
@@ -100,7 +99,7 @@ export default class VerificationSymbolStatusView {
   private itemStates: Map<string, PublishedVerificationStatus> = new Map();
   private itemRuns: Map<string, ItemRunState> = new Map();
   private readonly runItemsLeft: Map<TestRun, number> = new Map();
-  private readonly updateListenersPerFile: Map<string, ResolveablePromise<IVerificationSymbolStatusParams>> = new Map();
+  private readonly updateListenersPerFile: Map<string, ResolveablePromise<TestItem[]>> = new Map();
   private readonly updatesPerFile: Map<string, IVerificationSymbolStatusParams> = new Map();
   private readonly controller: TestController;
   private automaticRunEnd: boolean = false;
@@ -175,7 +174,6 @@ export default class VerificationSymbolStatusView {
     await this.processUpdateLock;
 
     this.updateStatusBar(params);
-    this.getFirstStatusForFilePromise(params.uri).resolve(params);
     this.updatesPerFile.set(params.uri, params);
     const uri = Uri.parse(params.uri);
     const controller = this.controller;
@@ -189,6 +187,7 @@ export default class VerificationSymbolStatusView {
     } else {
       items = params.namedVerifiables.map(f => this.getItem(document,
         VerificationSymbolStatusView.convertRange(f.nameRange), controller, uri));
+      this.getItemsFilePromise(params.uri).resolve(items);
     }
 
     const runningItemsWithoutRun = params.namedVerifiables.
@@ -207,7 +206,10 @@ export default class VerificationSymbolStatusView {
       const testItem = items[index];
       const itemRunState = this.itemRuns.get(testItem.id)!;
       if(this.itemStates.get(testItem.id) === element.status) {
-        newItemRuns.set(testItem.id, itemRunState);
+        const isRunning = itemRunState !== undefined;
+        if(isRunning) {
+          newItemRuns.set(testItem.id, itemRunState);
+        }
         return;
       }
       const { run, startedRunningTime } = itemRunState;
@@ -250,6 +252,11 @@ export default class VerificationSymbolStatusView {
       }
     });
     this.itemStates = new Map(params.namedVerifiables.map((v, index) => [ items[index].id, v.status ]));
+    for(const [ id, oldItem ] of this.itemRuns.entries()) {
+      if(!newItemRuns.has(id)) {
+        oldItem.run.end();
+      }
+    }
     this.itemRuns = newItemRuns;
   }
 
@@ -286,16 +293,16 @@ export default class VerificationSymbolStatusView {
     const itemMapping: Map<DocumentSymbol, TestItem> = new Map();
     const uri = Uri.parse(params.uri);
 
-    const updateMapping = (symbols: DocumentSymbol[], range: Range): TestItem | undefined => {
+    const updateMapping = (symbols: DocumentSymbol[], leafRange: Range): TestItem | undefined => {
       for(const symbol of symbols) {
-        if(symbol.range.contains(range)) {
+        if(symbol.range.contains(leafRange)) {
           let item = itemMapping.get(symbol);
           if(!item) {
             const itemRange = symbol.selectionRange;
             item = this.getItem(document, itemRange, controller, uri);
             itemMapping.set(symbol, item);
           }
-          return updateMapping(symbol.children, range) ?? item;
+          return updateMapping(symbol.children, leafRange) ?? item;
         }
       }
       return undefined;
@@ -319,6 +326,7 @@ export default class VerificationSymbolStatusView {
       childCollection.replace(newChildren);
     }
 
+    this.getItemsFilePromise(params.uri).resolve([ ...itemMapping.values() ]);
     return items;
   }
 
