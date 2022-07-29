@@ -114,10 +114,9 @@ suite('Dafny IDE Extension Installation', () => {
 
 suite('Verification Gutter', () => {
   test('perLineStatusToRanges', () => {
-    const ranges = VerificationGutterStatusView.perLineStatusToRanges([ 1, 1, 1, 3, 3, 3, 2, 2, 2 ], [ 2, 4, 6 ]);
-    assert.strictEqual(3, ranges.size);
+    const ranges = VerificationGutterStatusView.perLineStatusToRanges([ 1, 1, 1, 0, 0, 0, 2, 2, 2 ], [ 2, 4, 6 ]);
     assert.deepStrictEqual([ new vscode.Range(0, 1, 1, 1) ], ranges.get(1));
-    assert.deepStrictEqual([ new vscode.Range(7, 1, 7, 1) ], ranges.get(2));
-    assert.deepStrictEqual([ new vscode.Range(3, 1, 3, 1), new vscode.Range(5, 1, 5, 1) ], ranges.get(3));
+    assert.deepStrictEqual([ new vscode.Range(7, 1, 8, 1) ], ranges.get(2));
+    assert.deepStrictEqual([ new vscode.Range(3, 1, 3, 1), new vscode.Range(5, 1, 5, 1) ], ranges.get(0));
   });
 });
