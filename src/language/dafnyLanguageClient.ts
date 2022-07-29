@@ -1,5 +1,5 @@
 import { ExtensionContext, Disposable, OutputChannel, Uri, Diagnostic } from 'vscode';
-import { HandleDiagnosticsSignature, LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
+import { HandleDiagnosticsSignature, LanguageClient, LanguageClientOptions, ServerOptions, TextDocumentPositionParams } from 'vscode-languageclient/node';
 
 import Configuration from '../configuration';
 import { ConfigurationConstants } from '../constants';
@@ -9,6 +9,7 @@ import { ICompilationStatusParams, IVerificationCompletedParams, IVerificationSt
 import { ICounterexampleItem, ICounterexampleParams } from './api/counterExample';
 import { IGhostDiagnosticsParams } from './api/ghostDiagnostics';
 import { IVerificationGutterStatusParams as IVerificationGutterStatusParams } from './api/verificationGutterStatusParams';
+import { IVerificationSymbolStatusParams } from './api/verificationSymbolStatusParams';
 import { getLanguageServerRuntimePath } from './dafnyInstallation';
 
 const LanguageServerId = 'dafny-vscode';
@@ -125,6 +126,10 @@ export class DafnyLanguageClient extends LanguageClient {
     return this.onNotification('dafny/verification/status/gutter', callback);
   }
 
+  public onVerificationSymbolStatus(callback: (params: IVerificationSymbolStatusParams) => void): Disposable {
+    return this.onNotification('dafny/textDocument/symbolStatus', callback);
+  }
+
   public onCompilationStatus(callback: (params: ICompilationStatusParams) => void): Disposable {
     return this.onNotification('dafny/compilation/status', callback);
   }
@@ -137,12 +142,21 @@ export class DafnyLanguageClient extends LanguageClient {
     this.diagnosticsListeners.push(callback);
   }
 
-  // TODO Legacy verification status messages
+  // Backwards compatibility for versions of Dafny <= 3.2
   public onVerificationStarted(callback: (params: IVerificationStartedParams) => void): Disposable {
     return this.onNotification('dafny/verification/started', callback);
   }
 
+  // Backwards compatibility for versions of Dafny <= 3.2
   public onVerificationCompleted(callback: (params: IVerificationCompletedParams) => void): Disposable {
     return this.onNotification('dafny/verification/completed', callback);
+  }
+
+  public runVerification(params: TextDocumentPositionParams): Promise<boolean> {
+    return this.sendRequest<boolean>('dafny/textDocument/verifySymbol', params);
+  }
+
+  public cancelVerification(params: TextDocumentPositionParams): Promise<boolean> {
+    return this.sendRequest<boolean>('dafny/textDocument/cancelVerifySymbol', params);
   }
 }

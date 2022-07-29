@@ -10,6 +10,7 @@ import {
   nonErrorLineVerificationStatus } from '../language/api/verificationGutterStatusParams';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath } from '../tools/vscode';
+import VerificationSymbolStatusView from './verificationSymbolStatusView';
 
 const DELAY_IF_RESOLUTION_ERROR = 2000;
 const ANIMATION_INTERVAL = 200;
@@ -56,7 +57,7 @@ export default class VerificationGutterStatusView {
   private static readonly emptyLinearVerificationDiagnostics: Map<LineVerificationStatus, Range[]>
     = VerificationGutterStatusView.FillLineVerificationStatusMap();
 
-  private constructor(context: ExtensionContext) {
+  private constructor(context: ExtensionContext, private readonly symbolStatusView: VerificationSymbolStatusView | undefined) {
     const icon = VerificationGutterStatusView.makeIconAux(false, context);
     const grayIcon = VerificationGutterStatusView.makeIconAux(true, context);
     const lvs = LineVerificationStatus;
@@ -108,8 +109,11 @@ export default class VerificationGutterStatusView {
     ]);
   }
 
-  public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient): VerificationGutterStatusView {
-    const instance = new VerificationGutterStatusView(context);
+  public static createAndRegister(
+    context: ExtensionContext,
+    languageClient: DafnyLanguageClient,
+    symbolStatusView: VerificationSymbolStatusView | undefined): VerificationGutterStatusView {
+    const instance = new VerificationGutterStatusView(context, symbolStatusView);
     context.subscriptions.push(
       workspace.onDidCloseTextDocument(document => instance.clearVerificationDiagnostics(document.uri.toString())),
       window.onDidChangeActiveTextEditor(editor => instance.refreshDisplayedVerificationGutterStatuses(editor)),
@@ -254,26 +258,43 @@ export default class VerificationGutterStatusView {
 
   // Converts the IVerificationStatusGutter to a map from line verification status
   // to an array of ranges that VSCode can consume.
-  private getRangesOfLineStatus(params: IVerificationGutterStatusParams): Map<LineVerificationStatus, Range[]> {
+  private async getRangesOfLineStatus(params: IVerificationGutterStatusParams): Promise<Map<LineVerificationStatus, Range[]>> {
     const perLineStatus = this.addCosmetics(params.perLineStatus);
 
-    let previousLineStatus = -1;
-    let initialStatusLine = -1;
-    const ranges: Map<LineVerificationStatus, Range[]> = VerificationGutterStatusView.FillLineVerificationStatusMap();
+    const symbolParams = (await this.symbolStatusView?.getFirstStatusForCurrentVersion(params.uri)) ?? [];
+    const originalLinesToSkip = symbolParams.map(testItem => testItem.range!.start.line).sort((a, b) => a - b);
 
-    // <= so that we add a virtual final line to commit the last range.
-    for(let line = 0; line <= perLineStatus.length; line++) {
-      const lineDiagnostic = line === perLineStatus.length ? -1 : perLineStatus[line];
-      if(lineDiagnostic !== previousLineStatus) {
-        if(previousLineStatus !== -1) { // Never assigned before
-          const range = new Range(initialStatusLine, 1, line - 1, 1);
-          ranges.get(previousLineStatus)?.push(range);
+    return VerificationGutterStatusView.perLineStatusToRanges(perLineStatus, originalLinesToSkip);
+  }
+
+  public static perLineStatusToRanges(
+    perLineStatus: LineVerificationStatus[],
+    originalLinesToSkip: number[]): Map<LineVerificationStatus, Range[]> {
+
+    const linesToSkip = [ -1, ...originalLinesToSkip, perLineStatus.length ];
+    const result: Map<LineVerificationStatus, Range[]> = VerificationGutterStatusView.FillLineVerificationStatusMap();
+
+    for(let skipLineIndex = 0; skipLineIndex < linesToSkip.length; skipLineIndex++) {
+      let previousLineStatus = -1;
+      let initialStatusLine = -1;
+
+      const start = linesToSkip[skipLineIndex] + 1;
+      const end = linesToSkip[skipLineIndex + 1];
+
+      // <= so that we add a virtual final line to commit the last range.
+      for(let line = start; line <= end; line++) {
+        const lineDiagnostic = line === perLineStatus.length ? -1 : perLineStatus[line];
+        if(lineDiagnostic !== previousLineStatus || line === end) {
+          if(previousLineStatus !== -1) { // Was assigned before
+            const range = new Range(initialStatusLine, 1, line - 1, 1);
+            result.get(previousLineStatus)?.push(range);
+          }
+          previousLineStatus = lineDiagnostic;
+          initialStatusLine = line;
         }
-        previousLineStatus = lineDiagnostic;
-        initialStatusLine = line;
       }
     }
-    return ranges;
+    return result;
   }
 
   // Returns true if the params are for a different version of this document
@@ -285,12 +306,12 @@ export default class VerificationGutterStatusView {
   }
 
   // Entry point when receiving IVErificationStatusGutter
-  private updateVerificationStatusGutter(params: IVerificationGutterStatusParams): void {
+  private async updateVerificationStatusGutter(params: IVerificationGutterStatusParams): Promise<void> {
     if(this.areParamsOutdated(params)) {
       return;
     }
     const documentPath = getVsDocumentPath(params);
-    const ranges = this.getRangesOfLineStatus(params);
+    const ranges = await this.getRangesOfLineStatus(params);
 
     const newData: LinearVerificationGutterStatus = {
       decorations: ranges,

@@ -17,6 +17,7 @@ const { DafnyInstaller } = proxyquire('../../language/dafnyInstallation', {
 import { Messages } from '../../ui/messages';
 import { LanguageServerConstants } from '../../constants';
 import { DafnyCommands } from '../../commands';
+import VerificationGutterStatusView from '../../ui/verificationGutterStatusView';
 
 const mockedVsCode = {
   window: {
@@ -29,12 +30,11 @@ const mockedVsCode = {
     }
   }
 };
+const mockedWorkspace = MockingUtils.mockedWorkspace();
+(vscode as unknown as any).workspace = mockedWorkspace;
 const CompileCommands = proxyquire('../../ui/compileCommands', {
   'vscode': mockedVsCode
 }).default;
-
-const mockedWorkspace = MockingUtils.mockedWorkspace();
-(vscode as unknown as any).workspace = mockedWorkspace;
 
 suite('Compiler invocation', () => {
   test('Check command creation', async () => {
@@ -112,13 +112,11 @@ suite('Dafny IDE Extension Installation', () => {
   });
 });
 
-/*
-suite('Example Test Suite', () => {
-  vscode.window.showInformationMessage('Start all tests.');
-
-  test('Sample test', () => {
-    assert.strictEqual(-1, [ 1, 2, 3 ].indexOf(5));
-    assert.strictEqual(1, [ 1, 2, 3 ].indexOf(2));
+suite('Verification Gutter', () => {
+  test('perLineStatusToRanges', () => {
+    const ranges = VerificationGutterStatusView.perLineStatusToRanges([ 1, 1, 1, 0, 0, 0, 2, 2, 2 ], [ 2, 4, 6 ]);
+    assert.deepStrictEqual([ new vscode.Range(0, 1, 1, 1) ], ranges.get(1));
+    assert.deepStrictEqual([ new vscode.Range(7, 1, 8, 1) ], ranges.get(2));
+    assert.deepStrictEqual([ new vscode.Range(3, 1, 3, 1), new vscode.Range(5, 1, 5, 1) ], ranges.get(0));
   });
 });
-*/
