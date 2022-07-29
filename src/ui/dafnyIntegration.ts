@@ -24,6 +24,8 @@ export default async function createAndRegisterDafnyIntegration(
   const usingDafny38OrHigher = dafnyInstallation.versionToNumeric('3.8.0') <= dafnyInstallation.versionToNumeric(apiVersion);
   if(usingDafny38OrHigher) {
     symbolStatusView = VerificationSymbolStatusView.createAndRegister(context, languageClient, compilationStatusView);
+  } else {
+    compilationStatusView.registerBefore38Messages();
   }
   VerificationGutterStatusView.createAndRegister(context, languageClient, symbolStatusView);
   CompileCommands.createAndRegister(context);

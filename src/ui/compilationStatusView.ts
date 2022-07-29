@@ -20,16 +20,19 @@ function toStatusMessage(status: CompilationStatus, message?: string | null): st
   case CompilationStatus.CompilationSucceeded:
     return Messages.CompilationStatus.CompilationSucceeded;
 
+  // Not used from 3.8 on
   case CompilationStatus.VerificationStarted:
     return message != null
       ? `${Messages.CompilationStatus.Verifying} ${message}...`
       : `${Messages.CompilationStatus.Verifying}...`;
+  // Not used from 3.8 on
   case CompilationStatus.VerificationSucceeded:
     return Messages.CompilationStatus.VerificationSucceeded;
+  // Not used from 3.8 on
   case CompilationStatus.VerificationFailed:
     return message != null
-      ? `${Messages.CompilationStatus.VerificationFailed} ${message}`
-      : `${Messages.CompilationStatus.VerificationFailed}`;
+      ? `${Messages.CompilationStatus.VerificationFailedOld} ${message}`
+      : `${Messages.CompilationStatus.VerificationFailedOld}`;
   }
 }
 

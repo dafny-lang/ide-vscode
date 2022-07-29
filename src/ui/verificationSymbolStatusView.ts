@@ -271,10 +271,10 @@ export default class VerificationSymbolStatusView {
         if(skipped === 0) {
           message = Messages.CompilationStatus.VerificationSucceeded;
         } else {
-          message = `Verified ${succeeded} declarations, skipped ${skipped}.`;
+          message = `Verified ${succeeded} declarations, skipped ${skipped}`;
         }
       } else {
-        message = `${Messages.CompilationStatus.VerificationFailed} ${errors} declarations.`;
+        message = `${Messages.CompilationStatus.VerificationFailed} ${errors} declarations`;
       }
     }
     this.compilationStatusView.setDocumentStatusMessage(params.uri.toString(), message, params.version);
