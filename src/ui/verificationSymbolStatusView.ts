@@ -76,6 +76,7 @@ export default class VerificationSymbolStatusView {
     private readonly languageClient: DafnyLanguageClient,
     private readonly compilationStatusView: CompilationStatusView) {
     this.controller = this.createController();
+    context.subscriptions.push(this.controller);
 
     workspace.onDidChangeTextDocument(e => {
       const uriString = e.document.uri.toString();
