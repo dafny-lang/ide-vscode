@@ -9,11 +9,6 @@ import * as vscode from 'vscode';
 const mockedExec = new MockingExec();
 const mockedCommands = MockingUtils.mockedCommands();
 
-const { DafnyInstaller } = proxyquire('../../language/dafnyInstallation', {
-  'child_process': proxyquire('child_process', {
-    exec: mockedExec.stub
-  })
-});
 import { Messages } from '../../ui/messages';
 import { LanguageServerConstants } from '../../constants';
 import { DafnyCommands } from '../../commands';
@@ -30,11 +25,19 @@ const mockedVsCode = {
       return mockedCommands.registerCommand(command, callback);
     }
   },
-  workspace: mockedWorkspace
+  workspace: mockedWorkspace,
+  '@global': true
 };
 const CompileCommands = proxyquire('../../ui/compileCommands', {
   'vscode': mockedVsCode
 }).default;
+
+const { DafnyInstaller } = proxyquire('../../language/dafnyInstallation', {
+  'child_process': proxyquire('child_process', {
+    exec: mockedExec.stub
+  }),
+  vscode: mockedVsCode
+});
 
 suite('Compiler invocation', () => {
   test('Check command creation', async () => {
@@ -77,7 +80,7 @@ suite('Compiler invocation', () => {
     assert.strictEqual('<compiler command prefix>"<dotnet executable path>" "<extension path>/<compiler runtime path>" "fileName.dfy" /out <arg1> arg2',
       textSent.replace(/\\/g, '/'));
     assert.strictEqual(true, returnValue, 'returnValue');
-  });
+  }).timeout(60 * 1000);
 });
 
 suite('Dafny IDE Extension Installation', () => {
@@ -102,14 +105,14 @@ suite('Dafny IDE Extension Installation', () => {
     ]);
     assert.strictEqual(true, installer != null, 'Installer is not null');
     const result = await installer.install();
-    assert.strictEqual(outputChannelBuilder.writtenContent().replace(/\\/g, '/'),
+    assert.strictEqual(outputChannelBuilder.writtenContent().replace(/\\/g, '/').replace(/resources\/.*\n/, 'resources/\n'),
       'Starting Dafny installation\n'
-      + 'deleting previous Dafny installation at /tmp/mockedUri/out/resources/' + LanguageServerConstants.LatestVersion + '\n'
+      + 'deleting previous Dafny installation at /tmp/mockedUri/out/resources/\n'
       + 'Dafny installation failed:\n'
       + '> Simulated error in delete\n'
     );
     assert.strictEqual(false, result, 'Result is true');
-  });
+  }).timeout(60 * 1000);
 });
 
 suite('Verification Gutter', () => {

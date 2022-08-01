@@ -6,7 +6,7 @@ import * as assert from 'assert';
 import { Emitter } from 'vscode-languageclient';
 import * as vscode from 'vscode';
 import { DocumentSymbol, EventEmitter, TestItem } from 'vscode';
-import { toPromise } from './events-util';
+import { toPromise } from './eventsutil';
 
 const replaceCalled: EventEmitter<TestItem[]> = new Emitter();
 const createTestRunCalled: EventEmitter<vscode.TestRunRequest> = new Emitter();
@@ -61,7 +61,7 @@ module Bar {
 }`;
 
 suite('Verification symbol view', () => {
-  test.only('happy flow', async () => {
+  test('happy flow', async () => {
     const testRunCalledPromise = toPromise(createTestRunCalled.event);
     const testRunEndPromise = toPromise(testRunEndCalled.event);
     const untitledDocument = await vscode.workspace.openTextDocument({ content: program, language: 'dafny' });
