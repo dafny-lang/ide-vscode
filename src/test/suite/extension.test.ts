@@ -19,6 +19,7 @@ import { LanguageServerConstants } from '../../constants';
 import { DafnyCommands } from '../../commands';
 import VerificationGutterStatusView from '../../ui/verificationGutterStatusView';
 
+const mockedWorkspace = MockingUtils.mockedWorkspace();
 const mockedVsCode = {
   window: {
     activeTerminal: null as any,
@@ -28,10 +29,9 @@ const mockedVsCode = {
     registerCommand(command: string, callback: () => void): vscode.Disposable {
       return mockedCommands.registerCommand(command, callback);
     }
-  }
+  },
+  workspace: mockedWorkspace
 };
-const mockedWorkspace = MockingUtils.mockedWorkspace();
-(vscode as unknown as any).workspace = mockedWorkspace;
 const CompileCommands = proxyquire('../../ui/compileCommands', {
   'vscode': mockedVsCode
 }).default;

@@ -45,7 +45,7 @@ async function getConfiguredTagAndVersion(): Promise<[string, string]> {
 }
 
 async function getConfiguredGitTagAndVersionUncached(): Promise<[string, string]> {
-  let version = Configuration.get<string>(ConfigurationConstants.PreferredVersion);
+  let version = process.env['dafnyIdeVersion'] ?? Configuration.get<string>(ConfigurationConstants.PreferredVersion);
   switch(version) {
   case LanguageServerConstants.LatestStable:
     version = LanguageServerConstants.LatestVersion;
