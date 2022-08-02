@@ -13,10 +13,7 @@ import { ConfigurationConstants, LanguageServerConstants } from '../constants';
 import Configuration from '../configuration';
 import { exec } from 'child_process';
 import { chdir as processChdir, cwd as processCwd } from 'process';
-import { RequestInfo, RequestInit } from 'node-fetch';
-
-const fetch = (url: RequestInfo, init?: RequestInit) =>
-  import('node-fetch').then(({ default: fetch }) => fetch(url, init));
+import fetch from 'cross-fetch';
 
 const execAsync = promisify(exec);
 
