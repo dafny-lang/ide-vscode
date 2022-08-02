@@ -57,7 +57,7 @@ async function getCurrentBranch() {
 
 // Ensures that the working directory is clean
 async function ensureWorkingDirectoryClean() {
-  var unstagedChanges = (await execAsync("git diff")).stdout.trim();
+  var unstagedChanges = (await execAsync("git diff")).stdout.trim() + (await execAsync("git diff --cached")).stdout.trim();
   if(unstagedChanges != "") {
     console.log("Please commit your changes before launching this script.");
     throw ABORTED;
