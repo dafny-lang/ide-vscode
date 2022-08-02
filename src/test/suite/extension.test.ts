@@ -9,16 +9,12 @@ import * as vscode from 'vscode';
 const mockedExec = new MockingExec();
 const mockedCommands = MockingUtils.mockedCommands();
 
-const { DafnyInstaller } = proxyquire('../../language/dafnyInstallation', {
-  'child_process': proxyquire('child_process', {
-    exec: mockedExec.stub
-  })
-});
 import { Messages } from '../../ui/messages';
-import { LanguageServerConstants } from '../../constants';
 import { DafnyCommands } from '../../commands';
 import VerificationGutterStatusView from '../../ui/verificationGutterStatusView';
+import { DocumentSymbol } from 'vscode';
 
+const mockedWorkspace = MockingUtils.mockedWorkspace();
 const mockedVsCode = {
   window: {
     activeTerminal: null as any,
@@ -28,13 +24,20 @@ const mockedVsCode = {
     registerCommand(command: string, callback: () => void): vscode.Disposable {
       return mockedCommands.registerCommand(command, callback);
     }
-  }
+  },
+  workspace: mockedWorkspace,
+  '@global': true
 };
-const mockedWorkspace = MockingUtils.mockedWorkspace();
-(vscode as unknown as any).workspace = mockedWorkspace;
 const CompileCommands = proxyquire('../../ui/compileCommands', {
   'vscode': mockedVsCode
 }).default;
+
+const { DafnyInstaller } = proxyquire('../../language/dafnyInstallation', {
+  'child_process': proxyquire('child_process', {
+    exec: mockedExec.stub
+  }),
+  vscode: mockedVsCode
+});
 
 suite('Compiler invocation', () => {
   test('Check command creation', async () => {
@@ -77,7 +80,7 @@ suite('Compiler invocation', () => {
     assert.strictEqual('<compiler command prefix>"<dotnet executable path>" "<extension path>/<compiler runtime path>" "fileName.dfy" /out <arg1> arg2',
       textSent.replace(/\\/g, '/'));
     assert.strictEqual(true, returnValue, 'returnValue');
-  });
+  }).timeout(60 * 1000);
 });
 
 suite('Dafny IDE Extension Installation', () => {
@@ -102,14 +105,14 @@ suite('Dafny IDE Extension Installation', () => {
     ]);
     assert.strictEqual(true, installer != null, 'Installer is not null');
     const result = await installer.install();
-    assert.strictEqual(outputChannelBuilder.writtenContent().replace(/\\/g, '/'),
+    assert.strictEqual(outputChannelBuilder.writtenContent().replace(/\\/g, '/').replace(/resources\/.*\n/, 'resources/\n'),
       'Starting Dafny installation\n'
-      + 'deleting previous Dafny installation at /tmp/mockedUri/out/resources/' + LanguageServerConstants.LatestVersion + '\n'
+      + 'deleting previous Dafny installation at /tmp/mockedUri/out/resources/\n'
       + 'Dafny installation failed:\n'
       + '> Simulated error in delete\n'
     );
     assert.strictEqual(false, result, 'Result is true');
-  });
+  }).timeout(60 * 1000);
 });
 
 suite('Verification Gutter', () => {
@@ -118,5 +121,24 @@ suite('Verification Gutter', () => {
     assert.deepStrictEqual([ new vscode.Range(0, 1, 1, 1) ], ranges.get(1));
     assert.deepStrictEqual([ new vscode.Range(7, 1, 8, 1) ], ranges.get(2));
     assert.deepStrictEqual([ new vscode.Range(3, 1, 3, 1), new vscode.Range(5, 1, 5, 1) ], ranges.get(0));
+  });
+});
+
+suite('commands', () => {
+  test.skip('restart server', async () => {
+    const program = `
+method Foo(x: nat) returns (y: nat) 
+  ensures y > 2;
+{ 
+  return x + 2; 
+}`;
+    const extension = vscode.extensions.getExtension('dafny-lang.ide-vscode')!;
+    await extension.activate();
+    const document = await vscode.workspace.openTextDocument({ language: 'dafny', content: program });
+    const symbols1 = await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider', document.uri) as DocumentSymbol[];
+    await vscode.commands.executeCommand('dafny.restartServer');
+    const symbols2 = await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider', document.uri) as DocumentSymbol[];
+    assert.strictEqual(symbols1.length > 0, true);
+    assert.strictEqual(symbols2.length, symbols1.length);
   });
 });

@@ -39,9 +39,11 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
+        "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceFolder}",
         "--extensionTestsPath=${workspaceFolder}/out/src/test/suite/index"
       ],
+      "env": { "dafnyIdeVersion": "latest nightly" },
       "outFiles": [
         "${workspaceFolder}/out/**/*.js",
         "${workspaceFolder}/dist/**/*.js"

@@ -181,15 +181,9 @@ export default class VerificationSymbolStatusView {
     this.updatesPerFile.set(params.uri, params);
     const uri = Uri.parse(params.uri);
     const controller = this.controller;
-    let rootSymbols: DocumentSymbol[];
-    try {
-      rootSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[];
-    } catch(error: unknown) {
-      console.log('ba');
-      throw error;
-    }
+    const rootSymbols: DocumentSymbol[] = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[];
     let items: TestItem[];
-    const document = await workspace.openTextDocument(uri.fsPath);
+    const document = await workspace.openTextDocument(uri);
     if(rootSymbols !== undefined) {
       items = this.updateUsingSymbols(params, document, controller, rootSymbols);
     } else {
