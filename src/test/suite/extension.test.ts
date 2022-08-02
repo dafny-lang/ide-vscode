@@ -12,7 +12,6 @@ const mockedCommands = MockingUtils.mockedCommands();
 import { Messages } from '../../ui/messages';
 import { DafnyCommands } from '../../commands';
 import VerificationGutterStatusView from '../../ui/verificationGutterStatusView';
-import { timeStamp } from 'console';
 import { DocumentSymbol } from 'vscode';
 
 const mockedWorkspace = MockingUtils.mockedWorkspace();
