@@ -1,38 +1,8 @@
-
-
-// Mock some languageClient thing to inject symbolStatus notifications
-// Mock the VSCode test API to intercept calls to it.
 import * as assert from 'assert';
 import { Emitter } from 'vscode-languageclient';
 import * as vscode from 'vscode';
 import { DocumentSymbol, EventEmitter, TestItem } from 'vscode';
 import { toPromise } from './eventsutil';
-
-const replaceCalled: EventEmitter<TestItem[]> = new Emitter();
-const createTestRunCalled: EventEmitter<vscode.TestRunRequest> = new Emitter();
-const testRunEndCalled: EventEmitter<vscode.TestRun> = new Emitter();
-const originalCreateTestController = vscode.tests.createTestController;
-vscode.tests.createTestController = (id: string, label: string) => {
-  const controller = originalCreateTestController(id, label);
-  const originalReplace = controller.items.replace.bind(controller.items);
-  controller.items.replace = (items: TestItem[]) => {
-    replaceCalled.fire(items);
-    originalReplace(items);
-  };
-
-  const originalCreateTestRun = controller.createTestRun.bind(controller);
-  controller.createTestRun = (request, name, persist) => {
-    const result = originalCreateTestRun(request, name, persist);
-    createTestRunCalled.fire(request);
-    const originalEnd = result.end.bind(result);
-    result.end = () => {
-      testRunEndCalled.fire(result);
-      originalEnd();
-    };
-    return result;
-  };
-  return controller;
-};
 
 const program = `
 import opened Bar
@@ -61,21 +31,61 @@ module Bar {
 }`;
 
 suite('Verification symbol view', () => {
-  test('happy flow', async () => {
-    const testRunCalledPromise = toPromise(createTestRunCalled.event);
-    const testRunEndPromise = toPromise(testRunEndCalled.event);
-    const untitledDocument = await vscode.workspace.openTextDocument({ content: program, language: 'dafny' });
-    const extension = vscode.extensions.getExtension('dafny-lang.ide-vscode')!;
-    await extension.activate();
-    const symbols = await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider', untitledDocument.uri) as DocumentSymbol[];
-    const foo = symbols[0];
-    const zaz = foo.children[0];
-    const m1 = zaz.children[0];
+  test('opening a file triggers an implicit testrun that shows stale tasks', async () => {
 
-    const replacedItems = await toPromise(replaceCalled.event);
-    const runRequest = await testRunCalledPromise;
-    await testRunEndPromise;
-    assert.strictEqual(runRequest.include![0].id, JSON.stringify(m1.selectionRange));
-    assert.strictEqual(replacedItems.length, 3);
+    const replaceCalled: EventEmitter<TestItem[]> = new Emitter();
+    const createTestRunCalled: EventEmitter<vscode.TestRunRequest> = new Emitter();
+    const testRunEndCalled: EventEmitter<vscode.TestRun> = new Emitter();
+    const testRunSkippedCalled: EventEmitter<vscode.TestItem> = new Emitter();
+    const originalCreateTestController = vscode.tests.createTestController;
+    vscode.tests.createTestController = (id: string, label: string) => {
+      const controller = originalCreateTestController(id, label);
+      const originalReplace = controller.items.replace.bind(controller.items);
+      controller.items.replace = (items: TestItem[]) => {
+        replaceCalled.fire(items);
+        originalReplace(items);
+      };
+
+      const originalCreateTestRun = controller.createTestRun.bind(controller);
+      controller.createTestRun = (request, name, persist) => {
+        const result = originalCreateTestRun(request, name, persist);
+        createTestRunCalled.fire(request);
+        const originalEnd = result.end.bind(result);
+        result.end = () => {
+          testRunEndCalled.fire(result);
+          originalEnd();
+        };
+        const originalSkipped = result.skipped.bind(result);
+        result.skipped = (item) => {
+          testRunSkippedCalled.fire(item);
+          originalSkipped(item);
+        };
+        return result;
+      };
+      return controller;
+    };
+
+    try {
+      const testRunCalledPromise = toPromise(createTestRunCalled.event);
+      const testRunEndPromise = toPromise(testRunEndCalled.event);
+      const testItemSkipped = toPromise(testRunSkippedCalled.event);
+      const untitledDocument = await vscode.workspace.openTextDocument({ content: program, language: 'dafny' });
+      const extension = vscode.extensions.getExtension('dafny-lang.ide-vscode')!;
+      await extension.activate();
+      const symbols = await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider', untitledDocument.uri) as DocumentSymbol[];
+      const foo = symbols[0];
+      const zaz = foo.children[0];
+      const m1 = zaz.children[0];
+
+      const replacedItems = await toPromise(replaceCalled.event);
+      assert.strictEqual(replacedItems.length, 3);
+      const runRequest = await testRunCalledPromise;
+      assert.strictEqual(runRequest.include![0].id, JSON.stringify(m1.selectionRange));
+      const skippedItem = await testItemSkipped;
+      assert.strictEqual(skippedItem.id, JSON.stringify(m1.selectionRange));
+      await testRunEndPromise;
+    } finally {
+      vscode.tests.createTestController = originalCreateTestController;
+    }
   }).timeout(60 * 1000);
 });
