@@ -12,6 +12,8 @@ const mockedCommands = MockingUtils.mockedCommands();
 import { Messages } from '../../ui/messages';
 import { DafnyCommands } from '../../commands';
 import VerificationGutterStatusView from '../../ui/verificationGutterStatusView';
+import { timeStamp } from 'console';
+import { DocumentSymbol } from 'vscode';
 
 const mockedWorkspace = MockingUtils.mockedWorkspace();
 const mockedVsCode = {
@@ -121,4 +123,16 @@ suite('Verification Gutter', () => {
     assert.deepStrictEqual([ new vscode.Range(7, 1, 8, 1) ], ranges.get(2));
     assert.deepStrictEqual([ new vscode.Range(3, 1, 3, 1), new vscode.Range(5, 1, 5, 1) ], ranges.get(0));
   });
+});
+
+suite('commands', () => {
+  test('restart server', async () => {
+    const program = 'method Foo(x: nat) returns (y: nat) ensures y > 2 { return x + 2; }';
+    const document = await vscode.workspace.openTextDocument({ language: 'dafny', content: program });
+    const symbols1 = await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider', document.uri) as DocumentSymbol[];
+    await vscode.commands.executeCommand('dafny.restartServer');
+    const symbols2 = await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider', document.uri) as DocumentSymbol[];
+    assert.strictEqual(symbols1.length > 0, true);
+    assert.strictEqual(symbols2.length, symbols1.length);
+  }).timeout(60 * 1000);
 });
