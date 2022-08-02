@@ -127,6 +127,8 @@ suite('Verification Gutter', () => {
 suite('commands', () => {
   test('restart server', async () => {
     const program = 'method Foo(x: nat) returns (y: nat) ensures y > 2 { return x + 2; }';
+    const extension = vscode.extensions.getExtension('dafny-lang.ide-vscode')!;
+    await extension.activate();
     const document = await vscode.workspace.openTextDocument({ language: 'dafny', content: program });
     const symbols1 = await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider', document.uri) as DocumentSymbol[];
     await vscode.commands.executeCommand('dafny.restartServer');
