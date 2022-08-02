@@ -65,6 +65,8 @@ suite('Verification symbol view', () => {
     const testRunCalledPromise = toPromise(createTestRunCalled.event);
     const testRunEndPromise = toPromise(testRunEndCalled.event);
     const untitledDocument = await vscode.workspace.openTextDocument({ content: program, language: 'dafny' });
+    const extension = vscode.extensions.getExtension('dafny-lang.ide-vscode')!;
+    await extension.activate();
     const symbols = await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider', untitledDocument.uri) as DocumentSymbol[];
     const foo = symbols[0];
     const zaz = foo.children[0];

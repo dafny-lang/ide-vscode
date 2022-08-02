@@ -10,7 +10,6 @@ const mockedExec = new MockingExec();
 const mockedCommands = MockingUtils.mockedCommands();
 
 import { Messages } from '../../ui/messages';
-import { LanguageServerConstants } from '../../constants';
 import { DafnyCommands } from '../../commands';
 import VerificationGutterStatusView from '../../ui/verificationGutterStatusView';
 
