@@ -55,7 +55,17 @@ async function getCurrentBranch() {
   return (await execAsync("git branch --show-current")).stdout.trim();
 }
 
+// Ensures that the working directory is clean
+async function ensureWorkingDirectoryClean() {
+  var unstagedChanges = (await execAsync("git diff")).stdout.trim();
+  if(unstagedChanges != "") {
+    console.log("Please commit your changes before launching this script.");
+    throw ABORTED;
+  }
+}
+
 async function ensureMaster() {
+  await ensureWorkingDirectoryClean();
   var currentBranch = getCurrentBranch();
   if(currentBranch != "master") {
     console.log(`You need to be on the 'master' branch to release a new version.`);
