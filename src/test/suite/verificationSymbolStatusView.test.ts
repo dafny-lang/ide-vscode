@@ -87,5 +87,5 @@ suite('Verification symbol view', () => {
     } finally {
       vscode.tests.createTestController = originalCreateTestController;
     }
-  }).timeout(60 * 1000);
+  }).timeout(30 * 1000);
 });

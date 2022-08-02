@@ -125,8 +125,13 @@ suite('Verification Gutter', () => {
 });
 
 suite('commands', () => {
-  test('restart server', async () => {
-    const program = 'method Foo(x: nat) returns (y: nat) ensures y > 2 { return x + 2; }';
+  test.skip('restart server', async () => {
+    const program = `
+method Foo(x: nat) returns (y: nat) 
+  ensures y > 2;
+{ 
+  return x + 2; 
+}`;
     const extension = vscode.extensions.getExtension('dafny-lang.ide-vscode')!;
     await extension.activate();
     const document = await vscode.workspace.openTextDocument({ language: 'dafny', content: program });
@@ -135,5 +140,5 @@ suite('commands', () => {
     const symbols2 = await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider', document.uri) as DocumentSymbol[];
     assert.strictEqual(symbols1.length > 0, true);
     assert.strictEqual(symbols2.length, symbols1.length);
-  }).timeout(60 * 1000);
+  });
 });
