@@ -262,7 +262,7 @@ export default class VerificationGutterStatusView {
     const perLineStatus = this.addCosmetics(params.perLineStatus);
 
     const symbolParams = (await this.symbolStatusView?.getFirstStatusForCurrentVersion(params.uri)) ?? [];
-    const originalLinesToSkip = symbolParams.map(testItem => testItem.range!.start.line).sort((a, b) => a - b);
+    const originalLinesToSkip = symbolParams.map(range => range.start.line).sort((a, b) => a - b);
 
     return VerificationGutterStatusView.perLineStatusToRanges(perLineStatus, originalLinesToSkip);
   }

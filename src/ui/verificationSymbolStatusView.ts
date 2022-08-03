@@ -29,7 +29,7 @@ export function createAndRegister(
  */
 export default class VerificationSymbolStatusView {
 
-  public getFirstStatusForCurrentVersion(uriString: string): Promise<TestItem[]> {
+  public getFirstStatusForCurrentVersion(uriString: string): Promise<Range[]> {
     return this.getItemsFilePromise(uriString).promise;
   }
 
@@ -58,11 +58,11 @@ export default class VerificationSymbolStatusView {
     return instance;
   }
 
-  private getItemsFilePromise(uriString: string): ResolveablePromise<TestItem[]> {
+  private getItemsFilePromise(uriString: string): ResolveablePromise<Range[]> {
     let listener = this.updateListenersPerFile.get(uriString);
     if(listener === undefined) {
-      let storedResolve: (value: TestItem[]) => void;
-      const promise = new Promise<TestItem[]>((resolve) => {
+      let storedResolve: (value: Range[]) => void;
+      const promise = new Promise<Range[]>((resolve) => {
         storedResolve = resolve;
       });
       listener = { resolve: storedResolve!, promise };
@@ -103,7 +103,7 @@ export default class VerificationSymbolStatusView {
   private itemStates: Map<string, PublishedVerificationStatus> = new Map();
   private itemRuns: Map<string, ItemRunState> = new Map();
   private readonly runItemsLeft: Map<TestRun, number> = new Map();
-  private readonly updateListenersPerFile: Map<string, ResolveablePromise<TestItem[]>> = new Map();
+  private readonly updateListenersPerFile: Map<string, ResolveablePromise<Range[]>> = new Map();
   private readonly updatesPerFile: Map<string, IVerificationSymbolStatusParams> = new Map();
   private readonly controller: TestController;
   private automaticRunEnd: boolean = false;
@@ -175,22 +175,26 @@ export default class VerificationSymbolStatusView {
   }
 
   private async update(params: IVerificationSymbolStatusParams): Promise<void> {
+    this.getItemsFilePromise(params.uri).resolve(params.namedVerifiables.map(v => VerificationSymbolStatusView.convertRange(v.nameRange)));
+    const uri = Uri.parse(params.uri);
+    const document = await workspace.openTextDocument(uri);
+    if(params.version !== document.version) {
+      return;
+    }
+
     await this.processUpdateLock;
 
     this.updateStatusBar(params);
     this.updatesPerFile.set(params.uri, params);
-    const uri = Uri.parse(params.uri);
     const controller = this.controller;
     const rootSymbols: DocumentSymbol[] = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[];
     let items: TestItem[];
-    const document = await workspace.openTextDocument(uri);
     if(rootSymbols !== undefined) {
       items = this.updateUsingSymbols(params, document, controller, rootSymbols);
     } else {
       items = params.namedVerifiables.map(f => this.getItem(document,
         VerificationSymbolStatusView.convertRange(f.nameRange), controller, uri));
       controller.items.replace(items);
-      this.getItemsFilePromise(params.uri).resolve(items);
     }
 
     const runningItemsWithoutRun = params.namedVerifiables.
@@ -329,7 +333,6 @@ export default class VerificationSymbolStatusView {
       childCollection.replace(newChildren);
     }
 
-    this.getItemsFilePromise(params.uri).resolve([ ...itemMapping.values() ]);
     return items;
   }
 
