@@ -1,5 +1,11 @@
 # Release Notes
 
+## 2.7.0
+- New: Add verification management UI (https://github.com/dafny-lang/ide-vscode/pull/229)
+- Syntax highlighting after "var" fixed (https://github.com/dafny-lang/ide-vscode/pull/231)
+- Release script (https://github.com/dafny-lang/ide-vscode/pull/228)
+- Fix the restart server command (https://github.com/dafny-lang/ide-vscode/pull/232)
+
 ## 2.6.3
 - Set a default time limit of 20 seconds to avoid long freezes (https://github.com/dafny-lang/ide-vscode/pull/225)
 - Fixed typo (https://github.com/dafny-lang/ide-vscode/pull/216)

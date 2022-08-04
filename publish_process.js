@@ -28,8 +28,7 @@ const { promisify, getSystemErrorMap } = require('util');
 const exec = require('child_process').exec;
 const execAsync = promisify(exec);
 const readline = require('readline');
-const fetch = (url, init) =>
-  import('node-fetch').then(({ default: fetch }) => fetch(url, init));
+const fetch = require('cross-fetch');
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
@@ -65,7 +64,7 @@ async function ensureWorkingDirectoryClean() {
 }
 
 async function ensureMaster() {
-  await ensureWorkingDirectoryClean();
+  //await ensureWorkingDirectoryClean();
   var currentBranch = await getCurrentBranch();
   if(currentBranch != "master") {
     console.log(`You need to be on the 'master' branch to release a new version.`);
@@ -241,7 +240,7 @@ async function UpdateChangeLog(currentChangeLogVersion, packageObj, updateChange
     await updateChangeLogWith(newVersion, allRecentCommitMessages);
     console.log("I changed " + changeLogFile + " to reflect the new version.\nPlease make edits as needed and close the editing window.");
     await execAsync(getCommandLine() + ' ' + changeLogFile);
-    if (!await question(`Ready to continue? ${ACCEPT_HINT}`)) {
+    if (!ok(await question(`Ready to continue? ${ACCEPT_HINT}`))) {
       console.log("Aborting.");
       throw ABORTED;
     }
@@ -253,7 +252,6 @@ async function UpdateChangeLog(currentChangeLogVersion, packageObj, updateChange
   } else {
     console.log("ChangeLog.md already up-to-date");
   }
-  return answer;
 }
 
 async function HandleFinalPublishingProcess(currentChangeLogVersion, lastPreparedTag) {
@@ -294,7 +292,7 @@ async function Main() {
     }
 
     let newVersion = await nextVersion(currentChangeLogVersion);
-    let mostRecentDafnyRelease = await getMostRecentDafnyRelease().substring(1);
+    let mostRecentDafnyRelease = (await getMostRecentDafnyRelease()).substring(1);
     let packageObj = await readPackageJson();
     
     console.log(`Going to proceed to publish ${newVersion}`);
