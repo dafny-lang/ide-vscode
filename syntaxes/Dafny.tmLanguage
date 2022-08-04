@@ -26,15 +26,7 @@
 				</dict>
 			</dict>
 			<key>end</key>
-			<string>:=|:\||;|(?=const|least|greatest|predicate|function|method|lemma|var|type|datatype|newtype)</string>
-			<!--key>endCaptures</key>
-			<dict>
-				<key>1</key>
-				<dict>
-					<key>name</key>
-					<string>storage.type.dafny</string>
-				</dict>
-			</dict-->
+			<string>:=|:\||;|\)|\}|(?=(?:class|codatatype|const|constructor|datatype|function|greatest|iterator|least|lemma|method|module|newtype|predicate|trait|type|var)\b)</string>
 			<key>name</key>
 			<string>meta.vardecl.dafny</string>
 			<key>patterns</key>
@@ -150,7 +142,7 @@
 				</dict>
 			</dict>
 			<key>end</key>
-			<string>(?=&lt;|\s*|,|\)|\}|requires|ensures|modifies|var|const|method|function|datatype|type|newtype|lemma|least|greatest|predicate)</string>
+			<string>(?=&lt;|\s*|,|\)|\}|(?:requires|ensures|modifies|reads|class|codatatype|const|constructor|datatype|function|greatest|iterator|least|lemma|method|module|newtype|predicate|trait|type|var)\b))</string>
 		</dict>
 		<key>genericfunctioncalls</key>
 		<dict>
