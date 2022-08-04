@@ -312,7 +312,7 @@ async function Main() {
     await execAsync(`git add ${changeLogFile} ${packageFile} ${constantsFile} ${packageLockFile}`);
     if(ok(await question(`I made all the necessary edits. Push the changes to the remote repository? ${ACCEPT_HINT}`))) {
       await execAsync(`git commit -m "Release v${newVersion}${ updatedDafny ? ` (updated Dafny to ${mostRecentDafnyRelease})` : "" }"`);
-      await execAsync(`git push origin ${newBranch}`);
+      await execAsync(`git push origin --set-upstream ${newBranch}`);
       console.log("Now, create the pull request by clicking the link below:");
       console.log(`https://github.com/dafny-lang/ide-vscode/compare/${newBranch}?expand=1`);
       console.log("When this PR is approved and merged, launch this script again to finish publishing the release.");
