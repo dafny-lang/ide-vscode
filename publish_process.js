@@ -66,7 +66,7 @@ async function ensureWorkingDirectoryClean() {
 
 async function ensureMaster() {
   await ensureWorkingDirectoryClean();
-  var currentBranch = getCurrentBranch();
+  var currentBranch = await getCurrentBranch();
   if(currentBranch != "master") {
     console.log(`You need to be on the 'master' branch to release a new version.`);
     if(!ok(await question(`Switch from '${currentBranch}' to 'master'? ${ACCEPT_HINT}`))) {
@@ -75,7 +75,7 @@ async function ensureMaster() {
     }
     console.log("switched to master branch");
     console.log((await execAsync("git checkout master")).stdout);
-    currentBranch = getCurrentBranch();
+    currentBranch = await getCurrentBranch();
     if(currentBranch != "master") {
       console.log("Failed to checkout master");
       throw ABORTED;
