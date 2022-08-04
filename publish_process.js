@@ -64,7 +64,7 @@ async function ensureWorkingDirectoryClean() {
 }
 
 async function ensureMaster() {
-  //await ensureWorkingDirectoryClean();
+  await ensureWorkingDirectoryClean();
   var currentBranch = await getCurrentBranch();
   if(currentBranch != "master") {
     console.log(`You need to be on the 'master' branch to release a new version.`);
