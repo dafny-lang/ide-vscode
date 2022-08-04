@@ -26,17 +26,9 @@
 				</dict>
 			</dict>
 			<key>end</key>
-			<string>:=|:\||;</string>
-			<key>endCaptures</key>
-			<dict>
-				<key>1</key>
-				<dict>
-					<key>name</key>
-					<string>storage.type.dafny</string>
-				</dict>
-			</dict>
+			<string>:=|:\||;|\)|\}|(?=(?:class|codatatype|const|constructor|datatype|function|greatest|iterator|least|lemma|method|module|newtype|predicate|trait|type|var)\b)</string>
 			<key>name</key>
-			<string>meta.class.identifier.dafny</string>
+			<string>meta.vardecl.dafny</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -54,6 +46,10 @@
 				<dict>
 					<key>include</key>
 					<string>#generics</string>
+				</dict>
+			  <dict>
+				  <key>include</key>
+				  <string>#formalTypeDeclaration</string>
 				</dict>
 			</array>
 		</dict>
@@ -131,6 +127,23 @@
 	</array>
 	<key>repository</key>
 	<dict>
+	  <key>formalTypeDeclaration</key>
+		<dict>
+			<key>name</key>
+			<string>meta.type.formaldeclaration</string>
+			<key>begin</key>
+			<string>(?<!\{|:):\s*(?:[\w'?]+\.)*([\w'?]+\b(?!&lt;))</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>storage.type.dafny</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>(?=&lt;|\s*|,|\)|\}|(?:requires|ensures|modifies|reads|class|codatatype|const|constructor|datatype|function|greatest|iterator|least|lemma|method|module|newtype|predicate|trait|type|var)\b))</string>
+		</dict>
 		<key>genericfunctioncalls</key>
 		<dict>
 			<key>begin</key>
@@ -529,20 +542,8 @@
 					</array>
 				</dict>
 				<dict>
-					<key>begin</key>
-					<string>(?<!\{|:):\s*(?:[\w'?]+\.)*([\w'?]+\b(?!&lt;))</string>
-					<key>beginCaptures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>storage.type.dafny</string>
-						</dict>
-					</dict>
-					<key>end</key>
-					<string>(?=&lt;|\s*|,|\)|\}|requires|ensures|modifies)</string>
-					<key>name</key>
-					<string>meta.type.formaldeclaration</string>
+				  <key>include</key>
+					<string>#formalTypeDeclaration</string>
 				</dict>
 				<dict>
 					<key>include</key>

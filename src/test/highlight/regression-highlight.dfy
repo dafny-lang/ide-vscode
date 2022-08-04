@@ -1,3 +1,12 @@
+// Issue #230
+module A {
+  trait T {
+    var x: int
+    var y: int
+    //^var should be highlighted correctly, and int should be a type.
+  }
+}
+
 // Issue #221
 method Test() {
   var list: List<A> := new C<A>();
