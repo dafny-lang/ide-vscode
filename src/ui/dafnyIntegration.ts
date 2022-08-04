@@ -9,6 +9,8 @@ import GhostDiagnosticsView from './ghostDiagnosticsView';
 import VerificationGutterStatusView from './verificationGutterStatusView';
 import RelatedErrorView from './relatedErrorView';
 import VerificationSymbolStatusView from './verificationSymbolStatusView';
+import Configuration from '../configuration';
+import { ConfigurationConstants } from '../constants';
 
 export default async function createAndRegisterDafnyIntegration(
   context: ExtensionContext,
@@ -20,7 +22,7 @@ export default async function createAndRegisterDafnyIntegration(
   const compilationStatusView = CompilationStatusView.createAndRegister(context, languageClient, languageServerVersion);
   let symbolStatusView: VerificationSymbolStatusView | undefined = undefined;
   const serverSupportsSymbolStatusView = versionToNumeric('3.8.0') <= versionToNumeric(languageServerVersion);
-  if(serverSupportsSymbolStatusView) {
+  if(serverSupportsSymbolStatusView && Configuration.get<string>(ConfigurationConstants.LanguageServer.DisplayVerifiableSymbols)) {
     symbolStatusView = VerificationSymbolStatusView.createAndRegister(context, languageClient, compilationStatusView);
   } else {
     compilationStatusView.registerBefore38Messages();

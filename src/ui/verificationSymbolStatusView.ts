@@ -149,7 +149,6 @@ export default class VerificationSymbolStatusView {
   }
 
   private async update(params: IVerificationSymbolStatusParams): Promise<void> {
-    this.getItemsFilePromise(params.uri).resolve(params.namedVerifiables.map(v => VerificationSymbolStatusView.convertRange(v.nameRange)));
     await this.noRunCreationInProgress;
     const uri = Uri.parse(params.uri);
     const document = await workspace.openTextDocument(uri);
@@ -166,6 +165,7 @@ export default class VerificationSymbolStatusView {
     document: TextDocument,
     rootSymbols: DocumentSymbol[] | undefined) {
 
+    this.getVerifiableRangesPromise(params.uri).resolve(params.namedVerifiables.map(v => VerificationSymbolStatusView.convertRange(v.nameRange)));
     this.updateStatusBar(params);
     this.updatesPerFile.set(params.uri, params);
     const controller = this.controller;
@@ -334,11 +334,11 @@ export default class VerificationSymbolStatusView {
     return new Position(position.line, position.character);
   }
 
-  public getFirstStatusForCurrentVersion(uriString: string): Promise<Range[]> {
-    return this.getItemsFilePromise(uriString).promise;
+  public getVerifiableRanges(uriString: string): Promise<Range[]> {
+    return this.getVerifiableRangesPromise(uriString).promise;
   }
 
-  private getItemsFilePromise(uriString: string): ResolveablePromise<Range[]> {
+  private getVerifiableRangesPromise(uriString: string): ResolveablePromise<Range[]> {
     let listener = this.updateListenersPerFile.get(uriString);
     if(listener === undefined) {
       let storedResolve: (value: Range[]) => void;
