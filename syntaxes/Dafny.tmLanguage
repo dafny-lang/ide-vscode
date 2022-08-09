@@ -26,7 +26,7 @@
 				</dict>
 			</dict>
 			<key>end</key>
-			<string>:=|:\||;|\)|\}|(?=(?:class|codatatype|const|constructor|datatype|function|greatest|iterator|least|lemma|method|module|newtype|predicate|trait|type|var)\b)</string>
+			<string>:=|:\||;|\)|\}|(?=(?:class|codatatype|const|constructor|datatype|function|greatest|iterator|least|lemma|method|module|newtype|predicate|trait|type|var|ghost)\b)</string>
 			<key>name</key>
 			<string>meta.vardecl.dafny</string>
 			<key>patterns</key>
