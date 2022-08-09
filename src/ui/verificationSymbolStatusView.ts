@@ -187,7 +187,7 @@ export default class VerificationSymbolStatusView {
     if(rootSymbols !== undefined) {
       items = this.updateUsingSymbols(params, document, controller, rootSymbols);
     } else {
-      items = params.namedVerifiables.map(f => this.getItem(document,
+      items = params.namedVerifiables.map(f => VerificationSymbolStatusView.getItem(document,
         VerificationSymbolStatusView.convertRange(f.nameRange), controller, uri));
       controller.items.replace(items);
       this.getItemsFilePromise(params.uri).resolve(items);
@@ -217,7 +217,7 @@ export default class VerificationSymbolStatusView {
       }
       const { run, startedRunningTime } = itemRunState;
 
-      const endRun = () => {
+      const itemFinished = () => {
         const remaining = this.runItemsLeft.get(run)! - 1;
         this.itemRuns.delete(testItem.id);
         if(remaining === 0) {
@@ -233,16 +233,16 @@ export default class VerificationSymbolStatusView {
       switch(element.status) {
       case PublishedVerificationStatus.Stale: {
         run.skipped(testItem);
-        endRun();
+        itemFinished();
         break;
       }
       case PublishedVerificationStatus.Error:
         run.failed(testItem, [], getDuration());
-        endRun();
+        itemFinished();
         break;
       case PublishedVerificationStatus.Correct:
         run.passed(testItem, getDuration());
-        endRun();
+        itemFinished();
         break;
       case PublishedVerificationStatus.Running:
         run.started(testItem);
@@ -261,6 +261,62 @@ export default class VerificationSymbolStatusView {
       }
     }
     this.itemRuns = newItemRuns;
+  }
+
+  private updateUsingSymbols(params: IVerificationSymbolStatusParams, document: TextDocument,
+    controller: TestController, rootSymbols: DocumentSymbol[]): TestItem[] {
+
+    const itemMapping: Map<DocumentSymbol, TestItem> = new Map();
+    const uri = Uri.parse(params.uri);
+
+    const updateMapping = (symbols: DocumentSymbol[], leafRange: Range): TestItem | undefined => {
+      for(const symbol of symbols) {
+        if(symbol.range.contains(leafRange)) {
+          let item = itemMapping.get(symbol);
+          if(!item) {
+            const itemRange = symbol.selectionRange;
+            item = VerificationSymbolStatusView.getItem(document, itemRange, controller, uri);
+            itemMapping.set(symbol, item);
+          }
+          if(symbol.selectionRange.isEqual(leafRange)) {
+            return item;
+          } else {
+            return updateMapping(symbol.children, leafRange);
+          }
+        }
+      }
+      console.error(`Could not find a symbol to map to item ${JSON.stringify(leafRange)}. Item won't be visible in symbol tree.`);
+      return VerificationSymbolStatusView.getItem(document, leafRange, controller, uri);
+    };
+
+    const items = params.namedVerifiables.map(element => {
+      const vscodeRange = VerificationSymbolStatusView.convertRange(element.nameRange);
+      return updateMapping(rootSymbols, vscodeRange)!;
+    });
+
+    replaceChildren(rootSymbols, controller.items);
+    for(const [ symbol, item ] of itemMapping.entries()) {
+      replaceChildren(symbol.children, item.children);
+    }
+
+    function replaceChildren(childSymbols: DocumentSymbol[], childCollection: TestItemCollection) {
+      const newChildren = childSymbols.flatMap(child => {
+        const childItem = itemMapping.get(child);
+        return childItem ? [ childItem ] : [];
+      });
+      childCollection.replace(newChildren);
+    }
+
+    this.getItemsFilePromise(params.uri).resolve([ ...itemMapping.values() ]);
+
+    return items;
+  }
+
+  private static getItem(document: TextDocument, itemRange: Range, controller: TestController, uri: Uri) {
+    const nameText = document.getText(itemRange);
+    const item = controller.createTestItem(JSON.stringify(itemRange), nameText, uri);
+    item.range = itemRange;
+    return item;
   }
 
   private async updateStatusBar(params: IVerificationSymbolStatusParams) {
@@ -288,56 +344,6 @@ export default class VerificationSymbolStatusView {
       }
     }
     this.compilationStatusView.setDocumentStatusMessage(params.uri.toString(), message, params.version);
-  }
-
-  private updateUsingSymbols(params: IVerificationSymbolStatusParams, document: TextDocument,
-    controller: TestController, rootSymbols: DocumentSymbol[]): TestItem[] {
-
-    const itemMapping: Map<DocumentSymbol, TestItem> = new Map();
-    const uri = Uri.parse(params.uri);
-
-    const updateMapping = (symbols: DocumentSymbol[], leafRange: Range): TestItem | undefined => {
-      for(const symbol of symbols) {
-        if(symbol.range.contains(leafRange)) {
-          let item = itemMapping.get(symbol);
-          if(!item) {
-            const itemRange = symbol.selectionRange;
-            item = this.getItem(document, itemRange, controller, uri);
-            itemMapping.set(symbol, item);
-          }
-          return updateMapping(symbol.children, leafRange) ?? item;
-        }
-      }
-      return undefined;
-    };
-
-    const items = params.namedVerifiables.map(element => {
-      const vscodeRange = VerificationSymbolStatusView.convertRange(element.nameRange);
-      return updateMapping(rootSymbols, vscodeRange)!;
-    });
-
-    replaceChildren(rootSymbols, controller.items);
-    for(const [ symbol, item ] of itemMapping.entries()) {
-      replaceChildren(symbol.children, item.children);
-    }
-
-    function replaceChildren(childSymbols: DocumentSymbol[], childCollection: TestItemCollection) {
-      const newChildren = childSymbols.flatMap(child => {
-        const childItem = itemMapping.get(child);
-        return childItem ? [ childItem ] : [];
-      });
-      childCollection.replace(newChildren);
-    }
-
-    this.getItemsFilePromise(params.uri).resolve([ ...itemMapping.values() ]);
-    return items;
-  }
-
-  private getItem(document: TextDocument, itemRange: Range, controller: TestController, uri: Uri) {
-    const nameText = document.getText(itemRange);
-    const item = controller.createTestItem(JSON.stringify(itemRange), nameText, uri);
-    item.range = itemRange;
-    return item;
   }
 
   private static convertRange(range: lspRange): Range {
