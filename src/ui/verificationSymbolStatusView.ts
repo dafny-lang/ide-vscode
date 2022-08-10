@@ -292,7 +292,6 @@ export default class VerificationSymbolStatusView {
       childCollection.replace(newChildren);
     }
 
-    this.getItemsFilePromise(params.uri).resolve([ ...itemMapping.values() ]);
     return items;
   }
 
