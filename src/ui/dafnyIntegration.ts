@@ -22,7 +22,7 @@ export default async function createAndRegisterDafnyIntegration(
   const compilationStatusView = CompilationStatusView.createAndRegister(context, languageClient, languageServerVersion);
   let symbolStatusView: VerificationSymbolStatusView | undefined = undefined;
   const serverSupportsSymbolStatusView = versionToNumeric('3.8.0') <= versionToNumeric(languageServerVersion);
-  if(serverSupportsSymbolStatusView && Configuration.get<string>(ConfigurationConstants.LanguageServer.DisplayVerifiableSymbols)) {
+  if(serverSupportsSymbolStatusView && Configuration.get<boolean>(ConfigurationConstants.LanguageServer.DisplayVerificationAsTests)) {
     symbolStatusView = VerificationSymbolStatusView.createAndRegister(context, languageClient, compilationStatusView);
   } else {
     compilationStatusView.registerBefore38Messages();
