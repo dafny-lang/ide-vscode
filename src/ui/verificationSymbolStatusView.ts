@@ -20,8 +20,7 @@ export function createAndRegister(
   context: ExtensionContext,
   languageClient: DafnyLanguageClient,
   compilationStatusView: CompilationStatusView): VerificationSymbolStatusView {
-  const instance = new VerificationSymbolStatusView(context, languageClient, compilationStatusView);
-  return instance;
+  return new VerificationSymbolStatusView(context, languageClient, compilationStatusView);
 }
 
 /**
@@ -29,46 +28,11 @@ export function createAndRegister(
  */
 export default class VerificationSymbolStatusView {
 
-  public getFirstStatusForCurrentVersion(uriString: string): Promise<TestItem[]> {
-    return this.getItemsFilePromise(uriString).promise;
-  }
-
   public static createAndRegister(
     context: ExtensionContext,
     languageClient: DafnyLanguageClient,
     compilationStatusView: CompilationStatusView): VerificationSymbolStatusView {
-    const instance = new VerificationSymbolStatusView(context, languageClient, compilationStatusView);
-    window.onDidChangeActiveTextEditor(e => {
-      if(e !== undefined) {
-        const lastUpdate = instance.updatesPerFile.get(e.document.uri.toString());
-        if(lastUpdate !== undefined) {
-          instance.update(lastUpdate);
-        }
-      }
-    });
-    workspace.onDidChangeTextDocument(e => {
-      const uriString = e.document.uri.toString();
-      instance.updatesPerFile.delete(uriString);
-      instance.updateListenersPerFile.delete(uriString);
-    });
-    context.subscriptions.push(
-      languageClient.onVerificationSymbolStatus(params => instance.update(params)),
-      languageClient.onCompilationStatus(params => compilationStatusView.compilationStatusChangedForBefore38(params))
-    );
-    return instance;
-  }
-
-  private getItemsFilePromise(uriString: string): ResolveablePromise<TestItem[]> {
-    let listener = this.updateListenersPerFile.get(uriString);
-    if(listener === undefined) {
-      let storedResolve: (value: TestItem[]) => void;
-      const promise = new Promise<TestItem[]>((resolve) => {
-        storedResolve = resolve;
-      });
-      listener = { resolve: storedResolve!, promise };
-      this.updateListenersPerFile.set(uriString, listener);
-    }
-    return listener;
+    return new VerificationSymbolStatusView(context, languageClient, compilationStatusView);
   }
 
   public constructor(
@@ -78,18 +42,28 @@ export default class VerificationSymbolStatusView {
     this.controller = this.createController();
     context.subscriptions.push(this.controller);
 
+    window.onDidChangeActiveTextEditor(e => {
+      if(e !== undefined) {
+        const lastUpdate = this.updatesPerFile.get(e.document.uri.toString());
+        if(lastUpdate !== undefined) {
+          this.update(lastUpdate);
+        }
+      }
+    }, this, context.subscriptions);
     workspace.onDidChangeTextDocument(e => {
+      console.log('document updated to', e.document.version);
       const uriString = e.document.uri.toString();
       this.updateListenersPerFile.delete(uriString);
-    });
+      this.updatesPerFile.delete(uriString);
+    }, this, context.subscriptions);
     workspace.onDidCloseTextDocument(e => {
       const uriString = e.uri.toString();
       this.updatesPerFile.delete(uriString);
-    });
+    }, this, context.subscriptions);
     context.subscriptions.push(
-      languageClient.onVerificationSymbolStatus(params => this.update(params))
+      languageClient.onVerificationSymbolStatus(params => this.update(params)),
+      languageClient.onCompilationStatus(params => compilationStatusView.compilationStatusChangedForBefore38(params))
     );
-
     window.onDidChangeActiveTextEditor(e => {
       if(e !== undefined) {
         const lastUpdate = this.updatesPerFile.get(e.document.uri.toString());
@@ -103,11 +77,11 @@ export default class VerificationSymbolStatusView {
   private itemStates: Map<string, PublishedVerificationStatus> = new Map();
   private itemRuns: Map<string, ItemRunState> = new Map();
   private readonly runItemsLeft: Map<TestRun, number> = new Map();
-  private readonly updateListenersPerFile: Map<string, ResolveablePromise<TestItem[]>> = new Map();
+  private readonly updateListenersPerFile: Map<string, ResolveablePromise<Range[]>> = new Map();
   private readonly updatesPerFile: Map<string, IVerificationSymbolStatusParams> = new Map();
   private readonly controller: TestController;
   private automaticRunEnd: boolean = false;
-  private processUpdateLock: Promise<void> = Promise.resolve();
+  private noRunCreationInProgress: Promise<void> = Promise.resolve();
 
   private createController(): TestController {
     const controller = tests.createTestController('verificationStatus', 'Verification Status');
@@ -115,8 +89,8 @@ export default class VerificationSymbolStatusView {
       const items: TestItem[] = this.getItemsInRun(request, controller);
       const runningItems: TestItem[] = [];
       let outerResolve: () => void;
-      await this.processUpdateLock;
-      this.processUpdateLock = new Promise((resolve) => {
+      await this.noRunCreationInProgress;
+      this.noRunCreationInProgress = new Promise((resolve) => {
         outerResolve = resolve;
       });
 
@@ -175,22 +149,33 @@ export default class VerificationSymbolStatusView {
   }
 
   private async update(params: IVerificationSymbolStatusParams): Promise<void> {
-    await this.processUpdateLock;
+    await this.noRunCreationInProgress;
+    const uri = Uri.parse(params.uri);
+    const document = await workspace.openTextDocument(uri);
+    const rootSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[] | undefined;
 
+    // After this check we may no longer use awaits, because they allow the document to be updated and then our update becomes outdated.
+    if(params.version !== document.version) {
+      return;
+    }
+    this.updateForSpecificDocumentVersion(params, document, rootSymbols);
+  }
+
+  private updateForSpecificDocumentVersion(params: IVerificationSymbolStatusParams,
+    document: TextDocument,
+    rootSymbols: DocumentSymbol[] | undefined) {
+
+    this.getVerifiableRangesPromise(params.uri).resolve(params.namedVerifiables.map(v => VerificationSymbolStatusView.convertRange(v.nameRange)));
     this.updateStatusBar(params);
     this.updatesPerFile.set(params.uri, params);
-    const uri = Uri.parse(params.uri);
     const controller = this.controller;
-    const rootSymbols: DocumentSymbol[] = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[];
     let items: TestItem[];
-    const document = await workspace.openTextDocument(uri);
     if(rootSymbols !== undefined) {
       items = this.updateUsingSymbols(params, document, controller, rootSymbols);
     } else {
       items = params.namedVerifiables.map(f => this.getItem(document,
-        VerificationSymbolStatusView.convertRange(f.nameRange), controller, uri));
+        VerificationSymbolStatusView.convertRange(f.nameRange), controller, document.uri));
       controller.items.replace(items);
-      this.getItemsFilePromise(params.uri).resolve(items);
     }
 
     const runningItemsWithoutRun = params.namedVerifiables.
@@ -329,7 +314,6 @@ export default class VerificationSymbolStatusView {
       childCollection.replace(newChildren);
     }
 
-    this.getItemsFilePromise(params.uri).resolve([ ...itemMapping.values() ]);
     return items;
   }
 
@@ -348,5 +332,22 @@ export default class VerificationSymbolStatusView {
 
   private static convertPosition(position: lspPosition): Position {
     return new Position(position.line, position.character);
+  }
+
+  public getVerifiableRanges(uriString: string): Promise<Range[]> {
+    return this.getVerifiableRangesPromise(uriString).promise;
+  }
+
+  private getVerifiableRangesPromise(uriString: string): ResolveablePromise<Range[]> {
+    let listener = this.updateListenersPerFile.get(uriString);
+    if(listener === undefined) {
+      let storedResolve: (value: Range[]) => void;
+      const promise = new Promise<Range[]>((resolve) => {
+        storedResolve = resolve;
+      });
+      listener = { resolve: storedResolve!, promise };
+      this.updateListenersPerFile.set(uriString, listener);
+    }
+    return listener;
   }
 }
