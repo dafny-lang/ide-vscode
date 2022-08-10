@@ -160,6 +160,11 @@
           "default": "true",
           "description": "Display verification status in the gutter (requires restart and Dafny 3.7.0+)"
         },
+        "dafny.displayVerificationAsTests": {
+          "type": "boolean",
+          "default": "true",
+          "description": "Display verification status both in the test panel, and as actionable buttons next to top-level symbols in the editor (requires restart and Dafny 3.8.0+)"
+        },
         "dafny.dafnyPlugins": {
           "type": "array",
           "items": {
