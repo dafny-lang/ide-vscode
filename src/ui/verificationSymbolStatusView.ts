@@ -297,7 +297,7 @@ export default class VerificationSymbolStatusView {
 
   private static getItem(document: TextDocument, itemRange: Range, controller: TestController, uri: Uri) {
     const nameText = document.getText(itemRange);
-    const item = controller.createTestItem(JSON.stringify(itemRange), nameText, uri);
+    const item = controller.createTestItem(uri.toString() + JSON.stringify(itemRange), nameText, uri);
     item.range = itemRange;
     return item;
   }

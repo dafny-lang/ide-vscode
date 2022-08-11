@@ -32,36 +32,27 @@ module Bar {
 
 suite('Verification symbol view', () => {
   test('opening a file triggers an implicit testrun that shows stale tasks', async () => {
+    const testRunCalledPromise = toPromise(listener.createTestRunCalled.event);
+    const testRunEndPromise = toPromise(listener.testRunEndCalled.event);
+    const testItemSkipped = toPromise(listener.testRunSkippedCalled.event);
+    const untitledDocument = await vscode.workspace.openTextDocument({ content: program, language: 'dafny' });
+    const extension = vscode.extensions.getExtension('dafny-lang.ide-vscode')!;
+    await extension.activate();
+    const symbols = await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider', untitledDocument.uri) as DocumentSymbol[];
+    const foo = symbols[0];
+    const zaz = foo.children[0];
+    const m1 = zaz.children[0];
 
-    const listener = new TestControllerListener();
-
-    try {
-      const testRunCalledPromise = toPromise(listener.createTestRunCalled.event);
-      const testRunEndPromise = toPromise(listener.testRunEndCalled.event);
-      const testItemSkipped = toPromise(listener.testRunSkippedCalled.event);
-      const untitledDocument = await vscode.workspace.openTextDocument({ content: program, language: 'dafny' });
-      const extension = vscode.extensions.getExtension('dafny-lang.ide-vscode')!;
-      await extension.activate();
-      const symbols = await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider', untitledDocument.uri) as DocumentSymbol[];
-      const foo = symbols[0];
-      const zaz = foo.children[0];
-      const m1 = zaz.children[0];
-
-      const replacedItems = await toPromise(listener.replaceCalled.event);
-      assert.strictEqual(replacedItems.length, 3);
-      const runRequest = await testRunCalledPromise;
-      assert.strictEqual(runRequest.include![0].id, JSON.stringify(m1.selectionRange));
-      const skippedItem = await testItemSkipped;
-      assert.strictEqual(skippedItem.id, JSON.stringify(m1.selectionRange));
-      await testRunEndPromise;
-    } finally {
-      listener.dispose();
-    }
+    const replacedItems = await toPromise(listener.replaceCalled.event);
+    assert.strictEqual(replacedItems.length, 3);
+    const runRequest = await testRunCalledPromise;
+    assert.strictEqual(runRequest.include![0].id, untitledDocument.uri.toString() + JSON.stringify(m1.selectionRange));
+    const skippedItem = await testItemSkipped;
+    assert.strictEqual(skippedItem.id, untitledDocument.uri.toString() + JSON.stringify(m1.selectionRange));
+    await testRunEndPromise;
   }).timeout(30 * 1000);
 
   test('test runs still start and end when document symbols do not match verifiable symbols', async () => {
-
-    const listener = new TestControllerListener();
 
     const originalExecuteCommand = vscode.commands.executeCommand;
     function executeCommandMock<T = unknown>(command: string, args: any[]) {
@@ -86,7 +77,6 @@ suite('Verification symbol view', () => {
       await testRunEndPromise;
     } finally {
       vscode.commands.executeCommand = originalExecuteCommand;
-      listener.dispose();
     }
   }).timeout(30 * 1000);
 });
@@ -132,3 +122,4 @@ class TestControllerListener {
     vscode.tests.createTestController = this.originalCreateTestController;
   }
 }
+const listener = new TestControllerListener();
