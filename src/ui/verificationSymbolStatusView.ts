@@ -67,7 +67,9 @@ export default class VerificationSymbolStatusView {
     window.onDidChangeActiveTextEditor(e => {
       if(e !== undefined) {
         const lastUpdate = this.updatesPerFile.get(e.document.uri.toString());
-        if(lastUpdate !== undefined) {
+        if(lastUpdate === undefined) {
+          this.controller.items.replace([]);
+        } else {
           this.update(lastUpdate);
         }
       }
