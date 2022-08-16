@@ -167,22 +167,30 @@ export default class VerificationSymbolStatusView {
     document: TextDocument,
     rootSymbols: DocumentSymbol[] | undefined) {
 
-    this.getVerifiableRangesPromise(params.uri).resolve(params.namedVerifiables.map(v => VerificationSymbolStatusView.convertRange(v.nameRange)));
     this.updateStatusBar(params);
     this.updatesPerFile.set(params.uri, params);
     const controller = this.controller;
-    let items: TestItem[];
+    let leafItems: TestItem[];
     if(rootSymbols !== undefined) {
-      items = this.updateUsingSymbols(params, document, controller, rootSymbols);
+      leafItems = this.updateUsingSymbols(params, document, controller, rootSymbols);
     } else {
-      items = params.namedVerifiables.map(f => VerificationSymbolStatusView.getItem(document,
+      leafItems = params.namedVerifiables.map(f => VerificationSymbolStatusView.getItem(document,
         VerificationSymbolStatusView.convertRange(f.nameRange), controller, document.uri));
-      controller.items.replace(items);
+      controller.items.replace(leafItems);
     }
+    function collectTestItems(collection: TestItemCollection, result: TestItem[]) {
+      collection.forEach(item => {
+        result.push(item);
+        collectTestItems(item.children, result);
+      });
+    }
+    const allTestItems: TestItem[] = [];
+    collectTestItems(controller.items, allTestItems);
+    this.getVerifiableRangesPromise(params.uri).resolve(allTestItems.map(v => v.range!));
 
     const runningItemsWithoutRun = params.namedVerifiables.
       map((element, index) => {
-        return { verifiable: element, testItem: items[index] };
+        return { verifiable: element, testItem: leafItems[index] };
       }).
       filter(({ verifiable, testItem }) => {
         return this.itemStates.get(testItem.id) !== verifiable.status && this.itemRuns.get(testItem.id) === undefined;
@@ -193,7 +201,7 @@ export default class VerificationSymbolStatusView {
 
     const newItemRuns = new Map();
     params.namedVerifiables.forEach((element, index) => {
-      const testItem = items[index];
+      const testItem = leafItems[index];
       const itemRunState = this.itemRuns.get(testItem.id)!;
       if(this.itemStates.get(testItem.id) === element.status) {
         const isRunning = itemRunState !== undefined;
@@ -241,7 +249,7 @@ export default class VerificationSymbolStatusView {
         break;
       }
     });
-    this.itemStates = new Map(params.namedVerifiables.map((v, index) => [ items[index].id, v.status ]));
+    this.itemStates = new Map(params.namedVerifiables.map((v, index) => [ leafItems[index].id, v.status ]));
     for(const [ id, oldItem ] of this.itemRuns.entries()) {
       if(!newItemRuns.has(id)) {
         oldItem.run.end();
