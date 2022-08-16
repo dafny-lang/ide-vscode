@@ -193,7 +193,9 @@ export default class VerificationSymbolStatusView {
         return { verifiable: element, testItem: leafItems[index] };
       }).
       filter(({ verifiable, testItem }) => {
-        return this.itemStates.get(testItem.id) !== verifiable.status && this.itemRuns.get(testItem.id) === undefined;
+        return this.itemStates.get(testItem.id) !== verifiable.status
+          && (this.itemRuns.get(testItem.id) === undefined
+            || this.itemRuns.get(testItem.id)?.run.token.isCancellationRequested);
       }).map(r => r.testItem);
     if(runningItemsWithoutRun.length > 0) {
       this.createRun(runningItemsWithoutRun);
