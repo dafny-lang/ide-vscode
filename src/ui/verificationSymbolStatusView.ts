@@ -178,14 +178,14 @@ export default class VerificationSymbolStatusView {
         VerificationSymbolStatusView.convertRange(f.nameRange), controller, document.uri));
       controller.items.replace(leafItems);
     }
-    function collectTestItems(collection: TestItemCollection, result: TestItem[]) {
+    const allTestItems: TestItem[] = [];
+    function collectTestItems(collection: TestItemCollection) {
       collection.forEach(item => {
-        result.push(item);
-        collectTestItems(item.children, result);
+        allTestItems.push(item);
+        collectTestItems(item.children);
       });
     }
-    const allTestItems: TestItem[] = [];
-    collectTestItems(controller.items, allTestItems);
+    collectTestItems(controller.items);
     this.getVerifiableRangesPromise(params.uri).resolve(allTestItems.map(v => v.range!));
 
     const runningItemsWithoutRun = params.namedVerifiables.
