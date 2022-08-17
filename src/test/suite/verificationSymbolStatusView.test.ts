@@ -73,7 +73,7 @@ suite('Verification symbol view', () => {
       const replacedItems = await toPromise(listener.replaceCalled.event);
       assert.strictEqual(replacedItems.length, 0);
       const runRequest = await testRunCalledPromise;
-      assert.strictEqual(runRequest.include?.length, 4);
+      assert.strictEqual(runRequest.include?.length, 4, JSON.stringify(runRequest.include));
       await testRunEndPromise;
     } finally {
       vscode.commands.executeCommand = originalExecuteCommand;
