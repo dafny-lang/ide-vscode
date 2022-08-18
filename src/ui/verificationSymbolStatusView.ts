@@ -316,13 +316,19 @@ export default class VerificationSymbolStatusView {
 
   private async updateStatusBar(params: IVerificationSymbolStatusParams) {
     const completed = params.namedVerifiables.filter(v => v.status >= PublishedVerificationStatus.Error).length;
+    const queued = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Queued);
     const running = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Running);
     const total = params.namedVerifiables.length;
     let message: string;
-    if(running.length > 0) {
+    if(running.length > 0 || queued.length > 0) {
       const document = await workspace.openTextDocument(Uri.parse(params.uri));
       const verifying = running.map(item => document.getText(VerificationSymbolStatusView.convertRange(item.nameRange))).join(', ');
-      message = `$(sync~spin) Verified ${completed}/${total}, verifying ${verifying}`;
+      message = `$(sync~spin) Verified ${completed}/${total}`;
+      if(running.length > 0) {
+        message += `, verifying ${verifying}`;
+      } else {
+        message += ', waiting for free solvers';
+      }
     } else {
       const skipped = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Stale).length;
       const errors = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Error).length;
