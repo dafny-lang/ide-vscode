@@ -167,8 +167,11 @@ export default class VerificationSymbolStatusView {
     document: TextDocument,
     rootSymbols: DocumentSymbol[] | undefined) {
 
-    this.updateStatusBar(params);
     this.updatesPerFile.set(params.uri, params);
+    if(window.activeTextEditor?.document.uri.toString() !== params.uri.toString()) {
+      return;
+    }
+    this.updateStatusBar(params);
     const controller = this.controller;
     let leafItems: TestItem[];
     if(rootSymbols !== undefined) {
