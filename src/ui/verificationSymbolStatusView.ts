@@ -1,6 +1,7 @@
 /* eslint-disable max-depth */
 import { commands, ExtensionContext, workspace, tests, Range, Position, Uri, TestRunRequest, TestController, TestRun, DocumentSymbol, TestItem, TestItemCollection, TextDocument, TestRunProfileKind, window } from 'vscode';
 import { Range as lspRange, Position as lspPosition } from 'vscode-languageclient';
+import { VSCodeCommands } from '../commands';
 import { IVerificationSymbolStatusParams, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import CompilationStatusView from './compilationStatusView';
@@ -167,8 +168,11 @@ export default class VerificationSymbolStatusView {
     document: TextDocument,
     rootSymbols: DocumentSymbol[] | undefined) {
 
-    this.updateStatusBar(params);
     this.updatesPerFile.set(params.uri, params);
+    if(window.activeTextEditor?.document.uri.toString() !== params.uri.toString()) {
+      return;
+    }
+    this.updateStatusBar(params);
     const controller = this.controller;
     let leafItems: TestItem[];
     if(rootSymbols !== undefined) {
