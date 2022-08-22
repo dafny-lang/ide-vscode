@@ -186,7 +186,7 @@ export default class VerificationSymbolStatusView {
       });
     }
     collectTestItems(controller.items);
-    this.getVerifiableRangesPromise(params.uri).resolve(allTestItems.map(v => v.range!));
+    this.getVerifiableRangesPromise(Uri.parse(params.uri).toString()).resolve(allTestItems.map(v => v.range!));
 
     const runningItemsWithoutRun = params.namedVerifiables.
       map((element, index) => {
@@ -352,7 +352,7 @@ export default class VerificationSymbolStatusView {
   }
 
   public getVerifiableRanges(uriString: string): Promise<Range[]> {
-    return this.getVerifiableRangesPromise(uriString).promise;
+    return this.getVerifiableRangesPromise(Uri.parse(uriString).toString()).promise;
   }
 
   private getVerifiableRangesPromise(uriString: string): ResolveablePromise<Range[]> {
