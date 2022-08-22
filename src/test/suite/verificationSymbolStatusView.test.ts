@@ -50,10 +50,10 @@ suite('Verification symbol view', () => {
     const skippedItem = await testItemSkipped;
     assert.strictEqual(skippedItem.id, untitledDocument.uri.toString() + JSON.stringify(m1.selectionRange));
     await testRunEndPromise;
-  }).timeout(30 * 1000);
+  }).timeout(50 * 1000);
 
   test('test runs still start and end when document symbols do not match verifiable symbols', async () => {
-
+    await new Promise(resolve => setTimeout(resolve, 5000));
     const originalExecuteCommand = vscode.commands.executeCommand;
     function executeCommandMock<T = unknown>(command: string, args: any[]) {
       if(command === 'vscode.executeDocumentSymbolProvider') {
