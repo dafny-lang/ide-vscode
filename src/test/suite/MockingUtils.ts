@@ -64,10 +64,19 @@ export class MockingUtils {
   }
 
   public static mockedContext(): vscode.ExtensionContext {
+    const internalMap = new Map<string, string>();
     return {
       subscriptions: [],
       extensionUri: vscode.Uri.parse('/tmp/mockedUri'),
-      extensionPath: '<extension path>'
+      extensionPath: '<extension path>',
+      globalState: {
+        update(key: string, value: string) {
+          internalMap.set(key, value);
+        },
+        get(key: string) {
+          return internalMap.get(key);
+        }
+      }
     } as unknown as vscode.ExtensionContext;
   }
 
