@@ -1,5 +1,5 @@
 /* eslint-disable max-depth */
-import { Range, window, ExtensionContext, workspace, TextEditor, TextEditorDecorationType } from 'vscode';
+import { Range, window, ExtensionContext, workspace, TextEditor, TextEditorDecorationType, Uri } from 'vscode';
 import { Disposable } from 'vscode-languageclient';
 import {
   IVerificationGutterStatusParams,
@@ -310,6 +310,7 @@ export default class VerificationGutterStatusView {
     if(this.areParamsOutdated(params)) {
       return;
     }
+    params.uri = Uri.parse(params.uri).toString();// Makes the Uri canonical
     const documentPath = getVsDocumentPath(params);
     const ranges = await this.getRangesOfLineStatus(params);
 
