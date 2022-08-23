@@ -153,6 +153,7 @@ export default class VerificationSymbolStatusView {
   private async update(params: IVerificationSymbolStatusParams): Promise<void> {
     await this.noRunCreationInProgress;
     const uri = Uri.parse(params.uri);
+    params.uri = uri.toString();
     const document = await workspace.openTextDocument(uri);
     const rootSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[] | undefined;
 

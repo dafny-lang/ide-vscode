@@ -306,5 +306,11 @@
     "vscode-languageclient": "^7.0.0",
     "vscode-uri": "^3.0.2",
     "which": "^2.0.2"
+  },
+  "__metadata": {
+    "id": "36e6ec4b-cd6e-4792-8088-91e0631e4b3d",
+    "publisherDisplayName": "dafny-lang",
+    "publisherId": "77351d22-0a7b-4a0a-b0dc-d10fc29768e1",
+    "isPreReleaseVersion": false
   }
 }
