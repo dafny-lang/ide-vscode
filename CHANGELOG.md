@@ -1,6 +1,8 @@
 # Release Notes
 
 ## 2.8.0
+- Update Dafny and language server to [v3.8.0](https://github.com/dafny-lang/dafny/releases/tag/v3.8.0)
+- Feat: Enable displaying verification as tests when using the latest Dafny version
 - Fix a bug in Windows where the gutter's skipped lines are wrong. (https://github.com/dafny-lang/ide-vscode/pull/255)
 - Previously, in Windows, the LSP's string URI were a bit different than the VSCode's Uri.toString().
 - Namely, the LSP was retuning:
@@ -21,8 +23,6 @@
 - Correctly handle a difference between verifiable and document symbols (https://github.com/dafny-lang/ide-vscode/pull/249)
 - Adding brew update as part of the manual source installation (https://github.com/dafny-lang/ide-vscode/pull/250)
 - Ensure gutter icons show up in the correct locations (https://github.com/dafny-lang/ide-vscode/pull/241)
-- ### Changes
-- - Add a version check to prevent processing out-of-date symbolStatus updates
 
 ## 2.7.0
 - New: Add verification management UI (https://github.com/dafny-lang/ide-vscode/pull/229)
