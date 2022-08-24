@@ -1,5 +1,29 @@
 # Release Notes
 
+## 2.8.0
+- Fix a bug in Windows where the gutter's skipped lines are wrong. (https://github.com/dafny-lang/ide-vscode/pull/255)
+- Previously, in Windows, the LSP's string URI were a bit different than the VSCode's Uri.toString().
+- Namely, the LSP was retuning:
+- `file:///c:/...`
+- whereas `Uri.ToString()` in VSCode was returning
+- `file:///c%3A/...`
+- Thus, this PR transforms URI received by the LSP into their canonical form for the Verification Symbol Status view, where the canonical URI is needed because of the event handler `e.document.uri.toString()` in `window.onDidChangeTextDocument`
+- Second, this PR stores the latest nightly build version so that if the GitHub API rate limit is reached, a client will not revert to the previous stable version.
+- Third, deactivated two problematic tests that are passing locally but timeout in CI because of seemingly restrictive API quota limits.
+- Do not show status updates for non-active documents (https://github.com/dafny-lang/ide-vscode/pull/254)
+- * Do not show status updates for non-active documents
+- * Remove unused import
+- Do not show verified status message when no solvers are free (https://github.com/dafny-lang/ide-vscode/pull/253)
+- Prevent overlap of play and gutter icons on parent nodes (https://github.com/dafny-lang/ide-vscode/pull/252)
+- * Prevent overlap of play and gutter icons on parent nodes such as classes and modules
+- * Prevent visible and internal state of testItems from getting out of sync
+- * Add debug information
+- Correctly handle a difference between verifiable and document symbols (https://github.com/dafny-lang/ide-vscode/pull/249)
+- Adding brew update as part of the manual source installation (https://github.com/dafny-lang/ide-vscode/pull/250)
+- Ensure gutter icons show up in the correct locations (https://github.com/dafny-lang/ide-vscode/pull/241)
+- ### Changes
+- - Add a version check to prevent processing out-of-date symbolStatus updates
+
 ## 2.7.0
 - New: Add verification management UI (https://github.com/dafny-lang/ide-vscode/pull/229)
 - Syntax highlighting after "var" fixed (https://github.com/dafny-lang/ide-vscode/pull/231)
