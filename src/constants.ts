@@ -48,7 +48,7 @@ export namespace DotnetConstants {
 export namespace LanguageServerConstants {
   export const LatestStable = 'latest';
   export const LatestNightly = 'latest nightly';
-  export const LatestVersion = '3.7.3';
+  export const LatestVersion = '3.8.0';
   export const UnknownVersion = 'unknown';
   export const DafnyGitUrl = 'https://github.com/dafny-lang/dafny.git';
   export const DownloadBaseUri = 'https://github.com/dafny-lang/dafny/releases/download';
