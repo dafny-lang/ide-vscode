@@ -1,3 +1,19 @@
+// Issue #240
+method Test(someVar: int)
+  requires zero: someVar > 0
+              // ^^^^^^^ should not look like a type (the int above)
+{
+    label before: otherMethod();
+               // ^^^^^^^^^^^ should not look like a type
+    assert notzero: someVar != 0 by {
+                 // ^^^^^^^ should not look like a type
+        reveal zero;
+    }
+}
+
+method otherMethod() {
+}
+
 // Issue #230
 module A {
   trait T {
