@@ -263,7 +263,7 @@ export default class VerificationGutterStatusView {
 
     const symbolParams
       = params.perLineStatus.indexOf(LineVerificationStatus.ResolutionError) > 0 ? []
-        : (await this.symbolStatusView?.getVerifiableRanges(params.uri)) ?? [];
+        : await (this.symbolStatusView?.getVerifiableRanges(params.uri) ?? Promise.resolve([]));
     const originalLinesToSkip = symbolParams.map(range => range.start.line).sort((a, b) => a - b);
 
     return VerificationGutterStatusView.perLineStatusToRanges(perLineStatus, originalLinesToSkip);
