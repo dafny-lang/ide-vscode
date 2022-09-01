@@ -1,7 +1,7 @@
 # Release Notes
 
 ## 2.8.1
-- Use Dafny [v3.8.1](https://github.com/dafny-lang/dafny/releases/tag/v3.8.0) which contains critical language server fixes
+- Use Dafny [v3.8.1](https://github.com/dafny-lang/dafny/releases/tag/v3.8.1) which contains critical language server fixes
 - Fix disappearing resolution errors with verification tests. (https://github.com/dafny-lang/ide-vscode/pull/260)
 
 ## 2.8.0
