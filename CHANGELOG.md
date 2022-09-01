@@ -1,5 +1,9 @@
 # Release Notes
 
+## 2.8.1
+- Use Dafny [v3.8.1](https://github.com/dafny-lang/dafny/releases/tag/v3.8.0) which contains critical language server fixes
+- Fix disappearing resolution errors with verification tests. (https://github.com/dafny-lang/ide-vscode/pull/260)
+
 ## 2.8.0
 - Update Dafny and language server to [v3.8.0](https://github.com/dafny-lang/dafny/releases/tag/v3.8.0)
 - Feat: Enable displaying verification as tests when using the latest Dafny version

@@ -2,7 +2,7 @@
   "name": "ide-vscode",
   "displayName": "Dafny",
   "description": "Dafny for Visual Studio Code",
-  "version": "2.8.0",
+  "version": "2.8.1",
   "publisher": "dafny-lang",
   "repository": {
     "type": "git",
@@ -163,7 +163,7 @@
         "dafny.displayVerificationAsTests": {
           "type": "boolean",
           "default": "true",
-          "description": "Display verification status both in the test panel, and as actionable buttons next to top-level symbols in the editor (requires restart and Dafny 3.8.0+)"
+          "description": "Display verification status both in the test panel, and as actionable buttons next to top-level symbols in the editor (requires restart and Dafny 3.8.1+)"
         },
         "dafny.dafnyPlugins": {
           "type": "array",
@@ -207,7 +207,7 @@
           "type": "string",
           "enum": [
             "latest",
-            "3.8.0",
+            "3.8.1",
             "3.7.3",
             "3.6.0",
             "3.5.0",
