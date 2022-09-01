@@ -77,8 +77,8 @@ export default class CompilationStatusView {
   }
 
   public registerAfter38Messages(): void {
-    this.languageClient.onCompilationStatus(params => this.compilationStatusChangedForBefore38(params));
     this.context.subscriptions.push(
+      this.languageClient.onCompilationStatus(params => this.compilationStatusChangedForBefore38(params)),
       this.languageClient.onVerificationSymbolStatus(params => this.updateStatusBar(params))
     );
   }
