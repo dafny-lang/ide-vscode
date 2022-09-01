@@ -25,7 +25,11 @@ export default async function createAndRegisterDafnyIntegration(
   if(serverSupportsSymbolStatusView && Configuration.get<boolean>(ConfigurationConstants.LanguageServer.DisplayVerificationAsTests)) {
     symbolStatusView = VerificationSymbolStatusView.createAndRegister(context, languageClient, compilationStatusView);
   } else {
-    compilationStatusView.registerBefore38Messages();
+    if(serverSupportsSymbolStatusView) {
+      compilationStatusView.registerAfter38Messages();
+    } else {
+      compilationStatusView.registerBefore38Messages();
+    }
   }
   VerificationGutterStatusView.createAndRegister(context, languageClient, symbolStatusView);
   CompileCommands.createAndRegister(context);

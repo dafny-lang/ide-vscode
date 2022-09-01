@@ -4,7 +4,6 @@ import { Range as lspRange, Position as lspPosition } from 'vscode-languageclien
 import { IVerificationSymbolStatusParams, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import CompilationStatusView from './compilationStatusView';
-import { Messages } from './messages';
 
 interface ResolveablePromise<T> {
   promise: Promise<T>;
@@ -172,7 +171,7 @@ export default class VerificationSymbolStatusView {
     if(window.activeTextEditor?.document.uri.toString() !== params.uri.toString()) {
       return;
     }
-    this.updateStatusBar(params);
+    this.compilationStatusView.updateStatusBar(params);
     const controller = this.controller;
     let leafItems: TestItem[];
     if(rootSymbols !== undefined) {
@@ -318,40 +317,8 @@ export default class VerificationSymbolStatusView {
     return item;
   }
 
-  private async updateStatusBar(params: IVerificationSymbolStatusParams) {
-    const completed = params.namedVerifiables.filter(v => v.status >= PublishedVerificationStatus.Error).length;
-    const queued = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Queued);
-    const running = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Running);
-    const total = params.namedVerifiables.length;
-    let message: string;
-    if(running.length > 0 || queued.length > 0) {
-      const document = await workspace.openTextDocument(Uri.parse(params.uri));
-      const verifying = running.map(item => document.getText(VerificationSymbolStatusView.convertRange(item.nameRange))).join(', ');
-      message = `$(sync~spin) Verified ${completed}/${total}`;
-      if(running.length > 0) {
-        message += `, verifying ${verifying}`;
-      } else {
-        message += ', waiting for free solvers';
-      }
-    } else {
-      const skipped = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Stale).length;
-      const errors = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Error).length;
-      const succeeded = completed - errors;
 
-      if(errors === 0) {
-        if(skipped === 0) {
-          message = Messages.CompilationStatus.VerificationSucceeded;
-        } else {
-          message = `Verified ${succeeded} declarations, skipped ${skipped}`;
-        }
-      } else {
-        message = `${Messages.CompilationStatus.VerificationFailed} ${errors} declarations`;
-      }
-    }
-    this.compilationStatusView.setDocumentStatusMessage(params.uri.toString(), message, params.version);
-  }
-
-  private static convertRange(range: lspRange): Range {
+  public static convertRange(range: lspRange): Range {
     return new Range(
       VerificationSymbolStatusView.convertPosition(range.start),
       VerificationSymbolStatusView.convertPosition(range.end));
