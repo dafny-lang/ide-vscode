@@ -167,7 +167,7 @@ export default class CompilationStatusView {
     return this.documentStatusMessages.get(document)?.message ?? '';
   }
 
-  public async updateStatusBar(params: IVerificationSymbolStatusParams) {
+  public async updateStatusBar(params: IVerificationSymbolStatusParams): Promise<void> {
     const completed = params.namedVerifiables.filter(v => v.status >= PublishedVerificationStatus.Error).length;
     const queued = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Queued);
     const running = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Running);
