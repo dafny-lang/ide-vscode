@@ -1,4 +1,4 @@
-import { StatusBarAlignment, StatusBarItem, TextDocument, window, workspace, commands, ExtensionContext } from 'vscode';
+import { StatusBarAlignment, StatusBarItem, TextDocument, window, workspace, commands, ExtensionContext, Uri } from 'vscode';
 import { CompilationStatus, ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from '../language/api/compilationStatus';
 import { DafnyCommands } from '../commands';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
@@ -6,6 +6,8 @@ import { getVsDocumentPath } from '../tools/vscode';
 import { enableOnlyForDafnyDocuments } from '../tools/visibility';
 import { Messages } from './messages';
 import StatusBarActionView from './statusBarActionView';
+import { IVerificationSymbolStatusParams, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
+import VerificationSymbolStatusView from './verificationSymbolStatusView';
 
 const StatusBarPriority = 10;
 
@@ -71,6 +73,13 @@ export default class CompilationStatusView {
       this.languageClient.onCompilationStatus(params => this.compilationStatusChanged(params)),
       this.languageClient.onVerificationStarted(params => this.verificationStarted(params)),
       this.languageClient.onVerificationCompleted(params => this.verificationCompleted(params))
+    );
+  }
+
+  public registerAfter38Messages(): void {
+    this.context.subscriptions.push(
+      this.languageClient.onCompilationStatus(params => this.compilationStatusChangedForBefore38(params)),
+      this.languageClient.onVerificationSymbolStatus(params => this.updateStatusBar(params))
     );
   }
 
@@ -156,5 +165,38 @@ export default class CompilationStatusView {
       return;
     }
     return this.documentStatusMessages.get(document)?.message ?? '';
+  }
+
+  public async updateStatusBar(params: IVerificationSymbolStatusParams): Promise<void> {
+    const completed = params.namedVerifiables.filter(v => v.status >= PublishedVerificationStatus.Error).length;
+    const queued = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Queued);
+    const running = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Running);
+    const total = params.namedVerifiables.length;
+    let message: string;
+    if(running.length > 0 || queued.length > 0) {
+      const document = await workspace.openTextDocument(Uri.parse(params.uri));
+      const verifying = running.map(item => document.getText(VerificationSymbolStatusView.convertRange(item.nameRange))).join(', ');
+      message = `$(sync~spin) Verified ${completed}/${total}`;
+      if(running.length > 0) {
+        message += `, verifying ${verifying}`;
+      } else {
+        message += ', waiting for free solvers';
+      }
+    } else {
+      const skipped = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Stale).length;
+      const errors = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Error).length;
+      const succeeded = completed - errors;
+
+      if(errors === 0) {
+        if(skipped === 0) {
+          message = Messages.CompilationStatus.VerificationSucceeded;
+        } else {
+          message = `Verified ${succeeded} declarations, skipped ${skipped}`;
+        }
+      } else {
+        message = `${Messages.CompilationStatus.VerificationFailed} ${errors} declarations`;
+      }
+    }
+    this.setDocumentStatusMessage(params.uri.toString(), message, params.version);
   }
 }
