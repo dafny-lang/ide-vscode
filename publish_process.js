@@ -214,11 +214,12 @@ async function updatePackageJson(packageObj, newVersion, mostRecentDafnyRelease)
     if (ok(await question(`The Dafny version in the package.json file (${previousDafnyVersion}) is not the latest (${mostRecentDafnyRelease}). Do you want to update it? ${ACCEPT_HINT}`))) {
       var previousDafnyVersionListHead = versionList[1];
       // If the previous dafny version is just different from mostRecentDafnyRelease by the patch number, replace it, otherwise insert it using splice
-      if (previousDafnyVersionListHead == mostRecentDafnyRelease.substring(0, mostRecentDafnyRelease.lastIndexOf("."))) {
-        versionList[1] = mostRecentDafnyRelease;
-      } else {
+      // We need to do pruning manually later, so that one could revert to a previous patch of Dafny immediately.
+      //if (previousDafnyVersionListHead == mostRecentDafnyRelease.substring(0, mostRecentDafnyRelease.lastIndexOf("."))) {
+      //  versionList[1] = mostRecentDafnyRelease;
+      //} else {
         versionList.splice(1, 0, mostRecentDafnyRelease);
-      }
+      //}
 
       console.log("Updated Dafny version to " + mostRecentDafnyRelease);
       var constantsContent = await fs.promises.readAsync(constantsFile, "utf8");
