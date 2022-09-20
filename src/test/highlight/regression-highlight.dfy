@@ -1,3 +1,12 @@
+// Issue #269
+method SpaceAFterOperator(n: nat)
+  requires 1<n
+  // this should be a comment and ensures should be the same color as requires
+  ensures true
+{
+  assert 1<(2+2);
+}
+
 // Issue #240
 method Test(someVar: int)
   requires zero: someVar > 0
