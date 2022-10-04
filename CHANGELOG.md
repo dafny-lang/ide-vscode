@@ -1,5 +1,8 @@
 # Release Notes
 
+## 2.8.3
+- Fix: Number followed by `<` incorrectly highlighted as a generic (https://github.com/dafny-lang/ide-vscode/pull/270)
+
 ## 2.8.2
 - Ability to select previously published patch versions of Dafny.
 - Enable status bar also when verification as tests is turned off (https://github.com/dafny-lang/ide-vscode/pull/261)
