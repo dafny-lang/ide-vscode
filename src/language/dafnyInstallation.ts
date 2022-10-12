@@ -233,7 +233,11 @@ export class DafnyInstaller {
     await this.execLog('make exe');
     const binaries = Utils.joinPath(installationPath, 'dafny', 'Binaries').fsPath;
     processChdir(binaries);
-    await this.execLog('brew update'); // Could help some users not get "Error: The `brew link` step did not complete successfully"
+    try {
+      await this.execLog('brew update'); // Could help some users not get "Error: The `brew link` step did not complete successfully"
+    } catch(error: unknown) {
+      this.writeStatus(`Could not run \`brew update\` but this step is optional (${error})`);
+    }
     await this.execLog('brew install wget');
     const z3urlOsx = this.GetZ3DownloadUrlOSX();
     const z3filenameOsx = this.GetZ3FileNameOSX();
