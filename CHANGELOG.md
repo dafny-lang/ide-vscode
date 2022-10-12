@@ -1,5 +1,8 @@
 # Release Notes
 
+## 2.8.3.1
+- Fix: Updating to install LAtest Dafny version 3.9.0 
+
 ## 2.8.3
 - Fix: Number followed by `<` incorrectly highlighted as a generic (https://github.com/dafny-lang/ide-vscode/pull/270)
 
