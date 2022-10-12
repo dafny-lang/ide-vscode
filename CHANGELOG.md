@@ -1,5 +1,8 @@
 # Release Notes
 
+## 2.8.4
+- Updating LanguageServerConstants.LatestVersion value to the latest version number 3.9.0. (https://github.com/dafny-lang/ide-vscode/pull/280)
+
 ## 2.8.3
 - Fix: Number followed by `<` incorrectly highlighted as a generic (https://github.com/dafny-lang/ide-vscode/pull/270)
 
