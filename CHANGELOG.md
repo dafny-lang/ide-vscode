@@ -1,5 +1,8 @@
 # Release Notes
 
+## 2.8.5
+- Fix: Make brew update optional (https://github.com/dafny-lang/ide-vscode/pull/284)
+
 ## 2.8.4
 - Updating LanguageServerConstants.LatestVersion value to the latest version number 3.9.0. (https://github.com/dafny-lang/ide-vscode/pull/280)
 
