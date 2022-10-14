@@ -224,7 +224,7 @@ export class DafnyInstaller {
         }
       } catch(error: unknown) {
         const errorMsg = error === '' ? 'Javac not found' : `${error}`;
-        this.writeStatus(`${errorMsg}. Please install a valid JDK`
+        this.writeStatus(`${errorMsg}. Javac is needed because you use a version of Dafny older than 3.9.0. Please install a valid JDK`
         + ' and ensure that the path containing javac is in the PATH environment variable. '
         + 'You can obtain a free open-source JDK 1.8 from here: '
         + 'https://aws.amazon.com/corretto/');
