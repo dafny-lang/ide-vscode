@@ -235,7 +235,7 @@ export class DafnyInstaller {
     processChdir(Utils.joinPath(installationPath, 'dafny').fsPath);
     await this.execLog('git fetch --all --tags');
     await this.execLog(`git checkout v${configuredVersion}`);
-    await this.execLog('make exe');
+    await this.execLog('dotnet build Source/DafnyLanguageServer/DafnyLanguageServer.csproj');
     const binaries = Utils.joinPath(installationPath, 'dafny', 'Binaries').fsPath;
     processChdir(binaries);
     try {
