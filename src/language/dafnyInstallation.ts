@@ -2,6 +2,7 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
 import { promisify } from 'util';
+import { versionToNumeric } from '../ui/dafnyIntegration';
 
 import { workspace, ExtensionContext, Uri, OutputChannel, FileSystemError, window } from 'vscode';
 import { Utils } from 'vscode-uri';
@@ -212,25 +213,29 @@ export class DafnyInstaller {
       and restart VSCode, which may reinstall Dafny.`);
       return false;
     }
-    try {
-      const process = await this.execLog('javac -version');
-      if(!(/javac \d+\.\d+/.exec(process.stdout))
-         && !(/javac \d+\.\d+/.exec(process.stderr))) {
-        throw '';
+    const configuredVersion = await getConfiguredVersion(this.context);
+    if(versionToNumeric(configuredVersion) < versionToNumeric('3.9.0')) {
+      try {
+
+        const process = await this.execLog('javac -version');
+        if(!(/javac \d+\.\d+/.exec(process.stdout))
+          && !(/javac \d+\.\d+/.exec(process.stderr))) {
+          throw '';
+        }
+      } catch(error: unknown) {
+        const errorMsg = error === '' ? 'Javac not found' : `${error}`;
+        this.writeStatus(`${errorMsg}. Javac is needed because you use a version of Dafny older than 3.9.0. Please install a valid JDK`
+        + ' and ensure that the path containing javac is in the PATH environment variable. '
+        + 'You can obtain a free open-source JDK 1.8 from here: '
+        + 'https://aws.amazon.com/corretto/');
+        return false;
       }
-    } catch(error: unknown) {
-      const errorMsg = error === '' ? 'Javac not found' : `${error}`;
-      this.writeStatus(`${errorMsg}. Please install a valid JDK`
-       + ' and ensure that the path containing javac is in the PATH environment variable. '
-       + 'You can obtain a free open-source JDK 1.8 from here: '
-       + 'https://aws.amazon.com/corretto/');
-      return false;
     }
     await this.execLog(`git clone --recurse-submodules ${LanguageServerConstants.DafnyGitUrl}`);
     processChdir(Utils.joinPath(installationPath, 'dafny').fsPath);
     await this.execLog('git fetch --all --tags');
-    await this.execLog(`git checkout v${await getConfiguredVersion(this.context)}`);
-    await this.execLog('make exe');
+    await this.execLog(`git checkout v${configuredVersion}`);
+    await this.execLog('dotnet build Source/DafnyLanguageServer/DafnyLanguageServer.csproj');
     const binaries = Utils.joinPath(installationPath, 'dafny', 'Binaries').fsPath;
     processChdir(binaries);
     try {

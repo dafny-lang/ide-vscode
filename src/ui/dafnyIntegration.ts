@@ -37,7 +37,7 @@ export default async function createAndRegisterDafnyIntegration(
   await DafnyVersionView.createAndRegister(context, languageServerVersion);
 }
 
-function versionToNumeric(version: string): number {
+export function versionToNumeric(version: string): number {
   const numbers = version.split('.').map(x => Number.parseInt(x));
   return ((numbers[0] * 1000) + numbers[1]) * 1000 + numbers[2];
 }
