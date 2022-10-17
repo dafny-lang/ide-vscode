@@ -16,7 +16,7 @@ import { exec } from 'child_process';
 import { chdir as processChdir, cwd as processCwd } from 'process';
 import fetch from 'cross-fetch';
 
-import {checkSupportedDotnetVersion, getDotnetExecutablePath} from '../dotnet'
+import { checkSupportedDotnetVersion, getDotnetExecutablePath } from '../dotnet';
 
 const execAsync = promisify(exec);
 
@@ -249,7 +249,7 @@ export class DafnyInstaller {
     // it MAY NOT be on the path.
     // This will cause the build to fail.
     // This works around this edge case.
-    const injectPath = `PATH=${path.dirname(dotnet)}:$PATH`
+    const injectPath = `PATH=${path.dirname(dotnet)}:$PATH`;
     // Build the DafnyLanguageServer
     await this.execLog(`${injectPath} ${ (await getDotnetExecutablePath()).path } build Source/DafnyLanguageServer/DafnyLanguageServer.csproj`);
     const binaries = Utils.joinPath(installationPath, 'dafny', 'Binaries').fsPath;
