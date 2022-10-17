@@ -16,6 +16,8 @@ import { exec } from 'child_process';
 import { chdir as processChdir, cwd as processCwd } from 'process';
 import fetch from 'cross-fetch';
 
+import {checkSupportedDotnetVersion, getDotnetExecutablePath} from '../dotnet'
+
 const execAsync = promisify(exec);
 
 const ArchiveFileName = 'dafny.zip';
@@ -165,8 +167,8 @@ export class DafnyInstaller {
         this.writeStatus(`Found a non-supported architecture OSX:${os.arch()}. Going to install from source.`);
         return await this.installFromSource();
       } else {
-        const archive = await this.downloadArchive(await getDafnyDownloadAddress(this.context));
-        await this.extractArchive(archive);
+        const archive = await this.downloadArchive(await getDafnyDownloadAddress(this.context), 'Dafny');
+        await this.extractArchive(archive, 'Dafny');
         await workspace.fs.delete(archive, { useTrash: false });
         this.writeStatus('Dafny installation completed');
         return true;
@@ -200,18 +202,23 @@ export class DafnyInstaller {
     const previousDirectory = processCwd();
     processChdir(installationPath.fsPath);
     try {
-      await this.execLog('brew install dotnet-sdk');
+      await checkSupportedDotnetVersion();
     } catch(error: unknown) {
-      this.writeStatus('An error occurred while running this command.');
-      this.writeStatus(`${error}`);
-      this.writeStatus(`If brew is installed on your system, this can usually be resolved by adding add all brew commands to your ~/.zprofile,
-      e.g. by running the script there https://apple.stackexchange.com/a/430904 :
-
-      > echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
-      > eval "$(/opt/homebrew/bin/brew shellenv)"
-
-      and restart VSCode, which may reinstall Dafny.`);
-      return false;
+      try {
+        this.writeStatus('dotnet not found in $PATH, trying to install from brew.');
+        await this.execLog('brew install dotnet-sdk');
+      } catch(error: unknown) {
+        this.writeStatus('An error occurred while running this command.');
+        this.writeStatus(`${error}`);
+        this.writeStatus(`If brew is installed on your system, this can usually be resolved by adding add all brew commands to your ~/.zprofile,
+        e.g. by running the script there https://apple.stackexchange.com/a/430904 :
+  
+        > echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+        > eval "$(/opt/homebrew/bin/brew shellenv)"
+  
+        and restart VSCode, which may reinstall Dafny.`);
+        return false;
+      }
     }
     const configuredVersion = await getConfiguredVersion(this.context);
     if(versionToNumeric(configuredVersion) < versionToNumeric('3.9.0')) {
@@ -231,11 +238,20 @@ export class DafnyInstaller {
         return false;
       }
     }
-    await this.execLog(`git clone --recurse-submodules ${LanguageServerConstants.DafnyGitUrl}`);
+
+    // Clone the right version
+    await this.execLog(`git clone -b v${configuredVersion} --depth 1 --recurse-submodules ${LanguageServerConstants.DafnyGitUrl}`);
     processChdir(Utils.joinPath(installationPath, 'dafny').fsPath);
-    await this.execLog('git fetch --all --tags');
-    await this.execLog(`git checkout v${configuredVersion}`);
-    await this.execLog('dotnet build Source/DafnyLanguageServer/DafnyLanguageServer.csproj');
+
+    const { path: dotnet } = await getDotnetExecutablePath();
+    // The DafnyCore.csproj has a few targets that call `dotnet` directly.
+    // If dotnet is configured in dafny.dotnetExecutablePath
+    // it MAY NOT be on the path.
+    // This will cause the build to fail.
+    // This works around this edge case.
+    const injectPath = `PATH=${path.dirname(dotnet)}:$PATH`
+    // Build the DafnyLanguageServer
+    await this.execLog(`${injectPath} ${ (await getDotnetExecutablePath()).path } build Source/DafnyLanguageServer/DafnyLanguageServer.csproj`);
     const binaries = Utils.joinPath(installationPath, 'dafny', 'Binaries').fsPath;
     processChdir(binaries);
     try {
@@ -243,12 +259,14 @@ export class DafnyInstaller {
     } catch(error: unknown) {
       this.writeStatus(`Could not run \`brew update\` but this step is optional (${error})`);
     }
-    await this.execLog('brew install wget');
+
     const z3urlOsx = this.GetZ3DownloadUrlOSX();
     const z3filenameOsx = this.GetZ3FileNameOSX();
-    await this.execLog(`wget ${z3urlOsx}`);
-    await this.execLog(`unzip ${z3filenameOsx}.zip`);
-    await this.execLog(`mv ${z3filenameOsx} z3`);
+    const archive = await this.downloadArchive(z3urlOsx, 'Z3');
+    await this.extractArchive(archive, 'Z3');
+    await workspace.fs.delete(archive, { useTrash: false });
+
+    await this.execLog(`mv ${(await this.getInstallationPath()).fsPath}/${z3filenameOsx} z3`);
     processChdir((await this.getInstallationPath()).fsPath);
     await this.execLog('mkdir -p ./dafny/');
     await this.execLog(`cp -R ${binaries}/* ./dafny/`);
@@ -288,12 +306,12 @@ export class DafnyInstaller {
     }
   }
 
-  private async downloadArchive(downloadUri: string): Promise<Uri> {
+  private async downloadArchive(downloadUri: string, downloadTarget: string): Promise<Uri> {
     await mkdirAsync((await this.getInstallationPath()).fsPath, { recursive: true });
     const archivePath = await this.getZipPath();
     return await new Promise<Uri>((resolve, reject) => {
       const archiveHandle = fs.createWriteStream(archivePath.fsPath);
-      this.writeStatus(`downloading Dafny from ${downloadUri}`);
+      this.writeStatus(`downloading ${downloadTarget} from ${downloadUri}`);
       const progressReporter = new ProgressReporter(this.statusOutput);
       archiveHandle
         .on('finish', () => resolve(archivePath))
@@ -305,9 +323,9 @@ export class DafnyInstaller {
     });
   }
 
-  private async extractArchive(archivePath: Uri): Promise<void> {
+  private async extractArchive(archivePath: Uri, extractName: string): Promise<void> {
     const dirPath = await this.getInstallationPath();
-    this.writeStatus(`extracting Dafny to ${dirPath.fsPath}`);
+    this.writeStatus(`extracting ${extractName} to ${dirPath.fsPath}`);
     const progressReporter = new ProgressReporter(this.statusOutput);
     await extract(
       archivePath.fsPath,
