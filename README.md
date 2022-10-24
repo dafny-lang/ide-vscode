@@ -138,16 +138,10 @@ Because the latest version of the plugin requires recent changes to the Dafny la
 
 ### Packaging
 
-To create a VSIX package of the previously built sources, install the [VSCode Extension Manager](https://github.com/microsoft/vscode-vsce) globally:
+To create a VSIX package of the previously built sources, create the package through the CLI:
 
 ```sh
-npm install -g vsce
-```
-
-Now create the package through the CLI:
-
-```sh
-vsce package
+npx vsce package
 ```
 
 ### Coding Conventions
