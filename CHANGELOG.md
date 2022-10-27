@@ -1,5 +1,8 @@
 # Release Notes
 
+## 2.8.6
+- fix: `dafny.dotnetExecutablePath` works to install custom source (https://github.com/dafny-lang/ide-vscode/pull/287)
+
 ## 2.8.5
 - Fix: Make brew update optional (https://github.com/dafny-lang/ide-vscode/pull/284)
 
