@@ -52,6 +52,11 @@
           "when": "editorTextFocus && editorLangId == dafny && !dafny.counterexampleMenu.CanShowCounterExample",
           "command": "dafny.hideCounterexample",
           "group": "7_Dafny@2"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.copyCounterexamples",
+          "group": "7_Dafny@2"
         }
       ]
     },
@@ -260,6 +265,10 @@
       {
         "command": "dafny.hideCounterexample",
         "title": "Dafny: Hide Counterexample"
+      },
+      {
+        "command": "dafny.copyCounterexamples",
+        "title": "Dafny: Copy All Counterexamples to Clipboard"
       },
       {
         "command": "dafny.restartServer",
