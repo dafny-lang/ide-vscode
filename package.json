@@ -268,7 +268,7 @@
       },
       {
         "command": "dafny.copyCounterexamples",
-        "title": "Dafny: Copy All Counterexamples to Clipboard"
+        "title": "Dafny: Copy Counterexamples to Clipboard (Experimental)"
       },
       {
         "command": "dafny.restartServer",
