@@ -224,7 +224,7 @@ async function updatePackageJson(packageObj, newVersion, mostRecentDafnyRelease)
       console.log("Updated Dafny version to " + mostRecentDafnyRelease);
       var constantsContent = await fs.promises.readFile(constantsFile, { encoding: "utf8" });
       var constantsContentRegex = /const\s*LatestVersion\s*=\s*'\d+.\d+.\d+';/;
-      constantsContent.replace(constantsContentRegex, `const LatestVersion = '${mostRecentDafnyRelease}';`);
+      constantsContent = constantsContent.replace(constantsContentRegex, `const LatestVersion = '${mostRecentDafnyRelease}';`);
       await fs.promises.writeFile(constantsFile, constantsContent, { encoding: "utf8" });
       updatedDafny = true;
     } else {
