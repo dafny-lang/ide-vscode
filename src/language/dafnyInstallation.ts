@@ -89,15 +89,41 @@ export async function getCompilerRuntimePath(context: ExtensionContext): Promise
   return configuredPath;
 }
 
+// We cache the language server runtime path so that we don't need to copy it every time.
+let LanguageServerRuntimePath: string | null = null;
+
 export async function getLanguageServerRuntimePath(context: ExtensionContext): Promise<string> {
-  const configuredPath = await ifNullOrEmpty(
-    getConfiguredLanguageServerRuntimePath(),
+  if(LanguageServerRuntimePath != null) {
+    return LanguageServerRuntimePath;
+  }
+  const configuredLanguageServerPath = getConfiguredLanguageServerRuntimePath();
+  let mightBeRecomputed = false;
+  if(configuredLanguageServerPath !== '' && configuredLanguageServerPath != null) {
+    mightBeRecomputed = true;
+  }
+
+  let configuredPath = await ifNullOrEmpty(
+    configuredLanguageServerPath,
     async () => LanguageServerConstants.GetDefaultPath(await getConfiguredVersion(context))
   );
-  if(path.isAbsolute(configuredPath)) {
-    return configuredPath;
+  if(!path.isAbsolute(configuredPath)) {
+    configuredPath = path.join(context.extensionPath, configuredPath);
   }
-  return path.join(context.extensionPath, configuredPath);
+  if(mightBeRecomputed && (/\.dll$/.exec(configuredPath)) != null) {
+    // We copy DafnyLanguageServer.dll to another location
+    // so that rebuilding Dafny will not fail because it's open in VSCode
+    const newPath = configuredPath.replace('.dll', '-vscode.dll');
+    await fs.promises.copyFile(configuredPath, newPath);
+    const oldDepsJson = configuredPath.replace('.dll', '.deps.json');
+    const newDepsJson = configuredPath.replace('.dll', '-vscode.deps.json');
+    await fs.promises.copyFile(oldDepsJson, newDepsJson);
+    const oldRunJson = configuredPath.replace('.dll', '.runtimeconfig.json');
+    const newRunJson = configuredPath.replace('.dll', '-vscode.runtimeconfig.json');
+    await fs.promises.copyFile(oldRunJson, newRunJson);
+    configuredPath = newPath;
+  }
+  LanguageServerRuntimePath = configuredPath;
+  return configuredPath;
 }
 
 function getConfiguredLanguageServerRuntimePath(): string {
