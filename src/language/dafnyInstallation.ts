@@ -24,7 +24,7 @@ const ArchiveFileName = 'dafny.zip';
 const mkdirAsync = promisify(fs.mkdir);
 
 // Equivalent to a || b but without ESLint warnings
-async function ifNullOrEmptyAsync(a: string | null, b: () => Promise<string>): Promise<string> {
+async function ifNullOrEmpty(a: string | null, b: () => Promise<string>): Promise<string> {
   return a === null || a === '' ? await b() : Promise.resolve(a);
 }
 
@@ -79,7 +79,7 @@ export function isConfiguredToInstallLatestDafny(): boolean {
 }
 
 export async function getCompilerRuntimePath(context: ExtensionContext): Promise<string> {
-  const configuredPath = await ifNullOrEmptyAsync(
+  const configuredPath = await ifNullOrEmpty(
     Configuration.get<string | null>(ConfigurationConstants.Compiler.RuntimePath),
     async () => LanguageServerConstants.GetDefaultCompilerPath(await getConfiguredVersion(context))
   );
@@ -101,9 +101,9 @@ export async function getLanguageServerRuntimePath(context: ExtensionContext): P
     return LanguageServerRuntimePath;
   }
   const configuredLanguageServerPath = getConfiguredLanguageServerRuntimePath();
-  const mightBeRecomputed: boolean = !isNullOrEmpty(configuredLanguageServerPath);
+  const mightBeRecomputed = !isNullOrEmpty(configuredLanguageServerPath);
 
-  let configuredPath = await ifNullOrEmptyAsync(
+  let configuredPath = await ifNullOrEmpty(
     configuredLanguageServerPath,
     async () => LanguageServerConstants.GetDefaultPath(await getConfiguredVersion(context))
   );
@@ -118,30 +118,30 @@ export async function getLanguageServerRuntimePath(context: ExtensionContext): P
 }
 
 async function cloneAllNecessaryDlls(configuredPath: string): Promise<string> {
-  const DLSName = 'DafnyLanguageServer';
-  const DCName = 'DafnyCore';
+  const dlsName = 'DafnyLanguageServer';
+  const dcName = 'DafnyCore';
   const dll = '.dll';
-  const DLS = DLSName + dll;
-  if(configuredPath.endsWith(DLS)) {
-    const prefix = configuredPath.substring(0, configuredPath.length - DLS.length);
+  const dls = dlsName + dll;
+  if(configuredPath.endsWith(dls)) {
+    const installationDir = path.dirname(configuredPath);
     // We copy DafnyLanguageServer.dll to another location
     // so that rebuilding Dafny will not fail because it's open in VSCode
-    const newPath = `${prefix}${DLSName}-vscode.dll`;
+    const newPath = path.join(installationDir, `${dlsName}-vscode.dll`);
     await fs.promises.copyFile(configuredPath, newPath);
-    const oldDepsJson = `${prefix}${DLSName}.deps.json`;
-    const newDepsJson = `${prefix}${DLSName}-vscode.deps.json`;
+    const oldDepsJson = path.join(installationDir, `${dlsName}.deps.json`);
+    const newDepsJson = path.join(installationDir, `${dlsName}-vscode.deps.json`);
     const oldContent = await fs.promises.readFile(oldDepsJson, { encoding: 'utf8' });
     const newContent = oldContent.replace(/DafnyCore\.dll/g, 'vscode-dll/DafnyCore.dll');
     await fs.promises.writeFile(newDepsJson, newContent);
-    const oldRunJson = `${prefix}${DLSName}.runtimeconfig.json`;
-    const newRunJson = `${prefix}${DLSName}-vscode.runtimeconfig.json`;
+    const oldRunJson = path.join(installationDir, `${dlsName}.runtimeconfig.json`);
+    const newRunJson = path.join(installationDir, `${dlsName}-vscode.runtimeconfig.json`);
     await fs.promises.copyFile(oldRunJson, newRunJson);
-    const vscodedllpath = `${prefix}vscode.dll`;
+    const vscodedllpath = path.join(installationDir, 'vscode.dll');
     if(!fs.existsSync(vscodedllpath)) {
       await fs.promises.mkdir(vscodedllpath);
     }
-    const oldCore = `${prefix}${DCName}${dll}`;
-    const newCore = `${vscodedllpath}/${DCName}${dll}`;
+    const oldCore = path.join(installationDir, `${dcName}${dll}`);
+    const newCore = path.join(vscodedllpath, `${dcName}${dll}`);
     await fs.promises.copyFile(oldCore, newCore);
     return newPath;
   }
