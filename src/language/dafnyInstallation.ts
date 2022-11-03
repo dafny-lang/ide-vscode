@@ -19,6 +19,7 @@ import fetch from 'cross-fetch';
 import { checkSupportedDotnetVersion, getDotnetExecutablePath } from '../dotnet';
 
 const execAsync = promisify(exec);
+const existsAsync = promisify(fs.exists);
 
 const ArchiveFileName = 'dafny.zip';
 const mkdirAsync = promisify(fs.mkdir);
@@ -101,7 +102,7 @@ export async function getLanguageServerRuntimePath(context: ExtensionContext): P
     return LanguageServerRuntimePath;
   }
   const configuredLanguageServerPath = getConfiguredLanguageServerRuntimePath();
-  const mightBeRecomputed = !isNullOrEmpty(configuredLanguageServerPath);
+  const isCustomInstallation = !isNullOrEmpty(configuredLanguageServerPath);
 
   let configuredPath = await ifNullOrEmpty(
     configuredLanguageServerPath,
@@ -110,7 +111,7 @@ export async function getLanguageServerRuntimePath(context: ExtensionContext): P
   if(!path.isAbsolute(configuredPath)) {
     configuredPath = path.join(context.extensionPath, configuredPath);
   }
-  if(mightBeRecomputed) {
+  if(isCustomInstallation) {
     configuredPath = await cloneAllNecessaryDlls(configuredLanguageServerPath);
   }
   LanguageServerRuntimePath = configuredPath;
@@ -137,7 +138,7 @@ async function cloneAllNecessaryDlls(configuredPath: string): Promise<string> {
     const newRunJson = path.join(installationDir, `${dlsName}-vscode.runtimeconfig.json`);
     await fs.promises.copyFile(oldRunJson, newRunJson);
     const vscodedllpath = path.join(installationDir, 'vscode.dll');
-    if(!fs.existsSync(vscodedllpath)) {
+    if(!await existsAsync(vscodedllpath)) {
       await fs.promises.mkdir(vscodedllpath);
     }
     const oldCore = path.join(installationDir, `${dcName}${dll}`);
