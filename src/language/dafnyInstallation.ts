@@ -97,7 +97,7 @@ function isNullOrEmpty(s: string | null): boolean {
   return s === '' || s == null;
 }
 
-export async function getLanguageServerRuntimePath(context: ExtensionContext): Promise<string> {
+export async function getOrComputeLanguageServerRuntimePath(context: ExtensionContext): Promise<string> {
   if(LanguageServerRuntimePath != null) {
     return LanguageServerRuntimePath;
   }
@@ -328,7 +328,7 @@ export class DafnyInstaller {
   }
 
   public async isLanguageServerRuntimeAccessible(): Promise<boolean> {
-    const languageServerDll = await getLanguageServerRuntimePath(this.context);
+    const languageServerDll = await getOrComputeLanguageServerRuntimePath(this.context);
     try {
       await fs.promises.access(languageServerDll, fs.constants.R_OK);
       return true;

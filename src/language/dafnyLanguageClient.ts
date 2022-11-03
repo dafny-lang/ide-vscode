@@ -10,7 +10,7 @@ import { ICounterexampleItem, ICounterexampleParams } from './api/counterExample
 import { IGhostDiagnosticsParams } from './api/ghostDiagnostics';
 import { IVerificationGutterStatusParams as IVerificationGutterStatusParams } from './api/verificationGutterStatusParams';
 import { IVerificationSymbolStatusParams } from './api/verificationSymbolStatusParams';
-import { getLanguageServerRuntimePath } from './dafnyInstallation';
+import { getOrComputeLanguageServerRuntimePath } from './dafnyInstallation';
 
 const LanguageServerId = 'dafny-vscode';
 const LanguageServerName = 'Dafny Language Server';
@@ -96,7 +96,7 @@ export class DafnyLanguageClient extends LanguageClient {
 
   public static async create(context: ExtensionContext, statusOutput: OutputChannel): Promise<DafnyLanguageClient> {
     const { path: dotnetExecutable } = await getDotnetExecutablePath();
-    const launchArguments = [ await getLanguageServerRuntimePath(context), ...getLanguageServerLaunchArgs() ];
+    const launchArguments = [ await getOrComputeLanguageServerRuntimePath(context), ...getLanguageServerLaunchArgs() ];
     statusOutput.appendLine(`Language server arguments: ${DafnyLanguageClient.argumentsToCommandLine(launchArguments)}`);
     const serverOptions: ServerOptions = {
       run: { command: dotnetExecutable, args: launchArguments },
