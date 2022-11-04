@@ -97,6 +97,22 @@ function isNullOrEmpty(s: string | null): boolean {
   return s === '' || s == null;
 }
 
+async function copyDir(src: string, dest: string) {
+  const entries = await fs.promises.readdir(src, { withFileTypes: true });
+  if(!await existsAsync(dest)) {
+    await fs.promises.mkdir(dest);
+  }
+  for(const entry of entries) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    if(entry.isDirectory()) {
+      await copyDir(srcPath, destPath);
+    } else {
+      await fs.promises.copyFile(srcPath, destPath);
+    }
+  }
+}
+
 export async function getOrComputeLanguageServerRuntimePath(context: ExtensionContext): Promise<string> {
   if(LanguageServerRuntimePath != null) {
     return LanguageServerRuntimePath;
@@ -118,32 +134,45 @@ export async function getOrComputeLanguageServerRuntimePath(context: ExtensionCo
   return configuredPath;
 }
 
+// We copy DafnyLanguageServer.dll to another location and all its dependencies
+// so that rebuilding Dafny will not fail because it's open in VSCode
 async function cloneAllNecessaryDlls(configuredPath: string): Promise<string> {
   const dlsName = 'DafnyLanguageServer';
-  const dcName = 'DafnyCore';
   const dll = '.dll';
+  const runtimeconfigjson = '.runtimeconfig.json';
+  const depsjson = '.deps.json';
   const dls = dlsName + dll;
   if(configuredPath.endsWith(dls)) {
     const installationDir = path.dirname(configuredPath);
-    // We copy DafnyLanguageServer.dll to another location
-    // so that rebuilding Dafny will not fail because it's open in VSCode
-    const newPath = path.join(installationDir, `${dlsName}-vscode.dll`);
-    await fs.promises.copyFile(configuredPath, newPath);
-    const oldDepsJson = path.join(installationDir, `${dlsName}.deps.json`);
-    const newDepsJson = path.join(installationDir, `${dlsName}-vscode.deps.json`);
-    const oldContent = await fs.promises.readFile(oldDepsJson, { encoding: 'utf8' });
-    const newContent = oldContent.replace(/DafnyCore\.dll/g, 'vscode-dll/DafnyCore.dll');
-    await fs.promises.writeFile(newDepsJson, newContent);
-    const oldRunJson = path.join(installationDir, `${dlsName}.runtimeconfig.json`);
-    const newRunJson = path.join(installationDir, `${dlsName}-vscode.runtimeconfig.json`);
-    await fs.promises.copyFile(oldRunJson, newRunJson);
-    const vscodedllpath = path.join(installationDir, 'vscode.dll');
-    if(!await existsAsync(vscodedllpath)) {
-      await fs.promises.mkdir(vscodedllpath);
+    // copy all the files from installationDir to a new folder installationDir/vscode
+    const vscodeDir = path.join(installationDir, 'vscode');
+    // If the folder does not exist, create it
+    if(!await existsAsync(vscodeDir)) {
+      await mkdirAsync(vscodeDir);
     }
-    const oldCore = path.join(installationDir, `${dcName}${dll}`);
-    const newCore = path.join(vscodedllpath, `${dcName}${dll}`);
-    await fs.promises.copyFile(oldCore, newCore);
+    // Copy all the files from installationDir to vscodeDir
+    const files = await fs.promises.readdir(installationDir);
+    for(const file of files) {
+      if(!(file.endsWith(dll)
+        || file.endsWith(runtimeconfigjson)
+        || file.endsWith(depsjson)
+        || file.endsWith('.pdb')
+        || file === 'z3'
+        || file === 'DafnyPrelude.bpl'
+        || file === 'runtimes')) {
+        continue;
+      }
+      // If it's a directory, we use the function above
+      if((await fs.promises.stat(path.join(installationDir, file))).isDirectory()) {
+        await copyDir(
+          path.join(installationDir, file),
+          path.join(vscodeDir, file));
+      } else {
+        await fs.promises.copyFile(path.join(installationDir, file), path.join(vscodeDir, file));
+      }
+    }
+
+    const newPath = path.join(vscodeDir, `${dlsName}.dll`);
     return newPath;
   }
   return configuredPath;
