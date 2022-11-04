@@ -134,6 +134,8 @@ export async function getOrComputeLanguageServerRuntimePath(context: ExtensionCo
   return configuredPath;
 }
 
+// We copy DafnyLanguageServer.dll to another location and all its dependencies
+// so that rebuilding Dafny will not fail because it's open in VSCode
 async function cloneAllNecessaryDlls(configuredPath: string): Promise<string> {
   const dlsName = 'DafnyLanguageServer';
   const dll = '.dll';
@@ -152,24 +154,22 @@ async function cloneAllNecessaryDlls(configuredPath: string): Promise<string> {
     const files = await fs.promises.readdir(installationDir);
     for(const file of files) {
       if(!(file.endsWith(dll)
-      || file.endsWith(runtimeconfigjson)
-      || file.endsWith(depsjson)
-      || file.endsWith('.pdb')
-      || file === 'z3')) {
+        || file.endsWith(runtimeconfigjson)
+        || file.endsWith(depsjson)
+        || file.endsWith('.pdb')
+        || file === 'z3')) {
         continue;
       }
       // If it's a directory, we use the function above
-      if((await fs.promises.stat(path.join(installationDir, file)))
-        .isDirectory()) {
-        await copyDir(path.join(installationDir, file),
+      if((await fs.promises.stat(path.join(installationDir, file))).isDirectory()) {
+        await copyDir(
+          path.join(installationDir, file),
           path.join(vscodeDir, file));
       } else {
         await fs.promises.copyFile(path.join(installationDir, file), path.join(vscodeDir, file));
       }
     }
 
-    // We copy DafnyLanguageServer.dll to another location
-    // so that rebuilding Dafny will not fail because it's open in VSCode
     const newPath = path.join(vscodeDir, `${dlsName}.dll`);
     return newPath;
   }
