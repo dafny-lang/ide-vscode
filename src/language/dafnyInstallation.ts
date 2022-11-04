@@ -157,7 +157,9 @@ async function cloneAllNecessaryDlls(configuredPath: string): Promise<string> {
         || file.endsWith(runtimeconfigjson)
         || file.endsWith(depsjson)
         || file.endsWith('.pdb')
-        || file === 'z3')) {
+        || file === 'z3'
+        || file === 'DafnyPrelude.bpl'
+        || file === 'runtimes')) {
         continue;
       }
       // If it's a directory, we use the function above
