@@ -6,11 +6,12 @@ import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath, toVsRange } from '../tools/vscode';
 
 const GhostDecoration: DecorationRenderOptions = {
+  fontStyle: 'italic',
   dark: {
-    backgroundColor: '#64646480'
+    opacity: '80%'
   },
   light: {
-    backgroundColor: '#D3D3D380'
+    opacity: '70%'
   }
 };
 
