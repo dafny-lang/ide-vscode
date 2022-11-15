@@ -26,6 +26,7 @@ export default class GhostDiagnosticsView {
     context.subscriptions.push(
       workspace.onDidCloseTextDocument(document => instance.clearGhostDiagnostics(document.uri.toString())),
       window.onDidChangeActiveTextEditor(editor => instance.refreshDisplayedGhostDiagnostics(editor)),
+      workspace.onDidChangeTextDocument(() => instance.refreshDisplayedGhostDiagnostics(window.activeTextEditor)),
       languageClient.onGhostDiagnostics(params => instance.updateGhostDiagnostics(params)),
       instance
     );
