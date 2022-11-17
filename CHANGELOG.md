@@ -1,5 +1,10 @@
 # Release Notes
 
+## 2.9.0
+- Ghost highlighting is re-rendered now on every change to prevent non-ghost code from being displayed as ghost. (https://github.com/dafny-lang/ide-vscode/pull/304)
+- Ghost code more like comments (https://github.com/dafny-lang/ide-vscode/pull/301)
+- If the plugin is configured to depend on a locally compiled DafnyLanguageServer.dll, ensures that all DLLs are copied in a local directory before being accessed by vscode, so that the original DLLs can be overwritten even if VSCode is running (https://github.com/dafny-lang/ide-vscode/pull/297) (https://github.com/dafny-lang/ide-vscode/pull/298)
+
 ## 2.8.6
 - fix: `dafny.dotnetExecutablePath` works to install custom source (https://github.com/dafny-lang/ide-vscode/pull/287)
 
