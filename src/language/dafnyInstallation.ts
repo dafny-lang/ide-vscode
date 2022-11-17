@@ -329,7 +329,7 @@ export class DafnyInstaller {
     // This works around this edge case.
     const injectPath = `PATH=${path.dirname(dotnet)}:$PATH`;
     // Build the DafnyLanguageServer
-    await this.execLog(`${injectPath} ${ (await getDotnetExecutablePath()).path } build Source/DafnyLanguageServer/DafnyLanguageServer.csproj`);
+    await this.execLog(`${injectPath} ${ (await getDotnetExecutablePath()).path } build Source/Dafny.sln`);
     const binaries = Utils.joinPath(installationPath, 'dafny', 'Binaries').fsPath;
     processChdir(binaries);
     try {
