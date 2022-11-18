@@ -177,8 +177,8 @@ async function cloneAllNecessaryDlls(configuredPath: string): Promise<string> {
     } catch(e: unknown) {
       console.log(e);
       window.showWarningMessage(
-        'Another process (usually VSCode) prevented Dafny from importing the locally built DafnyLanguageServer.dll.\n'+
-        'This is fine if you did not modify DafnyLanguageServer.dll recently.');
+        'Another process (usually VSCode) prevented Dafny from importing the locally built DafnyLanguageServer.dll.\n'
+        + 'This is fine if you did not modify DafnyLanguageServer.dll recently.');
     }
 
     const newPath = path.join(vscodeDir, `${dlsName}.dll`);
