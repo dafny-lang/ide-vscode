@@ -152,24 +152,33 @@ async function cloneAllNecessaryDlls(configuredPath: string): Promise<string> {
     }
     // Copy all the files from installationDir to vscodeDir
     const files = await fs.promises.readdir(installationDir);
-    for(const file of files) {
-      if(!(file.endsWith(dll)
-        || file.endsWith(runtimeconfigjson)
-        || file.endsWith(depsjson)
-        || file.endsWith('.pdb')
-        || file === 'z3'
-        || file === 'DafnyPrelude.bpl'
-        || file === 'runtimes')) {
-        continue;
+    try {
+      for(const file of files) {
+        // eslint-disable-next-line max-depth
+        if(!(file.endsWith(dll)
+          || file.endsWith(runtimeconfigjson)
+          || file.endsWith(depsjson)
+          || file.endsWith('.pdb')
+          || file === 'z3'
+          || file === 'DafnyPrelude.bpl'
+          || file === 'runtimes')) {
+          continue;
+        }
+        // If it's a directory, we use the function above
+        // eslint-disable-next-line max-depth
+        if((await fs.promises.stat(path.join(installationDir, file))).isDirectory()) {
+          await copyDir(
+            path.join(installationDir, file),
+            path.join(vscodeDir, file));
+        } else {
+          await fs.promises.copyFile(path.join(installationDir, file), path.join(vscodeDir, file));
+        }
       }
-      // If it's a directory, we use the function above
-      if((await fs.promises.stat(path.join(installationDir, file))).isDirectory()) {
-        await copyDir(
-          path.join(installationDir, file),
-          path.join(vscodeDir, file));
-      } else {
-        await fs.promises.copyFile(path.join(installationDir, file), path.join(vscodeDir, file));
-      }
+    } catch(e: unknown) {
+      console.log(e);
+      window.showWarningMessage(
+        'Another process (usually VSCode) prevented Dafny from importing the locally built DafnyLanguageServer.dll.\n'+
+        'This is fine if you did not modify DafnyLanguageServer.dll recently.');
     }
 
     const newPath = path.join(vscodeDir, `${dlsName}.dll`);
