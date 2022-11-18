@@ -4,6 +4,7 @@ export namespace DafnyCommands {
   export const CompileAndRun = 'dafny.compileAndRun';
   export const ShowCounterexample = 'dafny.showCounterexample';
   export const HideCounterexample = 'dafny.hideCounterexample';
+  export const CopyCounterexamples = 'dafny.copyCounterexamples';
   export const OpenStatusBarMenu = 'dafny.openStatusBarMenu';
   export const RestartServer = 'dafny.restartServer';
 }
