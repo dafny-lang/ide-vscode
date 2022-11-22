@@ -98,37 +98,27 @@ function isNullOrEmpty(s: string | null): boolean {
 }
 
 async function ensureDirExists(
-  dirName: string,
-  addCleanup: (callback: () => Promise<void>) => void,
-  forceDeletingOnCleanupEvenIfExisted: boolean = false) {
+  dirName: string) {
   const existed = await existsAsync(dirName);
   if(!existed) {
     await mkdirAsync(dirName);
   }
-  if(!existed || forceDeletingOnCleanupEvenIfExisted) {
-    addCleanup(async () => {
-      await fs.promises.rmdir(dirName);
-    });
-  }
 }
 
-async function copyFile(srcPath: string, targetFile: string, addCleanup: (callback: () => Promise<void>) => void) {
+async function copyFile(srcPath: string, targetFile: string) {
   await fs.promises.copyFile(srcPath, targetFile);
-  addCleanup(((targetFile: string) => async () => {
-    await fs.promises.rm(targetFile);
-  })(targetFile));
 }
 
-async function copyDir(src: string, dest: string, addCleanup: (callback: () => Promise<void>) => void) {
+async function copyDir(src: string, dest: string) {
   const entries = await fs.promises.readdir(src, { withFileTypes: true });
-  await ensureDirExists(dest, addCleanup);
+  await ensureDirExists(dest);
   for(const entry of entries) {
     const srcPath = path.join(src, entry.name);
     const destPath = path.join(dest, entry.name);
     if(entry.isDirectory()) {
-      await copyDir(srcPath, destPath, addCleanup);
+      await copyDir(srcPath, destPath);
     } else {
-      await copyFile(srcPath, destPath, addCleanup);
+      await copyFile(srcPath, destPath);
     }
   }
 }
@@ -169,15 +159,10 @@ async function cloneAllNecessaryDlls(configuredPath: string): Promise<string> {
   // copy all the files from installationDir to a new temporary folder
   const vscodeDir = path.join(os.tmpdir(), await fs.promises.mkdtemp('vscode-dafny-dlls-'));
   console.log(`Copying all necessary dlls to ${vscodeDir}...`);
-  let cleanup: () => Promise<void> = async function() {};
-  // We cleanup in reverse
-  const addCleanup: (callback: () => Promise<void>) => void = (moreCleanup: () => Promise<void>) => {
-    cleanup = (cleanup => async () => {
-      await moreCleanup();
-      await cleanup();
-    })(cleanup);
+  const cleanup = function() {
+    fs.rmdirSync(vscodeDir, { recursive: true });
   };
-  await ensureDirExists(vscodeDir, addCleanup, true);
+  await ensureDirExists(vscodeDir);
   // Copy all the files from installationDir to vscodeDir
   const files = await fs.promises.readdir(installationDir);
   for(const file of files) {
@@ -196,9 +181,9 @@ async function cloneAllNecessaryDlls(configuredPath: string): Promise<string> {
     const srcFile = path.join(installationDir, file);
     const targetFile = path.join(vscodeDir, file);
     if((await fs.promises.stat(srcFile)).isDirectory()) {
-      await copyDir(srcFile, targetFile, addCleanup);
+      await copyDir(srcFile, targetFile);
     } else {
-      await copyFile(srcFile, targetFile, addCleanup);
+      await copyFile(srcFile, targetFile);
     }
   }
 
