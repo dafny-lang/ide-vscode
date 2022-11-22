@@ -163,6 +163,7 @@ async function cloneAllNecessaryDlls(configuredPath: string): Promise<string> {
     fs.rmdirSync(vscodeDir, { recursive: true });
   };
   await ensureDirExists(vscodeDir);
+  process.on('exit', cleanup);
   // Copy all the files from installationDir to vscodeDir
   const files = await fs.promises.readdir(installationDir);
   for(const file of files) {
@@ -188,7 +189,6 @@ async function cloneAllNecessaryDlls(configuredPath: string): Promise<string> {
   }
 
   const newPath = path.join(vscodeDir, dls);
-  process.on('exit', cleanup);
   return newPath;
 }
 
