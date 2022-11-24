@@ -3,7 +3,11 @@ import { ExtensionConstants, LanguageServerConstants } from './constants';
 import { DafnyCommands } from './commands';
 import { DafnyLanguageClient } from './language/dafnyLanguageClient';
 import checkAndInformAboutInstallation from './startupCheck';
+<<<<<<< Updated upstream
 import { DafnyInstaller, getOrComputeLanguageServerRuntimePath, isConfiguredToInstallLatestDafny } from './language/dafnyInstallation';
+=======
+import { DafnyInstaller, getLanguageServerExecutable, isConfiguredToInstallLatestDafny } from './language/dafnyInstallation';
+>>>>>>> Stashed changes
 import { Messages } from './ui/messages';
 import createAndRegisterDafnyIntegration from './ui/dafnyIntegration';
 import { timeout } from './tools/timeout';
@@ -62,7 +66,12 @@ class ExtensionRuntime {
   }
 
   private async initializeClient(): Promise<void> {
+<<<<<<< Updated upstream
     this.statusOutput.appendLine(`Starting Dafny from ${await getOrComputeLanguageServerRuntimePath(this.context)}`);
+=======
+    const exec = await getLanguageServerExecutable(this.context, []);
+    this.statusOutput.appendLine(`Starting Dafny from ${exec.args![0]}`);
+>>>>>>> Stashed changes
     await this.startClientAndWaitForVersion();
   }
 
