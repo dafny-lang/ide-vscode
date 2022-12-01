@@ -261,11 +261,11 @@
       },
       {
         "command": "dafny.showCounterexample",
-        "title": "Dafny: Show Counterexample"
+        "title": "Dafny: (experimental) Show Counterexample"
       },
       {
         "command": "dafny.hideCounterexample",
-        "title": "Dafny: Hide Counterexample"
+        "title": "Dafny: (experimental) Hide Counterexample"
       },
       {
         "command": "dafny.copyCounterexamples",
