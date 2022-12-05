@@ -261,15 +261,15 @@
       },
       {
         "command": "dafny.showCounterexample",
-        "title": "Dafny: (experimental) Show Counterexample"
+        "title": "Dafny: Show Counterexample (experimental)"
       },
       {
         "command": "dafny.hideCounterexample",
-        "title": "Dafny: (experimental) Hide Counterexample"
+        "title": "Dafny: Hide Counterexample (experimental)"
       },
       {
         "command": "dafny.copyCounterexamples",
-        "title": "Dafny: Copy Counterexamples to Clipboard (Experimental)"
+        "title": "Dafny: Copy Counterexamples to Clipboard (experimental)"
       },
       {
         "command": "dafny.restartServer",
