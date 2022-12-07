@@ -26,8 +26,21 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "submenus": [
+      {
+        "id": "dafny.context",
+        "label": "Dafny"
+      }
+    ],
     "menus": {
       "editor/context": [
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "submenu": "dafny.context",
+          "group": "7_Dafny@5"
+        }
+      ],
+      "dafny.context": [
         {
           "when": "editorTextFocus && editorLangId == dafny",
           "command": "dafny.compile",
