@@ -62,7 +62,7 @@ class ExtensionRuntime {
   }
 
   private async initializeClient(): Promise<void> {
-    const exec = await getLanguageServerExecutable(this.context, []);
+    const exec = await getLanguageServerExecutable(this.context, [], []);
     this.statusOutput.appendLine(`Starting Dafny from ${exec.args![0]}`);
     await this.startClientAndWaitForVersion();
   }

@@ -1,3 +1,4 @@
+/* eslint-disable max-depth */
 import * as os from 'os';
 import * as fs from 'fs';
 import * as child_process from 'child_process';
@@ -139,9 +140,9 @@ export async function getOrComputeLanguageServerRuntimePath(context: ExtensionCo
   if(!path.isAbsolute(configuredPath)) {
     configuredPath = path.join(context.extensionPath, configuredPath);
   }
-  if(isCustomInstallation) {
-    configuredPath = await cloneAllNecessaryDlls(configuredLanguageServerPath);
-  }
+  // if(isCustomInstallation) {
+  //   configuredPath = await cloneAllNecessaryDlls(configuredLanguageServerPath);
+  // }
   LanguageServerRuntimePath = configuredPath;
   return configuredPath;
 }
@@ -193,20 +194,41 @@ async function cloneAllNecessaryDlls(configuredPath: string): Promise<string> {
   const newPath = path.join(vscodeDir, dls);
   return newPath;
 }
+import { execFile } from 'child_process';
+import { mkdir } from 'fs/promises';
+const execFileAsync = promisify(execFile);
 
-export async function getLanguageServerExecutable(context: ExtensionContext, args: string[]): Promise<Executable> {
+export async function getLanguageServerExecutable(context: ExtensionContext, newArgs: string[], oldArgs: string[]): Promise<Executable> {
   const version = await getConfiguredVersion(context);
   const { path: dotnetExecutable } = await getDotnetExecutablePath();
 
-  if(!getConfiguredLanguageServerRuntimePath() && versionToNumeric(version) > versionToNumeric('3.10')) {
+  if(!getConfiguredLanguageServerRuntimePath() &&
+    true /*versionToNumeric(version) >= versionToNumeric('3.10')*/)
+  {
     const localToolPath = path.join(context.extensionPath, `out/resources/${version}/`);
+    if(!fs.existsSync(localToolPath)) {
+      try {
+        await mkdir(localToolPath);
+      } catch(e: unknown) {
+        if(e instanceof Error) {
+          if((e as any).code != 'EEXIST') {
+            throw e;
+          }
+        } else {
+          throw e;
+        }
+      }
+      const { stdout, stderr } = await execFileAsync(dotnetExecutable, [ 'new', 'tool-manifest' ], { cwd: localToolPath });
+      const { stdout: s, stderr: p } = await execFileAsync(dotnetExecutable, [ 'tool', 'install', 'Dafny', '--version', '3.10.0-nightly-2022-12-07-35a0478' ], { cwd: localToolPath });
+    }
+
     return {
       command: dotnetExecutable,
-      args: [ 'tool', 'run', 'dafny' ].concat(args),
+      args: [ 'tool', 'run', 'dafny' ].concat(newArgs),
       options: { cwd: localToolPath } };
   } else {
     const cliPath = await getOrComputeLanguageServerRuntimePath(context);
-    return { command: dotnetExecutable, args: [ cliPath, ...args ] };
+    return { command: dotnetExecutable, args: [ cliPath, ...oldArgs ] };
   }
 }
 
@@ -389,7 +411,7 @@ export class DafnyInstaller {
   }
 
   public async isLanguageServerRuntimeAccessible(): Promise<boolean> {
-    const executable = await getLanguageServerExecutable(this.context, [ '--version' ]);
+    const executable = await getLanguageServerExecutable(this.context, [ '--version' ], [ '--version' ]);
     try {
       await promisify(child_process.execFile.bind(child_process))(executable.command, executable.args, {
         cwd: executable.options?.cwd

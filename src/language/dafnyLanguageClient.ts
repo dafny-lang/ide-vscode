@@ -15,7 +15,30 @@ import { getOrComputeLanguageServerRuntimePath, getLanguageServerExecutable } fr
 const LanguageServerId = 'dafny-vscode';
 const LanguageServerName = 'Dafny Language Server';
 
-function getLanguageServerLaunchArgs(): string[] {
+function getLanguageServerLaunchArgsNew(): string[] {
+  const oldVerifyOnValue = Configuration.get<string>(ConfigurationConstants.LanguageServer.AutomaticVerification);
+  const map: Record<string, string> = {
+    never: 'Never',
+    onchange: 'Change',
+    onsave: 'Save'
+  };
+  const verifyOn: string = map[oldVerifyOnValue];
+
+  const launchArgs = Configuration.get<string[]>(ConfigurationConstants.LanguageServer.LaunchArgs);
+  return [
+    'server',
+    `--verify-on:${verifyOn}`,
+    `--verification-time-limit:${Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationTimeLimit)}`,
+    //getVerifierCachingPolicy(),
+    `--cores:${Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationVirtualCores)}`,
+    `--notify-ghostness:${Configuration.get<string>(ConfigurationConstants.LanguageServer.MarkGhostStatements)}`,
+    `--notify-line-verification-status:${Configuration.get<string>(ConfigurationConstants.LanguageServer.DisplayGutterStatus)}`,
+    //...getDafnyPluginsArgument(),
+    ...launchArgs
+  ];
+}
+
+function getLanguageServerLaunchArgsOld(): string[] {
   const launchArgs = Configuration.get<string[]>(ConfigurationConstants.LanguageServer.LaunchArgs);
   return [
     getVerificationArgument(),
@@ -95,7 +118,7 @@ export class DafnyLanguageClient extends LanguageClient {
   }
 
   public static async create(context: ExtensionContext, statusOutput: OutputChannel): Promise<DafnyLanguageClient> {
-    const exec = await getLanguageServerExecutable(context, getLanguageServerLaunchArgs());
+    const exec = await getLanguageServerExecutable(context, getLanguageServerLaunchArgsNew(), getLanguageServerLaunchArgsOld());
 
     statusOutput.appendLine(`Language server arguments: ${DafnyLanguageClient.argumentsToCommandLine(exec.args ?? [])}`);
     const serverOptions: ServerOptions = {
