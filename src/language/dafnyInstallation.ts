@@ -17,7 +17,6 @@ import { ChildProcess, exec } from 'child_process';
 import { chdir as processChdir, cwd as processCwd } from 'process';
 import fetch from 'cross-fetch';
 import { Executable } from 'vscode-languageclient/node';
-import { getDotnetExecutablePath } from '../dotnet';
 
 import { checkSupportedDotnetVersion, getDotnetExecutablePath } from '../dotnet';
 
@@ -93,7 +92,6 @@ export async function getCompilerRuntimePath(context: ExtensionContext): Promise
   return configuredPath;
 }
 
-<<<<<<< Updated upstream
 // We cache the language server runtime path so that we don't need to copy it every time.
 let LanguageServerRuntimePath: string | null = null;
 
@@ -194,7 +192,8 @@ async function cloneAllNecessaryDlls(configuredPath: string): Promise<string> {
 
   const newPath = path.join(vscodeDir, dls);
   return newPath;
-=======
+}
+
 export async function getLanguageServerExecutable(context: ExtensionContext, args: string[]): Promise<Executable> {
   const version = await getConfiguredVersion(context);
   const { path: dotnetExecutable } = await getDotnetExecutablePath();
@@ -206,28 +205,10 @@ export async function getLanguageServerExecutable(context: ExtensionContext, arg
       args: [ 'tool', 'run', 'dafny' ].concat(args),
       options: { cwd: localToolPath } };
   } else {
-    const configuredPath = await ifNullOrEmpty(
-      getConfiguredLanguageServerRuntimePath(),
-      async () => LanguageServerConstants.GetDefaultPath(await getConfiguredVersion(context))
-    );
-    const cliPath = path.isAbsolute(configuredPath)
-      ? configuredPath
-      : path.join(context.extensionPath, configuredPath);
+    const cliPath = await getOrComputeLanguageServerRuntimePath(context);
     return { command: dotnetExecutable, args: [ cliPath, ...args ] };
   }
->>>>>>> Stashed changes
 }
-
-// export async function getLanguageServerRuntimePath(context: ExtensionContext): Promise<string> {
-//   const configuredPath = await ifNullOrEmpty(
-//     getConfiguredLanguageServerRuntimePath(),
-//     async () => LanguageServerConstants.GetDefaultPath(await getConfiguredVersion(context))
-//   );
-//   if(path.isAbsolute(configuredPath)) {
-//     return configuredPath;
-//   }
-//   return path.join(context.extensionPath, configuredPath);
-// }
 
 function getConfiguredLanguageServerRuntimePath(): string {
   const languageServerOverride = process.env['DAFNY_SERVER_OVERRIDE'] ?? '';
@@ -408,11 +389,7 @@ export class DafnyInstaller {
   }
 
   public async isLanguageServerRuntimeAccessible(): Promise<boolean> {
-<<<<<<< Updated upstream
-    const languageServerDll = await getOrComputeLanguageServerRuntimePath(this.context);
-=======
     const executable = await getLanguageServerExecutable(this.context, [ '--version' ]);
->>>>>>> Stashed changes
     try {
       await promisify(child_process.execFile.bind(child_process))(executable.command, executable.args, {
         cwd: executable.options?.cwd
