@@ -16,7 +16,7 @@ export namespace ConfigurationConstants {
   }
 
   export namespace LanguageServer {
-    export const RuntimePath = 'languageServerRuntimePath';
+    export const CliPath = 'cliPath';
     export const LaunchArgs = 'languageServerLaunchArgs';
     export const AutomaticVerification = 'automaticVerification';
     export const VerificationTimeLimit = 'verificationTimeLimit';
@@ -29,7 +29,6 @@ export namespace ConfigurationConstants {
   }
 
   export namespace Compiler {
-    export const RuntimePath = 'compilerRuntimePath';
     export const OutputDir = 'compilerOutputDir';
     export const Arguments = 'compilerArgs';
     export const CommandPrefix = 'terminalCommandPrefix';

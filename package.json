@@ -115,11 +115,6 @@
       "type": "object",
       "title": "Dafny extension configuration",
       "properties": {
-        "dafny.languageServerRuntimePath": {
-          "type": "string",
-          "default": null,
-          "description": "Absolute or relative path to the DafnyLanguageServer.dll"
-        },
         "dafny.automaticVerification": {
           "type": "string",
           "default": "onchange",
@@ -139,21 +134,6 @@
           "type": "number",
           "default": "0",
           "description": "Maximum number of virtual cores that may be used for verification, 0=auto (requires restart)"
-        },
-        "dafny.verificationCachingPolicy": {
-          "type": "string",
-          "enum": [
-            "No caching",
-            "Basic caching",
-            "Advanced caching"
-          ],
-          "enumDescriptions": [
-            "Reverifies the whole file after each change",
-            "Keeps a per-procedure cache of verification results",
-            "Keeps a per-assertion cache of verification results"
-          ],
-          "default": "No caching",
-          "description": "EXPERIMENTAL: How Dafny reuses previous verification results as a source file is being edited (requires restart)."
         },
         "dafny.markGhostStatements": {
           "type": "boolean",
@@ -184,12 +164,12 @@
             "type": "string"
           },
           "default": [],
-          "description": "Optional array of strings to pass to the language server runtime."
+          "description": "Optional array of strings to pass to the language server."
         },
-        "dafny.compilerRuntimePath": {
+        "dafny.cliPath": {
           "type": "string",
           "default": null,
-          "description": "Absolute or relative path to the Dafny.dll"
+          "description": "Absolute or relative path to the Dafny CLI. When configured, overrides the selected Dafny version."
         },
         "dafny.compilerOutputDir": {
           "type": "string",
@@ -243,6 +223,21 @@
           "type": "string",
           "default": null,
           "description": "The prefix to use when executing a command in the VS Code terminal. Defaults to & on windows."
+        },
+        "dafny.verificationCachingPolicy": {
+          "type": "string",
+          "enum": [
+            "No caching",
+            "Basic caching",
+            "Advanced caching"
+          ],
+          "enumDescriptions": [
+            "Reverifies the whole file after each change",
+            "Keeps a per-procedure cache of verification results",
+            "Keeps a per-assertion cache of verification results"
+          ],
+          "default": "No caching",
+          "description": "EXPERIMENTAL: How Dafny reuses previous verification results as a source file is being edited (requires restart)."
         }
       }
     },

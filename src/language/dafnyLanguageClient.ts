@@ -1,16 +1,16 @@
+import { json } from 'stream/consumers';
 import { ExtensionContext, Disposable, OutputChannel, Uri, Diagnostic } from 'vscode';
 import { HandleDiagnosticsSignature, LanguageClient, LanguageClientOptions, ServerOptions, TextDocumentPositionParams } from 'vscode-languageclient/node';
 
 import Configuration from '../configuration';
 import { ConfigurationConstants } from '../constants';
-import { getDotnetExecutablePath } from '../dotnet';
 import { DafnyDocumentFilter } from '../tools/vscode';
 import { ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from './api/compilationStatus';
 import { ICounterexampleItem, ICounterexampleParams } from './api/counterExample';
 import { IGhostDiagnosticsParams } from './api/ghostDiagnostics';
 import { IVerificationGutterStatusParams as IVerificationGutterStatusParams } from './api/verificationGutterStatusParams';
 import { IVerificationSymbolStatusParams } from './api/verificationSymbolStatusParams';
-import { getOrComputeLanguageServerRuntimePath, getLanguageServerExecutable } from './dafnyInstallation';
+import { DafnyInstaller } from './dafnyInstallation';
 
 const LanguageServerId = 'dafny-vscode';
 const LanguageServerName = 'Dafny Language Server';
@@ -97,10 +97,10 @@ function getDafnyPluginsArgument(): string[] {
 type DiagnosticListener = (uri: Uri, diagnostics: Diagnostic[]) => void;
 
 export class DafnyLanguageClient extends LanguageClient {
-  private readonly diagnosticsListeners: DiagnosticListener[];
 
   // eslint-disable-next-line max-params
-  private constructor(id: string, name: string, serverOptions: ServerOptions, clientOptions: LanguageClientOptions, diagnosticsListeners: DiagnosticListener[], forceDebug?: boolean) {
+  private constructor(id: string, name: string, serverOptions: ServerOptions, clientOptions: LanguageClientOptions,
+    private readonly diagnosticsListeners: DiagnosticListener[], forceDebug?: boolean) {
     super(id, name, serverOptions, clientOptions, forceDebug);
     this.diagnosticsListeners = diagnosticsListeners;
   }
@@ -117,10 +117,11 @@ export class DafnyLanguageClient extends LanguageClient {
     ).join(' ');
   }
 
-  public static async create(context: ExtensionContext, statusOutput: OutputChannel): Promise<DafnyLanguageClient> {
-    const exec = await getLanguageServerExecutable(context, getLanguageServerLaunchArgsNew(), getLanguageServerLaunchArgsOld());
+  public static async create(installer: DafnyInstaller): Promise<DafnyLanguageClient> {
+    const exec = await installer.getLanguageServerExecutable(getLanguageServerLaunchArgsNew(), getLanguageServerLaunchArgsOld());
 
-    statusOutput.appendLine(`Language server arguments: ${DafnyLanguageClient.argumentsToCommandLine(exec.args ?? [])}`);
+    installer.statusOutput.appendLine(`Language server: ${JSON.stringify(exec)}`);
+    installer.statusOutput.appendLine(`Language server arguments: ${DafnyLanguageClient.argumentsToCommandLine(exec.args ?? [])}`);
     const serverOptions: ServerOptions = {
       run: exec,
       debug: exec
