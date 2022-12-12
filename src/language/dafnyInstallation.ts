@@ -5,7 +5,7 @@ import * as path from 'path';
 import { promisify } from 'util';
 import { versionToNumeric } from '../ui/dafnyIntegration';
 
-import { ExtensionContext, OutputChannel } from 'vscode';
+import { ExtensionContext, OutputChannel, window } from 'vscode';
 import { getCliPath } from './cliCloner';
 
 import { ConfigurationConstants, LanguageServerConstants } from '../constants';
@@ -18,6 +18,7 @@ import { execFile } from 'child_process';
 const execFileAsync = promisify(execFile);
 import { OldSkoolInstaller } from './oldSkoolInstaller';
 import { mkdir } from 'fs/promises';
+import { Messages } from '../ui/messages';
 
 export class DafnyInstaller {
   public constructor(
@@ -40,13 +41,12 @@ export class DafnyInstaller {
     const { path: dotnetExecutable } = await getDotnetExecutablePath();
 
     if(versionToNumeric(version) < versionToNumeric('3.7')) {
-      throw new Error('Not supported');
+      throw new Error('Dafny versions below 3.7 are not supported.');
     }
 
     const args = versionToNumeric(version) < versionToNumeric('3.10') ? oldArgs : newArgs;
 
     const configuredCliPath = await getCliPath(this.context);
-    let localToolPath: string;
     if(configuredCliPath != null) {
       if(configuredCliPath.endsWith('.dll')) {
         return {
@@ -60,28 +60,38 @@ export class DafnyInstaller {
         };
       }
     } else {
-      const toolVersion = await this.getDotnetToolVersion();
-      localToolPath = path.join(this.context.extensionPath, `out/resources/${toolVersion}/`);
-      if(!fs.existsSync(localToolPath)) {
-        try {
-          await mkdir(localToolPath, { recursive: true });
-          await execFileAsync(dotnetExecutable, [ 'new', 'tool-manifest' ], { cwd: localToolPath });
-          this.statusOutput.show();
-          this.writeStatus('Starting Dafny installation');
-          await execFileAsync(dotnetExecutable, [ 'tool', 'install', 'Dafny', '--version', toolVersion ], { cwd: localToolPath });
-          this.writeStatus('Dafny installation completed');
-        } catch(error: unknown) {
-          this.writeStatus('Dafny installation failed:');
-          this.writeStatus(`> ${error}`);
-          console.error('dafny installation failed', error);
-        }
-      }
+      const localToolPath = await this.ensureDafnyIsInstalled();
       return {
         command: dotnetExecutable,
         args: [ 'tool', 'run', 'dafny' ].concat(args),
         options: { cwd: localToolPath }
       };
     }
+  }
+
+  private async ensureDafnyIsInstalled(): Promise<string> {
+    const { path: dotnetExecutable } = await getDotnetExecutablePath();
+    const toolVersion = await this.getDotnetToolVersion();
+    const localToolPath = path.join(this.context.extensionPath, `out/resources/${toolVersion}/`);
+    if(fs.existsSync(localToolPath)) {
+      return localToolPath;
+    }
+
+    try {
+      await mkdir(localToolPath, { recursive: true });
+      await execFileAsync(dotnetExecutable, [ 'new', 'tool-manifest' ], { cwd: localToolPath });
+      this.statusOutput.show();
+      window.showErrorMessage(Messages.Installation.Start);
+      this.writeStatus(Messages.Installation.Start);
+      await execFileAsync(dotnetExecutable, [ 'tool', 'install', 'Dafny', '--version', toolVersion ], { cwd: localToolPath });
+      this.writeStatus(Messages.Installation.Completed);
+    } catch(error: unknown) {
+      window.showErrorMessage(Messages.Installation.Error);
+      this.writeStatus(Messages.Installation.Error);
+      this.writeStatus(`> ${error}`);
+      console.error('dafny installation failed', error);
+    }
+    return localToolPath;
   }
 
   private toolVersionCache: string | undefined;
@@ -127,15 +137,15 @@ export class DafnyInstaller {
     return toolVersion;
   }
 
-  public async isLanguageServerRuntimeAccessible(): Promise<boolean> {
+  public async checkCliAccessible(): Promise<boolean> {
     const executable = await this.getCliExecutable([ '--version' ], [ '--version' ]);
     try {
       await promisify(child_process.execFile.bind(child_process))(executable.command, executable.args, {
         cwd: executable.options?.cwd
       });
-      // TODO Should we check stdout to find the expected version number?
       return true;
     } catch(e: unknown) {
+      window.showErrorMessage(`Could not start the Dafny CLI using ${JSON.stringify(executable)}. Please check if the installation is corrupt.`);
       return false;
     }
   }
@@ -145,34 +155,6 @@ export class DafnyInstaller {
   }
 }
 
-export function isConfiguredToInstallLatestDafny(): boolean {
-  return Configuration.get<string>(ConfigurationConstants.PreferredVersion) === LanguageServerConstants.LatestStable;
-}
-
 function getPreferredVersion(): string {
   return process.env['dafnyIdeVersion'] ?? Configuration.get<string>(ConfigurationConstants.PreferredVersion);
 }
-
-// public isLatestKnownLanguageServerOrNewer(version: string): boolean {
-//   if(version === LanguageServerConstants.UnknownVersion) {
-//     this.writeStatus('failed to resolve the installed Dafny version');
-//     return true;
-//   }
-//   const givenParts = version.split('.');
-//   const latestVersion = LanguageServerConstants.LatestVersion;
-//   const latestParts = latestVersion.split('.');
-//   for(let i = 0; i < Math.min(givenParts.length, latestParts.length); i++) {
-//     const given = givenParts[i];
-//     const latest = latestParts[i];
-//     if(given < latest) {
-//       this.writeStatus(`the installed Dafny version is older than the latest: ${version} < ${latestVersion}`);
-//       return false;
-//     }
-//     if(given > latest) {
-//       this.writeStatus(`the installed Dafny version is newer than the latest: ${version} > ${latestVersion}`);
-//       return true;
-//     }
-//   }
-//   this.writeStatus(`the installed Dafny version is the latest known: ${version} = ${latestVersion}`);
-//   return true;
-// }

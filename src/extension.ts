@@ -44,26 +44,13 @@ class ExtensionRuntime {
   }
 
   public async initialize(): Promise<void> {
-    // if(!this.installer.isCustomInstallation() && !await this.installer.isLanguageServerRuntimeAccessible()) {
-    //   if(!await this.installer.install()) {
-    //     window.showErrorMessage(Messages.Installation.Error);
-    //     return;
-    //   }
-    // }
-    await this.initializeClient();
-    // if(!await this.updateDafnyIfNecessary(this.languageServerVersion!)) {
-    //   this.statusOutput.appendLine('Dafny initialization failed');
-    //   return;
-    // }
+    if(!await this.installer.checkCliAccessible()) {
+      return;
+    }
+    await this.startClientAndWaitForVersion();
     await createAndRegisterDafnyIntegration(this.installer, this.client!, this.languageServerVersion!);
     commands.registerCommand(DafnyCommands.RestartServer, restartServer);
     this.statusOutput.appendLine('Dafny is ready');
-  }
-
-  private async initializeClient(): Promise<void> {
-    const exec = await this.installer.getLanguageServerExecutable([], []);
-    this.statusOutput.appendLine(`Starting Dafny from ${exec.args![0]}`);
-    await this.startClientAndWaitForVersion();
   }
 
   private async getLanguageServerVersionAfterStartup(): Promise<string> {
@@ -78,25 +65,6 @@ class ExtensionRuntime {
     versionRegistration!.dispose();
     return version;
   }
-
-  // private async updateDafnyIfNecessary(installedVersion: string): Promise<boolean> {
-  //   if(this.installer.isLatestKnownLanguageServerOrNewer(installedVersion)) {
-  //     return true;
-  //   }
-  //   if(this.installer.isCustomInstallation() || !isConfiguredToInstallLatestDafny()) {
-  //     window.showInformationMessage(
-  //       `${Messages.Installation.Outdated} ${installedVersion} < ${LanguageServerConstants.LatestVersion}`
-  //     );
-  //     return true;
-  //   }
-  //   await this.client!.stop();
-  //   if(!await this.installer.install()) {
-  //     window.showErrorMessage(Messages.Installation.Error);
-  //     return false;
-  //   }
-  //   await this.initializeClient();
-  //   return true;
-  // }
 
   public async dispose(): Promise<void> {
     await this.client?.stop();
@@ -121,7 +89,7 @@ class ExtensionRuntime {
       this.context.subscriptions[i].dispose();
     }
     this.context.subscriptions.splice(1);
-    await this.initializeClient();
+    await this.startClientAndWaitForVersion();
     await createAndRegisterDafnyIntegration(this.installer, this.client!, this.languageServerVersion!);
     const issueURL = await fileIssueURL(this.languageServerVersion ?? '???', this.context);
     this.statusOutput.appendLine(

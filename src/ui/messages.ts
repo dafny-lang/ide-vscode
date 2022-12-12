@@ -19,7 +19,9 @@ export namespace Messages {
   }
 
   export namespace Installation {
+    export const Start = 'Starting Dafny installation.';
     export const Error = 'An error occurred during the installation of Dafny.';
+    export const Completed = 'Dafny installation completed';
     export const Outdated = 'Your Dafny installation is outdated: ';
   }
 

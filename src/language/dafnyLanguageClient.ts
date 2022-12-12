@@ -1,5 +1,4 @@
-import { json } from 'stream/consumers';
-import { ExtensionContext, Disposable, OutputChannel, Uri, Diagnostic } from 'vscode';
+import { Disposable, Uri, Diagnostic } from 'vscode';
 import { HandleDiagnosticsSignature, LanguageClient, LanguageClientOptions, ServerOptions, TextDocumentPositionParams } from 'vscode-languageclient/node';
 
 import Configuration from '../configuration';
@@ -29,11 +28,11 @@ function getLanguageServerLaunchArgsNew(): string[] {
     'server',
     `--verify-on:${verifyOn}`,
     `--verification-time-limit:${Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationTimeLimit)}`,
-    //getVerifierCachingPolicy(),
+    getVerifierCachingPolicy(),
     `--cores:${Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationVirtualCores)}`,
     `--notify-ghostness:${Configuration.get<string>(ConfigurationConstants.LanguageServer.MarkGhostStatements)}`,
     `--notify-line-verification-status:${Configuration.get<string>(ConfigurationConstants.LanguageServer.DisplayGutterStatus)}`,
-    //...getDafnyPluginsArgument(),
+    ...getDafnyPluginsArgument(),
     ...launchArgs
   ];
 }
@@ -43,11 +42,11 @@ function getLanguageServerLaunchArgsOld(): string[] {
   return [
     getVerificationArgument(),
     getVerifierTimeLimitArgument(),
-    getVerifierCachingPolicy(),
+    getVerifierCachingPolicyOld(),
     getVerifierVirtualCoresArgument(),
     getMarkGhostStatementsArgument(),
     getDisplayGutterStatusArgument(),
-    ...getDafnyPluginsArgument(),
+    ...getDafnyPluginsArgumentOld(),
     ...launchArgs
   ];
 }
@@ -61,6 +60,16 @@ function getVerifierTimeLimitArgument(): string {
 }
 
 function getVerifierCachingPolicy(): string {
+  const setting = Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationCachingPolicy);
+  const verifySnapshots = {
+    'No caching': 0,
+    'Basic caching': 1,
+    'Advanced caching': 3
+  }[setting] ?? 0;
+  return `--cache-verification=${verifySnapshots}`;
+}
+
+function getVerifierCachingPolicyOld(): string {
   const setting = Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationCachingPolicy);
   const verifySnapshots = {
     'No caching': 0,
@@ -82,7 +91,7 @@ function getMarkGhostStatementsArgument(): string {
   return `--ghost:markStatements=${Configuration.get<string>(ConfigurationConstants.LanguageServer.MarkGhostStatements)}`;
 }
 
-function getDafnyPluginsArgument(): string[] {
+function getDafnyPluginsArgumentOld(): string[] {
   const plugins = Configuration.get<string[]>(ConfigurationConstants.LanguageServer.DafnyPlugins);
   if(plugins === null || !Array.isArray(plugins)) {
     return [];
@@ -91,6 +100,18 @@ function getDafnyPluginsArgument(): string[] {
     plugins
       .filter(plugin => plugin !== null && plugin !== '')
       .map((plugin, i) => `--dafny:plugins:${i}=${plugin}`)
+  );
+}
+
+function getDafnyPluginsArgument(): string[] {
+  const plugins = Configuration.get<string[]>(ConfigurationConstants.LanguageServer.DafnyPlugins);
+  if(plugins === null || !Array.isArray(plugins)) {
+    return [];
+  }
+  return (
+    plugins
+      .filter(plugin => plugin !== null && plugin !== '')
+      .map((plugin, i) => `--plugin:${i}=${plugin}`)
   );
 }
 

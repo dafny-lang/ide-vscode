@@ -135,6 +135,21 @@
           "default": "0",
           "description": "Maximum number of virtual cores that may be used for verification, 0=auto (requires restart)"
         },
+        "dafny.verificationCachingPolicy": {
+          "type": "string",
+          "enum": [
+            "No caching",
+            "Basic caching",
+            "Advanced caching"
+          ],
+          "enumDescriptions": [
+            "Reverifies the whole file after each change",
+            "Keeps a per-procedure cache of verification results",
+            "Keeps a per-assertion cache of verification results"
+          ],
+          "default": "No caching",
+          "description": "EXPERIMENTAL: How Dafny reuses previous verification results as a source file is being edited (requires restart)."
+        },
         "dafny.markGhostStatements": {
           "type": "boolean",
           "default": "true",
@@ -223,21 +238,6 @@
           "type": "string",
           "default": null,
           "description": "The prefix to use when executing a command in the VS Code terminal. Defaults to & on windows."
-        },
-        "dafny.verificationCachingPolicy": {
-          "type": "string",
-          "enum": [
-            "No caching",
-            "Basic caching",
-            "Advanced caching"
-          ],
-          "enumDescriptions": [
-            "Reverifies the whole file after each change",
-            "Keeps a per-procedure cache of verification results",
-            "Keeps a per-assertion cache of verification results"
-          ],
-          "default": "No caching",
-          "description": "EXPERIMENTAL: How Dafny reuses previous verification results as a source file is being edited (requires restart)."
         }
       }
     },
