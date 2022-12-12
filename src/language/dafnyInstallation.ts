@@ -104,7 +104,7 @@ export class DafnyInstaller {
     case LanguageServerConstants.LatestNightly: {
       const nightlies = versions.filter(l => l.includes('nightly'));
       const dates: { index: number, date: string }[] = nightlies.map((n, index) => {
-        const split = n.split('-');
+        const split: string[] = n.split('-');
         return { index, date: split[2] + split[3] + split[4] };
       });
       dates.sort((a, b) => a.date < b.date ? 1 : -1);
