@@ -12,6 +12,8 @@ const mkdirAsync = promisify(fs.mkdir);
 import { execFile } from 'child_process';
 import { Executable } from 'vscode-languageclient/node';
 import { getDotnetExecutablePath } from '../dotnet';
+import { Messages } from '../ui/messages';
+import path = require('path');
 const execFileAsync = promisify(execFile);
 const ArchiveFileName = 'dafny.zip';
 
@@ -33,40 +35,36 @@ export class StandaloneLanguageServerInstaller {
     public readonly statusOutput: OutputChannel
   ) {}
 
-  private cachedDllPath: string | undefined;
   public async getExecutable(args: string[]): Promise<Executable> {
     const { path: dotnetExecutable } = await getDotnetExecutablePath();
-    const dllPath = LanguageServerConstants.GetDefaultPath(await this.getConfiguredVersion());
+    let dllPath = LanguageServerConstants.GetDefaultPath(await this.getConfiguredVersion());
+    if(dllPath && !path.isAbsolute(dllPath)) {
+      dllPath = path.join(this.context.extensionPath, dllPath);
+    }
 
-    if(this.cachedDllPath === undefined) {
-      try {
-        await execFileAsync(dotnetExecutable, [ dllPath, '/version' ]);
-        this.cachedDllPath = dllPath;
-      } catch(e: unknown) {
-        const installed = await this.install();
-        if(installed) {
-          return this.getExecutable(args);
-        }
-        throw new Error('bla');
+    if(!fs.existsSync(dllPath)) {
+      const installed = await this.install();
+      if(!installed) {
+        throw new Error(Messages.Installation.Error);
       }
     }
 
-    return { command: dotnetExecutable, args: [ this.cachedDllPath, ...args ] };
+    return { command: dotnetExecutable, args: [ dllPath, ...args ] };
   }
 
   private async install(): Promise<boolean> {
     try {
       await this.cleanInstallDir();
-      const sourceInstaller = new SourceInstaller(this);
       if(os.type() === 'Darwin' && os.arch() !== 'x64') {
         // Need to build from source and move all files from Binary/ to the out/resource folder
         this.writeStatus(`Found a non-supported architecture OSX:${os.arch()}. Going to install from source.`);
+        const sourceInstaller = new SourceInstaller(this);
         return await sourceInstaller.installFromSource();
       } else {
         const archive = await this.downloadArchive(await this.getDafnyDownloadAddress(), 'Dafny');
         await this.extractArchive(archive, 'Dafny');
         await workspace.fs.delete(archive, { useTrash: false });
-        this.writeStatus('Dafny installation completed');
+        this.writeStatus(Messages.Installation.Completed);
         return true;
       }
     } catch(error: unknown) {
