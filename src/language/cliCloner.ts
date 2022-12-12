@@ -23,7 +23,7 @@ export async function getCliPath(context: ExtensionContext): Promise<string | nu
 
 // eslint-disable-next-line @typescript-eslint/require-await
 async function getCliPathUncached(context: ExtensionContext): Promise<string | undefined | null> {
-  let cliPath = getConfiguredCliPath();
+  let cliPath = getRawConfiguredCliPath();
   if(!cliPath) {
     return null;
   }
@@ -37,7 +37,7 @@ async function getCliPathUncached(context: ExtensionContext): Promise<string | u
   return cliPath;
 }
 
-function getConfiguredCliPath(): string {
+function getRawConfiguredCliPath(): string {
   const cliPathOverride = process.env['DAFNY_SERVER_OVERRIDE'] ?? '';
   if(cliPathOverride) {
     window.showInformationMessage(`Using $DAFNY_SERVER_OVERRIDE = ${cliPathOverride} for the CLI path`);

@@ -121,7 +121,6 @@ export class DafnyLanguageClient extends LanguageClient {
     const exec = await installer.getLanguageServerExecutable(getLanguageServerLaunchArgsNew(), getLanguageServerLaunchArgsOld());
 
     installer.statusOutput.appendLine(`Language server: ${JSON.stringify(exec)}`);
-    installer.statusOutput.appendLine(`Language server arguments: ${DafnyLanguageClient.argumentsToCommandLine(exec.args ?? [])}`);
     const serverOptions: ServerOptions = {
       run: exec,
       debug: exec
