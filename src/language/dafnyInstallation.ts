@@ -48,10 +48,17 @@ export class DafnyInstaller {
     const configuredCliPath = await getCliPath(this.context);
     let localToolPath: string;
     if(configuredCliPath != null) {
-      return {
-        command: dotnetExecutable,
-        args: [ configuredCliPath ].concat(args)
-      };
+      if(configuredCliPath.endsWith('.dll')) {
+        return {
+          command: dotnetExecutable,
+          args: [ configuredCliPath ].concat(args)
+        };
+      } else {
+        return {
+          command: configuredCliPath,
+          args: args
+        };
+      }
     } else {
       const toolVersion = await this.getDotnetToolVersion();
       localToolPath = path.join(this.context.extensionPath, `out/resources/${toolVersion}/`);
