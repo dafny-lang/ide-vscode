@@ -21,35 +21,27 @@ export async function getCliPath(context: ExtensionContext): Promise<string | nu
   return cliPath!;
 }
 
-// eslint-disable-next-line @typescript-eslint/require-await
-async function getCliPathUncached(context: ExtensionContext): Promise<string | undefined | null> {
-  let cliPath = getRawConfiguredCliPath();
-  if(!cliPath) {
-    return null;
+async function getCliPathUncached(context: ExtensionContext): Promise<string> {
+  let cliPathOverride = process.env['DAFNY_SERVER_OVERRIDE'] ?? '';
+  if(cliPathOverride) {
+    try {
+      cliPathOverride = await copyNecessaryDllsToTempFolder(cliPathOverride);
+    } catch(e: unknown) {
+      // Ignore if copying fails. We'll run the original.
+    }
+    window.showInformationMessage(`Using $DAFNY_SERVER_OVERRIDE = ${cliPathOverride} for the CLI path`);
   }
-
+  let cliPath = Configuration.get<string | null>(ConfigurationConstants.LanguageServer.CliPath) ?? '';
   if(!path.isAbsolute(cliPath)) {
     cliPath = path.join(context.extensionPath, cliPath);
   }
-  // if(isCustomInstallation) {
-  //   cliPath = await cloneAllNecessaryDlls(cliPath);
-  // }
-  return cliPath;
-}
-
-function getRawConfiguredCliPath(): string {
-  const cliPathOverride = process.env['DAFNY_SERVER_OVERRIDE'] ?? '';
-  if(cliPathOverride) {
-    window.showInformationMessage(`Using $DAFNY_SERVER_OVERRIDE = ${cliPathOverride} for the CLI path`);
-  }
-  const cliPath = Configuration.get<string | null>(ConfigurationConstants.LanguageServer.CliPath) ?? '';
   return cliPathOverride || cliPath;
 }
 
-// We copy Dafny.dll to another location and all its dependencies
+// We copy Dafny.dll and all its dependenciesto another location
 // so that rebuilding Dafny will not fail because it's open in VSCode
-async function cloneAllNecessaryDlls(configuredPath: string): Promise<string> {
-  const dlsName = 'DafnyLanguageServer';
+async function copyNecessaryDllsToTempFolder(configuredPath: string): Promise<string> {
+  const dlsName = 'Dafny';
   const dll = '.dll';
   const runtimeconfigjson = '.runtimeconfig.json';
   const depsjson = '.deps.json';
@@ -58,7 +50,6 @@ async function cloneAllNecessaryDlls(configuredPath: string): Promise<string> {
     return configuredPath;
   }
   const installationDir = path.dirname(configuredPath);
-  // copy all the files from installationDir to a new temporary folder
   const vscodeDir = path.join(os.tmpdir(), await fs.promises.mkdtemp('vscode-dafny-dlls-'));
   console.log(`Copying all necessary dlls to ${vscodeDir}...`);
   const cleanup = function() {
@@ -66,7 +57,6 @@ async function cloneAllNecessaryDlls(configuredPath: string): Promise<string> {
   };
   await ensureDirExists(vscodeDir);
   process.on('exit', cleanup);
-  // Copy all the files from installationDir to vscodeDir
   const files = await fs.promises.readdir(installationDir);
   for(const file of files) {
     // eslint-disable-next-line max-depth
@@ -79,7 +69,6 @@ async function cloneAllNecessaryDlls(configuredPath: string): Promise<string> {
       || file === 'runtimes')) {
       continue;
     }
-    // If it's a directory, we use the function above
     // eslint-disable-next-line max-depth
     const srcFile = path.join(installationDir, file);
     const targetFile = path.join(vscodeDir, file);
