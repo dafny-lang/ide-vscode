@@ -11,11 +11,11 @@ import Configuration from '../configuration';
 import { ConfigurationConstants } from '../constants';
 import { DafnyInstaller } from '../language/dafnyInstallation';
 
-export default async function createAndRegisterDafnyIntegration(
+export default function createAndRegisterDafnyIntegration(
   installer: DafnyInstaller,
   languageClient: DafnyLanguageClient,
   languageServerVersion: string
-): Promise<void> {
+): void {
   CounterexamplesView.createAndRegister(installer.context, languageClient);
   GhostDiagnosticsView.createAndRegister(installer.context, languageClient);
   const compilationStatusView = CompilationStatusView.createAndRegister(installer.context, languageClient, languageServerVersion);
@@ -33,7 +33,7 @@ export default async function createAndRegisterDafnyIntegration(
   VerificationGutterStatusView.createAndRegister(installer.context, languageClient, symbolStatusView);
   CompileCommands.createAndRegister(installer);
   RelatedErrorView.createAndRegister(installer.context, languageClient);
-  await DafnyVersionView.createAndRegister(installer, languageServerVersion);
+  DafnyVersionView.createAndRegister(installer, languageServerVersion);
 }
 
 export function versionToNumeric(version: string): number {

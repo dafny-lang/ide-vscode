@@ -26,7 +26,7 @@ function getDafnyPlatformSuffix(): string {
   }
 }
 
-export class OldSkoolInstaller {
+export class StandaloneLanguageServerInstaller {
   public constructor(
     public readonly context: ExtensionContext,
     private readonly preferredVersion: string,
@@ -40,7 +40,7 @@ export class OldSkoolInstaller {
 
     if(this.cachedDllPath === undefined) {
       try {
-        const { stdout } = await execFileAsync(dotnetExecutable, [ dllPath, '/version' ]);
+        await execFileAsync(dotnetExecutable, [ dllPath, '/version' ]);
         this.cachedDllPath = dllPath;
       } catch(e: unknown) {
         const installed = await this.install();

@@ -48,7 +48,7 @@ class ExtensionRuntime {
       return;
     }
     await this.startClientAndWaitForVersion();
-    await createAndRegisterDafnyIntegration(this.installer, this.client!, this.languageServerVersion!);
+    createAndRegisterDafnyIntegration(this.installer, this.client!, this.languageServerVersion!);
     commands.registerCommand(DafnyCommands.RestartServer, restartServer);
     this.statusOutput.appendLine('Dafny is ready');
   }
@@ -90,7 +90,7 @@ class ExtensionRuntime {
     }
     this.context.subscriptions.splice(1);
     await this.startClientAndWaitForVersion();
-    await createAndRegisterDafnyIntegration(this.installer, this.client!, this.languageServerVersion!);
+    createAndRegisterDafnyIntegration(this.installer, this.client!, this.languageServerVersion!);
     const issueURL = await fileIssueURL(this.languageServerVersion ?? '???', this.context);
     this.statusOutput.appendLine(
       'Dafny is ready again.\nIf you have time, please let us know why you needed to restart by filing an issue:\n'

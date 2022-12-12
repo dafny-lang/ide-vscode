@@ -6,7 +6,7 @@ import { promisify } from 'util';
 import { versionToNumeric } from '../ui/dafnyIntegration';
 
 import { ExtensionContext, OutputChannel, window } from 'vscode';
-import { getCliPath } from './cliCloner';
+import { getCliPath } from './cliCopier';
 
 import { ConfigurationConstants, LanguageServerConstants } from '../constants';
 import Configuration from '../configuration';
@@ -16,7 +16,7 @@ import { getDotnetExecutablePath } from '../dotnet';
 
 import { execFile } from 'child_process';
 const execFileAsync = promisify(execFile);
-import { OldSkoolInstaller } from './oldSkoolInstaller';
+import { StandaloneLanguageServerInstaller } from './standaloneLanguageServerInstaller';
 import { mkdir } from 'fs/promises';
 import { Messages } from '../ui/messages';
 
@@ -32,7 +32,7 @@ export class DafnyInstaller {
     if(versionToNumeric(version) >= versionToNumeric('3.10')) {
       return this.getCliExecutable(newArgs, oldArgs);
     } else {
-      return await new OldSkoolInstaller(this.context, version, this.statusOutput).getExecutable(oldArgs);
+      return await new StandaloneLanguageServerInstaller(this.context, version, this.statusOutput).getExecutable(oldArgs);
     }
   }
 

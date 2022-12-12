@@ -7,17 +7,13 @@ import { DafnyInstaller } from '../language/dafnyInstallation';
 
 const StatusBarPriority = 10;
 
-async function getTooltipText(installer: DafnyInstaller, dafnyVersion: string): Promise<string> {
-  return `Dafny: ${dafnyVersion}\nExtension: ${ExtensionVersion}`;
-}
-
 export default class DafnyVersionView {
   private constructor() {}
 
-  public static async createAndRegister(installer: DafnyInstaller, languageServerVersion: string): Promise<void> {
+  public static createAndRegister(installer: DafnyInstaller, languageServerVersion: string): void {
     const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, StatusBarPriority);
     statusBarItem.text = languageServerVersion;
-    statusBarItem.tooltip = await getTooltipText(installer, languageServerVersion);
+    statusBarItem.tooltip = `Dafny: ${languageServerVersion}\nExtension: ${ExtensionVersion}`;
     installer.context.subscriptions.push(
       enableOnlyForDafnyDocuments(statusBarItem),
       statusBarItem

@@ -1,7 +1,7 @@
 import * as os from 'os';
 import * as path from 'path';
 
-import { window, commands, ExtensionContext } from 'vscode';
+import { window, commands } from 'vscode';
 import { DafnyCommands, VSCodeCommands } from '../commands';
 
 import Configuration from '../configuration';
