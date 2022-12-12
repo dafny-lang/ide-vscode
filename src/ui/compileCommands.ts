@@ -67,7 +67,11 @@ class CommandFactory {
     if(compilerArgs == null) {
       return undefined;
     }
-    return `${commandPrefix}"${dotnetPath}" "${compilerPath}" "${this.fileName}" ${compilerArgs}`;
+    let result = `${commandPrefix}"${dotnetPath}" ${compilerPath.args?.join(' ')} "${this.fileName}"`;
+    if(compilerPath.options?.cwd !== null) {
+      result = `cd ${compilerPath.options?.cwd}; ${result}`;
+    }
+    return result;
   }
 
   private getCommandPrefix(): string {

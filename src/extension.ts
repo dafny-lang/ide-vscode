@@ -44,9 +44,6 @@ class ExtensionRuntime {
   }
 
   public async initialize(): Promise<void> {
-    if(!await this.installer.checkCliAccessible()) {
-      return;
-    }
     await this.startClientAndWaitForVersion();
     createAndRegisterDafnyIntegration(this.installer, this.client!, this.languageServerVersion!);
     commands.registerCommand(DafnyCommands.RestartServer, restartServer);

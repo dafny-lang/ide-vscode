@@ -61,14 +61,20 @@ export class StandaloneLanguageServerInstaller {
         const sourceInstaller = new SourceInstaller(this);
         return await sourceInstaller.installFromSource();
       } else {
+        this.statusOutput.show();
+        const startMessage = 'Standalone language server installation started.';
+        window.showInformationMessage(startMessage);
+        this.writeStatus(startMessage);
         const archive = await this.downloadArchive(await this.getDafnyDownloadAddress(), 'Dafny');
         await this.extractArchive(archive, 'Dafny');
         await workspace.fs.delete(archive, { useTrash: false });
-        this.writeStatus(Messages.Installation.Completed);
+        const finishMessage = 'Standalone language server installation completed.';
+        window.showInformationMessage(finishMessage);
+        this.writeStatus(finishMessage);
         return true;
       }
     } catch(error: unknown) {
-      this.writeStatus('Dafny installation failed:');
+      this.writeStatus('Standalone language server installation failed:');
       this.writeStatus(`> ${error}`);
       console.error('dafny installation failed', error);
       return false;

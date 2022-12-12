@@ -84,6 +84,7 @@ export class DafnyInstaller {
       window.showInformationMessage(Messages.Installation.Start);
       this.writeStatus(Messages.Installation.Start);
       await execFileAsync(dotnetExecutable, [ 'tool', 'install', 'Dafny', '--version', toolVersion ], { cwd: localToolPath });
+      await execFileAsync(dotnetExecutable, [ 'tool', 'run', 'dafny', '/version' ], { cwd: localToolPath });
       window.showInformationMessage(Messages.Installation.Completed);
       this.writeStatus(Messages.Installation.Completed);
     } catch(error: unknown) {
@@ -138,19 +139,6 @@ export class DafnyInstaller {
     }
 
     return toolVersion;
-  }
-
-  public async checkCliAccessible(): Promise<boolean> {
-    const executable = await this.getCliExecutable([ '--version' ], [ '--version' ]);
-    try {
-      await promisify(child_process.execFile.bind(child_process))(executable.command, executable.args, {
-        cwd: executable.options?.cwd
-      });
-      return true;
-    } catch(e: unknown) {
-      window.showErrorMessage(`Could not start the Dafny CLI using ${JSON.stringify(executable)} because '${e}'. Please check if the installation is corrupt.`);
-      return false;
-    }
   }
 
   private writeStatus(message: string): void {
