@@ -47,7 +47,7 @@ export class DafnyInstaller {
     const args = versionToNumeric(version) < versionToNumeric('3.10') ? oldArgs : newArgs;
 
     const configuredCliPath = await getCliPath(this.context);
-    if(configuredCliPath != null) {
+    if(configuredCliPath) {
       if(configuredCliPath.endsWith('.dll')) {
         return {
           command: dotnetExecutable,
@@ -81,9 +81,10 @@ export class DafnyInstaller {
       await mkdir(localToolPath, { recursive: true });
       await execFileAsync(dotnetExecutable, [ 'new', 'tool-manifest' ], { cwd: localToolPath });
       this.statusOutput.show();
-      window.showErrorMessage(Messages.Installation.Start);
+      window.showInformationMessage(Messages.Installation.Start);
       this.writeStatus(Messages.Installation.Start);
       await execFileAsync(dotnetExecutable, [ 'tool', 'install', 'Dafny', '--version', toolVersion ], { cwd: localToolPath });
+      window.showInformationMessage(Messages.Installation.Completed);
       this.writeStatus(Messages.Installation.Completed);
     } catch(error: unknown) {
       window.showErrorMessage(Messages.Installation.Error);
@@ -116,6 +117,7 @@ export class DafnyInstaller {
     case LanguageServerConstants.LatestStable: {
       const version = LanguageServerConstants.LatestVersion;
       toolVersion = versions.filter(l => l.startsWith(version))[0];
+      window.showInformationMessage(`Using latest stable version: ${toolVersion}`);
       break;
     }
     case LanguageServerConstants.LatestNightly: {
@@ -127,6 +129,7 @@ export class DafnyInstaller {
       dates.sort((a, b) => a.date < b.date ? 1 : -1);
       const latestNightly = nightlies[dates[0].index];
       toolVersion = latestNightly;
+      window.showInformationMessage(`Using latest nightly version: ${toolVersion}`);
       break;
     }
     default: {
@@ -145,7 +148,7 @@ export class DafnyInstaller {
       });
       return true;
     } catch(e: unknown) {
-      window.showErrorMessage(`Could not start the Dafny CLI using ${JSON.stringify(executable)}. Please check if the installation is corrupt.`);
+      window.showErrorMessage(`Could not start the Dafny CLI using ${JSON.stringify(executable)} because '${e}'. Please check if the installation is corrupt.`);
       return false;
     }
   }

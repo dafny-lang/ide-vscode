@@ -13,7 +13,7 @@ const mkdirAsync = promisify(fs.mkdir);
 // We cache the cli path so that we don't need to copy it every time.
 let cliPath: string | undefined | null = null;
 
-export async function getCliPath(context: ExtensionContext): Promise<string | null> {
+export async function getCliPath(context: ExtensionContext): Promise<string> {
   if(cliPath != null) {
     return cliPath;
   }
@@ -32,7 +32,7 @@ async function getCliPathUncached(context: ExtensionContext): Promise<string> {
     window.showInformationMessage(`Using $DAFNY_SERVER_OVERRIDE = ${cliPathOverride} for the CLI path`);
   }
   let cliPath = Configuration.get<string | null>(ConfigurationConstants.LanguageServer.CliPath) ?? '';
-  if(!path.isAbsolute(cliPath)) {
+  if(cliPath && !path.isAbsolute(cliPath)) {
     cliPath = path.join(context.extensionPath, cliPath);
   }
   return cliPathOverride || cliPath;
