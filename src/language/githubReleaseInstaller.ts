@@ -2,7 +2,6 @@ import { ExtensionContext, FileSystemError, OutputChannel, Uri, window, workspac
 import { LanguageServerConstants } from '../constants';
 import * as os from 'os';
 import fetch from 'cross-fetch';
-import { FromSourceInstaller } from './fromSourceInstaller';
 import extract = require('extract-zip');
 import * as fs from 'fs';
 import got from 'got/dist/source';
@@ -60,24 +59,17 @@ export class GitHubReleaseInstaller {
   private async install(): Promise<boolean> {
     try {
       await this.cleanInstallDir();
-      if(os.type() === 'Darwin' && os.arch() !== 'x64') {
-        // Need to build from source and move all files from Binary/ to the out/resource folder
-        this.writeStatus(`Found a non-supported architecture OSX:${os.arch()}. Going to install from source.`);
-        const sourceInstaller = new FromSourceInstaller(this);
-        return await sourceInstaller.installFromSource();
-      } else {
-        this.statusOutput.show();
-        const startMessage = 'Standalone language server installation started.';
-        window.showInformationMessage(startMessage);
-        this.writeStatus(startMessage);
-        const archive = await this.downloadArchive(await this.getDafnyDownloadAddress(), 'Dafny');
-        await this.extractArchive(archive, 'Dafny');
-        await workspace.fs.delete(archive, { useTrash: false });
-        const finishMessage = 'Standalone language server installation completed.';
-        window.showInformationMessage(finishMessage);
-        this.writeStatus(finishMessage);
-        return true;
-      }
+      this.statusOutput.show();
+      const startMessage = 'Standalone language server installation started.';
+      window.showInformationMessage(startMessage);
+      this.writeStatus(startMessage);
+      const archive = await this.downloadArchive(await this.getDafnyDownloadAddress(), 'Dafny');
+      await this.extractArchive(archive, 'Dafny');
+      await workspace.fs.delete(archive, { useTrash: false });
+      const finishMessage = 'Standalone language server installation completed.';
+      window.showInformationMessage(finishMessage);
+      this.writeStatus(finishMessage);
+      return true;
     } catch(error: unknown) {
       this.writeStatus('Standalone language server installation failed:');
       this.writeStatus(`> ${error}`);
@@ -103,6 +95,7 @@ export class GitHubReleaseInstaller {
       }
     }
   }
+
   private async getDafnyDownloadAddress(): Promise<string> {
     const baseUri = LanguageServerConstants.DownloadBaseUri;
     const [ tag, version ] = await this.getConfiguredTagAndVersion();

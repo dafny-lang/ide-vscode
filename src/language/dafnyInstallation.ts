@@ -6,6 +6,8 @@ import { Executable } from 'vscode-languageclient/node';
 import { GitHubReleaseInstaller } from './githubReleaseInstaller';
 import { getCliPath } from './cliCopier';
 import { getDotnetExecutablePath } from '../dotnet';
+import * as os from 'os';
+import { FromSourceInstaller } from './fromSourceInstaller';
 
 export class DafnyInstaller {
   public constructor(
@@ -33,6 +35,11 @@ export class DafnyInstaller {
       }
     }
 
+    if(os.type() === 'Darwin' && os.arch() !== 'x64') {
+      // Need to build from source and move all files from Binary/ to the out/resource folder
+      const sourceInstaller = new FromSourceInstaller(new GitHubReleaseInstaller(this.context, this.statusOutput));
+      return await sourceInstaller.getExecutable(server, newArgs, oldArgs);
+    }
     return await new GitHubReleaseInstaller(this.context, this.statusOutput).getExecutable(server, newArgs, oldArgs);
   }
 }

@@ -11,6 +11,8 @@ import { promisify } from 'util';
 import { exec } from 'child_process';
 import * as fs from 'fs';
 import { GitHubReleaseInstaller } from './githubReleaseInstaller';
+import { Executable } from 'vscode-languageclient/node';
+import { getPreferredVersion } from './dafnyInstallation';
 const execAsync = promisify(exec);
 const mkdirAsync = promisify(fs.mkdir);
 
@@ -19,9 +21,27 @@ export class FromSourceInstaller {
     private readonly githubInstaller: GitHubReleaseInstaller
   ) {}
 
-  public async installFromSource(): Promise<boolean> {
-    const installationPath = await this.getCustomInstallationPath(os.arch());
+  public async getExecutable(server: boolean, newArgs: string[], oldArgs: string[]): Promise<Executable> {
+    const version = getPreferredVersion();
+    const { path: dotnetExecutable } = await getDotnetExecutablePath();
+    const directory = await this.installFromSource();
+    if(!server || versionToNumeric(version) >= versionToNumeric('3.10')) {
+      if(server) {
+        newArgs.unshift('server');
+      }
+      return { command: dotnetExecutable, args: [ path.join(directory, 'dafny', 'Binaries', 'Dafny.dll'), ...newArgs ] };
+    } else {
+      return { command: dotnetExecutable, args: [ path.join(directory, 'dafny', 'Binaries', 'DafnyLanguageServer.dll'), ...oldArgs ] };
+    }
+  }
+
+  private async installFromSource(): Promise<string> {
+    const installationPath = await this.getFromSourceInstallationPath(os.arch());
+    if(fs.existsSync(installationPath.fsPath)) {
+      return installationPath.fsPath;
+    }
     await mkdirAsync(installationPath.fsPath, { recursive: true });
+    this.writeStatus(`Found a non-supported architecture OSX:${os.arch()}. Going to install from source.`);
     this.writeStatus(`Installing Dafny from source in ${installationPath.fsPath}.\n`);
     const previousDirectory = processCwd();
     processChdir(installationPath.fsPath);
@@ -41,7 +61,7 @@ export class FromSourceInstaller {
         > eval "$(/opt/homebrew/bin/brew shellenv)"
   
         and restart VSCode, which may reinstall Dafny.`);
-        return false;
+        return '';
       }
     }
     const configuredVersion = await this.githubInstaller.getConfiguredVersion();
@@ -59,7 +79,7 @@ export class FromSourceInstaller {
         + ' and ensure that the path containing javac is in the PATH environment variable. '
         + 'You can obtain a free open-source JDK 1.8 from here: '
         + 'https://aws.amazon.com/corretto/');
-        return false;
+        return '';
       }
     }
 
@@ -74,8 +94,11 @@ export class FromSourceInstaller {
     // This will cause the build to fail.
     // This works around this edge case.
     const injectPath = `PATH=${path.dirname(dotnet)}:$PATH`;
-    // Build the DafnyLanguageServer
-    await this.execLog(`${injectPath} ${ (await getDotnetExecutablePath()).path } build Source/DafnyLanguageServer/DafnyLanguageServer.csproj`);
+
+    const projectToBuild = versionToNumeric(configuredVersion) < versionToNumeric('3.10.0')
+      ? 'DafnyLanguageServer/DafnyLanguageServer.csproj'
+      : 'DafnyDriver/DafnyDriver.csproj';
+    await this.execLog(`${injectPath} ${ (await getDotnetExecutablePath()).path } build Source/${projectToBuild}`);
     const binaries = Utils.joinPath(installationPath, 'dafny', 'Binaries').fsPath;
     processChdir(binaries);
     try {
@@ -95,11 +118,11 @@ export class FromSourceInstaller {
     await this.execLog('mkdir -p ./dafny/');
     await this.execLog(`cp -R ${binaries}/* ./dafny/`);
     processChdir(previousDirectory);
-    return true;
+    return installationPath.fsPath;
   }
 
 
-  private async getCustomInstallationPath(typeArch: string): Promise<Uri> {
+  private async getFromSourceInstallationPath(typeArch: string): Promise<Uri> {
     return Utils.joinPath(
       await this.githubInstaller.getInstallationPath(), 'custom', typeArch
     );
