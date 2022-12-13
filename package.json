@@ -179,12 +179,12 @@
             "type": "string"
           },
           "default": [],
-          "description": "Optional array of strings to pass to the language server."
+          "description": "Optional array of strings to pass to the language server. Only works with Dafny versions above 3.10"
         },
         "dafny.cliPath": {
           "type": "string",
           "default": null,
-          "description": "Absolute or relative path to the Dafny CLI. When configured, overrides the selected Dafny version."
+          "description": "Path to the Dafny CLI. Only used when 'custom' is the chosen Dafny version. Dafny version must be at least 3.10"
         },
         "dafny.compilerOutputDir": {
           "type": "string",
@@ -203,7 +203,7 @@
           ],
           "description": "Optional array of strings as Dafny compilation arguments"
         },
-        "dafny.preferredVersion": {
+        "dafny.version": {
           "type": "string",
           "enum": [
             "latest",
@@ -217,10 +217,11 @@
             "3.4.2",
             "3.3.0",
             "3.2.0",
+            "custom",
             "latest nightly"
           ],
           "default": "latest",
-          "description": "The preferred Dafny version to use (overriden by custom compiler and language server paths, requires restart)."
+          "description": "The preferred Dafny version to use (requires restart)."
         },
         "dafny.dotnetExecutablePath": {
           "type": "string",

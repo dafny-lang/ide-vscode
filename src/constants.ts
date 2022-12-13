@@ -9,7 +9,7 @@ export namespace ExtensionConstants {
 export namespace ConfigurationConstants {
   export const SectionName = 'dafny';
 
-  export const PreferredVersion = 'preferredVersion';
+  export const Version = 'version';
 
   export namespace Dotnet {
     export const ExecutablePath = 'dotnetExecutablePath';
@@ -47,6 +47,7 @@ export namespace DotnetConstants {
 export namespace LanguageServerConstants {
   export const LatestStable = 'latest';
   export const LatestNightly = 'latest nightly';
+  export const Custom = 'custom';
   export const LatestVersion = '3.9.1';
   export const UnknownVersion = 'unknown';
   export const DafnyGitUrl = 'https://github.com/dafny-lang/dafny.git';

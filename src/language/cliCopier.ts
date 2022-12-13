@@ -5,8 +5,9 @@ import { ExtensionContext, window } from 'vscode';
 
 const existsAsync = promisify(fs.exists);
 import * as path from 'path';
-import { ConfigurationConstants } from '../constants';
+import { ConfigurationConstants, LanguageServerConstants } from '../constants';
 import Configuration from '../configuration';
+import { getPreferredVersion } from './dafnyInstallation';
 
 const mkdirAsync = promisify(fs.mkdir);
 
@@ -31,11 +32,19 @@ async function getCliPathUncached(context: ExtensionContext): Promise<string> {
     }
     window.showInformationMessage(`Using $DAFNY_SERVER_OVERRIDE = ${cliPathOverride} for the CLI path`);
   }
+  if(cliPathOverride) {
+    return cliPathOverride;
+  }
+
+  const version = getPreferredVersion();
+  if(version !== LanguageServerConstants.Custom) {
+    return '';
+  }
   let cliPath = Configuration.get<string | null>(ConfigurationConstants.LanguageServer.CliPath) ?? '';
   if(cliPath && !path.isAbsolute(cliPath)) {
     cliPath = path.join(context.extensionPath, cliPath);
   }
-  return cliPathOverride || cliPath;
+  return cliPath;
 }
 
 // We copy Dafny.dll and all its dependenciesto another location

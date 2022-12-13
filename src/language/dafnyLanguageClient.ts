@@ -25,7 +25,6 @@ function getLanguageServerLaunchArgsNew(): string[] {
 
   const launchArgs = Configuration.get<string[]>(ConfigurationConstants.LanguageServer.LaunchArgs);
   return [
-    'server',
     `--verify-on:${verifyOn}`,
     `--verification-time-limit:${Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationTimeLimit)}`,
     getVerifierCachingPolicy(),
@@ -139,7 +138,7 @@ export class DafnyLanguageClient extends LanguageClient {
   }
 
   public static async create(installer: DafnyInstaller): Promise<DafnyLanguageClient> {
-    const exec = await installer.getCliExecutable(getLanguageServerLaunchArgsNew(), getLanguageServerLaunchArgsOld());
+    const exec = await installer.getCliExecutable(true, getLanguageServerLaunchArgsNew(), getLanguageServerLaunchArgsOld());
 
     installer.statusOutput.appendLine(`Language server: ${JSON.stringify(exec)}`);
     const serverOptions: ServerOptions = {

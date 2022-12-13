@@ -34,7 +34,7 @@ export class GitHubReleaseInstaller {
     public readonly statusOutput: OutputChannel
   ) {}
 
-  public async getExecutable(newArgs: string[], oldArgs: string[]): Promise<Executable> {
+  public async getExecutable(server: boolean, newArgs: string[], oldArgs: string[]): Promise<Executable> {
     const version = getPreferredVersion();
     const { path: dotnetExecutable } = await getDotnetExecutablePath();
 
@@ -46,7 +46,10 @@ export class GitHubReleaseInstaller {
       }
     }
 
-    if(versionToNumeric(version) >= versionToNumeric('3.10')) {
+    if(!server || versionToNumeric(version) >= versionToNumeric('3.10')) {
+      if(server) {
+        newArgs.unshift('server');
+      }
       return { command: dotnetExecutable, args: [ cliPath, ...newArgs ] };
     } else {
       const standaloneServerpath = path.join(this.context.extensionPath, LanguageServerConstants.GetDefaultPath(await this.getConfiguredVersion()));

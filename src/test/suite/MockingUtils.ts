@@ -87,7 +87,7 @@ export class MockingUtils {
   public static mockedWorkspace(): MockedWorkspace {
     return new MockedWorkspace({
       [ConfigurationConstants.SectionName]: new Map<string, any>([
-        [ ConfigurationConstants.PreferredVersion, LanguageServerConstants.LatestStable ],
+        [ ConfigurationConstants.Version, LanguageServerConstants.LatestStable ],
         [ ConfigurationConstants.Compiler.CommandPrefix, '<compiler command prefix>' ],
         [ ConfigurationConstants.Dotnet.ExecutablePath, '<dotnet executable path>' ],
         [ ConfigurationConstants.Compiler.Arguments, [ '/out', '<arg1>', 'arg2' ] ],

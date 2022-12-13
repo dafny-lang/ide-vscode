@@ -16,7 +16,7 @@ const mkdirAsync = promisify(fs.mkdir);
 
 export class SourceInstaller {
   public constructor(
-    private readonly oldSkoolInstaller: GitHubReleaseInstaller
+    private readonly githubInstaller: GitHubReleaseInstaller
   ) {}
 
   public async installFromSource(): Promise<boolean> {
@@ -44,7 +44,7 @@ export class SourceInstaller {
         return false;
       }
     }
-    const configuredVersion = await this.oldSkoolInstaller.getConfiguredVersion();
+    const configuredVersion = await this.githubInstaller.getConfiguredVersion();
     if(versionToNumeric(configuredVersion) < versionToNumeric('3.9.0')) {
       try {
 
@@ -86,12 +86,12 @@ export class SourceInstaller {
 
     const z3urlOsx = this.GetZ3DownloadUrlOSX();
     const z3filenameOsx = this.GetZ3FileNameOSX();
-    const archive = await this.oldSkoolInstaller.downloadArchive(z3urlOsx, 'Z3');
-    await this.oldSkoolInstaller.extractArchive(archive, 'Z3');
+    const archive = await this.githubInstaller.downloadArchive(z3urlOsx, 'Z3');
+    await this.githubInstaller.extractArchive(archive, 'Z3');
     await workspace.fs.delete(archive, { useTrash: false });
 
-    await this.execLog(`mv ${(await this.oldSkoolInstaller.getInstallationPath()).fsPath}/${z3filenameOsx} z3`);
-    processChdir((await this.oldSkoolInstaller.getInstallationPath()).fsPath);
+    await this.execLog(`mv ${(await this.githubInstaller.getInstallationPath()).fsPath}/${z3filenameOsx} z3`);
+    processChdir((await this.githubInstaller.getInstallationPath()).fsPath);
     await this.execLog('mkdir -p ./dafny/');
     await this.execLog(`cp -R ${binaries}/* ./dafny/`);
     processChdir(previousDirectory);
@@ -101,7 +101,7 @@ export class SourceInstaller {
 
   private async getCustomInstallationPath(typeArch: string): Promise<Uri> {
     return Utils.joinPath(
-      await this.oldSkoolInstaller.getInstallationPath(), 'custom', typeArch
+      await this.githubInstaller.getInstallationPath(), 'custom', typeArch
     );
   }
 
@@ -111,7 +111,7 @@ export class SourceInstaller {
   }
 
   private writeStatus(message: string): void {
-    this.oldSkoolInstaller.statusOutput.appendLine(message);
+    this.githubInstaller.statusOutput.appendLine(message);
   }
 
   private GetZ3DownloadUrlOSX(): string {
