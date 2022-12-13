@@ -78,7 +78,7 @@ export class GitHubReleaseInstaller {
     }
   }
 
-  private async cleanInstallDir(): Promise<void> {
+  public async cleanInstallDir(): Promise<void> {
     const installPath = await this.getInstallationPath();
     this.writeStatus(`deleting previous Dafny installation at ${installPath.fsPath}`);
     try {

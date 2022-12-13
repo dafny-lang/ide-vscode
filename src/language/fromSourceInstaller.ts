@@ -41,10 +41,12 @@ export class FromSourceInstaller {
   }
 
   private async installFromSource(): Promise<string> {
+    this.statusOutput.show();
     const installationPath = await this.getFromSourceInstallationPath(os.arch());
-    if(fs.existsSync(installationPath.fsPath)) {
+    if(fs.existsSync(path.join(installationPath.fsPath, 'dafny', 'Binaries'))) {
       return installationPath.fsPath;
     }
+    this.githubInstaller.cleanInstallDir();
     await mkdirAsync(installationPath.fsPath, { recursive: true });
     this.writeStatus(`Found a non-supported architecture OSX:${os.arch()}. Going to install from source.`);
     this.writeStatus(`Installing Dafny from source in ${installationPath.fsPath}.\n`);
