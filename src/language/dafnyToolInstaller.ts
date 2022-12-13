@@ -67,12 +67,28 @@ class DafnyToolInstaller {
     return this.toolVersionCache;
   }
 
+  /**
+   *  Example output from 'dotnet tool search dafny --detail --prerelease'
+   *  dafny
+      Latest Version: 3.10.0.41129-nightly-2022-11-29-bbeaf03
+      Authors: Dafny
+      Tags:
+      Downloads: 9576
+      Verified: False
+      Description: Package Description
+      Versions:
+              3.7.0.40620 Downloads: 500
+              3.7.1.40621-nightly-2022-07-09-141433c Downloads: 104
+              3.7.1.40621 Downloads: 754
+              3.7.2.40713 Downloads: 324
+   */
   private static async getDotnetToolVersionUncached(): Promise<string> {
     const { path: dotnetExecutable } = await getDotnetExecutablePath();
     const { stdout } = await execFileAsync(dotnetExecutable, [ 'tool', 'search', 'Dafny', '--detail', '--prerelease' ]);
     const entries = stdout.split('----------------').map(entry => entry.split('\n').filter(e => e !== ''));
     const dafnyEntry = entries.filter(entry => entry[0] === 'dafny')[0];
-    const versions = dafnyEntry.slice(8).map(versionLine => versionLine.trimStart().split(' ')[0]);
+    const versionsIndex = dafnyEntry.findIndex(v => v.startsWith('Versions:'));
+    const versions = dafnyEntry.slice(versionsIndex + 1).map(versionLine => versionLine.trimStart().split(' ')[0]);
 
     const versionDescription = getPreferredVersion();
     let toolVersion: string;

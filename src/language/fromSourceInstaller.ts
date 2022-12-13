@@ -14,7 +14,7 @@ import { GitHubReleaseInstaller } from './githubReleaseInstaller';
 const execAsync = promisify(exec);
 const mkdirAsync = promisify(fs.mkdir);
 
-export class SourceInstaller {
+export class FromSourceInstaller {
   public constructor(
     private readonly githubInstaller: GitHubReleaseInstaller
   ) {}

@@ -2,7 +2,7 @@ import { ExtensionContext, FileSystemError, OutputChannel, Uri, window, workspac
 import { LanguageServerConstants } from '../constants';
 import * as os from 'os';
 import fetch from 'cross-fetch';
-import { SourceInstaller } from './sourceInstaller';
+import { FromSourceInstaller } from './fromSourceInstaller';
 import extract = require('extract-zip');
 import * as fs from 'fs';
 import got from 'got/dist/source';
@@ -63,7 +63,7 @@ export class GitHubReleaseInstaller {
       if(os.type() === 'Darwin' && os.arch() !== 'x64') {
         // Need to build from source and move all files from Binary/ to the out/resource folder
         this.writeStatus(`Found a non-supported architecture OSX:${os.arch()}. Going to install from source.`);
-        const sourceInstaller = new SourceInstaller(this);
+        const sourceInstaller = new FromSourceInstaller(this);
         return await sourceInstaller.installFromSource();
       } else {
         this.statusOutput.show();
