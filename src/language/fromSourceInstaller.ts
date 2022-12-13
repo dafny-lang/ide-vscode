@@ -2,7 +2,7 @@
 import path = require('path');
 import * as os from 'os';
 import { chdir as processChdir, cwd as processCwd } from 'process';
-import { Uri, workspace } from 'vscode';
+import { ExtensionContext, OutputChannel, Uri, workspace } from 'vscode';
 import { Utils } from 'vscode-uri';
 import { LanguageServerConstants } from '../constants';
 import { checkSupportedDotnetVersion, getDotnetExecutablePath } from '../dotnet';
@@ -17,9 +17,14 @@ const execAsync = promisify(exec);
 const mkdirAsync = promisify(fs.mkdir);
 
 export class FromSourceInstaller {
+  private readonly githubInstaller: GitHubReleaseInstaller;
+
   public constructor(
-    private readonly githubInstaller: GitHubReleaseInstaller
-  ) {}
+    public readonly context: ExtensionContext,
+    public readonly statusOutput: OutputChannel
+  ) {
+    this.githubInstaller = new GitHubReleaseInstaller(this.context, this.statusOutput);
+  }
 
   public async getExecutable(server: boolean, newArgs: string[], oldArgs: string[]): Promise<Executable> {
     const version = getPreferredVersion();
