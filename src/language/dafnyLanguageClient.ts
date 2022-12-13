@@ -139,7 +139,7 @@ export class DafnyLanguageClient extends LanguageClient {
   }
 
   public static async create(installer: DafnyInstaller): Promise<DafnyLanguageClient> {
-    const exec = await installer.getLanguageServerExecutable(getLanguageServerLaunchArgsNew(), getLanguageServerLaunchArgsOld());
+    const exec = await installer.getCliExecutable(getLanguageServerLaunchArgsNew(), getLanguageServerLaunchArgsOld());
 
     installer.statusOutput.appendLine(`Language server: ${JSON.stringify(exec)}`);
     const serverOptions: ServerOptions = {

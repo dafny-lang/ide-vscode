@@ -10,13 +10,13 @@ import { versionToNumeric } from '../ui/dafnyIntegration';
 import { promisify } from 'util';
 import { exec } from 'child_process';
 import * as fs from 'fs';
-import { StandaloneLanguageServerInstaller } from './standaloneLanguageServerInstaller';
+import { GitHubReleaseInstaller } from './githubReleaseInstaller';
 const execAsync = promisify(exec);
 const mkdirAsync = promisify(fs.mkdir);
 
 export class SourceInstaller {
   public constructor(
-    private readonly oldSkoolInstaller: StandaloneLanguageServerInstaller
+    private readonly oldSkoolInstaller: GitHubReleaseInstaller
   ) {}
 
   public async installFromSource(): Promise<boolean> {

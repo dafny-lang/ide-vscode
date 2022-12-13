@@ -9,12 +9,12 @@ import got from 'got/dist/source';
 import { promisify } from 'util';
 import { Utils } from 'vscode-uri';
 const mkdirAsync = promisify(fs.mkdir);
-import { execFile } from 'child_process';
 import { Executable } from 'vscode-languageclient/node';
 import { getDotnetExecutablePath } from '../dotnet';
 import { Messages } from '../ui/messages';
 import path = require('path');
-const execFileAsync = promisify(execFile);
+import { getPreferredVersion } from './dafnyInstallation';
+import { versionToNumeric } from '../ui/dafnyIntegration';
 const ArchiveFileName = 'dafny.zip';
 
 function getDafnyPlatformSuffix(): string {
@@ -28,28 +28,30 @@ function getDafnyPlatformSuffix(): string {
   }
 }
 
-export class StandaloneLanguageServerInstaller {
+export class GitHubReleaseInstaller {
   public constructor(
     public readonly context: ExtensionContext,
-    private readonly preferredVersion: string,
     public readonly statusOutput: OutputChannel
   ) {}
 
-  public async getExecutable(args: string[]): Promise<Executable> {
+  public async getExecutable(newArgs: string[], oldArgs: string[]): Promise<Executable> {
+    const version = getPreferredVersion();
     const { path: dotnetExecutable } = await getDotnetExecutablePath();
-    let dllPath = LanguageServerConstants.GetDefaultPath(await this.getConfiguredVersion());
-    if(dllPath && !path.isAbsolute(dllPath)) {
-      dllPath = path.join(this.context.extensionPath, dllPath);
-    }
 
-    if(!fs.existsSync(dllPath)) {
+    const cliPath = path.join(this.context.extensionPath, LanguageServerConstants.GetDefaultCliPath(await this.getConfiguredVersion()));
+    if(!fs.existsSync(cliPath)) {
       const installed = await this.install();
       if(!installed) {
         throw new Error(Messages.Installation.Error);
       }
     }
 
-    return { command: dotnetExecutable, args: [ dllPath, ...args ] };
+    if(versionToNumeric(version) >= versionToNumeric('3.10')) {
+      return { command: dotnetExecutable, args: [ cliPath, ...newArgs ] };
+    } else {
+      const standaloneServerpath = path.join(this.context.extensionPath, LanguageServerConstants.GetDefaultPath(await this.getConfiguredVersion()));
+      return { command: dotnetExecutable, args: [ standaloneServerpath, ...oldArgs ] };
+    }
   }
 
   private async install(): Promise<boolean> {
@@ -123,8 +125,9 @@ export class StandaloneLanguageServerInstaller {
   }
 
   private async getConfiguredGitTagAndVersionUncached(): Promise<[string, string]> {
-    let version = this.preferredVersion;
-    switch(this.preferredVersion) {
+    const preferredVersion = getPreferredVersion();
+    let version = preferredVersion;
+    switch(preferredVersion) {
     case LanguageServerConstants.LatestStable:
       version = LanguageServerConstants.LatestVersion;
       break;
