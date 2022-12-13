@@ -26,8 +26,21 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "submenus": [
+      {
+        "id": "dafny.context",
+        "label": "Dafny"
+      }
+    ],
     "menus": {
       "editor/context": [
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "submenu": "dafny.context",
+          "group": "7_Dafny@5"
+        }
+      ],
+      "dafny.context": [
         {
           "when": "editorTextFocus && editorLangId == dafny",
           "command": "dafny.build",
@@ -254,15 +267,15 @@
       },
       {
         "command": "dafny.showCounterexample",
-        "title": "Dafny: Show Counterexample"
+        "title": "Dafny: Show Counterexample (experimental)"
       },
       {
         "command": "dafny.hideCounterexample",
-        "title": "Dafny: Hide Counterexample"
+        "title": "Dafny: Hide Counterexample (experimental)"
       },
       {
         "command": "dafny.copyCounterexamples",
-        "title": "Dafny: Copy Counterexamples to Clipboard (Experimental)"
+        "title": "Dafny: Copy Counterexamples to Clipboard (experimental)"
       },
       {
         "command": "dafny.restartServer",
