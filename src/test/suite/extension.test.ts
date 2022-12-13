@@ -43,9 +43,9 @@ suite('Compiler invocation', () => {
   test('Check command creation', async () => {
     const context = MockingUtils.mockedContext();
     CompileCommands.createAndRegister(context);
-    assert.strictEqual(true, DafnyCommands.Compile in mockedCommands.registeredCommands);
-    assert.strictEqual(true, DafnyCommands.CompileAndRun in mockedCommands.registeredCommands);
-    assert.strictEqual(true, DafnyCommands.CompileCustomArgs in mockedCommands.registeredCommands);
+    assert.strictEqual(true, DafnyCommands.Build in mockedCommands.registeredCommands);
+    assert.strictEqual(true, DafnyCommands.Run in mockedCommands.registeredCommands);
+    assert.strictEqual(true, DafnyCommands.BuildCustomArgs in mockedCommands.registeredCommands);
     const checkpoints = {
       accessedSave: false,
       accessedIsUntitled: false,
@@ -73,7 +73,7 @@ suite('Compiler invocation', () => {
         textSent = command;
       }
     };
-    const returnValue = await(mockedCommands.registeredCommands[DafnyCommands.Compile]() as unknown as Promise<boolean>);
+    const returnValue = await(mockedCommands.registeredCommands[DafnyCommands.Build]() as unknown as Promise<boolean>);
     for(const checkpoint in checkpoints) {
       assert.strictEqual(true, (checkpoints as any)[checkpoint], checkpoint);
     }

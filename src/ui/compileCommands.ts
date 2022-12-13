@@ -10,22 +10,20 @@ import { getDotnetExecutablePath } from '../dotnet';
 import { DafnyInstaller } from '../language/dafnyInstallation';
 import { Messages } from './messages';
 
-const CompileArg = '/compile';
-const CompileAndRunArg = `${CompileArg}:3`;
-const OutputPathArg = '/out';
+const OutputPathArg = '--output';
 
 export default class CompileCommands {
   public static createAndRegister(installer: DafnyInstaller): CompileCommands {
     installer.context.subscriptions.push(
-      commands.registerCommand(DafnyCommands.Compile, () => compileAndRun(installer, false, false)),
-      commands.registerCommand(DafnyCommands.CompileCustomArgs, () => compileAndRun(installer, true, false)),
-      commands.registerCommand(DafnyCommands.CompileAndRun, () => compileAndRun(installer, false, true))
+      commands.registerCommand(DafnyCommands.Build, () => buildOrRun(installer, false, false)),
+      commands.registerCommand(DafnyCommands.BuildCustomArgs, () => buildOrRun(installer, true, false)),
+      commands.registerCommand(DafnyCommands.Run, () => buildOrRun(installer, false, true))
     );
     return new CompileCommands();
   }
 }
 
-async function compileAndRun(installer: DafnyInstaller, useCustomArgs: boolean, run: boolean): Promise<boolean> {
+async function buildOrRun(installer: DafnyInstaller, useCustomArgs: boolean, run: boolean): Promise<boolean> {
   const document = window.activeTextEditor?.document;
   if(document == null) {
     return false;
@@ -105,13 +103,16 @@ class CommandFactory {
   }
 
   private withCompileAndRun(args: string[]): string[] {
-    if(!this.run) {
-      return args;
+    if(this.run) {
+      return [ 'run', ...args ];
     }
-    return [ ...args.filter(arg => !arg.includes(CompileArg)), CompileAndRunArg ];
+    return [ 'build', ...args ];
   }
 
   private withOutputPath(args: string[]): string[] {
+    if(this.run) {
+      return args;
+    }
     if(args.some(arg => arg.includes(OutputPathArg))) {
       return args;
     }

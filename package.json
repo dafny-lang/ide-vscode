@@ -30,17 +30,17 @@
       "editor/context": [
         {
           "when": "editorTextFocus && editorLangId == dafny",
-          "command": "dafny.compile",
+          "command": "dafny.build",
           "group": "7_Dafny@5"
         },
         {
           "when": "editorTextFocus && editorLangId == dafny",
-          "command": "dafny.compileCustomArgs",
+          "command": "dafny.buildCustomArgs",
           "group": "7_Dafny@6"
         },
         {
           "when": "editorTextFocus && editorLangId == dafny",
-          "command": "dafny.compileAndRun",
+          "command": "dafny.run",
           "group": "7_Dafny@7"
         },
         {
@@ -62,19 +62,19 @@
     },
     "keybindings": [
       {
-        "command": "dafny.compile",
+        "command": "dafny.build",
         "key": "ctrl+shift+b",
         "mac": "⇧⌘B",
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
-        "command": "dafny.compileAndRun",
+        "command": "dafny.run",
         "key": "f5",
         "mac": "f5",
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
-        "command": "dafny.compileCustomArgs",
+        "command": "dafny.buildCustomArgs",
         "key": "f6",
         "mac": "f6",
         "when": "editorTextFocus && editorLangId == dafny"
@@ -191,17 +191,14 @@
           "default": "bin",
           "description": "Absolute or relative path to the compilation output directory."
         },
-        "dafny.compilerArgs": {
+        "dafny.runArgs": {
           "type": "array",
           "items": {
             "type": "string"
           },
           "default": [
-            "/verifyAllModules",
-            "/compile:1",
-            "/spillTargetCode:1"
           ],
-          "description": "Optional array of strings as Dafny compilation arguments"
+          "description": "Optional array of strings as Dafny run and build arguments"
         },
         "dafny.version": {
           "type": "string",
@@ -244,16 +241,16 @@
     },
     "commands": [
       {
-        "command": "dafny.compile",
-        "title": "Dafny: Compile"
+        "command": "dafny.build",
+        "title": "Dafny: Build"
       },
       {
-        "command": "dafny.compileCustomArgs",
-        "title": "Dafny: Compile with Custom Arguments"
+        "command": "dafny.buildCustomArgs",
+        "title": "Dafny: Build with Custom Arguments"
       },
       {
-        "command": "dafny.compileAndRun",
-        "title": "Dafny: Compile and Run"
+        "command": "dafny.run",
+        "title": "Dafny: Run"
       },
       {
         "command": "dafny.showCounterexample",

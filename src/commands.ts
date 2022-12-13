@@ -1,7 +1,7 @@
 export namespace DafnyCommands {
-  export const Compile = 'dafny.compile';
-  export const CompileCustomArgs = 'dafny.compileCustomArgs';
-  export const CompileAndRun = 'dafny.compileAndRun';
+  export const Build = 'dafny.build';
+  export const BuildCustomArgs = 'dafny.buildCustomArgs';
+  export const Run = 'dafny.run';
   export const ShowCounterexample = 'dafny.showCounterexample';
   export const HideCounterexample = 'dafny.hideCounterexample';
   export const CopyCounterexamples = 'dafny.copyCounterexamples';

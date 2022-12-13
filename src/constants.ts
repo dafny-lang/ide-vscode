@@ -30,7 +30,7 @@ export namespace ConfigurationConstants {
 
   export namespace Compiler {
     export const OutputDir = 'compilerOutputDir';
-    export const Arguments = 'compilerArgs';
+    export const Arguments = 'runArgs';
     export const CommandPrefix = 'terminalCommandPrefix';
   }
 
