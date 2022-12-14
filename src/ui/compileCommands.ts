@@ -6,7 +6,6 @@ import { DafnyCommands, VSCodeCommands } from '../commands';
 
 import Configuration from '../configuration';
 import { ConfigurationConstants } from '../constants';
-import { getDotnetExecutablePath } from '../dotnet';
 import { DafnyInstaller } from '../language/dafnyInstallation';
 import { Messages } from './messages';
 
@@ -59,13 +58,12 @@ class CommandFactory {
 
   public async createCompilerCommand(): Promise<string | undefined> {
     const commandPrefix = this.getCommandPrefix();
-    const { path: dotnetPath } = await getDotnetExecutablePath();
     const compilerArgs = await this.getCompilerArgs();
     const compilerPath = await this.installer.getCliExecutable(false, compilerArgs, compilerArgs);
     if(compilerArgs == null) {
       return undefined;
     }
-    let result = `${commandPrefix}"${dotnetPath}" ${compilerPath.args?.join(' ')} "${this.fileName}"`;
+    let result = `${commandPrefix}"${compilerPath.command}" ${compilerPath.args?.join(' ')} "${this.fileName}"`;
     if(compilerPath.options?.cwd !== undefined) {
       result = `cd ${compilerPath.options?.cwd}; ${result}`;
     }

@@ -18,7 +18,8 @@ const mockedWorkspace = MockingUtils.mockedWorkspace();
 const mockedVsCode = {
   window: {
     activeTerminal: null as any,
-    activeTextEditor: null as any
+    activeTextEditor: null as any,
+    showInformationMessage: () => {}
   },
   commands: {
     registerCommand(command: string, callback: () => void): vscode.Disposable {
@@ -42,7 +43,19 @@ const { DafnyInstaller } = proxyquire('../../language/dafnyInstallation', {
 suite('Compiler invocation', () => {
   test('Check command creation', async () => {
     const context = MockingUtils.mockedContext();
-    CompileCommands.createAndRegister(context);
+    CompileCommands.createAndRegister({
+      context,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      getCliExecutable: (server: boolean, newArgs: string[], oldArgs: string[]) => {
+        return {
+          command: '<dotnet executable path>',
+          args: newArgs,
+          options: {
+            cwd: '<dotnet tool path>'
+          }
+        };
+      }
+    });
     assert.strictEqual(true, DafnyCommands.Build in mockedCommands.registeredCommands);
     assert.strictEqual(true, DafnyCommands.Run in mockedCommands.registeredCommands);
     assert.strictEqual(true, DafnyCommands.BuildCustomArgs in mockedCommands.registeredCommands);
@@ -77,7 +90,7 @@ suite('Compiler invocation', () => {
     for(const checkpoint in checkpoints) {
       assert.strictEqual(true, (checkpoints as any)[checkpoint], checkpoint);
     }
-    assert.strictEqual('<compiler command prefix>"<dotnet executable path>" "<extension path>/<compiler runtime path>" "fileName.dfy" /out <arg1> arg2',
+    assert.strictEqual('cd <dotnet tool path>; <compiler command prefix>"<dotnet executable path>" build --output <arg1> arg2 "fileName.dfy"',
       textSent.replace(/\\/g, '/'));
     assert.strictEqual(true, returnValue, 'returnValue');
   }).timeout(60 * 1000);
@@ -90,7 +103,7 @@ suite('Dafny IDE Extension Installation', () => {
     assert.strictEqual(true, Messages.Dotnet.DownloadUri.includes('https'), 'Download URL should contain https');
   });
 
-  test('Installer checks', async () => {
+  test.only('Installer checks', async () => {
     const context = MockingUtils.mockedContext();
     const outputChannelBuilder = MockingUtils.mockedOutputChannelBuilder();
     mockedExec.set(MockingUtils.simpleCommandMap({
@@ -104,14 +117,20 @@ suite('Dafny IDE Extension Installation', () => {
       }
     ]);
     assert.strictEqual(true, installer != null, 'Installer is not null');
-    const result = await installer.install();
-    assert.strictEqual(outputChannelBuilder.writtenContent().replace(/\\/g, '/').replace(/resources\/.*\n/, 'resources/\n'),
-      'Starting Dafny installation\n'
+    try {
+      await installer.getCliExecutable(false, [], []);
+      assert.fail('installation should fail');
+    // eslint-disable-next-line no-empty
+    } catch(e: unknown) {
+
+    }
+    const result = outputChannelBuilder.writtenContent().replace(/\\/g, '/').replace(/resources\/.*\n/, 'resources/\n');
+    assert.strictEqual(result,
+      'Standalone language server installation started.\n'
       + 'deleting previous Dafny installation at /tmp/mockedUri/out/resources/\n'
-      + 'Dafny installation failed:\n'
+      + 'Standalone language server installation failed:\n'
       + '> Simulated error in delete\n'
     );
-    assert.strictEqual(false, result, 'Result is true');
   }).timeout(60 * 1000);
 });
 

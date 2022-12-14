@@ -53,7 +53,6 @@ class DafnyToolInstaller {
       window.showErrorMessage(Messages.Installation.Error);
       this.writeStatus(Messages.Installation.Error);
       this.writeStatus(`> ${error}`);
-      console.error('dafny installation failed', error);
     }
     return localToolPath;
   }

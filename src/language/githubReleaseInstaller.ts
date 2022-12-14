@@ -57,12 +57,12 @@ export class GitHubReleaseInstaller {
   }
 
   private async install(): Promise<boolean> {
+    this.statusOutput.show();
+    const startMessage = 'Standalone language server installation started.';
+    window.showInformationMessage(startMessage);
+    this.writeStatus(startMessage);
     try {
       await this.cleanInstallDir();
-      this.statusOutput.show();
-      const startMessage = 'Standalone language server installation started.';
-      window.showInformationMessage(startMessage);
-      this.writeStatus(startMessage);
       const archive = await this.downloadArchive(await this.getDafnyDownloadAddress(), 'Dafny');
       await this.extractArchive(archive, 'Dafny');
       await workspace.fs.delete(archive, { useTrash: false });
@@ -73,7 +73,6 @@ export class GitHubReleaseInstaller {
     } catch(error: unknown) {
       this.writeStatus('Standalone language server installation failed:');
       this.writeStatus(`> ${error}`);
-      console.error('dafny installation failed', error);
       return false;
     }
   }
