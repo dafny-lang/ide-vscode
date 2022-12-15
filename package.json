@@ -192,7 +192,7 @@
             "type": "string"
           },
           "default": [],
-          "description": "Optional array of strings to pass to the language server. Only works with Dafny versions above 3.10"
+          "description": "Optional array of strings to pass to the language server. Only works with Dafny versions above 3.10. Available options can be seen using 'dafny server --help'"
         },
         "dafny.cliPath": {
           "type": "string",
