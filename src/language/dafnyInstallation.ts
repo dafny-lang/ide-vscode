@@ -265,7 +265,7 @@ export class DafnyInstaller {
       console.error('dafny download failed, trying to build from source', error);
       try {
         // Need to build from source and move all files from Binary/ to the out/resource folder
-        this.writeStatus(`Failed to download binary distribution of Dafny. Installing from source instead.`);
+        this.writeStatus('Failed to download binary distribution of Dafny. Installing from source instead.');
         return await this.installFromSource();
       } catch(error: unknown) {
         this.writeStatus('Dafny build failed:');
@@ -273,7 +273,6 @@ export class DafnyInstaller {
         console.error('failed to build from source', error);
         return false;
       }
-      return false;
     }
   }
 
