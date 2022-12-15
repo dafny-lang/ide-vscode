@@ -204,7 +204,11 @@ function getDafnyPlatformSuffix(): string {
   case 'Windows_NT':
     return 'win';
   case 'Darwin':
-    return 'osx-10.14.2';
+    if(os.arch() === 'arm64') {
+      return 'osx-11.0';
+    } else {
+      return 'osx-10.14.2';
+    }
   default:
     return 'ubuntu-16.04';
   }
