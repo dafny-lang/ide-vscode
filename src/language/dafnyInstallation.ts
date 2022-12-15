@@ -216,7 +216,7 @@ async function getDafnyDownloadAddress(context: ExtensionContext): Promise<strin
   const baseUri = LanguageServerConstants.DownloadBaseUri;
   const [ tag, version ] = await getConfiguredTagAndVersion(context);
   const suffix = getDafnyPlatformSuffix();
-  return `${baseUri}/${tag}/dafny-${version}-x64-${suffix}.zip`;
+  return `${baseUri}/${tag}/dafny-${version}-${os.arch()}-${suffix}.zip`;
 }
 
 export class DafnyInstaller {
@@ -254,21 +254,25 @@ export class DafnyInstaller {
     this.writeStatus('Starting Dafny installation');
     try {
       await this.cleanInstallDir();
-      if(os.type() === 'Darwin' && os.arch() !== 'x64') {
-        // Need to build from source and move all files from Binary/ to the out/resource folder
-        this.writeStatus(`Found a non-supported architecture OSX:${os.arch()}. Going to install from source.`);
-        return await this.installFromSource();
-      } else {
-        const archive = await this.downloadArchive(await getDafnyDownloadAddress(this.context), 'Dafny');
-        await this.extractArchive(archive, 'Dafny');
-        await workspace.fs.delete(archive, { useTrash: false });
-        this.writeStatus('Dafny installation completed');
-        return true;
-      }
+      const archive = await this.downloadArchive(await getDafnyDownloadAddress(this.context), 'Dafny');
+      await this.extractArchive(archive, 'Dafny');
+      await workspace.fs.delete(archive, { useTrash: false });
+      this.writeStatus('Dafny installation completed');
+      return true;
     } catch(error: unknown) {
-      this.writeStatus('Dafny installation failed:');
+      this.writeStatus('Dafny download failed:');
       this.writeStatus(`> ${error}`);
-      console.error('dafny installation failed', error);
+      console.error('dafny download failed, trying to build from source', error);
+      try {
+        // Need to build from source and move all files from Binary/ to the out/resource folder
+        this.writeStatus(`Failed to download binary distribution of Dafny. Installing from source instead.`);
+        return await this.installFromSource();
+      } catch(error: unknown) {
+        this.writeStatus('Dafny build failed:');
+        this.writeStatus(`> ${error}`);
+        console.error('failed to build from source', error);
+        return false;
+      }
       return false;
     }
   }
