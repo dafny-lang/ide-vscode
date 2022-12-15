@@ -334,8 +334,10 @@ export class DafnyInstaller {
       }
     }
 
+    const tag = configuredVersion.startsWith('nightly') ? configuredVersion.split('-').pop() : "v${configuredVersion}";
+
     // Clone the right version
-    await this.execLog(`git clone -b v${configuredVersion} --depth 1 --recurse-submodules ${LanguageServerConstants.DafnyGitUrl}`);
+    await this.execLog(`git clone -b ${tag} --depth 1 --recurse-submodules ${LanguageServerConstants.DafnyGitUrl}`);
     processChdir(Utils.joinPath(installationPath, 'dafny').fsPath);
 
     const { path: dotnet } = await getDotnetExecutablePath();
