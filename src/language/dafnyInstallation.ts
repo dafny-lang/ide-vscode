@@ -264,15 +264,19 @@ export class DafnyInstaller {
     } catch(error: unknown) {
       this.writeStatus('Dafny download failed:');
       this.writeStatus(`> ${error}`);
-      console.error('dafny download failed, trying to build from source', error);
-      try {
-        // Need to build from source and move all files from Binary/ to the out/resource folder
-        this.writeStatus('Failed to download binary distribution of Dafny. Installing from source instead.');
-        return await this.installFromSource();
-      } catch(error: unknown) {
-        this.writeStatus('Dafny build failed:');
-        this.writeStatus(`> ${error}`);
-        console.error('failed to build from source', error);
+      if(os.type() === 'Darwin') {
+        // Building from source works only on macOS at the moment
+        try {
+          // Need to build from source and move all files from Binary/ to the out/resource folder
+          this.writeStatus('Failed to download binary distribution of Dafny. Installing from source instead.');
+          return await this.installFromSource();
+        } catch(error: unknown) {
+          this.writeStatus('Dafny build failed:');
+          this.writeStatus(`> ${error}`);
+          console.error('failed to build from source', error);
+          return false;
+        }
+      } else {
         return false;
       }
     }
