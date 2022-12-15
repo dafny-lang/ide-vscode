@@ -67,8 +67,6 @@ async function getConfiguredGitTagAndVersionUncached(context: ExtensionContext):
     if(cachedVersion !== undefined) {
       return [ 'nightly', cachedVersion as string ];
     }
-    window.showWarningMessage('Failed to install latest nightly version of Dafny. Using latest stable version instead.\n'
-      + `The name of the nightly release we found was: ${result.name}`);
     version = LanguageServerConstants.LatestVersion;
   }
   }
@@ -334,11 +332,13 @@ export class DafnyInstaller {
       }
     }
 
-    const tag = configuredVersion.startsWith('nightly') ? configuredVersion.split('-').pop() : "v${configuredVersion}";
+    const tag = configuredVersion.startsWith('nightly') ? configuredVersion.split('-').pop() : `v${configuredVersion}`;
 
     // Clone the right version
-    await this.execLog(`git clone -b ${tag} --depth 1 --recurse-submodules ${LanguageServerConstants.DafnyGitUrl}`);
+    await this.execLog('rm -rf dafny');
+    await this.execLog(`git clone --recurse-submodules ${LanguageServerConstants.DafnyGitUrl}`);
     processChdir(Utils.joinPath(installationPath, 'dafny').fsPath);
+    await this.execLog(`git checkout ${tag}`);
 
     const { path: dotnet } = await getDotnetExecutablePath();
     // The DafnyCore.csproj has a few targets that call `dotnet` directly.

@@ -105,12 +105,12 @@ suite('Dafny IDE Extension Installation', () => {
     ]);
     assert.strictEqual(true, installer != null, 'Installer is not null');
     const result = await installer.install();
-    assert.strictEqual(outputChannelBuilder.writtenContent().replace(/\\/g, '/').replace(/resources\/.*\n/, 'resources/\n'),
-      'Starting Dafny installation\n'
-      + 'deleting previous Dafny installation at /tmp/mockedUri/out/resources/\n'
-      + 'Dafny installation failed:\n'
-      + '> Simulated error in delete\n'
-    );
+    const actual = outputChannelBuilder.writtenContent().replace(/\\/g, '/').replace(/resources\/.*\n/, 'resources/\n');
+    const expectedPrefix = 'Starting Dafny installation\n'
+                         + 'deleting previous Dafny installation at /tmp/mockedUri/out/resources/\n'
+                         + 'Dafny download failed:\n'
+                         + '> Simulated error in delete\n';
+    assert(actual.startsWith(expectedPrefix));
     assert.strictEqual(false, result, 'Result is true');
   }).timeout(60 * 1000);
 });
