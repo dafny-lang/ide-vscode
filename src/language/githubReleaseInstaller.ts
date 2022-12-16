@@ -21,7 +21,11 @@ function getDafnyPlatformSuffix(): string {
   case 'Windows_NT':
     return 'win';
   case 'Darwin':
-    return 'osx-10.14.2';
+    if(os.arch() === 'arm64') {
+      return 'osx-11.0';
+    } else {
+      return 'osx-10.14.2';
+    }
   default:
     return 'ubuntu-16.04';
   }
@@ -33,7 +37,7 @@ export class GitHubReleaseInstaller {
     public readonly statusOutput: OutputChannel
   ) {}
 
-  public async getExecutable(server: boolean, newArgs: string[], oldArgs: string[]): Promise<Executable> {
+  public async getExecutable(server: boolean, newArgs: string[], oldArgs: string[]): Promise<Executable | undefined> {
     const version = getPreferredVersion();
     const { path: dotnetExecutable } = await getDotnetExecutablePath();
 
@@ -41,7 +45,7 @@ export class GitHubReleaseInstaller {
     if(!fs.existsSync(cliPath)) {
       const installed = await this.install();
       if(!installed) {
-        throw new Error(Messages.Installation.Error);
+        return undefined;
       }
     }
 
@@ -99,7 +103,7 @@ export class GitHubReleaseInstaller {
     const baseUri = LanguageServerConstants.DownloadBaseUri;
     const [ tag, version ] = await this.getConfiguredTagAndVersion();
     const suffix = getDafnyPlatformSuffix();
-    return `${baseUri}/${tag}/dafny-${version}-x64-${suffix}.zip`;
+    return `${baseUri}/${tag}/dafny-${version}-${os.arch()}-${suffix}.zip`;
   }
 
   public async getConfiguredVersion(): Promise<string> {

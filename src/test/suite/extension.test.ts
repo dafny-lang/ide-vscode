@@ -103,7 +103,7 @@ suite('Dafny IDE Extension Installation', () => {
     assert.strictEqual(true, Messages.Dotnet.DownloadUri.includes('https'), 'Download URL should contain https');
   });
 
-  test.only('Installer checks', async () => {
+  test('Installer checks', async () => {
     const context = MockingUtils.mockedContext();
     const outputChannelBuilder = MockingUtils.mockedOutputChannelBuilder();
     mockedExec.set(MockingUtils.simpleCommandMap({

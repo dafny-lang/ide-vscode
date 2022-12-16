@@ -24,12 +24,17 @@ export class DafnyInstaller {
       return customExecutable;
     }
 
-    if(os.type() === 'Darwin' && os.arch() !== 'x64') {
-      // Need to build from source and move all files from Binary/ to the out/resource folder
+    const githubExecutable = await new GitHubReleaseInstaller(this.context, this.statusOutput).getExecutable(server, newArgs, oldArgs);
+    if(githubExecutable) {
+      return githubExecutable;
+    }
+
+    if(os.type() === 'Darwin') {
       const sourceInstaller = new FromSourceInstaller(this.context, this.statusOutput);
       return await sourceInstaller.getExecutable(server, newArgs, oldArgs);
     }
-    return await new GitHubReleaseInstaller(this.context, this.statusOutput).getExecutable(server, newArgs, oldArgs);
+
+    throw new Error('Could not install a Dafny language server.');
   }
 }
 

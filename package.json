@@ -197,7 +197,7 @@
         "dafny.cliPath": {
           "type": "string",
           "default": null,
-          "description": "Path to the Dafny CLI. Only used when 'custom' is the chosen Dafny version. Dafny version must be at least 3.10"
+          "description": "Path to the Dafny CLI. Only used when 'custom' is the chosen Dafny version. The Dafny version must be 3.10 or greater."
         },
         "dafny.compilerOutputDir": {
           "type": "string",

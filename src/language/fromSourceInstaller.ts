@@ -90,9 +90,11 @@ export class FromSourceInstaller {
       }
     }
 
-    // Clone the right version
-    await this.execLog(`git clone -b v${configuredVersion} --depth 1 --recurse-submodules ${LanguageServerConstants.DafnyGitUrl}`);
+    const tag = configuredVersion.startsWith('nightly') ? configuredVersion.split('-').pop() : `v${configuredVersion}`;
+    await this.execLog('rm -rf dafny');
+    await this.execLog(`git clone --recurse-submodules ${LanguageServerConstants.DafnyGitUrl}`);
     processChdir(Utils.joinPath(installationPath, 'dafny').fsPath);
+    await this.execLog(`git checkout ${tag}`);
 
     const { path: dotnet } = await getDotnetExecutablePath();
     // The DafnyCore.csproj has a few targets that call `dotnet` directly.
