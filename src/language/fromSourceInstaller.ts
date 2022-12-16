@@ -44,9 +44,10 @@ export class FromSourceInstaller {
     this.statusOutput.show();
     const installationPath = await this.getFromSourceInstallationPath(os.arch());
     if(fs.existsSync(path.join(installationPath.fsPath, 'dafny', 'Binaries'))) {
+      this.writeStatus('Using language server previously built from source.');
       return installationPath.fsPath;
     }
-    await this.githubInstaller.cleanInstallDir();
+    await this.githubInstaller.cleanInstallDir(installationPath);
     await mkdirAsync(installationPath.fsPath, { recursive: true });
     this.writeStatus(`Found a non-supported architecture OSX:${os.arch()}. Going to install from source.`);
     this.writeStatus(`Installing Dafny from source in ${installationPath.fsPath}.\n`);
@@ -129,10 +130,11 @@ export class FromSourceInstaller {
     return installationPath.fsPath;
   }
 
-
   private async getFromSourceInstallationPath(typeArch: string): Promise<Uri> {
     return Utils.joinPath(
-      await this.githubInstaller.getInstallationPath(), 'custom', typeArch
+      this.context.extensionUri,
+      ...LanguageServerConstants.GetResourceFolder(await this.githubInstaller.getConfiguredVersion()),
+      'custom', typeArch
     );
   }
 

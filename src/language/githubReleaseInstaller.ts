@@ -65,7 +65,7 @@ export class GitHubReleaseInstaller {
     window.showInformationMessage(startMessage);
     this.writeStatus(startMessage);
     try {
-      await this.cleanInstallDir();
+      await this.cleanInstallDir(await this.getInstallationPath());
       const archive = await this.downloadArchive(await this.getDafnyDownloadAddress(), 'Dafny');
       await this.extractArchive(archive, 'Dafny');
       await workspace.fs.delete(archive, { useTrash: false });
@@ -80,8 +80,7 @@ export class GitHubReleaseInstaller {
     }
   }
 
-  public async cleanInstallDir(): Promise<void> {
-    const installPath = await this.getInstallationPath();
+  public async cleanInstallDir(installPath: Uri): Promise<void> {
     this.writeStatus(`deleting previous Dafny installation at ${installPath.fsPath}`);
     try {
       await workspace.fs.delete(
@@ -186,7 +185,8 @@ export class GitHubReleaseInstaller {
   public async getInstallationPath(): Promise<Uri> {
     return Utils.joinPath(
       this.context.extensionUri,
-      ...LanguageServerConstants.GetResourceFolder(await this.getConfiguredVersion())
+      ...LanguageServerConstants.GetResourceFolder(await this.getConfiguredVersion()),
+      'github'
     );
   }
 
