@@ -10,7 +10,6 @@ import { Utils } from 'vscode-uri';
 const mkdirAsync = promisify(fs.mkdir);
 import { Executable } from 'vscode-languageclient/node';
 import { getDotnetExecutablePath } from '../dotnet';
-import { Messages } from '../ui/messages';
 import path = require('path');
 import { getPreferredVersion } from './dafnyInstallation';
 import { versionToNumeric } from '../ui/dafnyIntegration';
