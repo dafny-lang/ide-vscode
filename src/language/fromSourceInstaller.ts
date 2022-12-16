@@ -46,7 +46,7 @@ export class FromSourceInstaller {
     if(fs.existsSync(path.join(installationPath.fsPath, 'dafny', 'Binaries'))) {
       return installationPath.fsPath;
     }
-    this.githubInstaller.cleanInstallDir();
+    await this.githubInstaller.cleanInstallDir();
     await mkdirAsync(installationPath.fsPath, { recursive: true });
     this.writeStatus(`Found a non-supported architecture OSX:${os.arch()}. Going to install from source.`);
     this.writeStatus(`Installing Dafny from source in ${installationPath.fsPath}.\n`);
@@ -92,9 +92,8 @@ export class FromSourceInstaller {
 
     const tag = configuredVersion.startsWith('nightly') ? configuredVersion.split('-').pop() : `v${configuredVersion}`;
     await this.execLog('rm -rf dafny');
-    await this.execLog(`git clone --recurse-submodules ${LanguageServerConstants.DafnyGitUrl}`);
+    await this.execLog(`git clone -b ${tag} --depth 1 --recurse-submodules ${LanguageServerConstants.DafnyGitUrl}`);
     processChdir(Utils.joinPath(installationPath, 'dafny').fsPath);
-    await this.execLog(`git checkout ${tag}`);
 
     const { path: dotnet } = await getDotnetExecutablePath();
     // The DafnyCore.csproj has a few targets that call `dotnet` directly.
