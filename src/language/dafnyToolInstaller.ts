@@ -9,7 +9,7 @@ import { mkdir } from 'fs/promises';
 import { promisify } from 'util';
 import { Messages } from '../ui/messages';
 import { Executable } from 'vscode-languageclient/node';
-import { versionToNumeric } from '../ui/dafnyIntegration';
+import { configuredVersionToNumeric } from '../ui/dafnyIntegration';
 const execFileAsync = promisify(execFile);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -23,7 +23,7 @@ class DafnyToolInstaller {
     const { path: dotnetExecutable } = await getDotnetExecutablePath();
     const localToolPath = await this.ensureDafnyIsInstalled();
     const version = getPreferredVersion();
-    const args = versionToNumeric(version) >= versionToNumeric('3.10') ? newArgs : oldArgs;
+    const args = configuredVersionToNumeric(version) >= configuredVersionToNumeric('3.10') ? newArgs : oldArgs;
     return {
       command: dotnetExecutable,
       args: [ 'tool', 'run', 'dafny' ].concat(args),

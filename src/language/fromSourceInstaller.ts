@@ -6,7 +6,7 @@ import { ExtensionContext, OutputChannel, Uri, workspace } from 'vscode';
 import { Utils } from 'vscode-uri';
 import { LanguageServerConstants } from '../constants';
 import { checkSupportedDotnetVersion, getDotnetExecutablePath } from '../dotnet';
-import { versionToNumeric } from '../ui/dafnyIntegration';
+import { configuredVersionToNumeric } from '../ui/dafnyIntegration';
 import { promisify } from 'util';
 import { exec } from 'child_process';
 import * as fs from 'fs';
@@ -30,7 +30,7 @@ export class FromSourceInstaller {
     const version = getPreferredVersion();
     const { path: dotnetExecutable } = await getDotnetExecutablePath();
     const directory = await this.installFromSource();
-    if(!server || versionToNumeric(version) >= versionToNumeric('3.10')) {
+    if(!server || configuredVersionToNumeric(version) >= configuredVersionToNumeric('3.10')) {
       if(server) {
         newArgs.unshift('server');
       }
@@ -72,7 +72,7 @@ export class FromSourceInstaller {
       }
     }
     const configuredVersion = await this.githubInstaller.getConfiguredVersion();
-    if(versionToNumeric(configuredVersion) < versionToNumeric('3.9.0')) {
+    if(configuredVersionToNumeric(configuredVersion) < configuredVersionToNumeric('3.9.0')) {
       try {
 
         const process = await this.execLog('javac -version');
@@ -104,7 +104,7 @@ export class FromSourceInstaller {
     // This works around this edge case.
     const injectPath = `PATH=${path.dirname(dotnet)}:$PATH`;
 
-    const projectToBuild = versionToNumeric(configuredVersion) < versionToNumeric('3.10.0')
+    const projectToBuild = configuredVersionToNumeric(configuredVersion) < configuredVersionToNumeric('3.10.0')
       ? 'DafnyLanguageServer/DafnyLanguageServer.csproj'
       : 'DafnyDriver/DafnyDriver.csproj';
     await this.execLog(`${injectPath} ${ (await getDotnetExecutablePath()).path } build Source/${projectToBuild}`);

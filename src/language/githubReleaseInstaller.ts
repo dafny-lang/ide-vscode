@@ -12,7 +12,7 @@ import { Executable } from 'vscode-languageclient/node';
 import { getDotnetExecutablePath } from '../dotnet';
 import path = require('path');
 import { getPreferredVersion } from './dafnyInstallation';
-import { versionToNumeric } from '../ui/dafnyIntegration';
+import { configuredVersionToNumeric } from '../ui/dafnyIntegration';
 const ArchiveFileName = 'dafny.zip';
 
 function getDafnyPlatformSuffix(): string {
@@ -48,7 +48,7 @@ export class GitHubReleaseInstaller {
       }
     }
 
-    if(!server || versionToNumeric(version) >= versionToNumeric('3.10')) {
+    if(!server || configuredVersionToNumeric(version) >= configuredVersionToNumeric('3.10')) {
       if(server) {
         newArgs.unshift('server');
       }
