@@ -18,7 +18,8 @@ const mockedWorkspace = MockingUtils.mockedWorkspace();
 const mockedVsCode = {
   window: {
     activeTerminal: null as any,
-    activeTextEditor: null as any
+    activeTextEditor: null as any,
+    showInformationMessage: () => {}
   },
   commands: {
     registerCommand(command: string, callback: () => void): vscode.Disposable {
@@ -42,10 +43,22 @@ const { DafnyInstaller } = proxyquire('../../language/dafnyInstallation', {
 suite('Compiler invocation', () => {
   test('Check command creation', async () => {
     const context = MockingUtils.mockedContext();
-    CompileCommands.createAndRegister(context);
-    assert.strictEqual(true, DafnyCommands.Compile in mockedCommands.registeredCommands);
-    assert.strictEqual(true, DafnyCommands.CompileAndRun in mockedCommands.registeredCommands);
-    assert.strictEqual(true, DafnyCommands.CompileCustomArgs in mockedCommands.registeredCommands);
+    CompileCommands.createAndRegister({
+      context,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      getCliExecutable: (server: boolean, newArgs: string[], oldArgs: string[]) => {
+        return {
+          command: '<dotnet executable path>',
+          args: newArgs,
+          options: {
+            cwd: '<dotnet tool path>'
+          }
+        };
+      }
+    });
+    assert.strictEqual(true, DafnyCommands.Build in mockedCommands.registeredCommands);
+    assert.strictEqual(true, DafnyCommands.Run in mockedCommands.registeredCommands);
+    assert.strictEqual(true, DafnyCommands.BuildCustomArgs in mockedCommands.registeredCommands);
     const checkpoints = {
       accessedSave: false,
       accessedIsUntitled: false,
@@ -73,11 +86,11 @@ suite('Compiler invocation', () => {
         textSent = command;
       }
     };
-    const returnValue = await(mockedCommands.registeredCommands[DafnyCommands.Compile]() as unknown as Promise<boolean>);
+    const returnValue = await(mockedCommands.registeredCommands[DafnyCommands.Build]() as unknown as Promise<boolean>);
     for(const checkpoint in checkpoints) {
       assert.strictEqual(true, (checkpoints as any)[checkpoint], checkpoint);
     }
-    assert.strictEqual('<compiler command prefix>"<dotnet executable path>" "<extension path>/<compiler runtime path>" "fileName.dfy" /out <arg1> arg2',
+    assert.strictEqual('cd <dotnet tool path>; <compiler command prefix>"<dotnet executable path>" build --output <arg1> arg2 "fileName.dfy"',
       textSent.replace(/\\/g, '/'));
     assert.strictEqual(true, returnValue, 'returnValue');
   }).timeout(60 * 1000);
@@ -104,14 +117,20 @@ suite('Dafny IDE Extension Installation', () => {
       }
     ]);
     assert.strictEqual(true, installer != null, 'Installer is not null');
-    const result = await installer.install();
-    const actual = outputChannelBuilder.writtenContent().replace(/\\/g, '/').replace(/resources\/.*\n/, 'resources/\n');
-    const expectedPrefix = 'Starting Dafny installation\n'
-                         + 'deleting previous Dafny installation at /tmp/mockedUri/out/resources/\n'
-                         + 'Dafny download failed:\n'
-                         + '> Simulated error in delete\n';
-    assert(actual.startsWith(expectedPrefix));
-    assert.strictEqual(false, result, 'Result is true');
+    try {
+      await installer.getCliExecutable(false, [], []);
+      assert.fail('installation should fail');
+    // eslint-disable-next-line no-empty
+    } catch(e: unknown) {
+
+    }
+    const result = outputChannelBuilder.writtenContent().replace(/\\/g, '/').replace(/resources\/.*\n/, 'resources/\n');
+    assert.strictEqual(result,
+      'Standalone language server installation started.\n'
+      + 'deleting previous Dafny installation at /tmp/mockedUri/out/resources/\n'
+      + 'Standalone language server installation failed:\n'
+      + '> Simulated error in delete\n'
+    );
   }).timeout(60 * 1000);
 });
 
