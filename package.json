@@ -197,7 +197,7 @@
         "dafny.cliPath": {
           "type": "string",
           "default": null,
-          "description": "Path to Dafny.exe or Dafny.dll. Only used when 'custom' is the chosen Dafny version."
+          "description": "Path to Dafny.exe, Dafny.dll or a Dafny executable. Only used when 'custom' is the chosen Dafny version. The Dafny version must be 3.10 or greater."
         },
         "dafny.compilerOutputDir": {
           "type": "string",
