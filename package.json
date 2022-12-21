@@ -192,12 +192,12 @@
             "type": "string"
           },
           "default": [],
-          "description": "Optional array of strings to pass to the language server. Only works with Dafny versions above 3.10. Available options can be seen using 'dafny server --help'"
+          "description": "Optional array of strings to pass to the language server. Only works if the Dafny version is 3.10 or greater. Available options can be seen using 'dafny server --help'"
         },
         "dafny.cliPath": {
           "type": "string",
           "default": null,
-          "description": "Path to the Dafny CLI. Only used when 'custom' is the chosen Dafny version. The Dafny version must be 3.10 or greater."
+          "description": "Path to Dafny.exe, Dafny.dll or DafnyLanguageServer.dll. Only used when 'custom' is the chosen Dafny version."
         },
         "dafny.compilerOutputDir": {
           "type": "string",
