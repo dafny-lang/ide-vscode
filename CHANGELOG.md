@@ -1,5 +1,12 @@
 # Release Notes
 
+## 3.0.0
+- The Dafny language server accepts many of the same options as the Dafny CLI, such as --warn-shadowing and --enforce-determinism, allowing users to get the same resolution and verification diagnostics in the IDE as on the CLI.
+- The extension can be configured with a custom Dafny CLI, which it will use to start a Dafny language server, ensuring consistency between the custom CLI and the extension.
+- For Mac users with an ARM64 processor, Dafny will no longer install Dafny from source for Dafny versions starting with 3.10.0, but instead download a prebuilt binary.
+- The extension may attempt to build Dafny from source for platforms and architectures for which no prebuilt binary exists.
+- Building from source is possible when attempting to use the latest nightly version.
+
 ## 2.9.0
 - Ghost highlighting is re-rendered now on every change to prevent non-ghost code from being displayed as ghost. (https://github.com/dafny-lang/ide-vscode/pull/304)
 - Ghost code more like comments (https://github.com/dafny-lang/ide-vscode/pull/301)
