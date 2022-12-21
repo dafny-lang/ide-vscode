@@ -206,7 +206,7 @@ function close() {
 
 async function updatePackageJson(packageObj, newVersion, mostRecentDafnyRelease) {
   packageObj["version"] = newVersion;
-  var versionList = packageObj["contributes"]["configuration"]["properties"]["dafny.preferredVersion"]["enum"];
+  var versionList = packageObj["contributes"]["configuration"]["properties"]["dafny.version"]["enum"];
   // versionList starts with "latest", and then the last version
   var previousDafnyVersion = versionList[1];
   var updatedDafny = false;
