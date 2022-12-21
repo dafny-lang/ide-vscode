@@ -40,7 +40,7 @@ export class GitHubReleaseInstaller {
     const version = getPreferredVersion();
     const { path: dotnetExecutable } = await getDotnetExecutablePath();
 
-    const cliPath = path.join(this.context.extensionPath, LanguageServerConstants.GetDefaultCliPath(await this.getConfiguredVersion()));
+    const cliPath = path.join((await this.getInstallationPath()).fsPath, 'dafny', 'Dafny.dll');
     if(!fs.existsSync(cliPath)) {
       const installed = await this.install();
       if(!installed) {
@@ -54,7 +54,7 @@ export class GitHubReleaseInstaller {
       }
       return { command: dotnetExecutable, args: [ cliPath, ...newArgs ] };
     } else {
-      const standaloneServerpath = path.join(this.context.extensionPath, LanguageServerConstants.GetDefaultPath(await this.getConfiguredVersion()));
+      const standaloneServerpath = path.join((await (this.getInstallationPath())).fsPath, 'dafny', 'DafnyLanguageServer.dll');
       return { command: dotnetExecutable, args: [ standaloneServerpath, ...oldArgs ] };
     }
   }

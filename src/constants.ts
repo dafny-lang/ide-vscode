@@ -57,12 +57,4 @@ export namespace LanguageServerConstants {
   export function GetResourceFolder(version: string): string[] {
     return [ 'out', 'resources', version ];
   }
-
-  export function GetDefaultPath(version: string): string {
-    return `out/resources/${version}/dafny/DafnyLanguageServer.dll`;
-  }
-
-  export function GetDefaultCliPath(version: string): string {
-    return `out/resources/${version}/dafny/Dafny.dll`;
-  }
 }
