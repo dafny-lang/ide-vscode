@@ -2,7 +2,7 @@
   "name": "ide-vscode",
   "displayName": "Dafny",
   "description": "Dafny for Visual Studio Code",
-  "version": "2.10.0",
+  "version": "3.0.0",
   "publisher": "dafny-lang",
   "repository": {
     "type": "git",
@@ -209,8 +209,7 @@
           "items": {
             "type": "string"
           },
-          "default": [
-          ],
+          "default": [],
           "description": "Optional array of strings as Dafny run and build arguments"
         },
         "dafny.version": {
