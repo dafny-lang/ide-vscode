@@ -9,14 +9,14 @@ export namespace ExtensionConstants {
 export namespace ConfigurationConstants {
   export const SectionName = 'dafny';
 
-  export const PreferredVersion = 'preferredVersion';
+  export const Version = 'version';
 
   export namespace Dotnet {
     export const ExecutablePath = 'dotnetExecutablePath';
   }
 
   export namespace LanguageServer {
-    export const RuntimePath = 'languageServerRuntimePath';
+    export const CliPath = 'cliPath';
     export const LaunchArgs = 'languageServerLaunchArgs';
     export const AutomaticVerification = 'automaticVerification';
     export const VerificationTimeLimit = 'verificationTimeLimit';
@@ -29,9 +29,8 @@ export namespace ConfigurationConstants {
   }
 
   export namespace Compiler {
-    export const RuntimePath = 'compilerRuntimePath';
     export const OutputDir = 'compilerOutputDir';
-    export const Arguments = 'compilerArgs';
+    export const Arguments = 'runArgs';
     export const CommandPrefix = 'terminalCommandPrefix';
   }
 
@@ -48,7 +47,8 @@ export namespace DotnetConstants {
 export namespace LanguageServerConstants {
   export const LatestStable = 'latest';
   export const LatestNightly = 'latest nightly';
-  export const LatestVersion = '3.9.1';
+  export const Custom = 'custom';
+  export const LatestVersion = '3.10.0';
   export const UnknownVersion = 'unknown';
   export const DafnyGitUrl = 'https://github.com/dafny-lang/dafny.git';
   export const DownloadBaseUri = 'https://github.com/dafny-lang/dafny/releases/download';
@@ -56,13 +56,5 @@ export namespace LanguageServerConstants {
 
   export function GetResourceFolder(version: string): string[] {
     return [ 'out', 'resources', version ];
-  }
-
-  export function GetDefaultPath(version: string): string {
-    return `out/resources/${version}/dafny/DafnyLanguageServer.dll`;
-  }
-
-  export function GetDefaultCompilerPath(version: string): string {
-    return `out/resources/${version}/dafny/Dafny.dll`;
   }
 }

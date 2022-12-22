@@ -2,7 +2,7 @@
   "name": "ide-vscode",
   "displayName": "Dafny",
   "description": "Dafny for Visual Studio Code",
-  "version": "2.9.0",
+  "version": "2.10.0",
   "publisher": "dafny-lang",
   "repository": {
     "type": "git",
@@ -26,21 +26,34 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "submenus": [
+      {
+        "id": "dafny.context",
+        "label": "Dafny"
+      }
+    ],
     "menus": {
       "editor/context": [
         {
           "when": "editorTextFocus && editorLangId == dafny",
-          "command": "dafny.compile",
+          "submenu": "dafny.context",
+          "group": "7_Dafny@5"
+        }
+      ],
+      "dafny.context": [
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.build",
           "group": "7_Dafny@5"
         },
         {
           "when": "editorTextFocus && editorLangId == dafny",
-          "command": "dafny.compileCustomArgs",
+          "command": "dafny.buildCustomArgs",
           "group": "7_Dafny@6"
         },
         {
           "when": "editorTextFocus && editorLangId == dafny",
-          "command": "dafny.compileAndRun",
+          "command": "dafny.run",
           "group": "7_Dafny@7"
         },
         {
@@ -52,24 +65,29 @@
           "when": "editorTextFocus && editorLangId == dafny && !dafny.counterexampleMenu.CanShowCounterExample",
           "command": "dafny.hideCounterexample",
           "group": "7_Dafny@2"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.copyCounterexamples",
+          "group": "7_Dafny@2"
         }
       ]
     },
     "keybindings": [
       {
-        "command": "dafny.compile",
+        "command": "dafny.build",
         "key": "ctrl+shift+b",
         "mac": "⇧⌘B",
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
-        "command": "dafny.compileAndRun",
+        "command": "dafny.run",
         "key": "f5",
         "mac": "f5",
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
-        "command": "dafny.compileCustomArgs",
+        "command": "dafny.buildCustomArgs",
         "key": "f6",
         "mac": "f6",
         "when": "editorTextFocus && editorLangId == dafny"
@@ -110,11 +128,6 @@
       "type": "object",
       "title": "Dafny extension configuration",
       "properties": {
-        "dafny.languageServerRuntimePath": {
-          "type": "string",
-          "default": null,
-          "description": "Absolute or relative path to the DafnyLanguageServer.dll"
-        },
         "dafny.automaticVerification": {
           "type": "string",
           "default": "onchange",
@@ -179,34 +192,32 @@
             "type": "string"
           },
           "default": [],
-          "description": "Optional array of strings to pass to the language server runtime."
+          "description": "Optional array of strings to pass to the language server. Only works with Dafny versions above 3.10. Available options can be seen using 'dafny server --help'"
         },
-        "dafny.compilerRuntimePath": {
+        "dafny.cliPath": {
           "type": "string",
           "default": null,
-          "description": "Absolute or relative path to the Dafny.dll"
+          "description": "Path to the Dafny CLI. Only used when 'custom' is the chosen Dafny version. The Dafny version must be 3.10 or greater."
         },
         "dafny.compilerOutputDir": {
           "type": "string",
           "default": "bin",
           "description": "Absolute or relative path to the compilation output directory."
         },
-        "dafny.compilerArgs": {
+        "dafny.runArgs": {
           "type": "array",
           "items": {
             "type": "string"
           },
           "default": [
-            "/verifyAllModules",
-            "/compile:1",
-            "/spillTargetCode:1"
           ],
-          "description": "Optional array of strings as Dafny compilation arguments"
+          "description": "Optional array of strings as Dafny run and build arguments"
         },
-        "dafny.preferredVersion": {
+        "dafny.version": {
           "type": "string",
           "enum": [
             "latest",
+            "3.10.0",
             "3.9.1",
             "3.9.0",
             "3.8.1",
@@ -217,10 +228,11 @@
             "3.4.2",
             "3.3.0",
             "3.2.0",
+            "custom",
             "latest nightly"
           ],
           "default": "latest",
-          "description": "The preferred Dafny version to use (overriden by custom compiler and language server paths, requires restart)."
+          "description": "The preferred Dafny version to use (requires restart)."
         },
         "dafny.dotnetExecutablePath": {
           "type": "string",
@@ -243,24 +255,28 @@
     },
     "commands": [
       {
-        "command": "dafny.compile",
-        "title": "Dafny: Compile"
+        "command": "dafny.build",
+        "title": "Dafny: Build"
       },
       {
-        "command": "dafny.compileCustomArgs",
-        "title": "Dafny: Compile with Custom Arguments"
+        "command": "dafny.buildCustomArgs",
+        "title": "Dafny: Build with Custom Arguments"
       },
       {
-        "command": "dafny.compileAndRun",
-        "title": "Dafny: Compile and Run"
+        "command": "dafny.run",
+        "title": "Dafny: Run"
       },
       {
         "command": "dafny.showCounterexample",
-        "title": "Dafny: Show Counterexample"
+        "title": "Dafny: Show Counterexample (experimental)"
       },
       {
         "command": "dafny.hideCounterexample",
-        "title": "Dafny: Hide Counterexample"
+        "title": "Dafny: Hide Counterexample (experimental)"
+      },
+      {
+        "command": "dafny.copyCounterexamples",
+        "title": "Dafny: Copy Counterexamples to Clipboard (experimental)"
       },
       {
         "command": "dafny.restartServer",

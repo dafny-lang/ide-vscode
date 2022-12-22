@@ -1,31 +1,28 @@
 import * as os from 'os';
 import * as path from 'path';
 
-import { window, commands, ExtensionContext } from 'vscode';
+import { window, commands } from 'vscode';
 import { DafnyCommands, VSCodeCommands } from '../commands';
 
 import Configuration from '../configuration';
 import { ConfigurationConstants } from '../constants';
-import { getDotnetExecutablePath } from '../dotnet';
-import { getCompilerRuntimePath } from '../language/dafnyInstallation';
+import { DafnyInstaller } from '../language/dafnyInstallation';
 import { Messages } from './messages';
 
-const CompileArg = '/compile';
-const CompileAndRunArg = `${CompileArg}:3`;
-const OutputPathArg = '/out';
+const OutputPathArg = '--output';
 
 export default class CompileCommands {
-  public static createAndRegister(context: ExtensionContext): CompileCommands {
-    context.subscriptions.push(
-      commands.registerCommand(DafnyCommands.Compile, () => compileAndRun(context, false, false)),
-      commands.registerCommand(DafnyCommands.CompileCustomArgs, () => compileAndRun(context, true, false)),
-      commands.registerCommand(DafnyCommands.CompileAndRun, () => compileAndRun(context, false, true))
+  public static createAndRegister(installer: DafnyInstaller): CompileCommands {
+    installer.context.subscriptions.push(
+      commands.registerCommand(DafnyCommands.Build, () => buildOrRun(installer, false, false)),
+      commands.registerCommand(DafnyCommands.BuildCustomArgs, () => buildOrRun(installer, true, false)),
+      commands.registerCommand(DafnyCommands.Run, () => buildOrRun(installer, false, true))
     );
     return new CompileCommands();
   }
 }
 
-async function compileAndRun(context: ExtensionContext, useCustomArgs: boolean, run: boolean): Promise<boolean> {
+async function buildOrRun(installer: DafnyInstaller, useCustomArgs: boolean, run: boolean): Promise<boolean> {
   const document = window.activeTextEditor?.document;
   if(document == null) {
     return false;
@@ -37,7 +34,7 @@ async function compileAndRun(context: ExtensionContext, useCustomArgs: boolean, 
   if(!await document.save()) {
     return false;
   }
-  const compilerCommand = await new CommandFactory(context, document.fileName, useCustomArgs, run).createCompilerCommand();
+  const compilerCommand = await new CommandFactory(installer, document.fileName, useCustomArgs, run).createCompilerCommand();
   if(compilerCommand == null) {
     return false;
   }
@@ -53,7 +50,7 @@ function runCommandInTerminal(command: string): void {
 
 class CommandFactory {
   public constructor(
-    private readonly context: ExtensionContext,
+    private readonly installer: DafnyInstaller,
     private readonly fileName: string,
     private readonly useCustomArgs: boolean,
     private readonly run: boolean
@@ -61,13 +58,16 @@ class CommandFactory {
 
   public async createCompilerCommand(): Promise<string | undefined> {
     const commandPrefix = this.getCommandPrefix();
-    const { path: dotnetPath } = await getDotnetExecutablePath();
-    const compilerPath = await getCompilerRuntimePath(this.context);
     const compilerArgs = await this.getCompilerArgs();
+    const compilerPath = await this.installer.getCliExecutable(false, compilerArgs, compilerArgs);
     if(compilerArgs == null) {
       return undefined;
     }
-    return `${commandPrefix}"${dotnetPath}" "${compilerPath}" "${this.fileName}" ${compilerArgs}`;
+    let result = `${commandPrefix}"${compilerPath.command}" ${compilerPath.args?.join(' ')} "${this.fileName}"`;
+    if(compilerPath.options?.cwd !== undefined) {
+      result = `cd ${compilerPath.options?.cwd}; ${result}`;
+    }
+    return result;
   }
 
   private getCommandPrefix(): string {
@@ -75,22 +75,22 @@ class CommandFactory {
       ?? (os.type() === 'Windows_NT' ? '& ' : '');
   }
 
-  private async getCompilerArgs(): Promise<string | undefined> {
-    const configuredArgs = this.getConfiguredArgs().join(' ');
+  private async getCompilerArgs(): Promise<string[]> {
+    const configuredArgs = this.getConfiguredArgs();
     return this.useCustomArgs
-      ? await this.getCustomCompilerArgs(configuredArgs)
+      ? (await this.getCustomCompilerArgs(configuredArgs) ?? [])
       : configuredArgs;
   }
 
-  private async getCustomCompilerArgs(originalArgs: string): Promise<string | undefined> {
+  private async getCustomCompilerArgs(originalArgs: string[]): Promise<string[]> {
     const customArgs = await window.showInputBox({
-      value: originalArgs,
+      value: originalArgs.join(' '),
       prompt: Messages.Compiler.CustomArgumentsPrompt
     });
     if(customArgs == null) {
       window.showErrorMessage(Messages.Compiler.NoArgumentsGiven);
     }
-    return customArgs;
+    return customArgs?.split(' ') ?? [];
   }
 
   private getConfiguredArgs(): string[] {
@@ -101,13 +101,16 @@ class CommandFactory {
   }
 
   private withCompileAndRun(args: string[]): string[] {
-    if(!this.run) {
-      return args;
+    if(this.run) {
+      return [ 'run', ...args ];
     }
-    return [ ...args.filter(arg => !arg.includes(CompileArg)), CompileAndRunArg ];
+    return [ 'build', ...args ];
   }
 
   private withOutputPath(args: string[]): string[] {
+    if(this.run) {
+      return args;
+    }
     if(args.some(arg => arg.includes(OutputPathArg))) {
       return args;
     }

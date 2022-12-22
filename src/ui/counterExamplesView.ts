@@ -1,4 +1,4 @@
-import { DecorationOptions, Position, Range, TextEditor, TextEditorDecorationType, Uri, window, workspace, commands, ExtensionContext } from 'vscode';
+import { DecorationOptions, env, Position, Range, TextEditor, TextEditorDecorationType, Uri, window, workspace, commands, ExtensionContext } from 'vscode';
 
 import { DafnyCommands } from '../commands';
 import Configuration from '../configuration';
@@ -40,6 +40,7 @@ export default class CounterexamplesView {
       workspace.onDidChangeTextDocument(() => instance.updateCounterexamples(window.activeTextEditor)),
       commands.registerCommand(DafnyCommands.ShowCounterexample, () => instance.enableCounterexamplesForActiveEditor()),
       commands.registerCommand(DafnyCommands.HideCounterexample, () => instance.disableCounterexamplesForActiveEditor()),
+      commands.registerCommand(DafnyCommands.CopyCounterexamples, () => instance.copyCounterexamplesForActiveEditor()),
       instance
     );
     return instance;
@@ -61,6 +62,34 @@ export default class CounterexamplesView {
     }
     this.documentsWithActiveCounterexamples.delete(editor.document.uri);
     this.hideCounterexamples(editor);
+  }
+
+  private async copyCounterexamplesForActiveEditor(): Promise<void> {
+    const editor = window.activeTextEditor;
+    if(editor == null) {
+      return;
+    }
+    const document = editor.document.uri;
+    try {
+      const params: ICounterexampleParams = { textDocument: { uri: document.toString() } };
+      const cs = await this.languageClient.getCounterexamples(params);
+      const asText = cs
+        .map(c => {
+          const prop = editor.document.lineAt(c.position.line).text.trim();
+          const kvs = Object.entries(c.variables)
+            .map(([ name, value ]) => `    ${name} = ${value}`);
+
+          return `At "${prop}" (${document}:${c.position.line + 1}):\n` + kvs.join('\n');
+        })
+        .join('\n\n');
+      if(asText) {
+        env.clipboard.writeText(asText);
+      }
+    } catch(error: unknown) {
+      if(!(error instanceof DebounceError)) {
+        window.showErrorMessage(`Counterexample request failed: ${error}`);
+      }
+    }
   }
 
   private async updateCounterexamples(editor?: TextEditor, debounce: boolean = true): Promise<void> {
