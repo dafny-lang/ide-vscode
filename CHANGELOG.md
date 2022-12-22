@@ -1,6 +1,7 @@
 # Release Notes
 
 ## 3.0.0
+NOTE: the Dafny preferences for which Dafny version to use, which custom Dafny executables to use, and which custom arguments to use have been reset. Please check your preferences to see if these are correct.
 - The Dafny language server accepts many of the same options as the Dafny CLI, such as --warn-shadowing and --enforce-determinism, allowing users to get the same resolution and verification diagnostics in the IDE as on the CLI.
 - The extension can be configured with a custom Dafny CLI, which it will use to start a Dafny language server, ensuring consistency between the custom CLI and the extension.
 - For Mac users with an ARM64 processor, Dafny will no longer install Dafny from source for Dafny versions starting with 3.10.0, but instead download a prebuilt binary.
