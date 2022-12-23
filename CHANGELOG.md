@@ -1,5 +1,8 @@
 # Release Notes
 
+## 3.0.1
+- Fix building from source (https://github.com/dafny-lang/ide-vscode/pull/327)
+
 ## 3.0.0
 NOTE: the Dafny preferences for which Dafny version to use, which custom Dafny executables to use, and which custom arguments to use have been reset. Please check your preferences to see if these are correct.
 - The Dafny language server accepts many of the same options as the Dafny CLI, such as --warn-shadowing and --enforce-determinism, allowing users to get the same resolution and verification diagnostics in the IDE as on the CLI.
