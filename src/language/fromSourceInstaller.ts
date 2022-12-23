@@ -104,9 +104,20 @@ export class FromSourceInstaller {
     // This works around this edge case.
     const injectPath = `PATH=${path.dirname(dotnet)}:$PATH`;
 
-    const projectToBuild = configuredVersionToNumeric(configuredVersion) < configuredVersionToNumeric('3.10.0')
-      ? 'DafnyLanguageServer/DafnyLanguageServer.csproj'
-      : 'DafnyDriver/DafnyDriver.csproj';
+    // If java is not installed, remove from Source/DafnyRuntime/DafnyRuntime.csproj
+    // the section <Target Name="BuildDafnyRuntimeJar">...</Target>
+    try {
+      await this.execLog(`${injectPath} java -version`);
+    } catch(e: unknown) {
+      // Read the project file, and then remove the section
+      let DafnyRunTimeCsprojContent = await fs.promises.readFile(Utils.joinPath(installationPath, 'dafny', 'Source', 'DafnyRuntime', 'DafnyRuntime.csproj').fsPath, 'utf8');
+      DafnyRunTimeCsprojContent = DafnyRunTimeCsprojContent.replace(/<Target Name="BuildDafnyRuntimeJar"[\s\S]*?<\/Target>/, '');
+      // Remove the line <Content Include="DafnyRuntimeJava\build\libs\DafnyRuntime.jar" Link="DafnyRuntime.jar" CopyToOutputDirectory="PreserveNewest" />
+      // from Source/DafnyRuntime/DafnyRuntime.csproj
+      DafnyRunTimeCsprojContent = DafnyRunTimeCsprojContent.replace(/<Content Include="DafnyRuntimeJava.*?\/>/, '');
+      await fs.promises.writeFile(Utils.joinPath(installationPath, 'dafny', 'Source', 'DafnyRuntime', 'DafnyRuntime.csproj').fsPath, DafnyRunTimeCsprojContent);
+    }
+    const projectToBuild = 'Source/Dafny.sln'; // includes the language server, the runtime and the driver.
     await this.execLog(`${injectPath} ${ (await getDotnetExecutablePath()).path } build Source/${projectToBuild}`);
     const binaries = Utils.joinPath(installationPath, 'dafny', 'Binaries').fsPath;
     processChdir(binaries);
