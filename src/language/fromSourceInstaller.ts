@@ -117,7 +117,7 @@ export class FromSourceInstaller {
       DafnyRunTimeCsprojContent = DafnyRunTimeCsprojContent.replace(/<Content Include="DafnyRuntimeJava.*?\/>/, '');
       await fs.promises.writeFile(Utils.joinPath(installationPath, 'dafny', 'Source', 'DafnyRuntime', 'DafnyRuntime.csproj').fsPath, DafnyRunTimeCsprojContent);
     }
-    const projectToBuild = 'Source/Dafny.sln'; // includes the language server, the runtime and the driver.
+    const projectToBuild = 'Dafny.sln'; // includes the language server, the runtime and the driver.
     await this.execLog(`${injectPath} ${ (await getDotnetExecutablePath()).path } build Source/${projectToBuild}`);
     const binaries = Utils.joinPath(installationPath, 'dafny', 'Binaries').fsPath;
     processChdir(binaries);
