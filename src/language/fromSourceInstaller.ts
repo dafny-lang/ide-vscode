@@ -111,7 +111,7 @@ export class FromSourceInstaller {
     } catch(e: unknown) {
       // Read the project file, and then remove the section
       let DafnyRunTimeCsprojContent = await fs.promises.readFile(Utils.joinPath(installationPath, 'dafny', 'Source', 'DafnyRuntime', 'DafnyRuntime.csproj').fsPath, 'utf8');
-      DafnyRunTimeCsprojContent = DafnyRunTimeCsprojContent.replace(/<Target Name="BuildDafnyRuntimeJar">[\s\S]*?<\/Target>/, '');
+      DafnyRunTimeCsprojContent = DafnyRunTimeCsprojContent.replace(/<Target Name="BuildDafnyRuntimeJar"[\s\S]*?<\/Target>/, '');
       // Remove the line <Content Include="DafnyRuntimeJava\build\libs\DafnyRuntime.jar" Link="DafnyRuntime.jar" CopyToOutputDirectory="PreserveNewest" />
       // from Source/DafnyRuntime/DafnyRuntime.csproj
       DafnyRunTimeCsprojContent = DafnyRunTimeCsprojContent.replace(/<Content Include="DafnyRuntimeJava.*?\/>/, '');
