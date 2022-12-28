@@ -19,7 +19,8 @@ const mockedVsCode = {
   window: {
     activeTerminal: null as any,
     activeTextEditor: null as any,
-    showInformationMessage: () => {}
+    showInformationMessage: () => {},
+    showWarningMessage: () => {}
   },
   commands: {
     registerCommand(command: string, callback: () => void): vscode.Disposable {
