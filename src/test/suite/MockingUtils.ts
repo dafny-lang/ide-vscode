@@ -91,7 +91,8 @@ export class MockingUtils {
         [ ConfigurationConstants.Compiler.CommandPrefix, '<compiler command prefix>' ],
         [ ConfigurationConstants.Dotnet.ExecutablePath, '<dotnet executable path>' ],
         [ ConfigurationConstants.Compiler.Arguments, [ '--output', '<arg1>', 'arg2' ] ],
-        [ ConfigurationConstants.Compiler.OutputDir, '<compiler output dir>' ]
+        [ ConfigurationConstants.Compiler.OutputDir, '<compiler output dir>' ],
+        [ ConfigurationConstants.LanguageServer.CliPath, '<cli path>' ]
       ])
     });
   }
