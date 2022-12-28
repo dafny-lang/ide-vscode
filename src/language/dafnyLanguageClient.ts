@@ -27,7 +27,7 @@ function getLanguageServerLaunchArgsNew(): string[] {
   const launchArgs = Configuration.get<string[]>(ConfigurationConstants.LanguageServer.LaunchArgs);
   const specifiedCores = parseInt(Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationVirtualCores));
   // This is a temporary fix to prevent 0 cores from being used, since the languages server currently does not handle 0 cores correctly: https://github.com/dafny-lang/dafny/pull/3276
-  const cores = isNaN(specifiedCores) || specifiedCores === 0 ? (os.cpus().length + 1) / 2 : Math.max(1, specifiedCores);
+  const cores = isNaN(specifiedCores) || specifiedCores === 0 ? Math.ceil((os.cpus().length + 1) / 2) : Math.max(1, specifiedCores);
   return [
     `--verify-on:${verifyOn}`,
     `--verification-time-limit:${Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationTimeLimit)}`,
