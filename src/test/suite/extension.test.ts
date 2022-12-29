@@ -19,7 +19,8 @@ const mockedVsCode = {
   window: {
     activeTerminal: null as any,
     activeTextEditor: null as any,
-    showInformationMessage: () => {}
+    showInformationMessage: () => {},
+    showWarningMessage: () => {}
   },
   commands: {
     registerCommand(command: string, callback: () => void): vscode.Disposable {
@@ -122,7 +123,7 @@ suite('Dafny IDE Extension Installation', () => {
       assert.fail('installation should fail');
     // eslint-disable-next-line no-empty
     } catch(e: unknown) {
-
+      outputChannelBuilder.outputChannel.append(`${e}`);
     }
     const result = outputChannelBuilder.writtenContent().replace(/\\/g, '/').replace(/resources\/.*\n/, 'resources/\n');
     assert.strictEqual(result,
@@ -130,6 +131,7 @@ suite('Dafny IDE Extension Installation', () => {
       + 'deleting previous Dafny installation at /tmp/mockedUri/out/resources/\n'
       + 'Standalone language server installation failed:\n'
       + '> Simulated error in delete\n'
+      + 'Error: Could not install a Dafny language server.'
     );
   }).timeout(60 * 1000);
 });

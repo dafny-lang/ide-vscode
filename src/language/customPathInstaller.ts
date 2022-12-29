@@ -56,43 +56,42 @@ export class CustomPathInstaller {
 
   private async getCliPathUncached(context: ExtensionContext): Promise<string> {
     let cliPathOverride = process.env['DAFNY_SERVER_OVERRIDE'] ?? '';
-    if(cliPathOverride) {
+    const version = getPreferredVersion();
+    let cliPath = Configuration.get<string | null>(ConfigurationConstants.LanguageServer.CliPath) ?? '';
+    if(cliPath && !path.isAbsolute(cliPath)) {
+      cliPath = path.join(context.extensionPath, cliPath);
+    }
+    if(cliPathOverride || cliPath && version === LanguageServerConstants.Custom) {
+      const originalPath = cliPathOverride || cliPath;
+      let acopyofDafny = originalPath;
       try {
-        cliPathOverride = await this.copyNecessaryDllsToTempFolder(cliPathOverride);
+        cliPathOverride = await this.copyNecessaryDllsToTempFolder(originalPath);
+        acopyofDafny = `a copy of ${originalPath} in ${cliPathOverride}`;
       } catch(e: unknown) {
         // Ignore if copying fails. We'll run the original.
       }
-      window.showInformationMessage(`Using $DAFNY_SERVER_OVERRIDE = ${cliPathOverride} for the CLI path`);
+      window.showInformationMessage(`Using ${acopyofDafny} as Dafny executable`);
     }
     if(cliPathOverride) {
       return cliPathOverride;
     }
 
-    const version = getPreferredVersion();
     if(version !== LanguageServerConstants.Custom) {
       return '';
-    }
-    let cliPath = Configuration.get<string | null>(ConfigurationConstants.LanguageServer.CliPath) ?? '';
-    if(cliPath && !path.isAbsolute(cliPath)) {
-      cliPath = path.join(context.extensionPath, cliPath);
     }
     return cliPath;
   }
 
-  // We copy Dafny.dll and all its dependenciesto another location
+  // We copy Dafny.dll and all its dependencies to another location
   // so that rebuilding Dafny will not fail because it's open in VSCode
   private async copyNecessaryDllsToTempFolder(configuredPath: string): Promise<string> {
-    const dlsName = 'Dafny';
     const dll = '.dll';
     const runtimeconfigjson = '.runtimeconfig.json';
     const depsjson = '.deps.json';
-    const dls = dlsName + dll;
-    if(!configuredPath.endsWith(dls)) {
-      return configuredPath;
-    }
     const installationDir = path.dirname(configuredPath);
+    const executableName = path.basename(configuredPath);
     const vscodeDir = path.join(os.tmpdir(), await fs.promises.mkdtemp('vscode-dafny-dlls-'));
-    console.log(`Copying all necessary dlls to ${vscodeDir}...`);
+    console.log(`Copying all necessary dlls and executables to ${vscodeDir}...`);
     const cleanup = function() {
       fs.rmdirSync(vscodeDir, { recursive: true });
     };
@@ -105,6 +104,7 @@ export class CustomPathInstaller {
         || file.endsWith(runtimeconfigjson)
         || file.endsWith(depsjson)
         || file.endsWith('.pdb')
+        || file.endsWith('.exe')
         || file === 'z3'
         || file === 'DafnyPrelude.bpl'
         || file === 'runtimes')) {
@@ -120,7 +120,7 @@ export class CustomPathInstaller {
       }
     }
 
-    const newPath = path.join(vscodeDir, dls);
+    const newPath = path.join(vscodeDir, executableName);
     return newPath;
   }
 
