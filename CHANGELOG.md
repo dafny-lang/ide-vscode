@@ -1,5 +1,8 @@
 # Release Notes
 
+## 3.0.3
+- Fix behavior of automatic core selection. (https://github.com/dafny-lang/ide-vscode/pull/336)
+
 ## 3.0.2
 - Introduce a fix so setting verification cores to 0 (the default) doesn't stop verification (https://github.com/dafny-lang/ide-vscode/pull/332)
 
