@@ -173,6 +173,7 @@ export default class CompilationStatusView {
     const running = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Running);
     const total = params.namedVerifiables.length;
     let message: string;
+    params.uri = Uri.parse(params.uri).toString();// Makes the Uri canonical
     if(running.length > 0 || queued.length > 0) {
       const document = await workspace.openTextDocument(Uri.parse(params.uri));
       const verifying = running.map(item => document.getText(VerificationSymbolStatusView.convertRange(item.nameRange))).join(', ');
