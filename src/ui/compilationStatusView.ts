@@ -195,7 +195,7 @@ export default class CompilationStatusView {
           message = `Verified ${succeeded} declarations, skipped ${skipped}`;
         }
       } else {
-        message = `${Messages.CompilationStatus.VerificationFailed} ${errors} declarations`;
+        message = `${Messages.CompilationStatus.VerificationFailed} ${(errors > 1 ? `${errors} declarations` : 'the declaration')}`;
       }
     }
     this.setDocumentStatusMessage(params.uri.toString(), message, params.version);
