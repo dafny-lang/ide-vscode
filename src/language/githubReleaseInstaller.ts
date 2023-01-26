@@ -1,4 +1,4 @@
-import { ExtensionContext, FileSystemError, OutputChannel, Uri, env, window, workspace } from 'vscode';
+import { ExtensionContext, FileSystemError, OutputChannel, Uri, window, workspace } from 'vscode';
 import { LanguageServerConstants } from '../constants';
 import * as os from 'os';
 import fetch from 'cross-fetch';
@@ -11,7 +11,7 @@ const mkdirAsync = promisify(fs.mkdir);
 import { Executable } from 'vscode-languageclient/node';
 import { getDotnetExecutablePath } from '../dotnet';
 import path = require('path');
-import { getPreferredVersion } from './dafnyInstallation';
+import { DafnyInstaller, getPreferredVersion } from './dafnyInstallation';
 import { configuredVersionToNumeric } from '../ui/dafnyIntegration';
 const ArchiveFileName = 'dafny.zip';
 
@@ -121,52 +121,12 @@ export class GitHubReleaseInstaller {
     return this.getConfiguredTagAndVersionCache;
   }
 
-  public static readonly CurrentVersionTag = 'current-version';
-
-  // If there is a major version bump and the version is auto-selected
-  // warn the user before hand
-  private static async dafny4upgradeCheck(
-    context: ExtensionContext,
-    versionDescription: string,
-    newToolVersion: string
-  ): Promise<string> {
-    const previousToolVersion: string | undefined = context.globalState.get(GitHubReleaseInstaller.CurrentVersionTag);
-    // In case users have not reopened VSCode since this code was added until Dafny 4 is released
-    const compareToolVersion: string = previousToolVersion ?? '3.10.0';
-    if(!newToolVersion.startsWith(compareToolVersion[0])) {
-      const seeMigrationInstructions = 'Show migration instructions';
-      const accept = `Accept ${newToolVersion}`;
-      const decline = `Keep ${compareToolVersion} for now`;
-      let answer: string | undefined = seeMigrationInstructions;
-
-      while(answer === seeMigrationInstructions) {
-        // Major version change
-        answer = await window.showInformationMessage(
-          `Dafny ${newToolVersion} is out! You are using the ${versionDescription.toLowerCase()}, `
-          + 'but because this is a major change, we want you to confirm the switch.',
-          seeMigrationInstructions,
-          accept,
-          decline
-        );
-        if(answer === undefined || answer === decline) {
-          newToolVersion = (compareToolVersion !== undefined ? compareToolVersion : newToolVersion) as string;
-        } else if(answer === seeMigrationInstructions) {
-          env.openExternal(Uri.parse('https://dafny.org/TODO'));
-        } else {
-          break;
-        }
-      }
-    }
-    context.globalState.update(GitHubReleaseInstaller.CurrentVersionTag, newToolVersion);
-    return newToolVersion;
-  }
-
   private async getConfiguredGitTagAndVersionUncached(): Promise<[string, string]> {
     const preferredVersion = getPreferredVersion();
     let version = preferredVersion;
     switch(preferredVersion) {
     case LanguageServerConstants.LatestStable:
-      version = await GitHubReleaseInstaller.dafny4upgradeCheck(
+      version = await DafnyInstaller.dafny4upgradeCheck(
         this.context,
         preferredVersion,
         LanguageServerConstants.LatestVersion);
@@ -179,7 +139,7 @@ export class GitHubReleaseInstaller {
         if(name.startsWith(versionPrefix)) {
           let version = name.substring(versionPrefix.length);
           this.context.globalState.update('nightly-version', version);
-          version = await GitHubReleaseInstaller.dafny4upgradeCheck(
+          version = await DafnyInstaller.dafny4upgradeCheck(
             this.context,
             preferredVersion,
             version);
@@ -190,7 +150,7 @@ export class GitHubReleaseInstaller {
       const cachedVersion = this.context.globalState.get('nightly-version');
       if(cachedVersion !== undefined) {
         version = cachedVersion as string;
-        version = await GitHubReleaseInstaller.dafny4upgradeCheck(
+        version = await DafnyInstaller.dafny4upgradeCheck(
           this.context,
           preferredVersion,
           version);
@@ -199,7 +159,7 @@ export class GitHubReleaseInstaller {
       window.showWarningMessage('Failed to install latest nightly version of Dafny. Using latest stable version instead.\n'
         + `The name of the nightly release we found was: ${result.name}`);
       version = LanguageServerConstants.LatestVersion;
-      version = await GitHubReleaseInstaller.dafny4upgradeCheck(
+      version = await DafnyInstaller.dafny4upgradeCheck(
         this.context,
         preferredVersion,
         version);
