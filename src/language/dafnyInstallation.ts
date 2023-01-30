@@ -49,7 +49,7 @@ export class DafnyInstaller {
         if(answer === undefined || answer === decline) {
           newToolVersion = (compareToolVersion !== undefined ? compareToolVersion : newToolVersion) as string;
         } else if(answer === seeMigrationInstructions) {
-          env.openExternal(Uri.parse('https://dafny.org/TODO'));
+          env.openExternal(Uri.parse('https://github.com/dafny-lang/ide-vscode/wiki/Quick-migration-guide-from-Dafny-3.X-to-Dafny-4.0'));
         } else {
           break;
         }
