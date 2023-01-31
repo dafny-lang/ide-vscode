@@ -11,7 +11,7 @@ const mkdirAsync = promisify(fs.mkdir);
 import { Executable } from 'vscode-languageclient/node';
 import { getDotnetExecutablePath } from '../dotnet';
 import path = require('path');
-import { getPreferredVersion } from './dafnyInstallation';
+import { DafnyInstaller, getPreferredVersion } from './dafnyInstallation';
 import { configuredVersionToNumeric } from '../ui/dafnyIntegration';
 const ArchiveFileName = 'dafny.zip';
 
@@ -126,7 +126,10 @@ export class GitHubReleaseInstaller {
     let version = preferredVersion;
     switch(preferredVersion) {
     case LanguageServerConstants.LatestStable:
-      version = LanguageServerConstants.LatestVersion;
+      version = await DafnyInstaller.dafny4upgradeCheck(
+        this.context,
+        preferredVersion,
+        LanguageServerConstants.LatestVersion);
       break;
     case LanguageServerConstants.LatestNightly: {
       const result: any = await (await fetch('https://api.github.com/repos/dafny-lang/dafny/releases/tags/nightly')).json();
@@ -134,19 +137,32 @@ export class GitHubReleaseInstaller {
         const name: string = result.name;
         const versionPrefix = 'Dafny ';
         if(name.startsWith(versionPrefix)) {
-          const version = name.substring(versionPrefix.length);
+          let version = name.substring(versionPrefix.length);
           this.context.globalState.update('nightly-version', version);
+          version = await DafnyInstaller.dafny4upgradeCheck(
+            this.context,
+            preferredVersion,
+            version);
           return [ 'nightly', version ];
         }
       }
       // Github has some API limitations on how many times to call its API, so this is a good fallback.
       const cachedVersion = this.context.globalState.get('nightly-version');
       if(cachedVersion !== undefined) {
-        return [ 'nightly', cachedVersion as string ];
+        version = cachedVersion as string;
+        version = await DafnyInstaller.dafny4upgradeCheck(
+          this.context,
+          preferredVersion,
+          version);
+        return [ 'nightly', version ];
       }
       window.showWarningMessage('Failed to install latest nightly version of Dafny. Using latest stable version instead.\n'
         + `The name of the nightly release we found was: ${result.name}`);
       version = LanguageServerConstants.LatestVersion;
+      version = await DafnyInstaller.dafny4upgradeCheck(
+        this.context,
+        preferredVersion,
+        version);
     }
     }
     return [ `v${version}`, version ];

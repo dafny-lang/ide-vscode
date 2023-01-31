@@ -1,7 +1,7 @@
 import { LanguageServerConstants } from '../constants';
 import { ExtensionContext, OutputChannel, window } from 'vscode';
 import { getDotnetExecutablePath } from '../dotnet';
-import { getPreferredVersion } from './dafnyInstallation';
+import { DafnyInstaller, getPreferredVersion } from './dafnyInstallation';
 import { execFile } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -61,7 +61,7 @@ class DafnyToolInstaller {
 
   private async getDotnetToolVersion(): Promise<string> {
     if(this.toolVersionCache === undefined) {
-      this.toolVersionCache = await DafnyToolInstaller.getDotnetToolVersionUncached();
+      this.toolVersionCache = await DafnyToolInstaller.getDotnetToolVersionUncached(this.context);
     }
     return this.toolVersionCache;
   }
@@ -81,7 +81,7 @@ class DafnyToolInstaller {
               3.7.1.40621 Downloads: 754
               3.7.2.40713 Downloads: 324
    */
-  private static async getDotnetToolVersionUncached(): Promise<string> {
+  private static async getDotnetToolVersionUncached(context: ExtensionContext): Promise<string> {
     const { path: dotnetExecutable } = await getDotnetExecutablePath();
     const { stdout } = await execFileAsync(dotnetExecutable, [ 'tool', 'search', 'Dafny', '--detail', '--prerelease' ]);
     const entries = stdout.split('----------------').map(entry => entry.split('\n').filter(e => e !== ''));
@@ -91,10 +91,12 @@ class DafnyToolInstaller {
 
     const versionDescription = getPreferredVersion();
     let toolVersion: string;
+
     switch(versionDescription) {
     case LanguageServerConstants.LatestStable: {
       const version = LanguageServerConstants.LatestVersion;
-      toolVersion = versions.filter(l => l.startsWith(version))[0];
+      toolVersion = await DafnyInstaller.dafny4upgradeCheck(
+        context, versionDescription, versions.filter(l => l.startsWith(version))[0]);
       window.showInformationMessage(`Using latest stable version: ${toolVersion}`);
       break;
     }
@@ -106,15 +108,16 @@ class DafnyToolInstaller {
       });
       dates.sort((a, b) => a.date < b.date ? 1 : -1);
       const latestNightly = nightlies[dates[0].index];
-      toolVersion = latestNightly;
+      toolVersion = await DafnyInstaller.dafny4upgradeCheck(
+        context, versionDescription, latestNightly);
       window.showInformationMessage(`Using latest nightly version: ${toolVersion}`);
       break;
     }
     default: {
       toolVersion = versions.filter(l => l.startsWith(versionDescription))[0];
+      context.globalState.update(DafnyInstaller.CurrentVersionTag, versionDescription);
     }
     }
-
     return toolVersion;
   }
   private writeStatus(message: string): void {
