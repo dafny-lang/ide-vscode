@@ -2,15 +2,12 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 
 suite('Verification', () => {
-  test.only('Program with errors has diagnostics', async () => {
+  test('Program with errors has diagnostics', async () => {
     const extension = vscode.extensions.getExtension('dafny-lang.ide-vscode')!;
-    console.log('Waiting for extension activation');
     await extension.activate();
-    console.log('Activated extension');
 
     const program = 'method Foo() ensures false {}';
     const document = await vscode.workspace.openTextDocument({ language: 'dafny', content: program });
-    console.log('Opened document');
     await new Promise<void>(resolve => {
       vscode.languages.onDidChangeDiagnostics(() => {
         const diagnostics = vscode.languages.getDiagnostics(document.uri);
