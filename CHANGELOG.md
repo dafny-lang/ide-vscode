@@ -1,5 +1,9 @@
 # Release Notes
 
+## 3.0.4
+- Enable using Dafny 3.11.0
+- Prepare migration to Dafny 4 (https://github.com/dafny-lang/ide-vscode/pull/347)
+
 ## 3.0.3
 - Fix behavior of automatic core selection. (https://github.com/dafny-lang/ide-vscode/pull/336)
 

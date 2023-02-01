@@ -2,8 +2,7 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 
 suite('Verification', () => {
-  test.only('Program with errors has diagnostics', async () => {
-
+  test('Program with errors has diagnostics', async () => {
     const extension = vscode.extensions.getExtension('dafny-lang.ide-vscode')!;
     await extension.activate();
 
