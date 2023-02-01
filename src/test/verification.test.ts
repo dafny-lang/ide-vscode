@@ -20,5 +20,5 @@ suite('Verification', () => {
         resolve();
       });
     });
-  }).timeout(3 * 60 * 1000); // We use a large timeout to allow for the Dafny installation to run.
+  }).timeout(10 * 60 * 1000); // We use a large timeout to allow for the Dafny installation to run.
 });
