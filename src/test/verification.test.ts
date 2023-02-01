@@ -5,6 +5,7 @@ suite('Verification', () => {
   test('Program with errors has diagnostics', async () => {
 
     const extension = vscode.extensions.getExtension('dafny-lang.ide-vscode')!;
+    console.log('Waiting for extension activation');
     await extension.activate();
     console.log('Activated extension');
 
