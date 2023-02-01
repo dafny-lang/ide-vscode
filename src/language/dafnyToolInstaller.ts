@@ -107,7 +107,6 @@ class DafnyToolInstaller {
         return { index, date: split[2] + split[3] + split[4] };
       });
       dates.sort((a, b) => a.date < b.date ? 1 : -1);
-      const latestNightly = nightlies[dates[0].index];
       toolVersion = nightlies[dates[0].index];
       window.showInformationMessage(`Using latest nightly version: ${toolVersion}`);
       break;
