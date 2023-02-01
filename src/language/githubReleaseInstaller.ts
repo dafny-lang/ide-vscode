@@ -137,12 +137,8 @@ export class GitHubReleaseInstaller {
         const name: string = result.name;
         const versionPrefix = 'Dafny ';
         if(name.startsWith(versionPrefix)) {
-          let version = name.substring(versionPrefix.length);
+          const version = name.substring(versionPrefix.length);
           this.context.globalState.update('nightly-version', version);
-          version = await DafnyInstaller.dafny4upgradeCheck(
-            this.context,
-            preferredVersion,
-            version);
           return [ 'nightly', version ];
         }
       }
@@ -150,19 +146,11 @@ export class GitHubReleaseInstaller {
       const cachedVersion = this.context.globalState.get('nightly-version');
       if(cachedVersion !== undefined) {
         version = cachedVersion as string;
-        version = await DafnyInstaller.dafny4upgradeCheck(
-          this.context,
-          preferredVersion,
-          version);
         return [ 'nightly', version ];
       }
       window.showWarningMessage('Failed to install latest nightly version of Dafny. Using latest stable version instead.\n'
         + `The name of the nightly release we found was: ${result.name}`);
       version = LanguageServerConstants.LatestVersion;
-      version = await DafnyInstaller.dafny4upgradeCheck(
-        this.context,
-        preferredVersion,
-        version);
     }
     }
     return [ `v${version}`, version ];

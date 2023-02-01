@@ -108,8 +108,7 @@ class DafnyToolInstaller {
       });
       dates.sort((a, b) => a.date < b.date ? 1 : -1);
       const latestNightly = nightlies[dates[0].index];
-      toolVersion = await DafnyInstaller.dafny4upgradeCheck(
-        context, versionDescription, latestNightly);
+      toolVersion = nightlies[dates[0].index];
       window.showInformationMessage(`Using latest nightly version: ${toolVersion}`);
       break;
     }
