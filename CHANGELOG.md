@@ -1,5 +1,9 @@
 # Release Notes
 
+## 3.0.5
+- fix: check commit msg's first line for lastPreparedTag (https://github.com/dafny-lang/ide-vscode/pull/356)
+- Bump http-cache-semantics from 4.1.0 to 4.1.1 (https://github.com/dafny-lang/ide-vscode/pull/351)
+
 ## 3.0.4
 - Enable using Dafny 3.11.0
 - Prepare migration to Dafny 4 (https://github.com/dafny-lang/ide-vscode/pull/347)
