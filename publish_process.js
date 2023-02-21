@@ -171,7 +171,7 @@ async function nextVersion(currentVersion) {
 }
 
 async function getLastPreparedTag() {
-  const lastCommitMessage = (await execAsync("git log -1 --pretty=%B")).stdout.trim();
+  const lastCommitMessage = (await execAsync("git log -1 --pretty=%B | head -n 1")).stdout.trim();
   const lastCommitMessageRegex = /(v\d+\.\d+\.\d+)/;
   const match = lastCommitMessageRegex.exec(lastCommitMessage);
   if(match == null) {
