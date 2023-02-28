@@ -16,26 +16,30 @@ import { configuredVersionToNumeric } from '../ui/dafnyIntegration';
 const ArchiveFileName = 'dafny.zip';
 
 function getDafnyPlatformSuffix(version: string): string {
+  // Since every nightly published after this edit will be configured in the post-3.12 fashion, and this script
+  // fetches the latest nightly, it's safe to just condition this on 'nightly' and not 'nightly-date' for a date
+  // after a certain point.
   const post312 = version.includes('nightly') || configuredVersionToNumeric(version) >= configuredVersionToNumeric('3.13');
-  switch(os.type()) {
-  case 'Windows_NT':
-    if(post312) {
+  if(post312) {
+    switch(os.type()) {
+    case 'Windows_NT':
       return 'windows-2019';
-    } else {
-      return 'win';
-    }
-  case 'Darwin':
-    if(post312) {
+    case 'Darwin':
       return 'macos-11';
-    } else if(os.arch() === 'arm64') {
-      return 'osx-11.0';
-    } else {
-      return 'osx-10.14.2';
-    }
-  default:
-    if(post312) {
+    default:
       return 'ubuntu-20.04';
-    } else {
+    }
+  } else {
+    switch(os.type()) {
+    case 'Windows_NT':
+      return 'win';
+    case 'Darwin':
+      if(os.arch() === 'arm64') {
+        return 'osx-11.0';
+      } else {
+        return 'osx-10.14.2';
+      }
+    default:
       return 'ubuntu-16.04';
     }
   }
