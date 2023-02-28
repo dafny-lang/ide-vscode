@@ -1,5 +1,8 @@
 # Release Notes
 
+## 3.0.6
+- Update the names of release packages to account for changes in Dafny 3.13 and later packaging (https://github.com/dafny-lang/ide-vscode/pull/361)
+
 ## 3.0.5
 - fix: check commit msg's first line for lastPreparedTag (https://github.com/dafny-lang/ide-vscode/pull/356)
 - Bump http-cache-semantics from 4.1.0 to 4.1.1 (https://github.com/dafny-lang/ide-vscode/pull/351)
