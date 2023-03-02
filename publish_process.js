@@ -278,6 +278,11 @@ async function HandleFinalPublishingProcess(currentChangeLogVersion, lastPrepare
   }
 }
 
+async function isTagExists(tagName) {
+  var result = await execAsync(`git tag -l ${tagName}`);
+  return result.length > 0;
+}
+
 async function Main() {
   try {
     // verify that we are on the master branch.
@@ -285,11 +290,19 @@ async function Main() {
     await isTagMissing();
     let {updateChangeLogWith, currentChangeLogVersion} = await changeLogAndVersion();
 
+    // Check if the last commit contains a message containing "vX.Y.Z", which indicates
+    // that we want to publish a new version of the extension
     const lastPreparedTag = await getLastPreparedTag();
     if(lastPreparedTag) {
-      // Here we only need to publish the last prepared tag
-      await HandleFinalPublishingProcess(currentChangeLogVersion, lastPreparedTag);
-      return;
+      // Check if the tag with the name lastPreparedTag does not exist yet
+      // If it exists locally, it means that the version is already published
+      // or that the tag was not pushed.
+      var tagExists = await isTagExists(lastPreparedTag);
+      // Here we assume that if it exists, it was already pushed.
+      if(!tagExists) {
+        await HandleFinalPublishingProcess(currentChangeLogVersion, lastPreparedTag);
+        return;
+      }
     }
 
     let newVersion = await nextVersion(currentChangeLogVersion);
