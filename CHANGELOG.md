@@ -1,5 +1,8 @@
 # Release Notes
 
+## 3.0.7
+- Bumped default version of Dafny to 3.13.1
+
 ## 3.0.6
 - Update the names of release packages to account for changes in Dafny 3.13 and later packaging (https://github.com/dafny-lang/ide-vscode/pull/361)
 
