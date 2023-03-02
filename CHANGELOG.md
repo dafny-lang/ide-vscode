@@ -1,5 +1,8 @@
 # Release Notes
 
+## 3.0.7
+- Update README.md (https://github.com/dafny-lang/ide-vscode/pull/363)
+
 ## 3.0.6
 - Update the names of release packages to account for changes in Dafny 3.13 and later packaging (https://github.com/dafny-lang/ide-vscode/pull/361)
 
