@@ -1,5 +1,11 @@
 # Release Notes
 
+## 3.0.8
+- Support for zero-commit updates (https://github.com/dafny-lang/ide-vscode/pull/365)
+- - Removed a space in README.md
+- - `./publish_process.js` now accepts to publish a new version even if
+- there was no added commit to the extension (e.g. to support a new
+
 ## 3.0.7
 - Bumped default version of Dafny to 3.13.1
 
