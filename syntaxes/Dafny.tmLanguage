@@ -147,7 +147,7 @@
 		<key>genericfunctioncalls</key>
 		<dict>
 			<key>begin</key>
-			<string>([a-zA-Z'?][\w'?]*)\s*&lt;(?=[^\)\(]*&gt;(?=\())</string>
+			<string>([a-zA-Z'?][\w'?]*)\s*&lt;(?=(?:[^\)\(]|\((?:!new|,|0|00|==)*\))*&gt;(?=\())</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>

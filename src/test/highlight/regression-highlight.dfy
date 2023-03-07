@@ -1,3 +1,8 @@
+// Issue #370
+function Map<U(!new)>(): int {
+      // ^^^ should be highlighted like a function name, not a type
+}
+
 // Issue #269
 method SpaceAFterOperator(n: nat)
   requires 1<n
