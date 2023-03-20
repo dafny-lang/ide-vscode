@@ -26,7 +26,7 @@
 				</dict>
 			</dict>
 			<key>end</key>
-			<string>:=|:\||;|\)|\}|(?=(?:class|codatatype|const|constructor|datatype|function|greatest|iterator|least|lemma|method|module|newtype|opaque|predicate|trait|type|var)\b)</string>
+			<string>:=|:\||;|\)|\}|(?=(?:abstract|class|const|constructor|export|function|ghost|greatest|import|include|iterator|least|lemma|method|module|opaque|opened|predicate|refines|static|trait|twostate)\b)</string>
 			<key>name</key>
 			<string>meta.vardecl.dafny</string>
 			<key>patterns</key>
@@ -448,7 +448,7 @@
 			<array>
 				<dict>
 					<key>match</key>
-					<string>\b(class|trait|function|include|ghost|nameonly|var|const|method|constructor|abstract|module|import|export|lemma|as|is|opened|static|twostate|refines|witness|extends|returns|break|then|else|if|label|return|while|for|to|downto|print|new|in|fresh|allocated|match|case|assert|by|assume|expect|reveal|modify|predicate|least|greatest|forall|exists|false|true|null|old|unchanged|calc|iterator|opaque|yields|yield)\b</string>
+					<string>\b(abstract|allocated|as|assert|assume|break|by|calc|case|class|const|constructor|continue|downto|else|exists|expect|export|extends|false|for|forall|fresh|function|ghost|greatest|if|import|in|include|is|iterator|label|least|lemma|match|method|modify|module|nameonly|new|null|old|opaque|opened|predicate|print|refines|return|returns|reveal|static|then|to|trait|true|twostate|unchanged|var|while|witness|yield|yields)\b</string>
 					<key>name</key>
 					<string>keyword.control.dafny</string>
 				</dict>

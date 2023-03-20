@@ -1,6 +1,6 @@
 // Support for opaque keyword
 opaque function Test(): int { 1 }
-//^^^^ should be hihglighted as a keyword
+//^^^^ should be highlighted as a keyword
 
 // Issue #370
 function Map<U(!new)>(): int {
