@@ -26,7 +26,7 @@
 				</dict>
 			</dict>
 			<key>end</key>
-			<string>:=|:\||;|\)|\}|(?=(?:class|codatatype|const|constructor|datatype|function|greatest|iterator|least|lemma|method|module|newtype|predicate|trait|type|var)\b)</string>
+			<string>:=|:\||;|\)|\}|(?=(?:class|codatatype|const|constructor|datatype|function|greatest|iterator|least|lemma|method|module|newtype|opaque|predicate|trait|type|var)\b)</string>
 			<key>name</key>
 			<string>meta.vardecl.dafny</string>
 			<key>patterns</key>
@@ -142,7 +142,7 @@
 				</dict>
 			</dict>
 			<key>end</key>
-			<string>(?=&lt;|\s*|,|\)|\}|(?:requires|ensures|modifies|reads|class|codatatype|const|constructor|datatype|function|greatest|iterator|least|lemma|method|module|newtype|predicate|trait|type|var)\b))</string>
+			<string>(?=&lt;|\s*|,|\)|\}|(?:requires|ensures|modifies|reads|class|codatatype|const|constructor|datatype|function|greatest|iterator|least|lemma|method|module|newtype|opaque|predicate|trait|type|var)\b))</string>
 		</dict>
 		<key>genericfunctioncalls</key>
 		<dict>
@@ -448,7 +448,7 @@
 			<array>
 				<dict>
 					<key>match</key>
-					<string>\b(class|trait|function|include|ghost|nameonly|var|const|method|constructor|abstract|module|import|export|lemma|as|is|opened|static|twostate|refines|witness|extends|returns|break|then|else|if|label|return|while|for|to|downto|print|new|in|fresh|allocated|match|case|assert|by|assume|expect|reveal|modify|predicate|least|greatest|forall|exists|false|true|null|old|unchanged|calc|iterator|yields|yield)\b</string>
+					<string>\b(class|trait|function|include|ghost|nameonly|var|const|method|constructor|abstract|module|import|export|lemma|as|is|opened|static|twostate|refines|witness|extends|returns|break|then|else|if|label|return|while|for|to|downto|print|new|in|fresh|allocated|match|case|assert|by|assume|expect|reveal|modify|predicate|least|greatest|forall|exists|false|true|null|old|unchanged|calc|iterator|opaque|yields|yield)\b</string>
 					<key>name</key>
 					<string>keyword.control.dafny</string>
 				</dict>
