@@ -1,5 +1,9 @@
 # Release Notes
 
+## 3.1.0
+- Bump webpack from 5.73.0 to 5.76.0 (https://github.com/dafny-lang/ide-vscode/pull/376)
+- Opaque now marked as keyword
+
 ## 3.0.9
 - Fix: Function declarations not highlighted as types (https://github.com/dafny-lang/ide-vscode/pull/371)
 - Fix: undesired red "<" character (https://github.com/dafny-lang/ide-vscode/issues/368)
