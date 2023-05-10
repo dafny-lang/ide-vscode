@@ -1,5 +1,9 @@
 # Release Notes
 
+## 3.1.1
+- Add Dafny 4.1.0
+- chore: Empty releases (https://github.com/dafny-lang/ide-vscode/pull/387)
+
 ## 3.1.0
 - Bump webpack from 5.73.0 to 5.76.0 (https://github.com/dafny-lang/ide-vscode/pull/376)
 - Opaque now marked as keyword
