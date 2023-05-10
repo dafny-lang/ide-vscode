@@ -84,18 +84,17 @@ async function ensureMaster() {
   console.log("Latest master checked out")
 }
 
-async function isTagMissing() {
+async function getCurrentTag() {
   var tagList = (await execAsync("git show-ref --tags")).stdout.trim();
   // recovers the last commit hash
   var lastCommitHash = (await execAsync("git log -1 --pretty=%H")).stdout.trim();
   // checks if the last commit hash is in the tag list:
-  var tagListRegex = new RegExp(`^${lastCommitHash}\\s*refs/tags/(\\w*)`);
+  var tagListRegex = new RegExp(`^${lastCommitHash}\\s*refs/tags/(v\\d+\\.\\d+\\.\\d+)`, 'm');
   var match = tagListRegex.exec(tagList);
   if(match == null) {
-    return true;
+    return null;
   }
-  console.log(`The current master already has the tag ${match[1]}. Nothing needs to be done.\nIf you want to push the tag again, run 'git push --tags'`);
-  throw ABORTED;
+  return match[1];
 }
 
 async function changeLogAndVersion() {
@@ -287,12 +286,18 @@ async function Main() {
   try {
     // verify that we are on the master branch.
     await ensureMaster();
-    await isTagMissing();
+    let tag = await getCurrentTag();
+    if(tag){
+      console.log(`The current master already has the tag ${tag}. Nothing needs to be done.\nIf you want to push the tag again, run 'git push --tags'`);
+      if(!ok(await question(`Do you want to publish a new version regardless? ${ACCEPT_HINT}`))){
+        throw ABORTED;
+      }
+    }
     let {updateChangeLogWith, currentChangeLogVersion} = await changeLogAndVersion();
 
     // Check if the last commit contains a message containing "vX.Y.Z", which indicates
     // that we want to publish a new version of the extension
-    const lastPreparedTag = await getLastPreparedTag();
+    const lastPreparedTag = tag ? null : await getLastPreparedTag();
     if(lastPreparedTag) {
       // Check if the tag with the name lastPreparedTag does not exist yet
       // If it exists locally, it means that the version is already published
