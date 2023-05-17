@@ -11,14 +11,18 @@ import VerificationSymbolStatusView from './verificationSymbolStatusView';
 
 const StatusBarPriority = 10;
 
-function toStatusMessage(status: CompilationStatus, message?: string | null): string {
+function toStatusMessage(status: CompilationStatus | any, message?: string | null): string {
   switch(status) {
-  case CompilationStatus.ResolutionStarted:
-    return Messages.CompilationStatus.ResolutionStarted;
+  case CompilationStatus.Parsing:
+    return Messages.CompilationStatus.Parsing;
+  case CompilationStatus.Resolving:
+    return Messages.CompilationStatus.Resolving;
   case CompilationStatus.ParsingFailed:
     return Messages.CompilationStatus.ParsingFailed;
   case CompilationStatus.ResolutionFailed:
     return Messages.CompilationStatus.ResolutionFailed;
+  case CompilationStatus.PreparingVerification:
+    return Messages.CompilationStatus.PreparingVerification;
   case CompilationStatus.CompilationSucceeded:
     return Messages.CompilationStatus.CompilationSucceeded;
 
@@ -36,6 +40,7 @@ function toStatusMessage(status: CompilationStatus, message?: string | null): st
       ? `${Messages.CompilationStatus.VerificationFailedOld} ${message}`
       : `${Messages.CompilationStatus.VerificationFailedOld}`;
   }
+  return status.toString();
 }
 
 interface IDocumentStatusMessage {
@@ -113,9 +118,11 @@ export default class CompilationStatusView {
   }
 
   private static readonly handledMessages = new Set([
-    CompilationStatus.ResolutionStarted,
+    CompilationStatus.Parsing,
+    CompilationStatus.Resolving,
     CompilationStatus.ParsingFailed,
     CompilationStatus.ResolutionFailed,
+    CompilationStatus.PreparingVerification,
     CompilationStatus.CompilationSucceeded ]);
 
   public compilationStatusChangedForBefore38(params: ICompilationStatusParams): void {
