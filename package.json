@@ -289,7 +289,6 @@
     ]
   },
   "activationEvents": [
-    "onLanguage:dafny"
   ],
   "scripts": {
     "vscode:prepublish": "npm run package",

@@ -1,8 +1,10 @@
 export namespace Messages {
   export namespace CompilationStatus {
-    export const ResolutionStarted = '$(sync~spin) Resolving...';
+    export const Parsing = '$(sync~spin) Parsing...';
+    export const Resolving = '$(sync~spin) Resolving...';
     export const ParsingFailed = '$(thumbsdown) Parsing Failed';
     export const ResolutionFailed = '$(thumbsdown) Resolution Failed';
+    export const PreparingVerification = '$(sync~spin) Preparing verification...';
     export const CompilationSucceeded = '$(book) Resolved (not verified)';
     export const Verifying = '$(sync~spin) Verifying';
     export const VerificationSucceeded = '$(thumbsup) Verification Succeeded';
