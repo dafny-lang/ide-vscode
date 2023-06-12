@@ -1,3 +1,8 @@
+// Issue #386
+method Test(thisNat: nat, dothis: nat) {
+          //^^^^            ^^^^ this should not be highlighted separatedly in blue
+}
+
 // Support for opaque keyword
 opaque function Test(): int { 1 }
 //^^^^ should be highlighted as a keyword

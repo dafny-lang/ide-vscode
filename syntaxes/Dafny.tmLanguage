@@ -481,7 +481,7 @@
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>this</string>
+					<string>\bthis\b</string>
 					<key>name</key>
 					<string>storage.type.dafny</string>
 				</dict>
