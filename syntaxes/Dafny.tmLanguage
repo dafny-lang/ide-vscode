@@ -133,7 +133,7 @@
 			<key>name</key>
 			<string>meta.type.formaldeclaration</string>
 			<key>begin</key>
-			<string>(?<!\{|:|(?:label|assert|requires)\s*[_\w]+):\s*(?:[\w'?]+\.)*([\w'?]+\b(?!&lt;))</string>
+			<string>(?<!\{|:|(?:label|assert|requires)\s*[_\w'?]+):\s*(?:[\w'?]+\.)*([\w'?]+\b(?!&lt;))</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>

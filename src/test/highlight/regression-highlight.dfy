@@ -12,6 +12,17 @@ function Map<U(!new)>(): int {
       // ^^^ should be highlighted like a function name, not a type
 }
 
+// Issue #380
+method TestMethod()
+  requires b'?: Test() == 1
+{             //^^^^ This should not be highlighted as a type.
+          
+  assert a'?: Test() == 1;
+            //^^^^ This should not be highlighted as a type.
+  label x'?: TestMethod();
+           //^^^^^^^^^^ This should not be highlighted as a type.
+}
+
 // Issue #269
 method SpaceAFterOperator(n: nat)
   requires 1<n
