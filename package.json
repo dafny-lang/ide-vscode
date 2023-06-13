@@ -136,7 +136,7 @@
             "onchange",
             "onsave"
           ],
-          "description": "When to apply the automatic verification (requires restart)"
+          "description": "When Dafny should run verification automatically (requires restart). Notes:\n* If set on 'never', it is always possible to trigger verification of individual declarations manually using the test interface of VSCode if the option 'Display Verification As Tests' is checked\n* In any case but especially if using 'onchange', with versions of Dafny published after June 11, 2023, you can use the `{:only}` attribute on assertions and declarations to restrict verification temporarily"
         },
         "dafny.verificationTimeLimit": {
           "type": "number",
