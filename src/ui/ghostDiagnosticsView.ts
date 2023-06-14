@@ -37,9 +37,6 @@ export default class GhostDiagnosticsView {
     const documentPath = getVsDocumentPath(params);
     this.clearGhostDiagnostics(documentPath);
     const diagnostics = params.diagnostics;
-    if(diagnostics.length === 0) {
-      return;
-    }
     this.diagnosticsByDocument.set(documentPath, diagnostics);
     this.refreshDisplayedGhostDiagnostics(window.activeTextEditor);
   }
