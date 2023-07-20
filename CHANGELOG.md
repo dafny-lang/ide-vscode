@@ -1,5 +1,14 @@
 # Release Notes
 
+## 3.1.2
+- Add Dafny 4.2.0
+- Update README.md (https://github.com/dafny-lang/ide-vscode/pull/407)
+- Fix: Empty ghost diagnostics no longer ignored (https://github.com/dafny-lang/ide-vscode/pull/399)
+- Chore: Support labels with primes and question marks (https://github.com/dafny-lang/ide-vscode/pull/398)
+- Chore: Better description of automatic verification (https://github.com/dafny-lang/ide-vscode/pull/397)
+- Fixes "this" highlight (https://github.com/dafny-lang/ide-vscode/pull/396)
+- Support new IDE states, parsing and preparing verification (https://github.com/dafny-lang/ide-vscode/pull/392)
+
 ## 3.1.1
 - Add Dafny 4.1.0
 - chore: Empty releases (https://github.com/dafny-lang/ide-vscode/pull/387)
