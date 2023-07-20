@@ -2,7 +2,7 @@
   "name": "ide-vscode",
   "displayName": "Dafny",
   "description": "Dafny for Visual Studio Code",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "publisher": "dafny-lang",
   "repository": {
     "type": "git",
@@ -216,6 +216,7 @@
           "type": "string",
           "enum": [
             "latest",
+            "4.2.0",
             "4.1.0",
             "4.0.0",
             "3.13.1",
@@ -288,8 +289,7 @@
       }
     ]
   },
-  "activationEvents": [
-  ],
+  "activationEvents": [],
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "webpack",
