@@ -11,18 +11,32 @@ import { Messages } from './messages';
 
 const OutputPathArg = '--output';
 
+enum CommandType {
+  Build,
+  Run,
+  Test
+}
+
 export default class CompileCommands {
   public static createAndRegister(installer: DafnyInstaller): CompileCommands {
     installer.context.subscriptions.push(
-      commands.registerCommand(DafnyCommands.Build, () => buildOrRun(installer, false, false)),
-      commands.registerCommand(DafnyCommands.BuildCustomArgs, () => buildOrRun(installer, true, false)),
-      commands.registerCommand(DafnyCommands.Run, () => buildOrRun(installer, false, true))
+      commands.registerCommand(DafnyCommands.Build, () =>
+        buildRunOrTest(installer, CommandType.Build, false)),
+      commands.registerCommand(DafnyCommands.BuildCustomArgs, () =>
+        buildRunOrTest(installer, CommandType.Build, true)),
+      commands.registerCommand(DafnyCommands.Run, () =>
+        buildRunOrTest(installer, CommandType.Run, false)),
+      commands.registerCommand(DafnyCommands.Test, () =>
+        buildRunOrTest(installer, CommandType.Test, false))
     );
     return new CompileCommands();
   }
 }
 
-async function buildOrRun(installer: DafnyInstaller, useCustomArgs: boolean, run: boolean): Promise<boolean> {
+// Build: run == false && test == false
+// Run:   run == true
+// Test:  run == false && test == true
+async function buildRunOrTest(installer: DafnyInstaller, commandType: CommandType, useCustomArgs: boolean): Promise<boolean> {
   const document = window.activeTextEditor?.document;
   if(document == null) {
     return false;
@@ -34,7 +48,7 @@ async function buildOrRun(installer: DafnyInstaller, useCustomArgs: boolean, run
   if(!await document.save()) {
     return false;
   }
-  const compilerCommand = await new CommandFactory(installer, document.fileName, useCustomArgs, run).createCompilerCommand();
+  const compilerCommand = await new CommandFactory(installer, document.fileName, commandType, useCustomArgs).createCompilerCommand();
   if(compilerCommand == null) {
     return false;
   }
@@ -52,8 +66,8 @@ class CommandFactory {
   public constructor(
     private readonly installer: DafnyInstaller,
     private readonly fileName: string,
-    private readonly useCustomArgs: boolean,
-    private readonly run: boolean
+    private readonly commandType: CommandType,
+    private readonly useCustomArgs: boolean
   ) {}
 
   public async createCompilerCommand(): Promise<string | undefined> {
@@ -101,14 +115,21 @@ class CommandFactory {
   }
 
   private withCompileAndRun(args: string[]): string[] {
-    if(this.run) {
-      return [ 'run', ...args ];
+    if(this.commandType === CommandType.Run) {
+      return [ 'run', '--no-verify', ...args ];
     }
-    return [ 'build', ...args ];
+    if(this.commandType === CommandType.Test) {
+      return [ 'test', '--no-verify', ...args ];
+    }
+    if(this.commandType === CommandType.Build) {
+      return [ 'build', ...args ];
+    }
+    throw new Error(`Unknown command type: ${this.commandType}`);
   }
 
   private withOutputPath(args: string[]): string[] {
-    if(this.run) {
+    //if(this.run || this.test) {
+    if(this.commandType === CommandType.Run || this.commandType === CommandType.Test) {
       return args;
     }
     if(args.some(arg => arg.includes(OutputPathArg))) {
