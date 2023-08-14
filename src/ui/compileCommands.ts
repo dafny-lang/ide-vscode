@@ -14,15 +14,23 @@ const OutputPathArg = '--output';
 export default class CompileCommands {
   public static createAndRegister(installer: DafnyInstaller): CompileCommands {
     installer.context.subscriptions.push(
-      commands.registerCommand(DafnyCommands.Build, () => buildOrRun(installer, false, false)),
-      commands.registerCommand(DafnyCommands.BuildCustomArgs, () => buildOrRun(installer, true, false)),
-      commands.registerCommand(DafnyCommands.Run, () => buildOrRun(installer, false, true))
+      commands.registerCommand(DafnyCommands.Build, () =>
+        buildRunOrTest(installer, false, false, false)),
+      commands.registerCommand(DafnyCommands.BuildCustomArgs, () =>
+        buildRunOrTest(installer, true, false, false)),
+      commands.registerCommand(DafnyCommands.Run, () =>
+        buildRunOrTest(installer, false, true, false)),
+      commands.registerCommand(DafnyCommands.Test, () =>
+        buildRunOrTest(installer, false, false, true)),
     );
     return new CompileCommands();
   }
 }
 
-async function buildOrRun(installer: DafnyInstaller, useCustomArgs: boolean, run: boolean): Promise<boolean> {
+// Build: run == false && test == false
+// Run:   run == true
+// Test:  run == false && test == true
+async function buildRunOrTest(installer: DafnyInstaller, useCustomArgs: boolean, run: boolean, test: boolean): Promise<boolean> {
   const document = window.activeTextEditor?.document;
   if(document == null) {
     return false;
@@ -34,7 +42,7 @@ async function buildOrRun(installer: DafnyInstaller, useCustomArgs: boolean, run
   if(!await document.save()) {
     return false;
   }
-  const compilerCommand = await new CommandFactory(installer, document.fileName, useCustomArgs, run).createCompilerCommand();
+  const compilerCommand = await new CommandFactory(installer, document.fileName, useCustomArgs, run, test).createCompilerCommand();
   if(compilerCommand == null) {
     return false;
   }
@@ -53,7 +61,8 @@ class CommandFactory {
     private readonly installer: DafnyInstaller,
     private readonly fileName: string,
     private readonly useCustomArgs: boolean,
-    private readonly run: boolean
+    private readonly run: boolean,
+    private readonly test: boolean
   ) {}
 
   public async createCompilerCommand(): Promise<string | undefined> {
@@ -102,13 +111,16 @@ class CommandFactory {
 
   private withCompileAndRun(args: string[]): string[] {
     if(this.run) {
-      return [ 'run', ...args ];
+      return [ 'run', '--no-verify', ...args ];
+    }
+    if(this.test) {
+      return [ 'test', '--no-verify', ...args];
     }
     return [ 'build', ...args ];
   }
 
   private withOutputPath(args: string[]): string[] {
-    if(this.run) {
+    if(this.run || this.test) {
       return args;
     }
     if(args.some(arg => arg.includes(OutputPathArg))) {

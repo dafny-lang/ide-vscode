@@ -57,6 +57,11 @@
           "group": "7_Dafny@7"
         },
         {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.test",
+          "group": "7_Dafny@8"
+        },
+        {
           "when": "editorTextFocus && editorLangId == dafny && dafny.counterexampleMenu.CanShowCounterExample",
           "command": "dafny.showCounterexample",
           "group": "7_Dafny@1"
@@ -84,6 +89,12 @@
         "command": "dafny.run",
         "key": "f5",
         "mac": "f5",
+        "when": "editorTextFocus && editorLangId == dafny"
+      },
+      {
+        "command": "dafny.test",
+        "key": "shift+f5",
+        "mac": "⇧f5",
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
@@ -260,6 +271,10 @@
       {
         "command": "dafny.buildCustomArgs",
         "title": "Dafny: Build with Custom Arguments"
+      },
+      {
+        "command": "dafny.test",
+        "title": "Dafny: Test"
       },
       {
         "command": "dafny.run",
