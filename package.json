@@ -215,7 +215,7 @@
         "dafny.version": {
           "type": "string",
           "enum": [
-            "latest",
+            "latest stable release",
             "4.2.0",
             "4.1.0",
             "4.0.0",
@@ -236,7 +236,7 @@
             "custom",
             "latest nightly"
           ],
-          "default": "latest",
+          "default": "latest stable release",
           "description": "The preferred Dafny version to use (requires restart)."
         },
         "dafny.dotnetExecutablePath": {
