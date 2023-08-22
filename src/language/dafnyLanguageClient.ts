@@ -34,7 +34,7 @@ function getLanguageServerLaunchArgsNew(): string[] {
     getVerifierCachingPolicy(),
     `--cores:${cores}`,
     `--notify-ghostness:${Configuration.get<string>(ConfigurationConstants.LanguageServer.MarkGhostStatements)}`,
-    `--notify-line-verification-status:${Configuration.get<string>(ConfigurationConstants.LanguageServer.DisplayGutterStatus)}`,
+    '--notify-line-verification-status:false',
     ...getDafnyPluginsArgument(),
     ...launchArgs
   ];

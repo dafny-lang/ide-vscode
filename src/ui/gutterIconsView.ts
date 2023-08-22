@@ -118,33 +118,33 @@ export default class GutterIconsView {
       if(error === 'Parser' || error === 'Resolver') {
         perLineStatus.push(LineVerificationStatus.ResolutionError);
       } else {
-        let bigNumber: number;
+        let resultStatus: number;
         if(error !== undefined) {
-          bigNumber = LineVerificationStatus.AssertionFailed;
+          resultStatus = LineVerificationStatus.AssertionFailed;
         } else {
           if(linesInErrorContext.has(line)) {
-            bigNumber = LineVerificationStatus.ErrorContext;
+            resultStatus = LineVerificationStatus.ErrorContext;
           } else {
-            bigNumber = LineVerificationStatus.Verified;
+            resultStatus = LineVerificationStatus.Verified;
           }
         }
-        let smallNumber: number;
+        let progressStatus: number;
         switch(statusPerLine.get(line)) {
         case PublishedVerificationStatus.Stale:
         case PublishedVerificationStatus.Queued:
-          smallNumber = GutterIconProgress.Stale;
+          progressStatus = GutterIconProgress.Stale;
           break;
         case PublishedVerificationStatus.Running:
-          smallNumber = GutterIconProgress.Running;
+          progressStatus = GutterIconProgress.Running;
           break;
         case PublishedVerificationStatus.Error:
         case PublishedVerificationStatus.Correct:
         case undefined:
-          smallNumber = GutterIconProgress.Done;
+          progressStatus = GutterIconProgress.Done;
           break;
         default: throw new Error(`unknown PublishedVerificationStatus ${statusPerLine.get(line)}`);
         }
-        perLineStatus.push(bigNumber + smallNumber);
+        perLineStatus.push(resultStatus + progressStatus);
       }
     }
     return { uri: uri.toString(), perLineStatus: perLineStatus };
