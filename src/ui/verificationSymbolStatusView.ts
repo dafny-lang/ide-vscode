@@ -1,5 +1,7 @@
 /* eslint-disable max-depth */
-import { commands, ExtensionContext, workspace, tests, Range, Position, Uri, TestRunRequest, TestController, TestRun, DocumentSymbol, TestItem, TestItemCollection, TextDocument, TestRunProfileKind, window } from 'vscode';
+import { commands, ExtensionContext, workspace, tests, Range, Position, Uri,
+  TestRunRequest, TestController, TestRun, DocumentSymbol, TestItem, TestItemCollection, TextDocument, TestRunProfileKind, window,
+  Event, EventEmitter } from 'vscode';
 import { Range as lspRange, Position as lspPosition } from 'vscode-languageclient';
 import { IVerificationSymbolStatusParams, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
@@ -33,6 +35,17 @@ export default class VerificationSymbolStatusView {
     compilationStatusView: CompilationStatusView): VerificationSymbolStatusView {
     return new VerificationSymbolStatusView(context, languageClient, compilationStatusView);
   }
+
+  private itemStates: Map<string, PublishedVerificationStatus> = new Map();
+  private itemRuns: Map<string, ItemRunState> = new Map();
+  private readonly runItemsLeft: Map<TestRun, number> = new Map();
+  private readonly updateListenersPerFile: Map<string, ResolveablePromise<Range[]>> = new Map();
+  private readonly updatesPerFile: Map<string, IVerificationSymbolStatusParams> = new Map();
+  private readonly controller: TestController;
+  private automaticRunEnd: boolean = false;
+  private noRunCreationInProgress: Promise<void> = Promise.resolve();
+  private readonly _onUpdates: EventEmitter<Uri> = new EventEmitter();
+  public onUpdates: Event<Uri> = this._onUpdates.event;
 
   public constructor(
     private readonly context: ExtensionContext,
@@ -75,14 +88,9 @@ export default class VerificationSymbolStatusView {
     });
   }
 
-  private itemStates: Map<string, PublishedVerificationStatus> = new Map();
-  private itemRuns: Map<string, ItemRunState> = new Map();
-  private readonly runItemsLeft: Map<TestRun, number> = new Map();
-  private readonly updateListenersPerFile: Map<string, ResolveablePromise<Range[]>> = new Map();
-  private readonly updatesPerFile: Map<string, IVerificationSymbolStatusParams> = new Map();
-  private readonly controller: TestController;
-  private automaticRunEnd: boolean = false;
-  private noRunCreationInProgress: Promise<void> = Promise.resolve();
+  public getUpdatesForFile(uri: string): IVerificationSymbolStatusParams | undefined {
+    return this.updatesPerFile.get(uri);
+  }
 
   private createController(): TestController {
     const controller = tests.createTestController('verificationStatus', 'Verification Status');
@@ -168,6 +176,7 @@ export default class VerificationSymbolStatusView {
     rootSymbols: DocumentSymbol[] | undefined) {
 
     this.updatesPerFile.set(params.uri, params);
+    this._onUpdates.fire(document.uri);
     if(window.activeTextEditor?.document.uri.toString() !== params.uri.toString()) {
       return;
     }

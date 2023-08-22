@@ -308,7 +308,7 @@ export default class VerificationGutterStatusView {
   }
 
   // Entry point when receiving IVErificationStatusGutter
-  private async updateVerificationStatusGutter(params: IVerificationGutterStatusParams): Promise<void> {
+  public async updateVerificationStatusGutter(params: IVerificationGutterStatusParams): Promise<void> {
     if(this.areParamsOutdated(params)) {
       return;
     }

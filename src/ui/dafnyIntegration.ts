@@ -10,6 +10,7 @@ import VerificationSymbolStatusView from './verificationSymbolStatusView';
 import Configuration from '../configuration';
 import { ConfigurationConstants, LanguageServerConstants } from '../constants';
 import { DafnyInstaller } from '../language/dafnyInstallation';
+import GutterIconsView from './gutterIconsView';
 
 export default function createAndRegisterDafnyIntegration(
   installer: DafnyInstaller,
@@ -21,8 +22,10 @@ export default function createAndRegisterDafnyIntegration(
   const compilationStatusView = CompilationStatusView.createAndRegister(installer.context, languageClient, languageServerVersion);
   let symbolStatusView: VerificationSymbolStatusView | undefined = undefined;
   const serverSupportsSymbolStatusView = configuredVersionToNumeric('3.8.0') <= configuredVersionToNumeric(languageServerVersion);
+  const gutterViewUi = VerificationGutterStatusView.createAndRegister(installer.context, languageClient, symbolStatusView);
   if(serverSupportsSymbolStatusView && Configuration.get<boolean>(ConfigurationConstants.LanguageServer.DisplayVerificationAsTests)) {
     symbolStatusView = VerificationSymbolStatusView.createAndRegister(installer.context, languageClient, compilationStatusView);
+    new GutterIconsView(languageClient, gutterViewUi, symbolStatusView);
   } else {
     if(serverSupportsSymbolStatusView) {
       compilationStatusView.registerAfter38Messages();
@@ -30,7 +33,6 @@ export default function createAndRegisterDafnyIntegration(
       compilationStatusView.registerBefore38Messages();
     }
   }
-  VerificationGutterStatusView.createAndRegister(installer.context, languageClient, symbolStatusView);
   CompileCommands.createAndRegister(installer);
   RelatedErrorView.createAndRegister(installer.context, languageClient);
   DafnyVersionView.createAndRegister(installer, languageServerVersion);

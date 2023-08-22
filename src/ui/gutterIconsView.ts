@@ -1,37 +1,65 @@
 /* eslint-disable max-depth */
 /* eslint-disable @typescript-eslint/brace-style */
-import { Diagnostic, DocumentSymbol, ExtensionContext, Range, Uri, window, workspace } from 'vscode';
+import { Diagnostic, DocumentSymbol, Range, Uri, languages, commands, workspace, Position } from 'vscode';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
-import CompilationStatusView from './compilationStatusView';
 import { IVerificationGutterStatusParams, LineVerificationStatus } from '../language/api/verificationGutterStatusParams';
 import { NamedVerifiableStatus, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import VerificationSymbolStatusView from './verificationSymbolStatusView';
+import VerificationGutterStatusView from './verificationGutterStatusView';
 
 /**
  * This class shows verification tasks through the VSCode testing UI.
  */
 export default class GutterIconsView {
 
-
   public constructor(
-    private readonly context: ExtensionContext,
     private readonly languageClient: DafnyLanguageClient,
-    private readonly compilationStatusView: CompilationStatusView)
+    private readonly gutterViewUi: VerificationGutterStatusView,
+    private readonly symbolStatusView: VerificationSymbolStatusView)
   {
-    languageClient.onPublishDiagnostics((uri, diagnostics) => {
-
+    languageClient.onPublishDiagnostics((uri) => {
+      this.update(uri);
+    });
+    symbolStatusView.onUpdates(uri => {
+      this.update(uri);
     });
   }
 
-  private nameToSymbolRange(rootSymbols: DocumentSymbol[]): Map<Range, Range> {
+  private async update(uri: Uri) {
+    const rootSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[] | undefined;
+    if(rootSymbols === undefined) {
+      return;
+    }
+    const nameToSymbolRange = this.getNameToSymbolRange(rootSymbols);
+    const diagnostics = languages.getDiagnostics(uri);
+    const symbolStatus = this.symbolStatusView.getUpdatesForFile(uri.toString());
+    if(symbolStatus === undefined) {
+      return;
+    }
 
+    const icons = await this.computeNewGutterIcons(uri, nameToSymbolRange, symbolStatus.namedVerifiables, diagnostics);
+    this.gutterViewUi.updateVerificationStatusGutter(icons);
+  }
+
+  private getNameToSymbolRange(rootSymbols: DocumentSymbol[]): Map<string, Range> {
+    const result = new Map<string, Range>();
+    const stack = rootSymbols;
+    while(stack.length > 0) {
+      const top = stack.pop()!;
+      const children = top.children ?? [];
+      stack.push(...children);
+      result.set(positionToString(top.selectionRange.start), top.range);
+    }
+    return result;
   }
 
   /*
   No support for first-time icons yet. For first time we pretend like the symbol was previously verified.
   Error context is only triggered if the symbol currently has an error, not if it only had an error and is currently verifying.
   */
-  private async computeNewGutterIcons(uri: Uri, nameToSymbolRanges: Map<Range, Range>,
+  private async computeNewGutterIcons(
+    uri: Uri,
+    nameToSymbolRanges: Map<string, Range>,
     statuses: NamedVerifiableStatus[],
     diagnostics: Diagnostic[]): Promise<IVerificationGutterStatusParams>
   {
@@ -58,8 +86,9 @@ export default class GutterIconsView {
     }
 
     for(const status of statuses) {
-      const symbolRange = nameToSymbolRanges.get(VerificationSymbolStatusView.convertRange(status.nameRange))!;
-      for(let line = symbolRange.start.line; line < symbolRange.end.line; line++) {
+      const convertedRange = VerificationSymbolStatusView.convertRange(status.nameRange);
+      const symbolRange = nameToSymbolRanges.get(positionToString(convertedRange.start))!;
+      for(let line = symbolRange.start.line; line <= symbolRange.end.line; line++) {
         statusPerLine.set(line, status.status);
       }
     }
@@ -89,6 +118,7 @@ export default class GutterIconsView {
           break;
         case PublishedVerificationStatus.Error:
         case PublishedVerificationStatus.Correct:
+        case undefined:
           smallNumber = 2;
           break;
         default: throw new Error(`unknown PublishedVerificationStatus ${statusPerLine.get(line)}`);
@@ -126,4 +156,8 @@ export default class GutterIconsView {
 //     // For lines containing resolution or parse errors
 //     ResolutionError = 500,
 //   }
+}
+
+function positionToString(start: Position): string {
+  return `${start.line},${start.character}`;
 }
