@@ -99,22 +99,25 @@ export default class VerificationSymbolStatusView {
       const runningItems: TestItem[] = [];
       let outerResolve: () => void;
       await this.noRunCreationInProgress;
-      this.noRunCreationInProgress = new Promise((resolve) => {
-        outerResolve = resolve;
-      });
+      try {
+        this.noRunCreationInProgress = new Promise((resolve) => {
+          outerResolve = resolve;
+        });
 
-      const runs = items.map(item => this.languageClient.runVerification({ position: item.range!.start, textDocument: { uri: item.uri!.toString() } }));
-      for(const index in runs) {
-        const success = await runs[index];
-        if(success) {
-          runningItems.push(items[index]);
+        const runs = items.map(item => this.languageClient.runVerification({ position: item.range!.start, textDocument: { uri: item.uri!.toString() } }));
+        for(const index in runs) {
+          const success = await runs[index];
+          if(success) {
+            runningItems.push(items[index]);
+          }
         }
-      }
 
-      if(runningItems.length > 0) {
-        this.createRun(runningItems);
+        if(runningItems.length > 0) {
+          this.createRun(runningItems);
+        }
+      } finally {
+        outerResolve!();
       }
-      outerResolve!();
     }, true);
     return controller;
   }

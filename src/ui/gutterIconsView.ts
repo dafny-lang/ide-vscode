@@ -33,12 +33,9 @@ export default class GutterIconsView {
     const nameToSymbolRange = this.getNameToSymbolRange(rootSymbols);
     const diagnostics = languages.getDiagnostics(uri);
     const symbolStatus = this.symbolStatusView.getUpdatesForFile(uri.toString());
-    if(symbolStatus === undefined) {
-      return;
-    }
 
-    const icons = await this.computeNewGutterIcons(uri, nameToSymbolRange, symbolStatus.namedVerifiables, diagnostics);
-    this.gutterViewUi.updateVerificationStatusGutter(icons);
+    const icons = await this.computeNewGutterIcons(uri, nameToSymbolRange, symbolStatus?.namedVerifiables, diagnostics);
+    this.gutterViewUi.updateVerificationStatusGutter(icons, false);
   }
 
   private getNameToSymbolRange(rootSymbols: DocumentSymbol[]): Map<string, Range> {
@@ -55,12 +52,11 @@ export default class GutterIconsView {
 
   /*
   No support for first-time icons yet. For first time we pretend like the symbol was previously verified.
-  Error context is only triggered if the symbol currently has an error, not if it only had an error and is currently verifying.
   */
   private async computeNewGutterIcons(
     uri: Uri,
-    nameToSymbolRanges: Map<string, Range>,
-    statuses: NamedVerifiableStatus[],
+    nameToSymbolRanges: Map<string, Range> | undefined,
+    statuses: NamedVerifiableStatus[] | undefined,
     diagnostics: Diagnostic[]): Promise<IVerificationGutterStatusParams>
   {
     const document = await workspace.openTextDocument(uri);
@@ -68,10 +64,13 @@ export default class GutterIconsView {
     const errorLineSource = new Map<number, string>();
     const lineToSymbolRange = new Map<number, Range>();
     const linesInErrorContext = new Set<number>();
+    const linesToSkip = new Set<number>();
 
-    for(const range of nameToSymbolRanges.values()) {
-      for(let line = range.start.line; line < range.end.line; line++) {
-        lineToSymbolRange.set(line, range);
+    if(nameToSymbolRanges !== undefined) {
+      for(const range of nameToSymbolRanges.values()) {
+        for(let line = range.start.line; line < range.end.line; line++) {
+          lineToSymbolRange.set(line, range);
+        }
       }
     }
     const perLineStatus: LineVerificationStatus[] = [];
@@ -80,24 +79,43 @@ export default class GutterIconsView {
         continue;
       }
       for(let line = diagnostic.range.start.line; line <= diagnostic.range.end.line; line++) {
-        errorLineSource.set(line, diagnostic.source ?? ''); // TODO what about the resolver?
-        const contextRange = lineToSymbolRange.get(line)!;
-        for(let line = contextRange.start.line; line < contextRange.end.line; line++) {
-          linesInErrorContext.add(line);
+        errorLineSource.set(line, diagnostic.source ?? '');
+        const contextRange = lineToSymbolRange.get(line);
+        if(contextRange === undefined) {
+          continue;
+        }
+        for(let contextLine = contextRange.start.line; line < contextRange.end.line; line++) {
+          linesInErrorContext.add(contextLine);
         }
       }
     }
 
-    for(const status of statuses) {
-      const convertedRange = VerificationSymbolStatusView.convertRange(status.nameRange);
-      const symbolRange = nameToSymbolRanges.get(positionToString(convertedRange.start))!;
-      for(let line = symbolRange.start.line; line <= symbolRange.end.line; line++) {
-        statusPerLine.set(line, status.status);
+    if(nameToSymbolRanges === undefined || statuses === undefined) {
+      for(let line = 0; line < document.lineCount; line++) {
+        statusPerLine.set(line, PublishedVerificationStatus.Stale);
+      }
+    } else {
+      for(const status of statuses) {
+        const convertedRange = VerificationSymbolStatusView.convertRange(status.nameRange);
+        const symbolRange = nameToSymbolRanges.get(positionToString(convertedRange.start));
+        linesToSkip.add(convertedRange.start.line);
+        if(symbolRange === undefined) {
+          console.error('symbol mismatch between documentSymbol and symbolStatus API');
+          continue;
+        }
+        for(let line = symbolRange.start.line; line <= symbolRange.end.line; line++) {
+          statusPerLine.set(line, status.status);
+        }
       }
     }
     for(let line = 0; line < document.lineCount; line++) {
+      if(linesToSkip.has(line)) {
+        perLineStatus.push(LineVerificationStatus.Nothing);
+        continue;
+      }
+
       const error = errorLineSource.get(line);
-      if(error === 'Parser') {
+      if(error === 'Parser' || error === 'Resolver') { // TODO what about the resolver?
         perLineStatus.push(LineVerificationStatus.ResolutionError);
       } else {
         let bigNumber: number;
@@ -131,34 +149,6 @@ export default class GutterIconsView {
     }
     return { uri: uri.toString(), perLineStatus: perLineStatus };
   }
-
-//   export enum LineVerificationStatus {
-//     // Default value for every line, before the renderer figures it out.
-//     Nothing = 0,
-//     // For first-time computation not actively computing but soon. Synonym of "obsolete"
-//     // (scheduledComputation)
-//     Scheduled = 1,
-//     // For first-time computations, actively computing
-//     Verifying = 2,
-//     // Also applicable for empty spaces if they are not surrounded by errors.
-//     Verified = 200,
-//     VerifiedObsolete = 201,
-//     VerifiedVerifying = 202,
-//    // For trees containing children with errors (e.g. methods)
-//     ErrorContext = 300,
-//     ErrorContextObsolete = 301,
-//     ErrorContextVerifying = 302,
-//     // For individual assertions in error ranges
-//     AssertionVerifiedInErrorContext = 350,
-//     AssertionVerifiedInErrorContextObsolete = 351,
-//     AssertionVerifiedInErrorContextVerifying = 352,
-//     // For specific lines which have errors on it. They take over verified assertions
-//     AssertionFailed = 400,
-//     AssertionFailedObsolete = 401,
-//     AssertionFailedVerifying = 402,
-//     // For lines containing resolution or parse errors
-//     ResolutionError = 500,
-//   }
 }
 
 function positionToString(start: Position): string {
