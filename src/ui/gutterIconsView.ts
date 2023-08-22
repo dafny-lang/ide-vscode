@@ -61,7 +61,7 @@ export default class GutterIconsView {
   {
     const document = await workspace.openTextDocument(uri);
     const statusPerLine = new Map<number, PublishedVerificationStatus>();
-    const errorLineSource = new Map<number, string>();
+    const lineToErrorSource = new Map<number, string>();
     const lineToSymbolRange = new Map<number, Range>();
     const linesInErrorContext = new Set<number>();
     const linesToSkip = new Set<number>();
@@ -79,7 +79,7 @@ export default class GutterIconsView {
         continue;
       }
       for(let line = diagnostic.range.start.line; line <= diagnostic.range.end.line; line++) {
-        errorLineSource.set(line, diagnostic.source ?? '');
+        lineToErrorSource.set(line, diagnostic.source ?? '');
         const contextRange = lineToSymbolRange.get(line);
         if(contextRange === undefined) {
           continue;
@@ -114,8 +114,8 @@ export default class GutterIconsView {
         continue;
       }
 
-      const error = errorLineSource.get(line);
-      if(error === 'Parser' || error === 'Resolver') { // TODO what about the resolver?
+      const error = lineToErrorSource.get(line);
+      if(error === 'Parser' || error === 'Resolver') {
         perLineStatus.push(LineVerificationStatus.ResolutionError);
       } else {
         let bigNumber: number;
@@ -132,15 +132,15 @@ export default class GutterIconsView {
         switch(statusPerLine.get(line)) {
         case PublishedVerificationStatus.Stale:
         case PublishedVerificationStatus.Queued:
-          smallNumber = 1;
+          smallNumber = GutterIconProgress.Stale;
           break;
         case PublishedVerificationStatus.Running:
-          smallNumber = 2;
+          smallNumber = GutterIconProgress.Running;
           break;
         case PublishedVerificationStatus.Error:
         case PublishedVerificationStatus.Correct:
         case undefined:
-          smallNumber = 0;
+          smallNumber = GutterIconProgress.Done;
           break;
         default: throw new Error(`unknown PublishedVerificationStatus ${statusPerLine.get(line)}`);
         }
@@ -149,6 +149,12 @@ export default class GutterIconsView {
     }
     return { uri: uri.toString(), perLineStatus: perLineStatus };
   }
+}
+
+export enum GutterIconProgress {
+  Stale = 1,
+  Running = 2,
+  Done = 0
 }
 
 function positionToString(start: Position): string {
