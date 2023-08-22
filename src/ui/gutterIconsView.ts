@@ -1,6 +1,6 @@
 /* eslint-disable max-depth */
 /* eslint-disable @typescript-eslint/brace-style */
-import { Diagnostic, DocumentSymbol, Range, Uri, languages, commands, workspace, Position } from 'vscode';
+import { Diagnostic, DiagnosticSeverity, DocumentSymbol, Range, Uri, languages, commands, workspace, Position } from 'vscode';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { IVerificationGutterStatusParams, LineVerificationStatus } from '../language/api/verificationGutterStatusParams';
 import { NamedVerifiableStatus, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
@@ -65,7 +65,7 @@ export default class GutterIconsView {
   {
     const document = await workspace.openTextDocument(uri);
     const statusPerLine = new Map<number, PublishedVerificationStatus>();
-    const linesWithErrors = new Map<number, boolean>();
+    const errorLineSource = new Map<number, string>();
     const lineToSymbolRange = new Map<number, Range>();
     const linesInErrorContext = new Set<number>();
 
@@ -76,8 +76,11 @@ export default class GutterIconsView {
     }
     const perLineStatus: LineVerificationStatus[] = [];
     for(const diagnostic of diagnostics) {
-      for(let line = diagnostic.range.start.line; line < diagnostic.range.end.line; line++) {
-        linesWithErrors.set(line, diagnostic.source === 'Parser');
+      if(diagnostic.severity !== DiagnosticSeverity.Error) {
+        continue;
+      }
+      for(let line = diagnostic.range.start.line; line <= diagnostic.range.end.line; line++) {
+        errorLineSource.set(line, diagnostic.source ?? ''); // TODO what about the resolver?
         const contextRange = lineToSymbolRange.get(line)!;
         for(let line = contextRange.start.line; line < contextRange.end.line; line++) {
           linesInErrorContext.add(line);
@@ -93,12 +96,12 @@ export default class GutterIconsView {
       }
     }
     for(let line = 0; line < document.lineCount; line++) {
-      const error = linesWithErrors.get(line);
-      if(error === true) {
+      const error = errorLineSource.get(line);
+      if(error === 'Parser') {
         perLineStatus.push(LineVerificationStatus.ResolutionError);
       } else {
         let bigNumber: number;
-        if(error === false) {
+        if(error !== undefined) {
           bigNumber = LineVerificationStatus.AssertionFailed;
         } else {
           if(linesInErrorContext.has(line)) {
@@ -111,15 +114,15 @@ export default class GutterIconsView {
         switch(statusPerLine.get(line)) {
         case PublishedVerificationStatus.Stale:
         case PublishedVerificationStatus.Queued:
-          smallNumber = 0;
+          smallNumber = 1;
           break;
         case PublishedVerificationStatus.Running:
-          smallNumber = 1;
+          smallNumber = 2;
           break;
         case PublishedVerificationStatus.Error:
         case PublishedVerificationStatus.Correct:
         case undefined:
-          smallNumber = 2;
+          smallNumber = 0;
           break;
         default: throw new Error(`unknown PublishedVerificationStatus ${statusPerLine.get(line)}`);
         }
