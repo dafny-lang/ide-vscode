@@ -25,7 +25,8 @@ export default function createAndRegisterDafnyIntegration(
   const gutterViewUi = VerificationGutterStatusView.createAndRegister(installer.context, languageClient, symbolStatusView);
   if(serverSupportsSymbolStatusView && Configuration.get<boolean>(ConfigurationConstants.LanguageServer.DisplayVerificationAsTests)) {
     symbolStatusView = VerificationSymbolStatusView.createAndRegister(installer.context, languageClient, compilationStatusView);
-    if(Configuration.get<string>(ConfigurationConstants.LanguageServer.DisplayGutterStatus) === 'true') {
+    const displayGutterStatus = Configuration.get<boolean>(ConfigurationConstants.LanguageServer.DisplayGutterStatus);
+    if(displayGutterStatus) {
       new GutterIconsView(languageClient, gutterViewUi, symbolStatusView);
     }
   } else {
