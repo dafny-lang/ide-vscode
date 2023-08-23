@@ -148,7 +148,42 @@ suite('Verification Gutter', () => {
     assert.deepStrictEqual([ new vscode.Range(3, 1, 3, 1), new vscode.Range(5, 1, 5, 1) ], ranges.get(0));
   });
 
-  test('computeResolvedGutterIcons', () => {
+  test.only('computeGutterIconsParseError', () => {
+    /*
+    method Foo() {
+      parse(;)Error
+    }
+
+    method Bat() {
+      assert false; // Outdated error
+    }
+
+    method Fom() {
+      assert true;
+    }
+    */
+    const parseError = new vscode.Diagnostic(new vscode.Range(1, 2, 1, 15), 'Some parse error', vscode.DiagnosticSeverity.Error);
+    parseError.source = 'Parser';
+    const computedIcons = GutterIconsView.computeGutterIcons(10, undefined, undefined, [
+      parseError,
+      new vscode.Diagnostic(new vscode.Range(5, 2, 5, 14), 'Outdated: could not prove assertion', vscode.DiagnosticSeverity.Error)
+    ]);
+    const expected = [
+      LineVerificationStatus.VerifiedObsolete,
+      LineVerificationStatus.ResolutionError,
+      LineVerificationStatus.VerifiedObsolete,
+      LineVerificationStatus.VerifiedObsolete,
+      LineVerificationStatus.VerifiedObsolete,
+      LineVerificationStatus.AssertionFailedObsolete,
+      LineVerificationStatus.VerifiedObsolete,
+      LineVerificationStatus.VerifiedObsolete,
+      LineVerificationStatus.VerifiedObsolete,
+      LineVerificationStatus.VerifiedObsolete
+    ];
+    assert.strictEqual(expected, computedIcons);
+  });
+
+  test('computeGutterIconsResolved', () => {
     /*
     method Foo() { // Stale
       assert false; // No error

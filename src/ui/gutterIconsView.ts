@@ -26,10 +26,7 @@ export default class GutterIconsView {
 
   private async update(uri: Uri) {
     const rootSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[] | undefined;
-    if(rootSymbols === undefined) {
-      return;
-    }
-    const nameToSymbolRange = this.getNameToSymbolRange(rootSymbols);
+    const nameToSymbolRange = rootSymbols === undefined ? undefined : this.getNameToSymbolRange(rootSymbols);
     const diagnostics = languages.getDiagnostics(uri);
     const symbolStatus = this.symbolStatusService.getUpdatesForFile(uri.toString());
 
