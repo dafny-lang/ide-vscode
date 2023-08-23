@@ -13,10 +13,8 @@ import { Messages } from '../../ui/messages';
 import { DafnyCommands } from '../../commands';
 import VerificationGutterStatusView from '../../ui/verificationGutterStatusView';
 import { DocumentSymbol } from 'vscode';
-import GutterIconsView from '../../ui/gutterIconsView';
 import { PublishedVerificationStatus } from '../../language/api/verificationSymbolStatusParams';
 import { LineVerificationStatus } from '../../language/api/verificationGutterStatusParams';
-import exp = require('constants');
 
 const mockedWorkspace = MockingUtils.mockedWorkspace();
 const mockedVsCode = {
@@ -148,7 +146,7 @@ suite('Verification Gutter', () => {
     assert.deepStrictEqual([ new vscode.Range(3, 1, 3, 1), new vscode.Range(5, 1, 5, 1) ], ranges.get(0));
   });
 
-  test.only('computeGutterIconsParseError', () => {
+  test('computeGutterIconsParseError', () => {
     /*
     method Foo() {
       parse(;)Error
@@ -164,7 +162,7 @@ suite('Verification Gutter', () => {
     */
     const parseError = new vscode.Diagnostic(new vscode.Range(1, 2, 1, 15), 'Some parse error', vscode.DiagnosticSeverity.Error);
     parseError.source = 'Parser';
-    const computedIcons = GutterIconsView.computeGutterIcons(10, undefined, undefined, [
+    const computedIcons = VerificationGutterStatusView.computeGutterIcons(10, undefined, undefined, [
       parseError,
       new vscode.Diagnostic(new vscode.Range(5, 2, 5, 14), 'Outdated: could not prove assertion', vscode.DiagnosticSeverity.Error)
     ]);
@@ -210,7 +208,7 @@ suite('Verification Gutter', () => {
       assert false; // Error
     }
     */
-    const computedIcons = GutterIconsView.computeGutterIcons(24, new Map([
+    const computedIcons = VerificationGutterStatusView.computeGutterIcons(24, new Map([
       [ '0,7', new vscode.Range(0, 0, 2, 1) ],
       [ '4,7', new vscode.Range(4, 0, 6, 1) ],
       [ '8,7', new vscode.Range(8, 0, 10, 1) ],

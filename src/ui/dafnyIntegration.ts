@@ -10,7 +10,6 @@ import VerificationSymbolStatusView from './verificationSymbolStatusView';
 import Configuration from '../configuration';
 import { ConfigurationConstants, LanguageServerConstants } from '../constants';
 import { DafnyInstaller } from '../language/dafnyInstallation';
-import GutterIconsView from './gutterIconsView';
 import SymbolStatusService from './symbolStatusService';
 
 export default function createAndRegisterDafnyIntegration(
@@ -35,8 +34,7 @@ export default function createAndRegisterDafnyIntegration(
   }
   const displayGutterStatus = Configuration.get<boolean>(ConfigurationConstants.LanguageServer.DisplayGutterStatus);
   if(displayGutterStatus) {
-    const gutterViewUi = VerificationGutterStatusView.createAndRegister(installer.context, languageClient, symbolStatusView);
-    new GutterIconsView(languageClient, gutterViewUi, symbolStatusService);
+    VerificationGutterStatusView.createAndRegister(installer.context, languageClient, symbolStatusService, symbolStatusView);
   }
   CompileCommands.createAndRegister(installer);
   RelatedErrorView.createAndRegister(installer.context, languageClient);
