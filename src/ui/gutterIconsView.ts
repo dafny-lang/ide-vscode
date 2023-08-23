@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/brace-style */
 import { Diagnostic, DiagnosticSeverity, DocumentSymbol, Range, Uri, languages, commands, workspace, Position } from 'vscode';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
-import { IVerificationGutterStatusParams, LineVerificationStatus } from '../language/api/verificationGutterStatusParams';
+import { LineVerificationStatus } from '../language/api/verificationGutterStatusParams';
 import { NamedVerifiableStatus, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import VerificationSymbolStatusView from './verificationSymbolStatusView';
 import VerificationGutterStatusView from './verificationGutterStatusView';
@@ -33,8 +33,9 @@ export default class GutterIconsView {
     const diagnostics = languages.getDiagnostics(uri);
     const symbolStatus = this.symbolStatusService.getUpdatesForFile(uri.toString());
 
-    const icons = await this.computeNewGutterIcons(uri, nameToSymbolRange, symbolStatus?.namedVerifiables, diagnostics);
-    this.gutterViewUi.updateVerificationStatusGutter(icons, false);
+    const document = await workspace.openTextDocument(uri);
+    const perLineStatus = GutterIconsView.computeGutterIcons(document.lineCount, nameToSymbolRange, symbolStatus?.namedVerifiables, diagnostics);
+    this.gutterViewUi.updateVerificationStatusGutter({ uri: uri.toString(), perLineStatus: perLineStatus }, false);
   }
 
   private getNameToSymbolRange(rootSymbols: DocumentSymbol[]): Map<string, Range> {
@@ -52,13 +53,12 @@ export default class GutterIconsView {
   /*
   No support for first-time icons yet. For first time we pretend like the symbol was previously verified.
   */
-  private async computeNewGutterIcons(
-    uri: Uri,
+  public static computeGutterIcons(
+    lineCount: number,
     nameToSymbolRanges: Map<string, Range> | undefined,
     statuses: NamedVerifiableStatus[] | undefined,
-    diagnostics: Diagnostic[]): Promise<IVerificationGutterStatusParams>
+    diagnostics: Diagnostic[]): LineVerificationStatus[]
   {
-    const document = await workspace.openTextDocument(uri);
     const statusPerLine = new Map<number, PublishedVerificationStatus>();
     const lineToErrorSource = new Map<number, string>();
     const lineToSymbolRange = new Map<number, Range>();
@@ -83,14 +83,14 @@ export default class GutterIconsView {
         if(contextRange === undefined) {
           continue;
         }
-        for(let contextLine = contextRange.start.line; line < contextRange.end.line; line++) {
+        for(let contextLine = contextRange.start.line; contextLine <= contextRange.end.line; contextLine++) {
           linesInErrorContext.add(contextLine);
         }
       }
     }
 
     if(nameToSymbolRanges === undefined || statuses === undefined) {
-      for(let line = 0; line < document.lineCount; line++) {
+      for(let line = 0; line < lineCount; line++) {
         statusPerLine.set(line, PublishedVerificationStatus.Stale);
       }
     } else {
@@ -107,7 +107,7 @@ export default class GutterIconsView {
         }
       }
     }
-    for(let line = 0; line < document.lineCount; line++) {
+    for(let line = 0; line < lineCount; line++) {
       if(linesToSkip.has(line)) {
         perLineStatus.push(LineVerificationStatus.Nothing);
         continue;
@@ -146,7 +146,7 @@ export default class GutterIconsView {
         perLineStatus.push(resultStatus + progressStatus);
       }
     }
-    return { uri: uri.toString(), perLineStatus: perLineStatus };
+    return perLineStatus;
   }
 }
 

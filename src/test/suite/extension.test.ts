@@ -13,6 +13,10 @@ import { Messages } from '../../ui/messages';
 import { DafnyCommands } from '../../commands';
 import VerificationGutterStatusView from '../../ui/verificationGutterStatusView';
 import { DocumentSymbol } from 'vscode';
+import GutterIconsView from '../../ui/gutterIconsView';
+import { PublishedVerificationStatus } from '../../language/api/verificationSymbolStatusParams';
+import { LineVerificationStatus } from '../../language/api/verificationGutterStatusParams';
+import exp = require('constants');
 
 const mockedWorkspace = MockingUtils.mockedWorkspace();
 const mockedVsCode = {
@@ -142,6 +146,81 @@ suite('Verification Gutter', () => {
     assert.deepStrictEqual([ new vscode.Range(0, 1, 1, 1) ], ranges.get(1));
     assert.deepStrictEqual([ new vscode.Range(7, 1, 8, 1) ], ranges.get(2));
     assert.deepStrictEqual([ new vscode.Range(3, 1, 3, 1), new vscode.Range(5, 1, 5, 1) ], ranges.get(0));
+  });
+
+  test('computeResolvedGutterIcons', () => {
+    /*
+    method Foo() { // Stale
+      assert false; // No error
+    }
+
+    method Bat() { // Stale
+      assert false; // Outdated error
+    }
+
+    method Bar() { // Queued
+      assert false;
+    }
+
+    method Baz() { // Running
+      assert false;
+    }
+
+    method Fom() { // Correct
+      assert true;
+    }
+
+    method Faz() { // Error
+      assert true;
+      assert false; // Error
+    }
+    */
+    const computedIcons = GutterIconsView.computeGutterIcons(24, new Map([
+      [ '0,7', new vscode.Range(0, 0, 2, 1) ],
+      [ '4,7', new vscode.Range(4, 0, 6, 1) ],
+      [ '8,7', new vscode.Range(8, 0, 10, 1) ],
+      [ '12,7', new vscode.Range(12, 0, 14, 1) ],
+      [ '16,7', new vscode.Range(16, 0, 18, 1) ],
+      [ '20,7', new vscode.Range(20, 0, 23, 1) ]
+    ]), [
+      { nameRange: new vscode.Range(0, 7, 0, 10), status: PublishedVerificationStatus.Stale },
+      { nameRange: new vscode.Range(4, 7, 4, 10), status: PublishedVerificationStatus.Stale },
+      { nameRange: new vscode.Range(8, 7, 8, 10), status: PublishedVerificationStatus.Queued },
+      { nameRange: new vscode.Range(12, 7, 12, 10), status: PublishedVerificationStatus.Running },
+      { nameRange: new vscode.Range(16, 7, 16, 10), status: PublishedVerificationStatus.Correct },
+      { nameRange: new vscode.Range(20, 7, 20, 10), status: PublishedVerificationStatus.Error }
+    ], [
+      new vscode.Diagnostic(new vscode.Range(5, 2, 5, 14), 'Outdated, could not prove assertion', vscode.DiagnosticSeverity.Error),
+      new vscode.Diagnostic(new vscode.Range(17, 2, 17, 14), 'some warning', vscode.DiagnosticSeverity.Warning),
+      new vscode.Diagnostic(new vscode.Range(22, 2, 22, 14), 'could not prove assertion', vscode.DiagnosticSeverity.Error)
+    ]);
+    const expected = [
+      LineVerificationStatus.Nothing,
+      LineVerificationStatus.VerifiedObsolete,
+      LineVerificationStatus.VerifiedObsolete,
+      LineVerificationStatus.Verified,
+      LineVerificationStatus.Nothing,
+      LineVerificationStatus.AssertionFailedObsolete,
+      LineVerificationStatus.ErrorContextObsolete,
+      LineVerificationStatus.Verified,
+      LineVerificationStatus.Nothing,
+      LineVerificationStatus.VerifiedObsolete,
+      LineVerificationStatus.VerifiedObsolete,
+      LineVerificationStatus.Verified,
+      LineVerificationStatus.Nothing,
+      LineVerificationStatus.VerifiedVerifying,
+      LineVerificationStatus.VerifiedVerifying,
+      LineVerificationStatus.Verified,
+      LineVerificationStatus.Nothing,
+      LineVerificationStatus.Verified,
+      LineVerificationStatus.Verified,
+      LineVerificationStatus.Verified,
+      LineVerificationStatus.Nothing,
+      LineVerificationStatus.ErrorContext,
+      LineVerificationStatus.AssertionFailed,
+      LineVerificationStatus.ErrorContext
+    ];
+    assert.strictEqual(expected, computedIcons);
   });
 });
 
