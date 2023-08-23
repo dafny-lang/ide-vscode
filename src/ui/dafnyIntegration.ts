@@ -11,6 +11,7 @@ import Configuration from '../configuration';
 import { ConfigurationConstants, LanguageServerConstants } from '../constants';
 import { DafnyInstaller } from '../language/dafnyInstallation';
 import GutterIconsView from './gutterIconsView';
+import SymbolStatusService from './symbolStatusService';
 
 export default function createAndRegisterDafnyIntegration(
   installer: DafnyInstaller,
@@ -22,19 +23,20 @@ export default function createAndRegisterDafnyIntegration(
   const compilationStatusView = CompilationStatusView.createAndRegister(installer.context, languageClient, languageServerVersion);
   let symbolStatusView: VerificationSymbolStatusView | undefined = undefined;
   const serverSupportsSymbolStatusView = configuredVersionToNumeric('3.8.0') <= configuredVersionToNumeric(languageServerVersion);
-  const gutterViewUi = VerificationGutterStatusView.createAndRegister(installer.context, languageClient, symbolStatusView);
+  const symbolStatusService = new SymbolStatusService(installer.context, languageClient);
   if(serverSupportsSymbolStatusView && Configuration.get<boolean>(ConfigurationConstants.LanguageServer.DisplayVerificationAsTests)) {
-    symbolStatusView = VerificationSymbolStatusView.createAndRegister(installer.context, languageClient, compilationStatusView);
-    const displayGutterStatus = Configuration.get<boolean>(ConfigurationConstants.LanguageServer.DisplayGutterStatus);
-    if(displayGutterStatus) {
-      new GutterIconsView(languageClient, gutterViewUi, symbolStatusView);
-    }
+    symbolStatusView = VerificationSymbolStatusView.createAndRegister(installer.context, languageClient, symbolStatusService, compilationStatusView);
   } else {
     if(serverSupportsSymbolStatusView) {
       compilationStatusView.registerAfter38Messages();
     } else {
       compilationStatusView.registerBefore38Messages();
     }
+  }
+  const displayGutterStatus = Configuration.get<boolean>(ConfigurationConstants.LanguageServer.DisplayGutterStatus);
+  if(displayGutterStatus) {
+    const gutterViewUi = VerificationGutterStatusView.createAndRegister(installer.context, languageClient, symbolStatusView);
+    new GutterIconsView(languageClient, gutterViewUi, symbolStatusService);
   }
   CompileCommands.createAndRegister(installer);
   RelatedErrorView.createAndRegister(installer.context, languageClient);

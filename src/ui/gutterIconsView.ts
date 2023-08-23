@@ -6,22 +6,21 @@ import { IVerificationGutterStatusParams, LineVerificationStatus } from '../lang
 import { NamedVerifiableStatus, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import VerificationSymbolStatusView from './verificationSymbolStatusView';
 import VerificationGutterStatusView from './verificationGutterStatusView';
+import SymbolStatusService from './symbolStatusService';
 
-/**
- * This class shows verification tasks through the VSCode testing UI.
- */
+// TODO merge with VerificationGutterStatusView
 export default class GutterIconsView {
 
   public constructor(
     private readonly languageClient: DafnyLanguageClient,
     private readonly gutterViewUi: VerificationGutterStatusView,
-    private readonly symbolStatusView: VerificationSymbolStatusView)
+    private readonly symbolStatusService: SymbolStatusService)
   {
     languageClient.onPublishDiagnostics((uri) => {
       this.update(uri);
     });
-    symbolStatusView.onUpdates(uri => {
-      this.update(uri);
+    symbolStatusService.onUpdates(params => {
+      this.update(Uri.parse(params.uri));
     });
   }
 
@@ -32,7 +31,7 @@ export default class GutterIconsView {
     }
     const nameToSymbolRange = this.getNameToSymbolRange(rootSymbols);
     const diagnostics = languages.getDiagnostics(uri);
-    const symbolStatus = this.symbolStatusView.getUpdatesForFile(uri.toString());
+    const symbolStatus = this.symbolStatusService.getUpdatesForFile(uri.toString());
 
     const icons = await this.computeNewGutterIcons(uri, nameToSymbolRange, symbolStatus?.namedVerifiables, diagnostics);
     this.gutterViewUi.updateVerificationStatusGutter(icons, false);

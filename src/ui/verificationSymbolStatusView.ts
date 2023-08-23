@@ -1,11 +1,11 @@
 /* eslint-disable max-depth */
 import { commands, ExtensionContext, workspace, tests, Range, Position, Uri,
-  TestRunRequest, TestController, TestRun, DocumentSymbol, TestItem, TestItemCollection, TextDocument, TestRunProfileKind, window,
-  Event, EventEmitter } from 'vscode';
+  TestRunRequest, TestController, TestRun, DocumentSymbol, TestItem, TestItemCollection, TextDocument, TestRunProfileKind, window } from 'vscode';
 import { Range as lspRange, Position as lspPosition } from 'vscode-languageclient';
 import { IVerificationSymbolStatusParams, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import CompilationStatusView from './compilationStatusView';
+import SymbolStatusService from './symbolStatusService';
 
 interface ResolveablePromise<T> {
   promise: Promise<T>;
@@ -17,13 +17,6 @@ interface ItemRunState {
   startedRunningTime?: number;
 }
 
-export function createAndRegister(
-  context: ExtensionContext,
-  languageClient: DafnyLanguageClient,
-  compilationStatusView: CompilationStatusView): VerificationSymbolStatusView {
-  return new VerificationSymbolStatusView(context, languageClient, compilationStatusView);
-}
-
 /**
  * This class shows verification tasks through the VSCode testing UI.
  */
@@ -32,8 +25,9 @@ export default class VerificationSymbolStatusView {
   public static createAndRegister(
     context: ExtensionContext,
     languageClient: DafnyLanguageClient,
+    symbolStatusService: SymbolStatusService,
     compilationStatusView: CompilationStatusView): VerificationSymbolStatusView {
-    return new VerificationSymbolStatusView(context, languageClient, compilationStatusView);
+    return new VerificationSymbolStatusView(context, languageClient, symbolStatusService, compilationStatusView);
   }
 
   private itemStates: Map<string, PublishedVerificationStatus> = new Map();
@@ -44,12 +38,11 @@ export default class VerificationSymbolStatusView {
   private readonly controller: TestController;
   private automaticRunEnd: boolean = false;
   private noRunCreationInProgress: Promise<void> = Promise.resolve();
-  private readonly _onUpdates: EventEmitter<Uri> = new EventEmitter();
-  public onUpdates: Event<Uri> = this._onUpdates.event;
 
   public constructor(
     private readonly context: ExtensionContext,
     private readonly languageClient: DafnyLanguageClient,
+    symbolStatusService: SymbolStatusService,
     private readonly compilationStatusView: CompilationStatusView) {
     this.controller = this.createController();
     context.subscriptions.push(this.controller);
@@ -73,7 +66,7 @@ export default class VerificationSymbolStatusView {
       this.updatesPerFile.delete(uriString);
     }, this, context.subscriptions);
     context.subscriptions.push(
-      languageClient.onVerificationSymbolStatus(params => this.update(params)),
+      symbolStatusService.onUpdates(params => this.update(params)),
       languageClient.onCompilationStatus(params => compilationStatusView.compilationStatusChangedForBefore38(params))
     );
     window.onDidChangeActiveTextEditor(e => {
@@ -86,10 +79,6 @@ export default class VerificationSymbolStatusView {
         }
       }
     });
-  }
-
-  public getUpdatesForFile(uri: string): IVerificationSymbolStatusParams | undefined {
-    return this.updatesPerFile.get(uri);
   }
 
   private createController(): TestController {
@@ -161,8 +150,8 @@ export default class VerificationSymbolStatusView {
   }
 
   private async update(params: IVerificationSymbolStatusParams): Promise<void> {
-    await this.noRunCreationInProgress;
     const uri = Uri.parse(params.uri);
+    await this.noRunCreationInProgress;
     params.uri = uri.toString();
     const document = await workspace.openTextDocument(uri);
     const rootSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[] | undefined;
@@ -178,8 +167,6 @@ export default class VerificationSymbolStatusView {
     document: TextDocument,
     rootSymbols: DocumentSymbol[] | undefined) {
 
-    this.updatesPerFile.set(params.uri, params);
-    this._onUpdates.fire(document.uri);
     if(window.activeTextEditor?.document.uri.toString() !== params.uri.toString()) {
       return;
     }
