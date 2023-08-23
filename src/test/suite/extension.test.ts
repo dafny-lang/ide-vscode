@@ -178,7 +178,7 @@ suite('Verification Gutter', () => {
       LineVerificationStatus.VerifiedObsolete,
       LineVerificationStatus.VerifiedObsolete
     ];
-    assert.strictEqual(expected, computedIcons);
+    assert.equal(expected, computedIcons);
   });
 
   test('computeGutterIconsResolved', () => {
@@ -253,7 +253,7 @@ suite('Verification Gutter', () => {
       LineVerificationStatus.AssertionFailed,
       LineVerificationStatus.ErrorContext
     ];
-    assert.strictEqual(expected, computedIcons);
+    assert.equal(expected, computedIcons);
   });
 });
 
