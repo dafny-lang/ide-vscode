@@ -158,9 +158,6 @@ export default class VerificationGutterStatusView {
     return result;
   }
 
-  /*
-  No support for first-time icons yet. For first time we pretend like the symbol was previously verified.
-  */
   public static computeGutterIcons(
     lineCount: number,
     nameToSymbolRanges: Map<string, Range> | undefined,
