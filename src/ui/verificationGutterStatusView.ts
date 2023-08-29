@@ -125,7 +125,11 @@ export default class VerificationGutterStatusView {
     symbolStatusService.onUpdates(params => {
       instance.update(Uri.parse(params.uri));
     });
-
+    workspace.onDidChangeTextDocument(e => {
+      if(instance.lineCountsPerDocument.get(e.document.uri) !== e.document.lineCount) {
+        instance.update(e.document.uri);
+      }
+    });
 
     context.subscriptions.push(
       workspace.onDidCloseTextDocument(document => instance.clearVerificationDiagnostics(document.uri.toString())),
@@ -135,6 +139,7 @@ export default class VerificationGutterStatusView {
     return instance;
   }
 
+  private readonly lineCountsPerDocument = new Map<Uri, number>();
   private async update(uri: Uri) {
     const rootSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[] | undefined;
     const nameToSymbolRange = rootSymbols === undefined ? undefined : this.getNameToSymbolRange(rootSymbols);
@@ -142,6 +147,8 @@ export default class VerificationGutterStatusView {
     const symbolStatus = this.symbolStatusService.getUpdatesForFile(uri.toString());
 
     const document = await workspace.openTextDocument(uri);
+
+    this.lineCountsPerDocument.set(document.uri, document.lineCount);
     const perLineStatus = VerificationGutterStatusView.computeGutterIcons(document.lineCount, nameToSymbolRange, symbolStatus?.namedVerifiables, diagnostics);
     this.updateVerificationStatusGutter({ uri: uri.toString(), perLineStatus: perLineStatus }, false);
   }
