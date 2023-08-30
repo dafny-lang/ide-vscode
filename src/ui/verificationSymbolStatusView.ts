@@ -154,11 +154,12 @@ export default class VerificationSymbolStatusView {
 
   private async update(params: IVerificationSymbolStatusParams): Promise<void> {
     await this.noRunCreationInProgress;
+    // Make sure only to use the latest params at this point, and don't use them if they've already been used.
+
     const uri = Uri.parse(params.uri);
     params.uri = uri.toString();
     const document = await workspace.openTextDocument(uri);
     const rootSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[] | undefined;
-
     // After this check we may no longer use awaits, because they allow the document to be updated and then our update becomes outdated.
     if(params.version !== document.version) {
       return;
@@ -178,10 +179,12 @@ export default class VerificationSymbolStatusView {
     const controller = this.controller;
     let leafItems: TestItem[];
     if(rootSymbols !== undefined) {
-      leafItems = this.updateUsingSymbols(params, document, controller, rootSymbols);
+      leafItems = this.updateUsingSymbols(params, controller, rootSymbols);
     } else {
-      leafItems = params.namedVerifiables.map(f => VerificationSymbolStatusView.getItem(document,
-        VerificationSymbolStatusView.convertRange(f.nameRange), controller, document.uri));
+      leafItems = params.namedVerifiables.map(f => {
+        const vscodeRange = VerificationSymbolStatusView.convertRange(f.nameRange);
+        return VerificationSymbolStatusView.getItem(document.getText(vscodeRange), vscodeRange, controller, document.uri);
+      });
       controller.items.replace(leafItems);
     }
     const allTestItems: TestItem[] = [];
@@ -266,7 +269,7 @@ export default class VerificationSymbolStatusView {
     this.itemRuns = newItemRuns;
   }
 
-  private updateUsingSymbols(params: IVerificationSymbolStatusParams, document: TextDocument,
+  private updateUsingSymbols(params: IVerificationSymbolStatusParams,
     controller: TestController, rootSymbols: DocumentSymbol[]): TestItem[] {
 
     const itemMapping: Map<DocumentSymbol, TestItem> = new Map();
@@ -278,7 +281,7 @@ export default class VerificationSymbolStatusView {
           let item = itemMapping.get(symbol);
           if(!item) {
             const itemRange = symbol.selectionRange;
-            item = VerificationSymbolStatusView.getItem(document, itemRange, controller, uri);
+            item = VerificationSymbolStatusView.getItem(symbol.name, itemRange, controller, uri);
             itemMapping.set(symbol, item);
           }
           if(symbol.selectionRange.isEqual(leafRange)) {
@@ -288,8 +291,9 @@ export default class VerificationSymbolStatusView {
           }
         }
       }
-      console.error(`Could not find a symbol to map to item ${JSON.stringify(leafRange)}. Item won't be visible in symbol tree.`);
-      return VerificationSymbolStatusView.getItem(document, leafRange, controller, uri);
+      const nameFromRange = JSON.stringify(leafRange);
+      console.error(`Could not find a symbol to map to item ${nameFromRange}. Item won't be visible in symbol tree.`);
+      return VerificationSymbolStatusView.getItem(nameFromRange, leafRange, controller, uri);
     };
 
     const items = params.namedVerifiables.map(element => {
@@ -313,9 +317,8 @@ export default class VerificationSymbolStatusView {
     return items;
   }
 
-  private static getItem(document: TextDocument, itemRange: Range, controller: TestController, uri: Uri) {
-    const nameText = document.getText(itemRange);
-    const item = controller.createTestItem(uri.toString() + JSON.stringify(itemRange), nameText, uri);
+  private static getItem(name: string, itemRange: Range, controller: TestController, uri: Uri) {
+    const item = controller.createTestItem(uri.toString() + JSON.stringify(itemRange), name, uri);
     item.range = itemRange;
     return item;
   }
