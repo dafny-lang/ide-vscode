@@ -188,7 +188,7 @@ export default class CompilationStatusView {
       if(running.length > 0) {
         message += `, verifying ${verifying}`;
       } else {
-        message += ', waiting for free solvers';
+        message += ', preparing verification';
       }
     } else {
       const skipped = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Stale).length;

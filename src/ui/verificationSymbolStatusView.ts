@@ -41,45 +41,24 @@ export default class VerificationSymbolStatusView {
     this.controller = this.createController();
     context.subscriptions.push(this.controller);
 
-    window.onDidChangeActiveTextEditor(e => {
-      if(e !== undefined) {
-        const lastUpdate = this.updatesPerFile.get(e.document.uri.toString());
-        if(lastUpdate !== undefined) {
-          this.update(lastUpdate);
-        }
-      }
-    }, this, context.subscriptions);
     workspace.onDidChangeTextDocument(e => {
-      console.log('document updated to', e.document.version);
       const uriString = e.document.uri.toString();
       this.updateListenersPerFile.delete(uriString);
-      this.updatesPerFile.delete(uriString);
     }, this, context.subscriptions);
     workspace.onDidCloseTextDocument(e => {
       const uriString = e.uri.toString();
-      this.updatesPerFile.delete(uriString);
+      this.controller.items.delete(uriString);
     }, this, context.subscriptions);
     context.subscriptions.push(
       languageClient.onVerificationSymbolStatus(params => this.update(params)),
       languageClient.onCompilationStatus(params => compilationStatusView.compilationStatusChangedForBefore38(params))
     );
-    window.onDidChangeActiveTextEditor(e => {
-      if(e !== undefined) {
-        const lastUpdate = this.updatesPerFile.get(e.document.uri.toString());
-        if(lastUpdate === undefined) {
-          this.controller.items.replace([]);
-        } else {
-          this.update(lastUpdate);
-        }
-      }
-    });
   }
 
   private itemStates: Map<string, PublishedVerificationStatus> = new Map();
   private itemRuns: Map<string, ItemRunState> = new Map();
   private readonly runItemsLeft: Map<TestRun, number> = new Map();
   private readonly updateListenersPerFile: Map<string, ResolveablePromise<Range[]>> = new Map();
-  private readonly updatesPerFile: Map<string, IVerificationSymbolStatusParams> = new Map();
   private readonly controller: TestController;
   private automaticRunEnd: boolean = false;
   private noRunCreationInProgress: Promise<void> = Promise.resolve();
@@ -161,7 +140,7 @@ export default class VerificationSymbolStatusView {
     const document = await workspace.openTextDocument(uri);
     const rootSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[] | undefined;
     // After this check we may no longer use awaits, because they allow the document to be updated and then our update becomes outdated.
-    if(params.version !== document.version) {
+    if((params.version ?? 1) !== document.version) {
       return;
     }
     this.updateForSpecificDocumentVersion(params, document, rootSymbols);
@@ -171,13 +150,18 @@ export default class VerificationSymbolStatusView {
     document: TextDocument,
     rootSymbols: DocumentSymbol[] | undefined) {
 
-    this.updatesPerFile.set(params.uri, params);
-    if(window.activeTextEditor?.document.uri.toString() !== params.uri.toString()) {
-      return;
-    }
     this.compilationStatusView.updateStatusBar(params);
     const controller = this.controller;
+
     let leafItems: TestItem[];
+    const nonUriItems: TestItem[] = [];
+    controller.items.forEach(item => {
+      if(item.uri !== document.uri) {
+        nonUriItems.push(item);
+      }
+    });
+    controller.items.replace(nonUriItems);
+
     if(rootSymbols !== undefined) {
       leafItems = this.updateUsingSymbols(params, controller, rootSymbols);
     } else {
@@ -185,7 +169,9 @@ export default class VerificationSymbolStatusView {
         const vscodeRange = VerificationSymbolStatusView.convertRange(f.nameRange);
         return VerificationSymbolStatusView.getItem(document.getText(vscodeRange), vscodeRange, controller, document.uri);
       });
-      controller.items.replace(leafItems);
+      for(const leafItem of leafItems) {
+        controller.items.add(leafItem);
+      }
     }
     const allTestItems: TestItem[] = [];
     function collectTestItems(collection: TestItemCollection) {
@@ -195,7 +181,6 @@ export default class VerificationSymbolStatusView {
       });
     }
     collectTestItems(controller.items);
-    this.getVerifiableRangesPromise(params.uri).resolve(allTestItems.map(v => v.range!));
 
     const runningItemsWithoutRun = params.namedVerifiables.
       map((element, index) => {
@@ -301,7 +286,13 @@ export default class VerificationSymbolStatusView {
       return updateMapping(rootSymbols, vscodeRange)!;
     });
 
-    replaceChildren(rootSymbols, controller.items);
+    const newRoots = rootSymbols.flatMap(child => {
+      const childItem = itemMapping.get(child);
+      return childItem ? [ childItem ] : [];
+    });
+    for(const newRoot of newRoots) {
+      controller.items.add(newRoot);
+    }
     for(const [ symbol, item ] of itemMapping.entries()) {
       replaceChildren(symbol.children, item.children);
     }
@@ -318,7 +309,8 @@ export default class VerificationSymbolStatusView {
   }
 
   private static getItem(name: string, itemRange: Range, controller: TestController, uri: Uri) {
-    const item = controller.createTestItem(uri.toString() + JSON.stringify(itemRange), name, uri);
+    const id = uri.toString() + JSON.stringify(itemRange);
+    const item = controller.createTestItem(id, name, uri);
     item.range = itemRange;
     return item;
   }
@@ -334,20 +326,20 @@ export default class VerificationSymbolStatusView {
     return new Position(position.line, position.character);
   }
 
-  public getVerifiableRanges(uriString: string): Promise<Range[]> {
-    return this.getVerifiableRangesPromise(uriString).promise;
-  }
-
-  private getVerifiableRangesPromise(uriString: string): ResolveablePromise<Range[]> {
-    let listener = this.updateListenersPerFile.get(uriString);
-    if(listener === undefined) {
-      let storedResolve: (value: Range[]) => void;
-      const promise = new Promise<Range[]>((resolve) => {
-        storedResolve = resolve;
+  public getVerifiableRangesForUri(uri: Uri): Range[] {
+    const stack: TestItemCollection[] = [ this.controller.items ];
+    const ranges: Range[] = [];
+    while(stack.length !== 0) {
+      const top = stack.pop()!;
+      top.forEach(child => {
+        if(child.uri === uri) {
+          if(child.range !== undefined) {
+            ranges.push(child.range);
+          }
+          stack.push(child.children);
+        }
       });
-      listener = { resolve: storedResolve!, promise };
-      this.updateListenersPerFile.set(uriString, listener);
     }
-    return listener;
+    return ranges;
   }
 }

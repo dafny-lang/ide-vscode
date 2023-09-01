@@ -258,12 +258,13 @@ export default class VerificationGutterStatusView {
 
   // Converts the IVerificationStatusGutter to a map from line verification status
   // to an array of ranges that VSCode can consume.
-  private async getRangesOfLineStatus(params: IVerificationGutterStatusParams): Promise<Map<LineVerificationStatus, Range[]>> {
+  private getRangesOfLineStatus(params: IVerificationGutterStatusParams): Map<LineVerificationStatus, Range[]> {
     const perLineStatus = this.addCosmetics(params.perLineStatus);
 
+    const uri = Uri.parse(params.uri);
     const symbolParams
       = params.perLineStatus.indexOf(LineVerificationStatus.ResolutionError) > 0 ? []
-        : await (this.symbolStatusView?.getVerifiableRanges(params.uri) ?? Promise.resolve([]));
+        : (this.symbolStatusView?.getVerifiableRangesForUri(uri) ?? []);
     const originalLinesToSkip = symbolParams.map(range => range.start.line).sort((a, b) => a - b);
 
     return VerificationGutterStatusView.perLineStatusToRanges(perLineStatus, originalLinesToSkip);
@@ -308,13 +309,13 @@ export default class VerificationGutterStatusView {
   }
 
   // Entry point when receiving IVErificationStatusGutter
-  private async updateVerificationStatusGutter(params: IVerificationGutterStatusParams): Promise<void> {
+  private updateVerificationStatusGutter(params: IVerificationGutterStatusParams) {
     if(this.areParamsOutdated(params)) {
       return;
     }
     params.uri = Uri.parse(params.uri).toString();// Makes the Uri canonical
     const documentPath = getVsDocumentPath(params);
-    const ranges = await this.getRangesOfLineStatus(params);
+    const ranges = this.getRangesOfLineStatus(params);
 
     const newData: LinearVerificationGutterStatus = {
       decorations: ranges,
