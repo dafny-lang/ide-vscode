@@ -1,13 +1,27 @@
 /* eslint-disable max-depth */
-import { commands, ExtensionContext, workspace, tests, Range, Position, Uri, TestRunRequest, TestController, TestRun, DocumentSymbol, TestItem, TestItemCollection, TextDocument, TestRunProfileKind, window } from 'vscode';
+import { commands, ExtensionContext, workspace, tests, Range, Position, Uri, TestRunRequest, TestController, TestRun, DocumentSymbol, TestItem, TestItemCollection, TextDocument, TestRunProfileKind } from 'vscode';
 import { Range as lspRange, Position as lspPosition } from 'vscode-languageclient';
 import { IVerificationSymbolStatusParams, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import CompilationStatusView from './compilationStatusView';
 
-interface ResolveablePromise<T> {
-  promise: Promise<T>;
-  resolve(value: T): void;
+class ResolveablePromise<T> {
+  private _resolve: (value: T) => void = () => {};
+  private readonly _promise: Promise<T>;
+
+  public constructor() {
+    this._promise = new Promise<T>((innerResolve) => {
+      this._resolve = innerResolve;
+    });
+  }
+
+  public resolve(value: T): void {
+    this._resolve(value);
+  }
+
+  public get promise() {
+    return this._promise;
+  }
 }
 
 interface ItemRunState {
@@ -41,14 +55,6 @@ export default class VerificationSymbolStatusView {
     this.controller = this.createController();
     context.subscriptions.push(this.controller);
 
-    workspace.onDidChangeTextDocument(e => {
-      const uriString = e.document.uri.toString();
-      this.updateListenersPerFile.delete(uriString);
-    }, this, context.subscriptions);
-    workspace.onDidCloseTextDocument(e => {
-      const uriString = e.uri.toString();
-      this.controller.items.delete(uriString);
-    }, this, context.subscriptions);
     context.subscriptions.push(
       languageClient.onVerificationSymbolStatus(params => this.update(params)),
       languageClient.onCompilationStatus(params => compilationStatusView.compilationStatusChangedForBefore38(params))
@@ -58,7 +64,6 @@ export default class VerificationSymbolStatusView {
   private itemStates: Map<string, PublishedVerificationStatus> = new Map();
   private itemRuns: Map<string, ItemRunState> = new Map();
   private readonly runItemsLeft: Map<TestRun, number> = new Map();
-  private readonly updateListenersPerFile: Map<string, ResolveablePromise<Range[]>> = new Map();
   private readonly controller: TestController;
   private automaticRunEnd: boolean = false;
   private noRunCreationInProgress: Promise<void> = Promise.resolve();
@@ -68,12 +73,10 @@ export default class VerificationSymbolStatusView {
     controller.createRunProfile('Verify', TestRunProfileKind.Run, async (request) => {
       const items: TestItem[] = this.getItemsInRun(request, controller);
       const runningItems: TestItem[] = [];
-      let outerResolve: () => void;
       await this.noRunCreationInProgress;
+      const noRunCreationInProgress = new ResolveablePromise<void>();
+      this.noRunCreationInProgress = noRunCreationInProgress.promise;
       try {
-        this.noRunCreationInProgress = new Promise((resolve) => {
-          outerResolve = resolve;
-        });
 
         const runs = items.map(item => this.languageClient.runVerification({ position: item.range!.start, textDocument: { uri: item.uri!.toString() } }));
         for(const index in runs) {
@@ -87,7 +90,7 @@ export default class VerificationSymbolStatusView {
           this.createRun(runningItems);
         }
       } finally {
-        outerResolve!();
+        noRunCreationInProgress.resolve!();
       }
     }, true);
     return controller;
@@ -133,7 +136,6 @@ export default class VerificationSymbolStatusView {
 
   private async update(params: IVerificationSymbolStatusParams): Promise<void> {
     await this.noRunCreationInProgress;
-    // Make sure only to use the latest params at this point, and don't use them if they've already been used.
 
     const uri = Uri.parse(params.uri);
     params.uri = uri.toString();
@@ -146,6 +148,15 @@ export default class VerificationSymbolStatusView {
     this.updateForSpecificDocumentVersion(params, document, rootSymbols);
   }
 
+  private clearItemsForUri(uri: Uri) {
+    const nonUriItems: TestItem[] = [];
+    this.controller.items.forEach(item => {
+      if(item.uri !== uri) {
+        nonUriItems.push(item);
+      }
+    });
+    this.controller.items.replace(nonUriItems);
+  }
   private updateForSpecificDocumentVersion(params: IVerificationSymbolStatusParams,
     document: TextDocument,
     rootSymbols: DocumentSymbol[] | undefined) {
@@ -153,15 +164,9 @@ export default class VerificationSymbolStatusView {
     this.compilationStatusView.updateStatusBar(params);
     const controller = this.controller;
 
-    let leafItems: TestItem[];
-    const nonUriItems: TestItem[] = [];
-    controller.items.forEach(item => {
-      if(item.uri !== document.uri) {
-        nonUriItems.push(item);
-      }
-    });
-    controller.items.replace(nonUriItems);
+    this.clearItemsForUri(document.uri);
 
+    let leafItems: TestItem[];
     if(rootSymbols !== undefined) {
       leafItems = this.updateUsingSymbols(params, controller, rootSymbols);
     } else {
@@ -173,6 +178,7 @@ export default class VerificationSymbolStatusView {
         controller.items.add(leafItem);
       }
     }
+
     const allTestItems: TestItem[] = [];
     function collectTestItems(collection: TestItemCollection) {
       collection.forEach(item => {
