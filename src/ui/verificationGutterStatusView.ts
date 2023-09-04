@@ -150,7 +150,7 @@ export default class VerificationGutterStatusView {
 
     this.lineCountsPerDocument.set(document.uri, document.lineCount);
     const perLineStatus = VerificationGutterStatusView.computeGutterIcons(document.lineCount, nameToSymbolRange, symbolStatus?.namedVerifiables, diagnostics);
-    this.updateVerificationStatusGutter({ uri: uri.toString(), perLineStatus: perLineStatus }, false);
+    this.updateUsingLineStatus({ uri: uri.toString(), perLineStatus: perLineStatus });
   }
 
   private getNameToSymbolRange(rootSymbols: DocumentSymbol[]): Map<string, Range> {
@@ -447,7 +447,7 @@ export default class VerificationGutterStatusView {
   }
 
   // Entry point when receiving IVErificationStatusGutter
-  private updateVerificationStatusGutter(params: IVerificationGutterStatusParams) {
+  private updateUsingLineStatus(params: IVerificationGutterStatusParams) {
     if(this.areParamsOutdated(params)) {
       return;
     }
