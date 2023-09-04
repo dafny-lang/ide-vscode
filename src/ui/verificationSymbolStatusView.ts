@@ -1,10 +1,9 @@
 /* eslint-disable max-depth */
-import { commands, ExtensionContext, workspace, tests, Range, Position, Uri, TestRunRequest, TestController, TestRun, DocumentSymbol, TestItem, TestItemCollection, TextDocument, TestRunProfileKind } from 'vscode';
+import { commands, ExtensionContext, workspace, Event, tests, Range, Position, Uri, TestRunRequest, TestController, TestRun, DocumentSymbol, TestItem, TestItemCollection, TextDocument, TestRunProfileKind, EventEmitter } from 'vscode';
 import { Range as lspRange, Position as lspPosition } from 'vscode-languageclient';
-import { IVerificationSymbolStatusParams, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
+import { IVerificationSymbolStatusParams, NamedVerifiableStatus, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import CompilationStatusView from './compilationStatusView';
-import SymbolStatusService from './symbolStatusService';
 
 class ResolveablePromise<T> {
   private _resolve: (value: T) => void = () => {};
@@ -38,9 +37,8 @@ export default class VerificationSymbolStatusView {
   public static createAndRegister(
     context: ExtensionContext,
     languageClient: DafnyLanguageClient,
-    symbolStatusService: SymbolStatusService,
     compilationStatusView: CompilationStatusView): VerificationSymbolStatusView {
-    return new VerificationSymbolStatusView(context, languageClient, symbolStatusService, compilationStatusView);
+    return new VerificationSymbolStatusView(context, languageClient, compilationStatusView);
   }
 
   private itemStates: Map<string, PublishedVerificationStatus> = new Map();
@@ -49,17 +47,20 @@ export default class VerificationSymbolStatusView {
   private readonly controller: TestController;
   private automaticRunEnd: boolean = false;
   private noRunCreationInProgress: Promise<void> = Promise.resolve();
+  private readonly _onUpdates: EventEmitter<Uri> = new EventEmitter();
+  public onUpdates: Event<Uri> = this._onUpdates.event;
 
   public constructor(
     private readonly context: ExtensionContext,
     private readonly languageClient: DafnyLanguageClient,
-    symbolStatusService: SymbolStatusService,
     private readonly compilationStatusView: CompilationStatusView) {
     this.controller = this.createController();
     context.subscriptions.push(this.controller);
 
     context.subscriptions.push(
-      symbolStatusService.onUpdates(params => this.update(params)),
+      languageClient.onVerificationSymbolStatus(params => {
+        this.update(params);
+      }),
       languageClient.onCompilationStatus(params => compilationStatusView.compilationStatusChangedForBefore38(params))
     );
   }
@@ -176,6 +177,7 @@ export default class VerificationSymbolStatusView {
         controller.items.add(leafItem);
       }
     }
+    this._onUpdates.fire(document.uri);
 
     const allTestItems: TestItem[] = [];
     function collectTestItems(collection: TestItemCollection) {
@@ -202,6 +204,8 @@ export default class VerificationSymbolStatusView {
     const newItemRuns = new Map();
     params.namedVerifiables.forEach((element, index) => {
       const testItem = leafItems[index];
+      this.statuses.set(testItem.id, element.status);
+
       const itemRunState = this.itemRuns.get(testItem.id)!;
       if(this.itemStates.get(testItem.id) === element.status) {
         const isRunning = itemRunState !== undefined;
@@ -330,15 +334,18 @@ export default class VerificationSymbolStatusView {
     return new Position(position.line, position.character);
   }
 
-  public getVerifiableRangesForUri(uri: Uri): Range[] {
+  private readonly statuses: Map<string, PublishedVerificationStatus> = new Map();
+
+  public getVerifiableRangesForUri(uri: Uri): NamedVerifiableStatus[] {
     const stack: TestItemCollection[] = [ this.controller.items ];
-    const ranges: Range[] = [];
+    const ranges: NamedVerifiableStatus[] = [];
     while(stack.length !== 0) {
       const top = stack.pop()!;
       top.forEach(child => {
-        if(child.uri === uri) {
-          if(child.range !== undefined) {
-            ranges.push(child.range);
+        if(child.uri?.toString() === uri.toString()) {
+          const status = this.statuses.get(child.id);
+          if(child.range !== undefined && status !== undefined) {
+            ranges.push({ nameRange: child.range, status: status });
           }
           stack.push(child.children);
         }

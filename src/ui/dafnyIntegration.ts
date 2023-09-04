@@ -10,7 +10,6 @@ import VerificationSymbolStatusView from './verificationSymbolStatusView';
 import Configuration from '../configuration';
 import { ConfigurationConstants, LanguageServerConstants } from '../constants';
 import { DafnyInstaller } from '../language/dafnyInstallation';
-import SymbolStatusService from './symbolStatusService';
 
 export default function createAndRegisterDafnyIntegration(
   installer: DafnyInstaller,
@@ -22,9 +21,8 @@ export default function createAndRegisterDafnyIntegration(
   const compilationStatusView = CompilationStatusView.createAndRegister(installer.context, languageClient, languageServerVersion);
   let symbolStatusView: VerificationSymbolStatusView | undefined = undefined;
   const serverSupportsSymbolStatusView = configuredVersionToNumeric('3.8.0') <= configuredVersionToNumeric(languageServerVersion);
-  const symbolStatusService = new SymbolStatusService(installer.context, languageClient);
   if(serverSupportsSymbolStatusView && Configuration.get<boolean>(ConfigurationConstants.LanguageServer.DisplayVerificationAsTests)) {
-    symbolStatusView = VerificationSymbolStatusView.createAndRegister(installer.context, languageClient, symbolStatusService, compilationStatusView);
+    symbolStatusView = VerificationSymbolStatusView.createAndRegister(installer.context, languageClient, compilationStatusView);
   } else {
     if(serverSupportsSymbolStatusView) {
       compilationStatusView.registerAfter38Messages();
@@ -34,7 +32,7 @@ export default function createAndRegisterDafnyIntegration(
   }
   const displayGutterStatus = Configuration.get<boolean>(ConfigurationConstants.LanguageServer.DisplayGutterStatus);
   if(displayGutterStatus) {
-    VerificationGutterStatusView.createAndRegister(installer.context, languageClient, symbolStatusService, symbolStatusView);
+    VerificationGutterStatusView.createAndRegister(installer.context, languageClient, symbolStatusView);
   }
   CompileCommands.createAndRegister(installer);
   RelatedErrorView.createAndRegister(installer.context, languageClient);

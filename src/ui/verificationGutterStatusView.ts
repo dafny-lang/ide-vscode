@@ -12,7 +12,6 @@ import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath } from '../tools/vscode';
 import VerificationSymbolStatusView from './verificationSymbolStatusView';
 import { NamedVerifiableStatus, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
-import SymbolStatusService from './symbolStatusService';
 
 const DELAY_IF_RESOLUTION_ERROR = 2000;
 const ANIMATION_INTERVAL = 200;
@@ -60,7 +59,6 @@ export default class VerificationGutterStatusView {
     = VerificationGutterStatusView.FillLineVerificationStatusMap();
 
   private constructor(context: ExtensionContext,
-    private readonly symbolStatusService: SymbolStatusService,
     private readonly symbolStatusView: VerificationSymbolStatusView | undefined) {
     const icon = VerificationGutterStatusView.makeIconAux(false, context);
     const grayIcon = VerificationGutterStatusView.makeIconAux(true, context);
@@ -116,9 +114,8 @@ export default class VerificationGutterStatusView {
   public static createAndRegister(
     context: ExtensionContext,
     languageClient: DafnyLanguageClient,
-    symbolStatusService: SymbolStatusService,
     symbolStatusView: VerificationSymbolStatusView | undefined): VerificationGutterStatusView {
-    const instance = new VerificationGutterStatusView(context, symbolStatusService, symbolStatusView);
+    const instance = new VerificationGutterStatusView(context, symbolStatusView);
     languageClient.onPublishDiagnostics((uri) => {
       instance.update(uri);
     });
@@ -126,16 +123,19 @@ export default class VerificationGutterStatusView {
     context.subscriptions.push(
       workspace.onDidCloseTextDocument(document => instance.clearVerificationDiagnostics(document.uri.toString())),
       window.onDidChangeActiveTextEditor(editor => instance.refreshDisplayedVerificationGutterStatuses(editor)),
-
-      symbolStatusService.onUpdates(params => {
-        instance.update(Uri.parse(params.uri));
-      }),
       workspace.onDidChangeTextDocument(e => {
         if(instance.lineCountsPerDocument.get(e.document.uri) !== e.document.lineCount) {
           instance.update(e.document.uri);
         }
       })
     );
+    if(symbolStatusView !== undefined) {
+      context.subscriptions.push(
+        symbolStatusView.onUpdates(uri => {
+          instance.update(uri);
+        })
+      );
+    }
     return instance;
   }
 
@@ -144,12 +144,12 @@ export default class VerificationGutterStatusView {
     const rootSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[] | undefined;
     const nameToSymbolRange = rootSymbols === undefined ? undefined : this.getNameToSymbolRange(rootSymbols);
     const diagnostics = languages.getDiagnostics(uri);
-    const symbolStatus = this.symbolStatusService.getUpdatesForFile(uri.toString());
+    const verifiableRanges = this.symbolStatusView!.getVerifiableRangesForUri(uri);
 
     const document = await workspace.openTextDocument(uri);
 
     this.lineCountsPerDocument.set(document.uri, document.lineCount);
-    const perLineStatus = VerificationGutterStatusView.computeGutterIcons(document.lineCount, nameToSymbolRange, symbolStatus?.namedVerifiables, diagnostics);
+    const perLineStatus = VerificationGutterStatusView.computeGutterIcons(document.lineCount, nameToSymbolRange, verifiableRanges, diagnostics);
     this.updateUsingLineStatus({ uri: uri.toString(), perLineStatus: perLineStatus });
   }
 
@@ -403,7 +403,7 @@ export default class VerificationGutterStatusView {
     const symbolParams
       = params.perLineStatus.indexOf(LineVerificationStatus.ResolutionError) > 0 ? []
         : (this.symbolStatusView?.getVerifiableRangesForUri(uri) ?? []);
-    const originalLinesToSkip = symbolParams.map(range => range.start.line).sort((a, b) => a - b);
+    const originalLinesToSkip = symbolParams.map(range => range.nameRange.start.line).sort((a, b) => a - b);
 
     return VerificationGutterStatusView.perLineStatusToRanges(perLineStatus, originalLinesToSkip);
   }
