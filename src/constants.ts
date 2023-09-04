@@ -45,7 +45,7 @@ export namespace DotnetConstants {
 }
 
 export namespace LanguageServerConstants {
-  export const LatestStable = 'latest';
+  export const LatestStable = 'latest stable release';
   export const LatestNightly = 'latest nightly';
   export const Custom = 'custom';
   export const LatestVersion = '4.2.0';

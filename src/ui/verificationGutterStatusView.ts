@@ -122,19 +122,20 @@ export default class VerificationGutterStatusView {
     languageClient.onPublishDiagnostics((uri) => {
       instance.update(uri);
     });
-    symbolStatusService.onUpdates(params => {
-      instance.update(Uri.parse(params.uri));
-    });
-    workspace.onDidChangeTextDocument(e => {
-      if(instance.lineCountsPerDocument.get(e.document.uri) !== e.document.lineCount) {
-        instance.update(e.document.uri);
-      }
-    });
 
     context.subscriptions.push(
       workspace.onDidCloseTextDocument(document => instance.clearVerificationDiagnostics(document.uri.toString())),
       window.onDidChangeActiveTextEditor(editor => instance.refreshDisplayedVerificationGutterStatuses(editor)),
-      languageClient.onVerificationStatusGutter(params => instance.updateVerificationStatusGutter(params, true))
+      languageClient.onVerificationStatusGutter(params => instance.updateVerificationStatusGutter(params)),
+
+      symbolStatusService.onUpdates(params => {
+        instance.update(Uri.parse(params.uri));
+      }),
+      workspace.onDidChangeTextDocument(e => {
+        if(instance.lineCountsPerDocument.get(e.document.uri) !== e.document.lineCount) {
+          instance.update(e.document.uri);
+        }
+      })
     );
     return instance;
   }
@@ -396,18 +397,14 @@ export default class VerificationGutterStatusView {
 
   // Converts the IVerificationStatusGutter to a map from line verification status
   // to an array of ranges that VSCode can consume.
-  private async getRangesOfLineStatus(params: IVerificationGutterStatusParams, skipVerificationSymbolHeaders: boolean): Promise<Map<LineVerificationStatus, Range[]>> {
+  private getRangesOfLineStatus(params: IVerificationGutterStatusParams): Map<LineVerificationStatus, Range[]> {
     const perLineStatus = this.addCosmetics(params.perLineStatus);
 
-    let originalLinesToSkip: number[];
-    if(skipVerificationSymbolHeaders) {
-      const symbolParams
-        = params.perLineStatus.indexOf(LineVerificationStatus.ResolutionError) > 0 ? []
-          : await (this.symbolStatusView?.getVerifiableRanges(params.uri) ?? Promise.resolve([]));
-      originalLinesToSkip = symbolParams.map(range => range.start.line).sort((a, b) => a - b);
-    } else {
-      originalLinesToSkip = [];
-    }
+    const uri = Uri.parse(params.uri);
+    const symbolParams
+      = params.perLineStatus.indexOf(LineVerificationStatus.ResolutionError) > 0 ? []
+        : (this.symbolStatusView?.getVerifiableRangesForUri(uri) ?? []);
+    const originalLinesToSkip = symbolParams.map(range => range.start.line).sort((a, b) => a - b);
 
     return VerificationGutterStatusView.perLineStatusToRanges(perLineStatus, originalLinesToSkip);
   }
@@ -451,13 +448,13 @@ export default class VerificationGutterStatusView {
   }
 
   // Entry point when receiving IVErificationStatusGutter
-  public async updateVerificationStatusGutter(params: IVerificationGutterStatusParams, skipVerificationSymbolHeaders: boolean): Promise<void> {
+  private updateVerificationStatusGutter(params: IVerificationGutterStatusParams) {
     if(this.areParamsOutdated(params)) {
       return;
     }
     params.uri = Uri.parse(params.uri).toString();// Makes the Uri canonical
     const documentPath = getVsDocumentPath(params);
-    const ranges = await this.getRangesOfLineStatus(params, skipVerificationSymbolHeaders);
+    const ranges = this.getRangesOfLineStatus(params);
 
     const newData: LinearVerificationGutterStatus = {
       decorations: ranges,
