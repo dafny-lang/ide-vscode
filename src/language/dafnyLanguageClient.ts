@@ -7,7 +7,6 @@ import { DafnyDocumentFilter } from '../tools/vscode';
 import { ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from './api/compilationStatus';
 import { ICounterexampleItem, ICounterexampleParams } from './api/counterExample';
 import { IGhostDiagnosticsParams } from './api/ghostDiagnostics';
-import { IVerificationGutterStatusParams as IVerificationGutterStatusParams } from './api/verificationGutterStatusParams';
 import { IVerificationSymbolStatusParams } from './api/verificationSymbolStatusParams';
 import { DafnyInstaller } from './dafnyInstallation';
 import * as os from 'os';
@@ -167,10 +166,6 @@ export class DafnyLanguageClient extends LanguageClient {
 
   public onGhostDiagnostics(callback: (params: IGhostDiagnosticsParams) => void): Disposable {
     return this.onNotification('dafny/ghost/diagnostics', callback);
-  }
-
-  public onVerificationStatusGutter(callback: (params: IVerificationGutterStatusParams) => void): Disposable {
-    return this.onNotification('dafny/verification/status/gutter', callback);
   }
 
   public onVerificationSymbolStatus(callback: (params: IVerificationSymbolStatusParams) => void): Disposable {

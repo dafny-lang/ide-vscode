@@ -126,7 +126,6 @@ export default class VerificationGutterStatusView {
     context.subscriptions.push(
       workspace.onDidCloseTextDocument(document => instance.clearVerificationDiagnostics(document.uri.toString())),
       window.onDidChangeActiveTextEditor(editor => instance.refreshDisplayedVerificationGutterStatuses(editor)),
-      languageClient.onVerificationStatusGutter(params => instance.updateVerificationStatusGutter(params)),
 
       symbolStatusService.onUpdates(params => {
         instance.update(Uri.parse(params.uri));
