@@ -33,9 +33,6 @@ export default class CompileCommands {
   }
 }
 
-// Build: run == false && test == false
-// Run:   run == true
-// Test:  run == false && test == true
 async function buildRunOrTest(installer: DafnyInstaller, commandType: CommandType, useCustomArgs: boolean): Promise<boolean> {
   const document = window.activeTextEditor?.document;
   if(document == null) {
@@ -77,7 +74,7 @@ class CommandFactory {
     if(compilerArgs == null) {
       return undefined;
     }
-    let result = `${commandPrefix}"${compilerPath.command}" ${compilerPath.args?.join(' ')} "${this.fileName}"`;
+    let result = `${commandPrefix}"${compilerPath.command}" ${compilerPath.args?.map(arg => `"${arg}"`).join(' ')} "${this.fileName}"`;
     if(compilerPath.options?.cwd !== undefined) {
       result = `cd ${compilerPath.options?.cwd}; ${result}`;
     }
