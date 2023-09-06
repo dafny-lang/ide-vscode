@@ -6,6 +6,7 @@ export enum CompilationStatus {
   Resolving = 'ResolutionStarted',
   ResolutionFailed = 'ResolutionFailed',
   PreparingVerification = 'PreparingVerification',
+  ResolutionSucceeded = 'ResolutionSucceeded',
   CompilationSucceeded = 'CompilationSucceeded',
   VerificationStarted = 'VerificationStarted',
   VerificationFailed = 'VerificationFailed',

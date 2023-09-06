@@ -54,19 +54,24 @@ export default class CompilationStatusView {
   private readonly documentStatusMessages = new Map<string, IDocumentStatusMessage>();
 
   private constructor(private readonly statusBarItem: StatusBarItem,
+    private readonly symbolStatusView: VerificationSymbolStatusView,
     private readonly languageClient: DafnyLanguageClient,
     private readonly context: ExtensionContext) {}
 
-  public static createAndRegister(context: ExtensionContext, languageClient: DafnyLanguageClient, languageServerVersion: string): CompilationStatusView {
+  public static createAndRegister(context: ExtensionContext,
+    languageClient: DafnyLanguageClient,
+    symbolStatusView: VerificationSymbolStatusView,
+    languageServerVersion: string): CompilationStatusView {
     const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, StatusBarPriority);
     statusBarItem.command = DafnyCommands.OpenStatusBarMenu;
-    const view = new CompilationStatusView(statusBarItem, languageClient, context);
+    const view = new CompilationStatusView(statusBarItem, symbolStatusView, languageClient, context);
     const statusBarActionView = new StatusBarActionView(view, languageServerVersion, context);
     context.subscriptions.push(
       commands.registerCommand(DafnyCommands.OpenStatusBarMenu, () => statusBarActionView.openStatusBarMenu()),
       workspace.onDidCloseTextDocument(document => view.documentClosed(document)),
       workspace.onDidChangeTextDocument(() => view.updateActiveDocumentStatus()),
       window.onDidChangeActiveTextEditor(() => view.updateActiveDocumentStatus()),
+      symbolStatusView.onUpdates(uri => view.updateStatusBar(uri)),
       enableOnlyForDafnyDocuments(statusBarItem),
       statusBarItem
     );
@@ -84,7 +89,6 @@ export default class CompilationStatusView {
   public registerAfter38Messages(): void {
     this.context.subscriptions.push(
       this.languageClient.onCompilationStatus(params => this.compilationStatusChangedForBefore38(params)),
-      this.languageClient.onVerificationSymbolStatus(params => this.updateStatusBar(params))
     );
   }
 
@@ -122,6 +126,7 @@ export default class CompilationStatusView {
     CompilationStatus.Resolving,
     CompilationStatus.ParsingFailed,
     CompilationStatus.ResolutionFailed,
+    CompilationStatus.ResolutionSucceeded,
     CompilationStatus.PreparingVerification,
     CompilationStatus.CompilationSucceeded ]);
 
@@ -174,15 +179,15 @@ export default class CompilationStatusView {
     return this.documentStatusMessages.get(document)?.message ?? '';
   }
 
-  public async updateStatusBar(params: IVerificationSymbolStatusParams): Promise<void> {
-    const completed = params.namedVerifiables.filter(v => v.status >= PublishedVerificationStatus.Error).length;
-    const queued = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Queued);
-    const running = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Running);
-    const total = params.namedVerifiables.length;
+  public async updateStatusBar(uri: Uri): Promise<void> {
+    const document = await workspace.openTextDocument(uri);
+    const statuses = this.symbolStatusView.getVerifiableRangesForUri(uri);
+    const completed = statuses.filter(v => v.status >= PublishedVerificationStatus.Error).length;
+    const queued = statuses.filter(v => v.status === PublishedVerificationStatus.Queued);
+    const running = statuses.filter(v => v.status === PublishedVerificationStatus.Running);
+    const total = statuses.length;
     let message: string;
-    params.uri = Uri.parse(params.uri).toString();// Makes the Uri canonical
     if(running.length > 0 || queued.length > 0) {
-      const document = await workspace.openTextDocument(Uri.parse(params.uri));
       const verifying = running.map(item => document.getText(VerificationSymbolStatusView.convertRange(item.nameRange))).join(', ');
       message = `$(sync~spin) Verified ${completed}/${total}`;
       if(running.length > 0) {
@@ -191,8 +196,8 @@ export default class CompilationStatusView {
         message += ', preparing verification';
       }
     } else {
-      const skipped = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Stale).length;
-      const errors = params.namedVerifiables.filter(v => v.status === PublishedVerificationStatus.Error).length;
+      const skipped = statuses.filter(v => v.status === PublishedVerificationStatus.Stale).length;
+      const errors = statuses.filter(v => v.status === PublishedVerificationStatus.Error).length;
       const succeeded = completed - errors;
 
       if(errors === 0) {
@@ -205,6 +210,6 @@ export default class CompilationStatusView {
         message = `${Messages.CompilationStatus.VerificationFailed} ${(errors > 1 ? `${errors} declarations` : 'the declaration')}`;
       }
     }
-    this.setDocumentStatusMessage(params.uri.toString(), message, params.version);
+    this.setDocumentStatusMessage(uri.toString(), message, document.version);
   }
 }

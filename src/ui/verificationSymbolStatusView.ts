@@ -161,7 +161,6 @@ export default class VerificationSymbolStatusView {
     document: TextDocument,
     rootSymbols: DocumentSymbol[] | undefined) {
 
-    this.compilationStatusView.updateStatusBar(params);
     const controller = this.controller;
 
     this.clearItemsForUri(document.uri);
@@ -178,6 +177,8 @@ export default class VerificationSymbolStatusView {
         controller.items.add(leafItem);
       }
     }
+
+    this._onUpdates.fire(document.uri);
 
     const allTestItems: TestItem[] = [];
     function collectTestItems(collection: TestItemCollection) {
