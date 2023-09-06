@@ -12,12 +12,13 @@ jobs:
       - name: "Prepare: Checkout Repository"
         uses: actions/checkout@v2
       - name: "Prepare: Use Node.js ${{ matrix.node-version }}"
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
-          node-version: v14.x
+          node-version: v16.x
       #- name: "Prepare: Setup sonarqube"
       #  uses: warchant/setup-sonar-scanner@v1
-      - run: npm install -g npm@latest
+      #- run: npm install -g npm@latest
+      - run: npm install -g npm@8.13.2
       - run: npm install
       - run: npm run lint
       - run: npm run vscode:prepublish
@@ -25,10 +26,11 @@ jobs:
       #  env:
       #    CI: true
       - name: "Prepare: Package VSCode Extension"
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
-          node-version: v14.x
-      - run: npm install -g npm@latest
+          node-version: v16.x
+      #- run: npm install -g npm@latest
+      - run: npm install -g npm@8.13.2
       - run: npm install -g vsce@2.9.2
       - run: vsce package --out dist/
 
