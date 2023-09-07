@@ -23,7 +23,7 @@ export default function createAndRegisterDafnyIntegration(
   if(serverSupportsSymbolStatusView && Configuration.get<boolean>(ConfigurationConstants.LanguageServer.DisplayVerificationAsTests)) {
     symbolStatusView = VerificationSymbolStatusView.createAndRegister(installer.context, languageClient);
   }
-  CompilationStatusView.createAndRegister(installer.context, languageClient, symbolStatusView, languageServerVersion);
+  CompilationStatusView.createAndRegister(installer.context, languageClient, serverSupportsSymbolStatusView, languageServerVersion);
   VerificationGutterStatusView.createAndRegister(installer.context, languageClient, symbolStatusView);
   CompileCommands.createAndRegister(installer);
   RelatedErrorView.createAndRegister(installer.context, languageClient);

@@ -6,7 +6,7 @@ import { getVsDocumentPath } from '../tools/vscode';
 import { enableOnlyForDafnyDocuments } from '../tools/visibility';
 import { Messages } from './messages';
 import StatusBarActionView from './statusBarActionView';
-import { PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
+import { IVerificationSymbolStatusParams, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import VerificationSymbolStatusView from './verificationSymbolStatusView';
 
 const StatusBarPriority = 10;
@@ -59,7 +59,7 @@ export default class CompilationStatusView {
 
   public static createAndRegister(context: ExtensionContext,
     languageClient: DafnyLanguageClient,
-    symbolStatusView: VerificationSymbolStatusView | undefined,
+    useOnVerificationSymbolStatus: boolean,
     languageServerVersion: string): CompilationStatusView {
     const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, StatusBarPriority);
     statusBarItem.command = DafnyCommands.OpenStatusBarMenu;
@@ -74,16 +74,16 @@ export default class CompilationStatusView {
       statusBarItem
     );
 
-    if(symbolStatusView === undefined) {
-      view.registerBefore38Messages();
-    } else {
-      context.subscriptions.push(
-        symbolStatusView.onUpdates(uri => view.showVerifiableRangesInStatusBar(uri, symbolStatusView))
-      );
+    if(useOnVerificationSymbolStatus) {
+      languageClient.onVerificationSymbolStatus(params => {
+        view.showVerifiableRangesInStatusBar(params);
+      });
 
       context.subscriptions.push(
         languageClient.onCompilationStatus(params => view.compilationStatusChangedAfter38(params))
       );
+    } else {
+      view.registerBefore38Messages();
     }
     return view;
   }
@@ -196,9 +196,11 @@ export default class CompilationStatusView {
   }
 
   private readonly verifiableRangeMessages = new Map<string, string>();
-  public async showVerifiableRangesInStatusBar(uri: Uri, symbolStatusView: VerificationSymbolStatusView): Promise<void> {
+  public async showVerifiableRangesInStatusBar(params: IVerificationSymbolStatusParams): Promise<void> {
+    const uri = Uri.parse(params.uri);
+
     const document = await workspace.openTextDocument(uri);
-    const statuses = symbolStatusView.getVerifiableRangesForUri(uri);
+    const statuses = params.namedVerifiables;
     const completed = statuses.filter(v => v.status >= PublishedVerificationStatus.Error).length;
     const queued = statuses.filter(v => v.status === PublishedVerificationStatus.Queued);
     const running = statuses.filter(v => v.status === PublishedVerificationStatus.Running);
