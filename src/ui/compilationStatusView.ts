@@ -141,6 +141,7 @@ export default class CompilationStatusView {
     if(params.status === CompilationStatus.ResolutionSucceeded) {
       const verifiableRangeMessage = this.verifiableRangeMessages.get(params.uri);
       if(verifiableRangeMessage === undefined) {
+        // If we have not yet received verification symbols, then pretend we're still resolving.
         this.compilationStatusChangedAfter38({ ...params, status: CompilationStatus.Resolving });
       } else {
         this.setDocumentStatusMessage(

@@ -1,7 +1,7 @@
 /* eslint-disable max-depth */
-import { commands, ExtensionContext, workspace, Event, tests, Range, Position, Uri, TestRunRequest, TestController, TestRun, DocumentSymbol, TestItem, TestItemCollection, TextDocument, TestRunProfileKind, EventEmitter } from 'vscode';
+import { commands, ExtensionContext, workspace, tests, Range, Position, Uri, TestRunRequest, TestController, TestRun, DocumentSymbol, TestItem, TestItemCollection, TextDocument, TestRunProfileKind } from 'vscode';
 import { Range as lspRange, Position as lspPosition } from 'vscode-languageclient';
-import { IVerificationSymbolStatusParams, NamedVerifiableStatus, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
+import { IVerificationSymbolStatusParams, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 
 class ResolveablePromise<T> {
@@ -28,6 +28,12 @@ interface ItemRunState {
   startedRunningTime?: number;
 }
 
+export function createAndRegister(
+  context: ExtensionContext,
+  languageClient: DafnyLanguageClient): VerificationSymbolStatusView {
+  return new VerificationSymbolStatusView(context, languageClient);
+}
+
 /**
  * This class shows verification tasks through the VSCode testing UI.
  */
@@ -39,15 +45,6 @@ export default class VerificationSymbolStatusView {
     return new VerificationSymbolStatusView(context, languageClient);
   }
 
-  private itemStates: Map<string, PublishedVerificationStatus> = new Map();
-  private itemRuns: Map<string, ItemRunState> = new Map();
-  private readonly runItemsLeft: Map<TestRun, number> = new Map();
-  private readonly controller: TestController;
-  private automaticRunEnd: boolean = false;
-  private noRunCreationInProgress: Promise<void> = Promise.resolve();
-  private readonly _onUpdates: EventEmitter<Uri> = new EventEmitter();
-  public onUpdates: Event<Uri> = this._onUpdates.event;
-
   public constructor(
     private readonly context: ExtensionContext,
     private readonly languageClient: DafnyLanguageClient) {
@@ -55,12 +52,16 @@ export default class VerificationSymbolStatusView {
     context.subscriptions.push(this.controller);
 
     context.subscriptions.push(
-      languageClient.onVerificationSymbolStatus(params => {
-        this.update(params);
-      })
+      languageClient.onVerificationSymbolStatus(params => this.update(params))
     );
   }
 
+  private itemStates: Map<string, PublishedVerificationStatus> = new Map();
+  private itemRuns: Map<string, ItemRunState> = new Map();
+  private readonly runItemsLeft: Map<TestRun, number> = new Map();
+  private readonly controller: TestController;
+  private automaticRunEnd: boolean = false;
+  private noRunCreationInProgress: Promise<void> = Promise.resolve();
 
   private createController(): TestController {
     const controller = tests.createTestController('verificationStatus', 'Verification Status');
@@ -132,7 +133,6 @@ export default class VerificationSymbolStatusView {
     await this.noRunCreationInProgress;
 
     const uri = Uri.parse(params.uri);
-    await this.noRunCreationInProgress;
     params.uri = uri.toString();
     const document = await workspace.openTextDocument(uri);
     const rootSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[] | undefined;
@@ -172,7 +172,6 @@ export default class VerificationSymbolStatusView {
         controller.items.add(leafItem);
       }
     }
-    this._onUpdates.fire(document.uri);
 
     const allTestItems: TestItem[] = [];
     function collectTestItems(collection: TestItemCollection) {
@@ -199,8 +198,6 @@ export default class VerificationSymbolStatusView {
     const newItemRuns = new Map();
     params.namedVerifiables.forEach((element, index) => {
       const testItem = leafItems[index];
-      this.leafStatuses.set(testItem.id, element.status);
-
       const itemRunState = this.itemRuns.get(testItem.id)!;
       if(this.itemStates.get(testItem.id) === element.status) {
         const isRunning = itemRunState !== undefined;
@@ -329,18 +326,15 @@ export default class VerificationSymbolStatusView {
     return new Position(position.line, position.character);
   }
 
-  private readonly leafStatuses: Map<string, PublishedVerificationStatus> = new Map();
-
-  public getVerifiableRangesForUri(uri: Uri): NamedVerifiableStatus[] {
+  public getVerifiableRangesForUri(uri: Uri): Range[] {
     const stack: TestItemCollection[] = [ this.controller.items ];
-    const ranges: NamedVerifiableStatus[] = [];
+    const ranges: Range[] = [];
     while(stack.length !== 0) {
       const top = stack.pop()!;
       top.forEach(child => {
-        if(child.uri?.toString() === uri.toString()) {
-          const status = this.leafStatuses.get(child.id);
-          if(child.range !== undefined && status !== undefined) {
-            ranges.push({ nameRange: child.range, status: status });
+        if(child.uri === uri) {
+          if(child.range !== undefined) {
+            ranges.push(child.range);
           }
           stack.push(child.children);
         }
