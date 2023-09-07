@@ -28,12 +28,6 @@ interface ItemRunState {
   startedRunningTime?: number;
 }
 
-export function createAndRegister(
-  context: ExtensionContext,
-  languageClient: DafnyLanguageClient): VerificationSymbolStatusView {
-  return new VerificationSymbolStatusView(context, languageClient);
-}
-
 /**
  * This class shows verification tasks through the VSCode testing UI.
  */
