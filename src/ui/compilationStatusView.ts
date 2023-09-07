@@ -75,11 +75,10 @@ export default class CompilationStatusView {
     );
 
     if(useOnVerificationSymbolStatus) {
-      languageClient.onVerificationSymbolStatus(params => {
-        view.showVerifiableRangesInStatusBar(params);
-      });
-
       context.subscriptions.push(
+        languageClient.OnVerificationSymbolStatus(params => {
+          view.showVerifiableRangesInStatusBar(params);
+        }),
         languageClient.onCompilationStatus(params => view.compilationStatusChangedAfter38(params))
       );
     } else {

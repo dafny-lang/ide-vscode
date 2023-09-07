@@ -46,7 +46,7 @@ export default class VerificationSymbolStatusView {
     context.subscriptions.push(this.controller);
 
     context.subscriptions.push(
-      languageClient.onVerificationSymbolStatus(params => this.update(params))
+      languageClient.OnVerificationSymbolStatus(params => this.update(params))
     );
   }
 

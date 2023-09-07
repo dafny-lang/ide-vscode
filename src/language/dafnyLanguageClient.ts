@@ -1,4 +1,4 @@
-import { Disposable, Uri, Diagnostic } from 'vscode';
+import { Disposable, Uri, Diagnostic, EventEmitter, Event } from 'vscode';
 import { HandleDiagnosticsSignature, LanguageClient, LanguageClientOptions, ServerOptions, TextDocumentPositionParams } from 'vscode-languageclient/node';
 
 import Configuration from '../configuration';
@@ -127,6 +127,9 @@ export class DafnyLanguageClient extends LanguageClient {
     private readonly diagnosticsListeners: DiagnosticListener[], forceDebug?: boolean) {
     super(id, name, serverOptions, clientOptions, forceDebug);
     this.diagnosticsListeners = diagnosticsListeners;
+    this.onReady().then(() => {
+      this.onNotification('dafny/textDocument/symbolStatus', params => this._onVerificationSymbolStatus.fire(params));
+    });
   }
 
   public getCounterexamples(param: ICounterexampleParams): Promise<ICounterexampleItem[]> {
@@ -173,9 +176,9 @@ export class DafnyLanguageClient extends LanguageClient {
     return this.onNotification('dafny/verification/status/gutter', callback);
   }
 
-  public onVerificationSymbolStatus(callback: (params: IVerificationSymbolStatusParams) => void): Disposable {
-    return this.onNotification('dafny/textDocument/symbolStatus', callback);
-  }
+  private readonly _onVerificationSymbolStatus: EventEmitter<IVerificationSymbolStatusParams> = new EventEmitter();
+
+  public OnVerificationSymbolStatus: Event<IVerificationSymbolStatusParams> = this._onVerificationSymbolStatus.event;
 
   public onCompilationStatus(callback: (params: ICompilationStatusParams) => void): Disposable {
     return this.onNotification('dafny/compilation/status', callback);
