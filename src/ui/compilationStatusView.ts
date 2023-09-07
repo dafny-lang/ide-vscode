@@ -6,7 +6,7 @@ import { getVsDocumentPath } from '../tools/vscode';
 import { enableOnlyForDafnyDocuments } from '../tools/visibility';
 import { Messages } from './messages';
 import StatusBarActionView from './statusBarActionView';
-import { IVerificationSymbolStatusParams, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
+import { PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import VerificationSymbolStatusView from './verificationSymbolStatusView';
 
 const StatusBarPriority = 10;
@@ -54,27 +54,37 @@ export default class CompilationStatusView {
   private readonly documentStatusMessages = new Map<string, IDocumentStatusMessage>();
 
   private constructor(private readonly statusBarItem: StatusBarItem,
-    private readonly symbolStatusView: VerificationSymbolStatusView,
     private readonly languageClient: DafnyLanguageClient,
     private readonly context: ExtensionContext) {}
 
   public static createAndRegister(context: ExtensionContext,
     languageClient: DafnyLanguageClient,
-    symbolStatusView: VerificationSymbolStatusView,
+    symbolStatusView: VerificationSymbolStatusView | undefined,
     languageServerVersion: string): CompilationStatusView {
     const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left, StatusBarPriority);
     statusBarItem.command = DafnyCommands.OpenStatusBarMenu;
-    const view = new CompilationStatusView(statusBarItem, symbolStatusView, languageClient, context);
+    const view = new CompilationStatusView(statusBarItem, languageClient, context);
     const statusBarActionView = new StatusBarActionView(view, languageServerVersion, context);
     context.subscriptions.push(
       commands.registerCommand(DafnyCommands.OpenStatusBarMenu, () => statusBarActionView.openStatusBarMenu()),
       workspace.onDidCloseTextDocument(document => view.documentClosed(document)),
       workspace.onDidChangeTextDocument(() => view.updateActiveDocumentStatus()),
       window.onDidChangeActiveTextEditor(() => view.updateActiveDocumentStatus()),
-      symbolStatusView.onUpdates(uri => view.updateStatusBar(uri)),
       enableOnlyForDafnyDocuments(statusBarItem),
       statusBarItem
     );
+
+    if(symbolStatusView === undefined) {
+      view.registerBefore38Messages();
+    } else {
+      context.subscriptions.push(
+        symbolStatusView.onUpdates(uri => view.showVerifiableRangesInStatusBar(uri, symbolStatusView))
+      );
+
+      context.subscriptions.push(
+        languageClient.onCompilationStatus(params => view.compilationStatusChangedAfter38(params))
+      );
+    }
     return view;
   }
 
@@ -83,12 +93,6 @@ export default class CompilationStatusView {
       this.languageClient.onCompilationStatus(params => this.compilationStatusChanged(params)),
       this.languageClient.onVerificationStarted(params => this.verificationStarted(params)),
       this.languageClient.onVerificationCompleted(params => this.verificationCompleted(params))
-    );
-  }
-
-  public registerAfter38Messages(): void {
-    this.context.subscriptions.push(
-      this.languageClient.onCompilationStatus(params => this.compilationStatusChangedForBefore38(params)),
     );
   }
 
@@ -130,8 +134,20 @@ export default class CompilationStatusView {
     CompilationStatus.PreparingVerification,
     CompilationStatus.CompilationSucceeded ]);
 
-  public compilationStatusChangedForBefore38(params: ICompilationStatusParams): void {
+  public compilationStatusChangedAfter38(params: ICompilationStatusParams): void {
     if(this.areParamsOutdated(params)) {
+      return;
+    }
+    if(params.status === CompilationStatus.ResolutionSucceeded) {
+      const verifiableRangeMessage = this.verifiableRangeMessages.get(params.uri);
+      if(verifiableRangeMessage === undefined) {
+        this.compilationStatusChangedAfter38({ ...params, status: CompilationStatus.Resolving });
+      } else {
+        this.setDocumentStatusMessage(
+          getVsDocumentPath(params),
+          verifiableRangeMessage,
+          params.version);
+      }
       return;
     }
     if(CompilationStatusView.handledMessages.has(params.status)) {
@@ -179,9 +195,10 @@ export default class CompilationStatusView {
     return this.documentStatusMessages.get(document)?.message ?? '';
   }
 
-  public async updateStatusBar(uri: Uri): Promise<void> {
+  private readonly verifiableRangeMessages = new Map<string, string>();
+  public async showVerifiableRangesInStatusBar(uri: Uri, symbolStatusView: VerificationSymbolStatusView): Promise<void> {
     const document = await workspace.openTextDocument(uri);
-    const statuses = this.symbolStatusView.getVerifiableRangesForUri(uri);
+    const statuses = symbolStatusView.getVerifiableRangesForUri(uri);
     const completed = statuses.filter(v => v.status >= PublishedVerificationStatus.Error).length;
     const queued = statuses.filter(v => v.status === PublishedVerificationStatus.Queued);
     const running = statuses.filter(v => v.status === PublishedVerificationStatus.Running);
@@ -207,9 +224,10 @@ export default class CompilationStatusView {
           message = `Verified ${succeeded} declarations, skipped ${skipped}`;
         }
       } else {
-        message = `${Messages.CompilationStatus.VerificationFailed} ${(errors > 1 ? `${errors} declarations` : 'the declaration')}`;
+        message = `${Messages.CompilationStatus.VerificationFailed} ${(errors > 1 ? `${errors} declarations` : 'a declaration')}`;
       }
     }
+    this.verifiableRangeMessages.set(uri.toString(), message);
     this.setDocumentStatusMessage(uri.toString(), message, document.version);
   }
 }
