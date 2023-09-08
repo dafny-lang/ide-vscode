@@ -149,7 +149,7 @@ export default class VerificationGutterStatusView {
     const document = await workspace.openTextDocument(uri);
 
     this.lineCountsPerDocument.set(document.uri, document.lineCount);
-    const perLineStatus = VerificationGutterStatusView.computeGutterIcons(document.lineCount, nameToSymbolRange, verifiableRanges, diagnostics);
+    const perLineStatus = VerificationGutterStatusView.computeGutterIcons(uri, document.lineCount, nameToSymbolRange, verifiableRanges, diagnostics);
     this.updateUsingLineStatus({ uri: uri.toString(), perLineStatus: perLineStatus });
   }
 
@@ -165,7 +165,9 @@ export default class VerificationGutterStatusView {
     return result;
   }
 
+  // eslint-disable-next-line max-params
   public static computeGutterIcons(
+    uri: Uri,
     lineCount: number,
     nameToSymbolRanges: Map<string, Range> | undefined,
     statuses: NamedVerifiableStatus[] | undefined,
@@ -189,16 +191,14 @@ export default class VerificationGutterStatusView {
       if(diagnostic.severity !== DiagnosticSeverity.Error && !outdatedError) {
         continue;
       }
-      for(let line = diagnostic.range.start.line; line <= diagnostic.range.end.line; line++) {
-        lineToErrorSource.set(line, diagnostic.source ?? '');
-        const contextRange = lineToSymbolRange.get(line);
-        if(contextRange === undefined) {
-          continue;
-        }
-        for(let contextLine = contextRange.start.line; contextLine <= contextRange.end.line; contextLine++) {
-          linesInErrorContext.add(contextLine);
+
+      const source = diagnostic.source ?? '';
+      for(const related of diagnostic.relatedInformation ?? []) {
+        if(related.location.uri === uri) {
+          processErrorRange(related.location.range, source);
         }
       }
+      processErrorRange(diagnostic.range, source);
     }
 
     if(nameToSymbolRanges === undefined || statuses === undefined) {
@@ -219,6 +219,20 @@ export default class VerificationGutterStatusView {
         }
       }
     }
+
+    function processErrorRange(range: Range, source: string | undefined) {
+      for(let line = range.start.line; line <= range.end.line; line++) {
+        lineToErrorSource.set(line, source ?? '');
+        const contextRange = lineToSymbolRange.get(line);
+        if(contextRange === undefined) {
+          continue;
+        }
+        for(let contextLine = contextRange.start.line; contextLine <= contextRange.end.line; contextLine++) {
+          linesInErrorContext.add(contextLine);
+        }
+      }
+    }
+
     for(let line = 0; line < lineCount; line++) {
       if(linesToSkip.has(line)) {
         perLineStatus.push(LineVerificationStatus.Nothing);

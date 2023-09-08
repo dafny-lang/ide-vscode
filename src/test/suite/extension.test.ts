@@ -152,20 +152,28 @@ suite('Verification Gutter', () => {
       parse(;)Error
     }
 
-    method Bat() {
-      assert false; // Outdated error
+    method Bat()
+      ensures false
+    {
+      if (true) {
+        return;
+      } else {
+        return;
+      }
     }
 
     method Fom() {
       assert true;
     }
     */
+    const uri = vscode.Uri.parse('file:///woops.dfy');
     const parseError = new vscode.Diagnostic(new vscode.Range(1, 2, 1, 15), 'Some parse error', vscode.DiagnosticSeverity.Error);
     parseError.source = 'Parser';
-    const computedIcons = VerificationGutterStatusView.computeGutterIcons(10, undefined, undefined, [
-      parseError,
-      new vscode.Diagnostic(new vscode.Range(5, 2, 5, 14), 'Outdated: could not prove assertion', vscode.DiagnosticSeverity.Error)
-    ]);
+    const outdatedReturnError = new vscode.Diagnostic(new vscode.Range(8, 8, 8, 14), 'Outdated: a postcondition could not be proved on this return path', vscode.DiagnosticSeverity.Warning);
+    outdatedReturnError.relatedInformation = [ {
+      location: { uri, range: new vscode.Range(5, 14, 5, 19) },
+      message: 'This postcondition might not hold: false'
+    } ];
     const expected = [
       LineVerificationStatus.VerifiedObsolete,
       LineVerificationStatus.ResolutionError,
@@ -175,9 +183,23 @@ suite('Verification Gutter', () => {
       LineVerificationStatus.AssertionFailedObsolete,
       LineVerificationStatus.VerifiedObsolete,
       LineVerificationStatus.VerifiedObsolete,
+      LineVerificationStatus.AssertionFailedObsolete,
+      LineVerificationStatus.VerifiedObsolete,
+      LineVerificationStatus.VerifiedObsolete,
+      LineVerificationStatus.VerifiedObsolete,
+      LineVerificationStatus.VerifiedObsolete,
+      LineVerificationStatus.VerifiedObsolete,
+      LineVerificationStatus.VerifiedObsolete,
       LineVerificationStatus.VerifiedObsolete,
       LineVerificationStatus.VerifiedObsolete
     ];
+    const computedIcons = VerificationGutterStatusView.computeGutterIcons(
+      uri,
+      expected.length, undefined, undefined, [
+        parseError,
+        outdatedReturnError
+      ]
+    );
     assert.deepStrictEqual(expected, computedIcons);
   });
 
@@ -208,25 +230,27 @@ suite('Verification Gutter', () => {
       assert false; // Error
     }
     */
-    const computedIcons = VerificationGutterStatusView.computeGutterIcons(24, new Map([
-      [ '0,7', new vscode.Range(0, 0, 2, 1) ],
-      [ '4,7', new vscode.Range(4, 0, 6, 1) ],
-      [ '8,7', new vscode.Range(8, 0, 10, 1) ],
-      [ '12,7', new vscode.Range(12, 0, 14, 1) ],
-      [ '16,7', new vscode.Range(16, 0, 18, 1) ],
-      [ '20,7', new vscode.Range(20, 0, 23, 1) ]
-    ]), [
-      { nameRange: new vscode.Range(0, 7, 0, 10), status: PublishedVerificationStatus.Stale },
-      { nameRange: new vscode.Range(4, 7, 4, 10), status: PublishedVerificationStatus.Stale },
-      { nameRange: new vscode.Range(8, 7, 8, 10), status: PublishedVerificationStatus.Queued },
-      { nameRange: new vscode.Range(12, 7, 12, 10), status: PublishedVerificationStatus.Running },
-      { nameRange: new vscode.Range(16, 7, 16, 10), status: PublishedVerificationStatus.Correct },
-      { nameRange: new vscode.Range(20, 7, 20, 10), status: PublishedVerificationStatus.Error }
-    ], [
-      new vscode.Diagnostic(new vscode.Range(5, 2, 5, 14), 'Outdated, could not prove assertion', vscode.DiagnosticSeverity.Error),
-      new vscode.Diagnostic(new vscode.Range(17, 2, 17, 14), 'some warning', vscode.DiagnosticSeverity.Warning),
-      new vscode.Diagnostic(new vscode.Range(22, 2, 22, 14), 'could not prove assertion', vscode.DiagnosticSeverity.Error)
-    ]);
+    const computedIcons = VerificationGutterStatusView.computeGutterIcons(
+      vscode.Uri.parse('file:///woops.dfy'),
+      24, new Map([
+        [ '0,7', new vscode.Range(0, 0, 2, 1) ],
+        [ '4,7', new vscode.Range(4, 0, 6, 1) ],
+        [ '8,7', new vscode.Range(8, 0, 10, 1) ],
+        [ '12,7', new vscode.Range(12, 0, 14, 1) ],
+        [ '16,7', new vscode.Range(16, 0, 18, 1) ],
+        [ '20,7', new vscode.Range(20, 0, 23, 1) ]
+      ]), [
+        { nameRange: new vscode.Range(0, 7, 0, 10), status: PublishedVerificationStatus.Stale },
+        { nameRange: new vscode.Range(4, 7, 4, 10), status: PublishedVerificationStatus.Stale },
+        { nameRange: new vscode.Range(8, 7, 8, 10), status: PublishedVerificationStatus.Queued },
+        { nameRange: new vscode.Range(12, 7, 12, 10), status: PublishedVerificationStatus.Running },
+        { nameRange: new vscode.Range(16, 7, 16, 10), status: PublishedVerificationStatus.Correct },
+        { nameRange: new vscode.Range(20, 7, 20, 10), status: PublishedVerificationStatus.Error }
+      ], [
+        new vscode.Diagnostic(new vscode.Range(5, 2, 5, 14), 'Outdated: could not prove assertion', vscode.DiagnosticSeverity.Warning),
+        new vscode.Diagnostic(new vscode.Range(17, 2, 17, 14), 'some warning', vscode.DiagnosticSeverity.Warning),
+        new vscode.Diagnostic(new vscode.Range(22, 2, 22, 14), 'could not prove assertion', vscode.DiagnosticSeverity.Error)
+      ]);
     const expected = [
       LineVerificationStatus.Nothing,
       LineVerificationStatus.VerifiedObsolete,
