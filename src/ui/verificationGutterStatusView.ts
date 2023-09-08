@@ -185,7 +185,8 @@ export default class VerificationGutterStatusView {
     }
     const perLineStatus: LineVerificationStatus[] = [];
     for(const diagnostic of diagnostics) {
-      if(diagnostic.severity !== DiagnosticSeverity.Error) {
+      const outdatedError = diagnostic.message.startsWith('Outdated: ');
+      if(diagnostic.severity !== DiagnosticSeverity.Error && !outdatedError) {
         continue;
       }
       for(let line = diagnostic.range.start.line; line <= diagnostic.range.end.line; line++) {
