@@ -248,7 +248,12 @@ export default class VerificationGutterStatusView {
           resultStatus = LineVerificationStatus.AssertionFailed;
         } else {
           if(linesInErrorContext.has(line)) {
-            resultStatus = LineVerificationStatus.ErrorContext;
+            if(statusPerLine.get(line) === PublishedVerificationStatus.FoundAllErrors) {
+              // if we found all errors then a line with no error must be correct.
+              resultStatus = LineVerificationStatus.AssertionVerifiedInErrorContext;
+            } else {
+              resultStatus = LineVerificationStatus.ErrorContext;
+            }
           } else {
             resultStatus = LineVerificationStatus.Verified;
           }
@@ -263,6 +268,7 @@ export default class VerificationGutterStatusView {
           progressStatus = GutterIconProgress.Running;
           break;
         case PublishedVerificationStatus.Error:
+        case PublishedVerificationStatus.FoundAllErrors:
         case PublishedVerificationStatus.Correct:
         case undefined:
           progressStatus = GutterIconProgress.Done;

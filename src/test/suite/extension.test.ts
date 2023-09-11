@@ -203,6 +203,33 @@ suite('Verification Gutter', () => {
     assert.deepStrictEqual(expected, computedIcons);
   });
 
+  test('foundAllError', () => {
+    /*
+    method Faz() {
+      assert true;
+      assert true;
+      assert false; // Error
+    }
+    */
+    const computedIcons = VerificationGutterStatusView.computeGutterIcons(
+      vscode.Uri.parse('file:///woops.dfy'),
+      5, new Map([
+        [ '0,7', new vscode.Range(0, 0, 4, 1) ]
+      ]), [
+        { nameRange: new vscode.Range(0, 7, 0, 10), status: PublishedVerificationStatus.FoundAllErrors }
+      ], [
+        new vscode.Diagnostic(new vscode.Range(3, 2, 3, 14), 'could not prove assertion', vscode.DiagnosticSeverity.Error)
+      ]);
+    const expected = [
+      LineVerificationStatus.Nothing,
+      LineVerificationStatus.AssertionVerifiedInErrorContext,
+      LineVerificationStatus.AssertionVerifiedInErrorContext,
+      LineVerificationStatus.AssertionFailed,
+      LineVerificationStatus.AssertionVerifiedInErrorContext
+    ];
+    assert.deepStrictEqual(expected, computedIcons);
+  });
+
   test('computeGutterIconsResolved', () => {
     /*
     method Foo() { // Stale
