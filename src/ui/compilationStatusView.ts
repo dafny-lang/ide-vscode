@@ -216,17 +216,21 @@ export default class CompilationStatusView {
       }
     } else {
       const skipped = statuses.filter(v => v.status === PublishedVerificationStatus.Stale).length;
-      const errors = statuses.filter(v => v.status === PublishedVerificationStatus.Error).length;
-      const succeeded = completed - errors;
+      const errors = statuses.filter(v => v.status === PublishedVerificationStatus.Error);
+      const errorCount = errors.length;
+      const succeeded = completed - errorCount;
 
-      if(errors === 0) {
+      if(errorCount === 0) {
         if(skipped === 0) {
           message = Messages.CompilationStatus.VerificationSucceeded;
         } else {
           message = `Verified ${succeeded} declarations, skipped ${skipped}`;
         }
       } else {
-        message = `${Messages.CompilationStatus.VerificationFailed} ${(errors > 1 ? `${errors} declarations` : 'a declaration')}`;
+        const object = errorCount > 1
+          ? `${errorCount} declarations`
+          : (document.getText(VerificationSymbolStatusView.convertRange(errors[0].nameRange)) ?? 'a declaration');
+        message = `${Messages.CompilationStatus.VerificationFailed} ${object}`;
       }
     }
     this.verifiableRangeMessages.set(uri.toString(), message);
