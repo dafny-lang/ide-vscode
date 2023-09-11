@@ -16,5 +16,6 @@ export enum PublishedVerificationStatus {
   Queued = 1, // Scheduled to be run but waiting for resources
   Running = 2, // Currently running
   Error = 4, // Finished and had errors
-  Correct = 5 // Finished and was correct
+  Correct = 5, // Finished and was correct
+  FoundAllErrors = 6 // Finished, had errors and found them all
 }

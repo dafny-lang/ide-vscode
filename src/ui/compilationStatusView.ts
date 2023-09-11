@@ -216,7 +216,8 @@ export default class CompilationStatusView {
       }
     } else {
       const skipped = statuses.filter(v => v.status === PublishedVerificationStatus.Stale).length;
-      const errors = statuses.filter(v => v.status === PublishedVerificationStatus.Error);
+      const errors = statuses.filter(v => v.status === PublishedVerificationStatus.Error
+        || v.status === PublishedVerificationStatus.FoundAllErrors);
       const errorCount = errors.length;
       const succeeded = completed - errorCount;
 

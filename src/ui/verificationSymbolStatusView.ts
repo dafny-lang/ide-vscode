@@ -228,6 +228,7 @@ export default class VerificationSymbolStatusView {
         itemFinished();
         break;
       }
+      case PublishedVerificationStatus.FoundAllErrors:
       case PublishedVerificationStatus.Error:
         run.failed(testItem, [], getDuration());
         itemFinished();
