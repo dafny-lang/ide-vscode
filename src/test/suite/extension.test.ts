@@ -93,7 +93,7 @@ suite('Compiler invocation', () => {
     for(const checkpoint in checkpoints) {
       assert.strictEqual(true, (checkpoints as any)[checkpoint], checkpoint);
     }
-    assert.strictEqual('cd <dotnet tool path>; <compiler command prefix>"<dotnet executable path>" build --output <arg1> arg2 "fileName.dfy"',
+    assert.strictEqual('cd <dotnet tool path>; <compiler command prefix>"<dotnet executable path>" "build" "--output" "<arg1>" "arg2" "fileName.dfy"',
       textSent.replace(/\\/g, '/'));
     assert.strictEqual(true, returnValue, 'returnValue');
   }).timeout(60 * 1000);

@@ -1,4 +1,4 @@
-import { Disposable, Uri, Diagnostic } from 'vscode';
+import { Disposable, Uri, Diagnostic, EventEmitter, Event } from 'vscode';
 import { HandleDiagnosticsSignature, LanguageClient, LanguageClientOptions, ServerOptions, TextDocumentPositionParams } from 'vscode-languageclient/node';
 
 import Configuration from '../configuration';
@@ -10,6 +10,7 @@ import { IGhostDiagnosticsParams } from './api/ghostDiagnostics';
 import { IVerificationSymbolStatusParams } from './api/verificationSymbolStatusParams';
 import { DafnyInstaller } from './dafnyInstallation';
 import * as os from 'os';
+import { IVerificationGutterStatusParams } from './api/verificationGutterStatusParams';
 
 const LanguageServerId = 'dafny-vscode';
 const LanguageServerName = 'Dafny Language Server';
@@ -126,6 +127,9 @@ export class DafnyLanguageClient extends LanguageClient {
     private readonly diagnosticsListeners: DiagnosticListener[], forceDebug?: boolean) {
     super(id, name, serverOptions, clientOptions, forceDebug);
     this.diagnosticsListeners = diagnosticsListeners;
+    this.onReady().then(() => {
+      this.onNotification('dafny/textDocument/symbolStatus', params => this._onVerificationSymbolStatus.fire(params));
+    });
   }
 
   public getCounterexamples(param: ICounterexampleParams): Promise<ICounterexampleItem[]> {
@@ -168,9 +172,13 @@ export class DafnyLanguageClient extends LanguageClient {
     return this.onNotification('dafny/ghost/diagnostics', callback);
   }
 
-  public onVerificationSymbolStatus(callback: (params: IVerificationSymbolStatusParams) => void): Disposable {
-    return this.onNotification('dafny/textDocument/symbolStatus', callback);
+  public onVerificationStatusGutter(callback: (params: IVerificationGutterStatusParams) => void): Disposable {
+    return this.onNotification('dafny/verification/status/gutter', callback);
   }
+
+  private readonly _onVerificationSymbolStatus: EventEmitter<IVerificationSymbolStatusParams> = new EventEmitter();
+
+  public OnVerificationSymbolStatus: Event<IVerificationSymbolStatusParams> = this._onVerificationSymbolStatus.event;
 
   public onCompilationStatus(callback: (params: ICompilationStatusParams) => void): Disposable {
     return this.onNotification('dafny/compilation/status', callback);

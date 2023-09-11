@@ -18,17 +18,11 @@ export default function createAndRegisterDafnyIntegration(
 ): void {
   CounterexamplesView.createAndRegister(installer.context, languageClient);
   GhostDiagnosticsView.createAndRegister(installer.context, languageClient);
-  const compilationStatusView = CompilationStatusView.createAndRegister(installer.context, languageClient, languageServerVersion);
-  let symbolStatusView: VerificationSymbolStatusView | undefined = undefined;
   const serverSupportsSymbolStatusView = configuredVersionToNumeric('3.8.0') <= configuredVersionToNumeric(languageServerVersion);
+  CompilationStatusView.createAndRegister(installer.context, languageClient, serverSupportsSymbolStatusView, languageServerVersion);
+  let symbolStatusView: VerificationSymbolStatusView | undefined = undefined;
   if(serverSupportsSymbolStatusView && Configuration.get<boolean>(ConfigurationConstants.LanguageServer.DisplayVerificationAsTests)) {
-    symbolStatusView = VerificationSymbolStatusView.createAndRegister(installer.context, languageClient, compilationStatusView);
-  } else {
-    if(serverSupportsSymbolStatusView) {
-      compilationStatusView.registerAfter38Messages();
-    } else {
-      compilationStatusView.registerBefore38Messages();
-    }
+    symbolStatusView = VerificationSymbolStatusView.createAndRegister(installer.context, languageClient);
   }
   const displayGutterStatus = Configuration.get<boolean>(ConfigurationConstants.LanguageServer.DisplayGutterStatus);
   if(displayGutterStatus) {

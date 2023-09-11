@@ -3,7 +3,6 @@ import { commands, ExtensionContext, workspace, Event, tests, Range, Position, U
 import { Range as lspRange, Position as lspPosition } from 'vscode-languageclient';
 import { IVerificationSymbolStatusParams, NamedVerifiableStatus, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
-import CompilationStatusView from './compilationStatusView';
 
 class ResolveablePromise<T> {
   private _resolve: (value: T) => void = () => {};
@@ -36,9 +35,8 @@ export default class VerificationSymbolStatusView {
 
   public static createAndRegister(
     context: ExtensionContext,
-    languageClient: DafnyLanguageClient,
-    compilationStatusView: CompilationStatusView): VerificationSymbolStatusView {
-    return new VerificationSymbolStatusView(context, languageClient, compilationStatusView);
+    languageClient: DafnyLanguageClient): VerificationSymbolStatusView {
+    return new VerificationSymbolStatusView(context, languageClient);
   }
 
   private itemStates: Map<string, PublishedVerificationStatus> = new Map();
@@ -52,16 +50,12 @@ export default class VerificationSymbolStatusView {
 
   public constructor(
     private readonly context: ExtensionContext,
-    private readonly languageClient: DafnyLanguageClient,
-    private readonly compilationStatusView: CompilationStatusView) {
+    private readonly languageClient: DafnyLanguageClient) {
     this.controller = this.createController();
     context.subscriptions.push(this.controller);
 
     context.subscriptions.push(
-      languageClient.onVerificationSymbolStatus(params => {
-        this.update(params);
-      }),
-      languageClient.onCompilationStatus(params => compilationStatusView.compilationStatusChangedForBefore38(params))
+      languageClient.OnVerificationSymbolStatus(params => this.update(params))
     );
   }
 
@@ -160,7 +154,6 @@ export default class VerificationSymbolStatusView {
     document: TextDocument,
     rootSymbols: DocumentSymbol[] | undefined) {
 
-    this.compilationStatusView.updateStatusBar(params);
     const controller = this.controller;
 
     this.clearItemsForUri(document.uri);
