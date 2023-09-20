@@ -201,7 +201,7 @@ export default class CompilationStatusView {
 
     const document = await workspace.openTextDocument(uri);
     const statuses = params.namedVerifiables;
-    const completed = statuses.filter(v => v.status >= PublishedVerificationStatus.Error).length;
+    const completed = statuses.filter(v => v.status >= PublishedVerificationStatus.FoundSomeErrors).length;
     const queued = statuses.filter(v => v.status === PublishedVerificationStatus.Queued);
     const running = statuses.filter(v => v.status === PublishedVerificationStatus.Running);
     const total = statuses.length;
@@ -216,7 +216,7 @@ export default class CompilationStatusView {
       }
     } else {
       const skipped = statuses.filter(v => v.status === PublishedVerificationStatus.Stale).length;
-      const errors = statuses.filter(v => v.status === PublishedVerificationStatus.Error
+      const errors = statuses.filter(v => v.status === PublishedVerificationStatus.FoundSomeErrors
         || v.status === PublishedVerificationStatus.FoundAllErrors);
       const errorCount = errors.length;
       const succeeded = completed - errorCount;

@@ -229,7 +229,7 @@ export default class VerificationSymbolStatusView {
         break;
       }
       case PublishedVerificationStatus.FoundAllErrors:
-      case PublishedVerificationStatus.Error:
+      case PublishedVerificationStatus.FoundSomeErrors:
         run.failed(testItem, [], getDuration());
         itemFinished();
         break;
@@ -316,7 +316,6 @@ export default class VerificationSymbolStatusView {
     item.range = itemRange;
     return item;
   }
-
 
   public static convertRange(range: lspRange): Range {
     return new Range(

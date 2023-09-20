@@ -1,5 +1,5 @@
 /* eslint-disable max-depth */
-import { Range, window, ExtensionContext, workspace, TextEditor, TextEditorDecorationType, Uri, Position, DocumentSymbol, Diagnostic, DiagnosticSeverity, commands, languages } from 'vscode';
+import { Range, TextDocument, window, ExtensionContext, workspace, TextEditor, TextEditorDecorationType, Uri, Position, DocumentSymbol, Diagnostic, DiagnosticSeverity, commands, languages } from 'vscode';
 import { Disposable } from 'vscode-languageclient';
 import {
   IVerificationGutterStatusParams,
@@ -149,7 +149,7 @@ export default class VerificationGutterStatusView {
     const document = await workspace.openTextDocument(uri);
 
     this.lineCountsPerDocument.set(document.uri, document.lineCount);
-    const perLineStatus = VerificationGutterStatusView.computeGutterIcons(uri, document.lineCount, nameToSymbolRange, verifiableRanges, diagnostics);
+    const perLineStatus = VerificationGutterStatusView.computeGutterIcons(document, true, nameToSymbolRange, verifiableRanges, diagnostics);
     this.updateUsingLineStatus({ uri: uri.toString(), perLineStatus: perLineStatus });
   }
 
@@ -167,8 +167,8 @@ export default class VerificationGutterStatusView {
 
   // eslint-disable-next-line max-params
   public static computeGutterIcons(
-    uri: Uri,
-    lineCount: number,
+    document: TextDocument,
+    assertionTracking: boolean,
     nameToSymbolRanges: Map<string, Range> | undefined,
     statuses: NamedVerifiableStatus[] | undefined,
     diagnostics: Diagnostic[]): LineVerificationStatus[] {
@@ -177,6 +177,7 @@ export default class VerificationGutterStatusView {
     const lineToSymbolRange = new Map<number, Range>();
     const linesInErrorContext = new Set<number>();
     const linesToSkip = new Set<number>();
+    const implicitAssertionLines = new Set<number>();
 
     if(nameToSymbolRanges !== undefined) {
       for(const range of nameToSymbolRanges.values()) {
@@ -187,6 +188,13 @@ export default class VerificationGutterStatusView {
     }
     const perLineStatus: LineVerificationStatus[] = [];
     for(const diagnostic of diagnostics) {
+      const assertionMarker = diagnostic.message.startsWith('Assertion: ')
+        && diagnostic.severity === DiagnosticSeverity.Hint;
+      if(assertionMarker) {
+        // Just the first line of the assertion is sufficient.
+        implicitAssertionLines.add(diagnostic.range.start.line);
+      }
+
       const outdatedError = diagnostic.message.startsWith('Outdated: ');
       if(diagnostic.severity !== DiagnosticSeverity.Error && !outdatedError) {
         continue;
@@ -194,7 +202,7 @@ export default class VerificationGutterStatusView {
 
       const source = diagnostic.source ?? '';
       for(const related of diagnostic.relatedInformation ?? []) {
-        if(related.location.uri === uri) {
+        if(related.location.uri === document.uri) {
           processErrorRange(related.location.range, source);
         }
       }
@@ -202,7 +210,7 @@ export default class VerificationGutterStatusView {
     }
 
     if(nameToSymbolRanges === undefined || statuses === undefined) {
-      for(let line = 0; line < lineCount; line++) {
+      for(let line = 0; line < document.lineCount; line++) {
         statusPerLine.set(line, PublishedVerificationStatus.Stale);
       }
     } else {
@@ -233,11 +241,14 @@ export default class VerificationGutterStatusView {
       }
     }
 
-    for(let line = 0; line < lineCount; line++) {
+    for(let line = 0; line < document.lineCount; line++) {
       if(linesToSkip.has(line)) {
         perLineStatus.push(LineVerificationStatus.Nothing);
         continue;
       }
+
+      const lineText = document.getText(new Range(line, 0, line + 1, 0));
+      const isExplicitAssertion = lineText.trimStart().startsWith('assert');
 
       const error = lineToErrorSource.get(line);
       if(error === 'Parser' || error === 'Resolver') {
@@ -248,8 +259,11 @@ export default class VerificationGutterStatusView {
           resultStatus = LineVerificationStatus.AssertionFailed;
         } else {
           if(linesInErrorContext.has(line)) {
-            if(statusPerLine.get(line) === PublishedVerificationStatus.FoundAllErrors) {
-              // if we found all errors then a line with no error must be correct.
+            const considerLineAsHavingAssertions
+              = !assertionTracking || implicitAssertionLines.has(line) || isExplicitAssertion;
+            if(statusPerLine.get(line) === PublishedVerificationStatus.FoundAllErrors
+              && considerLineAsHavingAssertions) {
+              // If we found all errors then an assertion with no error must be correct.
               resultStatus = LineVerificationStatus.AssertionVerifiedInErrorContext;
             } else {
               resultStatus = LineVerificationStatus.ErrorContext;
@@ -267,7 +281,7 @@ export default class VerificationGutterStatusView {
         case PublishedVerificationStatus.Running:
           progressStatus = GutterIconProgress.Running;
           break;
-        case PublishedVerificationStatus.Error:
+        case PublishedVerificationStatus.FoundSomeErrors:
         case PublishedVerificationStatus.FoundAllErrors:
         case PublishedVerificationStatus.Correct:
         case undefined:

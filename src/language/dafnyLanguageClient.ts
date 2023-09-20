@@ -28,6 +28,7 @@ function getLanguageServerLaunchArgsNew(): string[] {
   const specifiedCores = parseInt(Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationVirtualCores));
   // This is a temporary fix to prevent 0 cores from being used, since the languages server currently does not handle 0 cores correctly: https://github.com/dafny-lang/dafny/pull/3276
   const cores = isNaN(specifiedCores) || specifiedCores === 0 ? Math.ceil((os.cpus().length + 1) / 2) : Math.max(1, specifiedCores);
+  const displayGutterIcons = Configuration.get<boolean>(ConfigurationConstants.LanguageServer.DisplayGutterStatus);
   return [
     `--verify-on:${verifyOn}`,
     `--verification-time-limit:${Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationTimeLimit)}`,
@@ -35,6 +36,7 @@ function getLanguageServerLaunchArgsNew(): string[] {
     `--cores:${cores}`,
     `--notify-ghostness:${Configuration.get<string>(ConfigurationConstants.LanguageServer.MarkGhostStatements)}`,
     '--notify-line-verification-status:false',
+    `--show-assertions:${displayGutterIcons ? 'All' : 'Implicit'}`,
     ...getDafnyPluginsArgument(),
     ...launchArgs
   ];
