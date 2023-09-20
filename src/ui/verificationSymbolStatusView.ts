@@ -140,12 +140,13 @@ export default class VerificationSymbolStatusView {
   private clearItemsForUri(uri: Uri) {
     const nonUriItems: TestItem[] = [];
     this.controller.items.forEach(item => {
-      if(item.uri !== uri) {
+      if(item.uri?.toString() !== uri.toString()) {
         nonUriItems.push(item);
       }
     });
     this.controller.items.replace(nonUriItems);
   }
+
   private updateForSpecificDocumentVersion(params: IVerificationSymbolStatusParams,
     document: TextDocument,
     rootSymbols: DocumentSymbol[] | undefined) {
