@@ -123,7 +123,8 @@
         ],
         "extensions": [
           ".dfy",
-          ".dfyi"
+          ".dfyi",
+          "dfyconfig.toml"
         ],
         "configuration": "./language-configuration.json"
       }
