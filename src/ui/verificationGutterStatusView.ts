@@ -172,12 +172,13 @@ export default class VerificationGutterStatusView {
     nameToSymbolRanges: Map<string, Range> | undefined,
     statuses: NamedVerifiableStatus[] | undefined,
     diagnostics: Diagnostic[]): LineVerificationStatus[] {
-    const statusPerLine = new Map<number, PublishedVerificationStatus>();
+    const statusPerLine = new Map<number, { progress: PublishedVerificationStatus, hitErrorLimit: boolean } >();
     const lineToErrorSource = new Map<number, string>();
     const lineToSymbolRange = new Map<number, Range>();
     const linesInErrorContext = new Set<number>();
     const linesToSkip = new Set<number>();
     const implicitAssertionLines = new Set<number>();
+    const errorLimitHitVerifiables = new Set<string>();
 
     if(nameToSymbolRanges !== undefined) {
       for(const range of nameToSymbolRanges.values()) {
@@ -188,8 +189,11 @@ export default class VerificationGutterStatusView {
     }
     const perLineStatus: LineVerificationStatus[] = [];
     for(const diagnostic of diagnostics) {
-      const assertionMarker = diagnostic.message.startsWith('Assertion: ')
-        && diagnostic.severity === DiagnosticSeverity.Hint;
+      if(diagnostic.code === 'errorLimitHit') {
+        errorLimitHitVerifiables.add(positionToString(diagnostic.range.start));
+      }
+
+      const assertionMarker = diagnostic.code === 'isAssertion';
       if(assertionMarker) {
         // Just the first line of the assertion is sufficient.
         implicitAssertionLines.add(diagnostic.range.start.line);
@@ -211,19 +215,22 @@ export default class VerificationGutterStatusView {
 
     if(nameToSymbolRanges === undefined || statuses === undefined) {
       for(let line = 0; line < document.lineCount; line++) {
-        statusPerLine.set(line, PublishedVerificationStatus.Stale);
+        statusPerLine.set(line, { progress: PublishedVerificationStatus.Stale, hitErrorLimit: false });
       }
     } else {
       for(const status of statuses) {
         const convertedRange = VerificationSymbolStatusView.convertRange(status.nameRange);
+        const positionString = positionToString(convertedRange.start);
+        const hitErrorLimit = errorLimitHitVerifiables.has(positionString);
         const symbolRange = nameToSymbolRanges.get(positionToString(convertedRange.start));
         linesToSkip.add(convertedRange.start.line);
         if(symbolRange === undefined) {
           console.error('symbol mismatch between documentSymbol and symbolStatus API');
           continue;
         }
+        const lineStatus = { progress: status.status, hitErrorLimit: hitErrorLimit };
         for(let line = symbolRange.start.line; line <= symbolRange.end.line; line++) {
-          statusPerLine.set(line, status.status);
+          statusPerLine.set(line, lineStatus);
         }
       }
     }
@@ -254,6 +261,7 @@ export default class VerificationGutterStatusView {
       if(error === 'Parser' || error === 'Resolver') {
         perLineStatus.push(LineVerificationStatus.ResolutionError);
       } else {
+        const lineStatus = statusPerLine.get(line)!;
         let resultStatus: number;
         if(error !== undefined) {
           resultStatus = LineVerificationStatus.AssertionFailed;
@@ -261,8 +269,7 @@ export default class VerificationGutterStatusView {
           if(linesInErrorContext.has(line)) {
             const considerLineAsHavingAssertions
               = !assertionTracking || implicitAssertionLines.has(line) || isExplicitAssertion;
-            if(statusPerLine.get(line) === PublishedVerificationStatus.FoundAllErrors
-              && considerLineAsHavingAssertions) {
+            if(lineStatus?.hitErrorLimit === false && considerLineAsHavingAssertions) {
               // If we found all errors then an assertion with no error must be correct.
               resultStatus = LineVerificationStatus.AssertionVerifiedInErrorContext;
             } else {
@@ -273,7 +280,7 @@ export default class VerificationGutterStatusView {
           }
         }
         let progressStatus: number;
-        switch(statusPerLine.get(line)) {
+        switch(lineStatus?.progress) {
         case PublishedVerificationStatus.Stale:
         case PublishedVerificationStatus.Queued:
           progressStatus = GutterIconProgress.Stale;
@@ -281,8 +288,7 @@ export default class VerificationGutterStatusView {
         case PublishedVerificationStatus.Running:
           progressStatus = GutterIconProgress.Running;
           break;
-        case PublishedVerificationStatus.FoundSomeErrors:
-        case PublishedVerificationStatus.FoundAllErrors:
+        case PublishedVerificationStatus.Error:
         case PublishedVerificationStatus.Correct:
         case undefined:
           progressStatus = GutterIconProgress.Done;

@@ -144,12 +144,13 @@ export default class VerificationSymbolStatusView {
   private clearItemsForUri(uri: Uri) {
     const nonUriItems: TestItem[] = [];
     this.controller.items.forEach(item => {
-      if(item.uri !== uri) {
+      if(item.uri?.toString() !== uri.toString()) {
         nonUriItems.push(item);
       }
     });
     this.controller.items.replace(nonUriItems);
   }
+
   private updateForSpecificDocumentVersion(params: IVerificationSymbolStatusParams,
     document: TextDocument,
     rootSymbols: DocumentSymbol[] | undefined) {
@@ -228,8 +229,7 @@ export default class VerificationSymbolStatusView {
         itemFinished();
         break;
       }
-      case PublishedVerificationStatus.FoundAllErrors:
-      case PublishedVerificationStatus.FoundSomeErrors:
+      case PublishedVerificationStatus.Error:
         run.failed(testItem, [], getDuration());
         itemFinished();
         break;

@@ -225,7 +225,7 @@ method Faz() {
       false, new Map([
         [ '0,7', new vscode.Range(0, 0, 4, 1) ]
       ]), [
-        { nameRange: new vscode.Range(0, 7, 0, 10), status: PublishedVerificationStatus.FoundAllErrors }
+        { nameRange: new vscode.Range(0, 7, 0, 10), status: PublishedVerificationStatus.Error }
       ], [
         new vscode.Diagnostic(new vscode.Range(3, 2, 3, 14), 'could not prove assertion', vscode.DiagnosticSeverity.Error)
       ]);
@@ -267,7 +267,7 @@ method Faz() { // Error
 }`.trimStart();
     const computedIcons = VerificationGutterStatusView.computeGutterIcons(
       virtualDocument(vscode.Uri.parse('file:///woops.dfy'), source),
-      false, new Map([
+      true, new Map([
         [ '0,7', new vscode.Range(0, 0, 2, 1) ],
         [ '4,7', new vscode.Range(4, 0, 6, 1) ],
         [ '8,7', new vscode.Range(8, 0, 10, 1) ],
@@ -280,10 +280,12 @@ method Faz() { // Error
         { nameRange: new vscode.Range(8, 7, 8, 10), status: PublishedVerificationStatus.Queued },
         { nameRange: new vscode.Range(12, 7, 12, 10), status: PublishedVerificationStatus.Running },
         { nameRange: new vscode.Range(16, 7, 16, 10), status: PublishedVerificationStatus.Correct },
-        { nameRange: new vscode.Range(20, 7, 20, 10), status: PublishedVerificationStatus.FoundSomeErrors }
+        { nameRange: new vscode.Range(20, 7, 20, 10), status: PublishedVerificationStatus.Error }
       ], [
         new vscode.Diagnostic(new vscode.Range(5, 2, 5, 14), 'Outdated: could not prove assertion', vscode.DiagnosticSeverity.Warning),
         new vscode.Diagnostic(new vscode.Range(17, 2, 17, 14), 'some warning', vscode.DiagnosticSeverity.Warning),
+        Object.assign(new vscode.Diagnostic(new vscode.Range(21, 2, 21, 12), 'Assertion: division', vscode.DiagnosticSeverity.Hint),
+          { code: 'isAssertion' }),
         new vscode.Diagnostic(new vscode.Range(22, 2, 22, 14), 'could not prove assertion', vscode.DiagnosticSeverity.Error)
       ]);
     const expected = [
@@ -308,7 +310,7 @@ method Faz() { // Error
       LineVerificationStatus.Verified,
       LineVerificationStatus.Verified,
       LineVerificationStatus.Nothing,
-      LineVerificationStatus.ErrorContext,
+      LineVerificationStatus.AssertionVerifiedInErrorContext,
       LineVerificationStatus.AssertionFailed,
       LineVerificationStatus.ErrorContext
     ];
@@ -340,14 +342,18 @@ method FoundAllErrors() {
         [ '0,7', new vscode.Range(0, 0, 7, 1) ],
         [ '8,7', new vscode.Range(8, 0, 15, 1) ]
       ]), [
-        { nameRange: new vscode.Range(0, 7, 0, 22), status: PublishedVerificationStatus.FoundSomeErrors },
-        { nameRange: new vscode.Range(8, 7, 8, 21), status: PublishedVerificationStatus.FoundAllErrors }
+        { nameRange: new vscode.Range(0, 7, 0, 22), status: PublishedVerificationStatus.Error },
+        { nameRange: new vscode.Range(8, 7, 8, 21), status: PublishedVerificationStatus.Error }
       ], [
+        Object.assign(new vscode.Diagnostic(new vscode.Range(0, 7, 0, 22), 'Verification hit error limit so not all errors may be shown.',
+          vscode.DiagnosticSeverity.Error), { code: 'errorLimitHit' }),
         new vscode.Diagnostic(new vscode.Range(2, 4, 2, 16), 'could not prove assertion', vscode.DiagnosticSeverity.Error),
-        new vscode.Diagnostic(new vscode.Range(4, 4, 4, 16), 'Assertion: division', vscode.DiagnosticSeverity.Hint),
+        Object.assign(new vscode.Diagnostic(new vscode.Range(4, 4, 4, 16), 'Assertion: division', vscode.DiagnosticSeverity.Hint),
+          { code: 'isAssertion' }),
         new vscode.Diagnostic(new vscode.Range(6, 4, 6, 18), 'could not prove assertion', vscode.DiagnosticSeverity.Error),
         new vscode.Diagnostic(new vscode.Range(10, 4, 10, 16), 'could not prove assertion', vscode.DiagnosticSeverity.Error),
-        new vscode.Diagnostic(new vscode.Range(12, 4, 12, 18), 'Assertion: division', vscode.DiagnosticSeverity.Hint)
+        Object.assign(new vscode.Diagnostic(new vscode.Range(12, 4, 12, 18), 'Assertion: division', vscode.DiagnosticSeverity.Hint),
+          { code: 'isAssertion' })
       ]);
     const expected = [
       LineVerificationStatus.Nothing,
