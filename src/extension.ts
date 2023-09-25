@@ -69,8 +69,7 @@ class ExtensionRuntime {
 
   public async startClientAndWaitForVersion() {
     this.client = this.client ?? await DafnyLanguageClient.create(this.installer);
-    this.client.start();
-    await this.client.onReady();
+    await this.client.start();
     this.languageServerVersion = await this.getLanguageServerVersionAfterStartup();
   }
 

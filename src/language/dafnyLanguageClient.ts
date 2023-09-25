@@ -127,9 +127,7 @@ export class DafnyLanguageClient extends LanguageClient {
     private readonly diagnosticsListeners: DiagnosticListener[], forceDebug?: boolean) {
     super(id, name, serverOptions, clientOptions, forceDebug);
     this.diagnosticsListeners = diagnosticsListeners;
-    this.onReady().then(() => {
-      this.onNotification('dafny/textDocument/symbolStatus', params => this._onVerificationSymbolStatus.fire(params));
-    });
+    this.onNotification('dafny/textDocument/symbolStatus', params => this._onVerificationSymbolStatus.fire(params));
   }
 
   public getCounterexamples(param: ICounterexampleParams): Promise<ICounterexampleItem[]> {
