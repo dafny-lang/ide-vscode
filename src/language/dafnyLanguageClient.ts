@@ -24,7 +24,7 @@ function getLanguageServerLaunchArgsNew(): string[] {
   };
   const verifyOn: string = map[oldVerifyOnValue];
 
-  const launchArgs = Configuration.get<string[]>(ConfigurationConstants.LanguageServer.LaunchArgs);
+  const launchArgs = getCustomLaunchArgs();
   const specifiedCores = parseInt(Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationVirtualCores));
   // This is a temporary fix to prevent 0 cores from being used, since the languages server currently does not handle 0 cores correctly: https://github.com/dafny-lang/dafny/pull/3276
   const cores = isNaN(specifiedCores) || specifiedCores === 0 ? Math.ceil((os.cpus().length + 1) / 2) : Math.max(1, specifiedCores);
@@ -41,7 +41,7 @@ function getLanguageServerLaunchArgsNew(): string[] {
 }
 
 function getLanguageServerLaunchArgsOld(): string[] {
-  const launchArgs = Configuration.get<string[]>(ConfigurationConstants.LanguageServer.LaunchArgs);
+  const launchArgs = getCustomLaunchArgs();
   return [
     getVerificationArgument(),
     getVerifierTimeLimitArgument(),
@@ -53,6 +53,44 @@ function getLanguageServerLaunchArgsOld(): string[] {
     ...launchArgs
   ];
 }
+
+function getCustomLaunchArgs(): string[] {
+  const launchArgs = Configuration.get<string[]>(ConfigurationConstants.LanguageServer.LaunchArgs);
+  return launchArgs.flatMap(a => splitArguments(a));
+}
+
+function splitArguments(args: string): string[] {
+  if(args) {
+    return [];
+  }
+
+  let inSingleQuote = false;
+  let inDoubleQuote = false;
+  const result: string[] = [];
+  let start = 0;
+  for(let end = 0; end < args.length; end++) {
+    let store = false;
+    if(args[end] === '"' && !inSingleQuote) {
+      store = inDoubleQuote;
+      inDoubleQuote = !inDoubleQuote;
+    }
+    if(args[end] === '\'' && !inDoubleQuote) {
+      store = inSingleQuote;
+      inSingleQuote = !inSingleQuote;
+    }
+    if(!inSingleQuote && !inDoubleQuote && args[end] === ' ') {
+      store = true;
+    }
+
+    if(store) {
+      result.push(args.substring(start, end - start));
+      start = end + 1; // Skip the single or double quote or space in the next entry
+    }
+  }
+  result.push(args.substring(start, args.length - start));
+  return result;
+}
+
 
 function getVerificationArgument(): string {
   return `--documents:verify=${Configuration.get<string>(ConfigurationConstants.LanguageServer.AutomaticVerification)}`;
