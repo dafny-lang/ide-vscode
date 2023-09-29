@@ -1,5 +1,17 @@
 # Release Notes
 
+## 3.2.0
+- Add Dafny 4.3.0
+- Update LSP client to 9.0.0 (https://github.com/dafny-lang/ide-vscode/pull/439)
+  The main driver of this update is that it improves error handling
+- Let the extension use the Dafny server to track changes in dfyconfig (https://github.com/dafny-lang/ide-vscode/pull/435)
+- Fix the removal of verification tests (https://github.com/dafny-lang/ide-vscode/pull/436)
+- Make status bar forward compatible with upcoming Dafny release (https://github.com/dafny-lang/ide-vscode/pull/432)
+- Fix: support for spaces in paths (https://github.com/dafny-lang/ide-vscode/pull/431)
+- Bump semver from 7.3.7 to 7.5.4 (https://github.com/dafny-lang/ide-vscode/pull/411)
+- Always show all verifiable symbols in the test panels (https://github.com/dafny-lang/ide-vscode/pull/428)
+- Prevent verification as tests UI from becoming unresponsive (https://github.com/dafny-lang/ide-vscode/pull/421)
+
 ## 3.1.2
 - Add Dafny 4.2.0
 - Update README.md (https://github.com/dafny-lang/ide-vscode/pull/407)
