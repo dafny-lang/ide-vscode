@@ -1,5 +1,8 @@
 # Release Notes
 
+## 3.2.1
+- fix: relax .NET runtime version check (https://github.com/dafny-lang/ide-vscode/pull/443)
+
 ## 3.2.0
 - Add Dafny 4.3.0
 - Update LSP client to 9.0.0 (https://github.com/dafny-lang/ide-vscode/pull/439)
