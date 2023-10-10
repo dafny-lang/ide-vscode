@@ -41,7 +41,8 @@ export namespace ConfigurationConstants {
 
 export namespace DotnetConstants {
   export const ExecutableName = 'dotnet';
-  export const SupportedRuntimesPattern = /Microsoft\.AspNetCore\.App\s*[56]\.0/i;
+  export const SupportedRuntimesPattern = /Microsoft\.NETCore\.App\s*((\d+)\.\d+\.\d+)/ig;
+  export const SupportedRuntimesMinVersion = 5;
 }
 
 export namespace LanguageServerConstants {

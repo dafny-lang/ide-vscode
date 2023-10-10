@@ -20,8 +20,19 @@ export async function checkSupportedDotnetVersion(): Promise<string | undefined>
       return dotnetExecutable + Messages.Dotnet.IsNotAnExecutableFile;
     }
     const { stdout } = await execFileAsync(dotnetExecutable, [ ListRuntimesArg ]);
-    return DotnetConstants.SupportedRuntimesPattern.test(stdout) ? undefined
-      : dotnetExecutable + Messages.Dotnet.NotASupportedDotnetInstallation + stdout;
+    const runtimeVersions = [...stdout.matchAll(DotnetConstants.SupportedRuntimesPattern)]
+      .map(match => {
+        const version = match[1];
+        const major = parseInt(match[2], 10);
+        return [major, version] as [number, string];
+      });
+    if (runtimeVersions.find(([major, _]) => major >= DotnetConstants.SupportedRuntimesMinVersion) !== undefined) {
+      return undefined;
+    }
+    const runtimeVersionsStr = runtimeVersions.length === 0
+      ? " no installed versions"
+      : runtimeVersions.map(([_, version]) => version).join(", ");
+    return dotnetExecutable + Messages.Dotnet.NotASupportedDotnetInstallation + runtimeVersionsStr;
   } catch(error: unknown) {
     const errorMsg = `Error invoking ${dotnetExecutable} ${ListRuntimesArg}: ${error}`;
     console.error(errorMsg);
