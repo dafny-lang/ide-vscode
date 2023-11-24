@@ -96,7 +96,7 @@ function getMarkGhostStatementsArgument(): string {
 
 function getDafnyPluginsArgumentOld(): string[] {
   const plugins = Configuration.get<string[]>(ConfigurationConstants.LanguageServer.DafnyPlugins);
-  if (plugins === null || !Array.isArray(plugins)) {
+  if(plugins === null || !Array.isArray(plugins)) {
     return [];
   }
   return (
@@ -108,7 +108,7 @@ function getDafnyPluginsArgumentOld(): string[] {
 
 function getDafnyPluginsArgument(): string[] {
   const plugins = Configuration.get<string[]>(ConfigurationConstants.LanguageServer.DafnyPlugins);
-  if (plugins === null || !Array.isArray(plugins)) {
+  if(plugins === null || !Array.isArray(plugins)) {
     return [];
   }
   return (
