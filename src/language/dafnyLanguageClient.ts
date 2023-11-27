@@ -114,7 +114,7 @@ function getDafnyPluginsArgument(): string[] {
   return (
     plugins
       .filter(plugin => plugin !== null && plugin !== '')
-      .map((plugin, i) => `--plugin:${i}=${plugin}`)
+      .map(plugin => `--plugin:${plugin}`)
   );
 }
 
