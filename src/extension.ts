@@ -1,4 +1,4 @@
-import { Disposable, ExtensionContext, OutputChannel, window, commands } from 'vscode';
+import { Disposable, ExtensionContext, OutputChannel, window, workspace, commands, Uri, CancellationToken } from 'vscode';
 import { ExtensionConstants, LanguageServerConstants } from './constants';
 import { DafnyCommands } from './commands';
 import { DafnyLanguageClient } from './language/dafnyLanguageClient';
@@ -44,6 +44,13 @@ class ExtensionRuntime {
   }
 
   public async initialize(): Promise<void> {
+    workspace.registerTextDocumentContentProvider('dafny', {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      provideTextDocumentContent: function(uri: Uri, token: CancellationToken) {
+        return '// Viewing Dafny libraries in the Dafny IDE is not yet supported.';
+      }
+    });
+
     await this.startClientAndWaitForVersion();
     createAndRegisterDafnyIntegration(this.installer, this.client!, this.languageServerVersion!);
     commands.registerCommand(DafnyCommands.RestartServer, restartServer);
