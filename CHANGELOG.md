@@ -1,5 +1,11 @@
 # Release Notes
 
+## 3.2.2
+- Warn users about libraries not being available inside the Dafny IDE (https://github.com/dafny-lang/ide-vscode/pull/454)
+- Fix: Dafny plugins working again. (https://github.com/dafny-lang/ide-vscode/pull/453)
+- Fix formatting issues accidentally introduced in PR #450 (https://github.com/dafny-lang/ide-vscode/pull/451)
+- Fix plugin arguments to Dafny server (https://github.com/dafny-lang/ide-vscode/pull/450)
+
 ## 3.2.1
 - fix: relax .NET runtime version check (https://github.com/dafny-lang/ide-vscode/pull/443)
 
