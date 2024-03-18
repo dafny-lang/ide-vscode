@@ -1,5 +1,8 @@
 # Release Notes
 
+## 3.2.3
+- Add Dafny 4.5.0
+
 ## 3.2.2
 - Warn users about libraries not being available inside the Dafny IDE (https://github.com/dafny-lang/ide-vscode/pull/454)
 - Fix: Dafny plugins working again. (https://github.com/dafny-lang/ide-vscode/pull/453)
