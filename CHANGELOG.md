@@ -1,5 +1,8 @@
 # Release Notes
 
+## 3.3.0
+- chore: Empty commit for the benefit of publish_process.js (https://github.com/dafny-lang/ide-vscode/pull/467)
+
 ## 3.2.3
 - Add Dafny 4.5.0
 
