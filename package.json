@@ -250,7 +250,7 @@
             "latest nightly"
           ],
           "default": "latest stable release",
-          "description": "The preferred Dafny version to use (requires restart)."
+          "description": "The preferred Dafny version to use (requires restart). Select 'custom' and configure the option 'Cli Path' to use the Dafny binary at that location."
         },
         "dafny.dotnetExecutablePath": {
           "type": "string",

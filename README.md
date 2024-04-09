@@ -29,26 +29,6 @@ You can find [examples below](#examples).
 The plugin requires at least .NET Core 5.0 (the ASP.NET Core 5.0 or 6.0 runtimes to be more specific) to run the _Dafny Language Server_. Please download a distribution from [Microsoft](https://dotnet.microsoft.com/download).
 When you first open a _Dafny_ file, the extension will prompt you to install .NET Core manually. The language server gets installed automatically.
 
-## Extension Settings
-
-| Setting                           | Description                                                                                                                                                                                        | Default                                                        |
-| :-------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------- |
-| `dafny.languageServerRuntimePath` | Absolute or relative path to the _Dafny_ language server runtime (`DafnyLanguageServer.dll`).                                                                                                      | `null`                                                         |
-| `dafny.automaticVerification`     | Optional string to control when the document should be verified (choose between `never`, `onchange`, and `onsave`.                                                                                 | `onchange`                                                     |
-| `dafny.verificationTimeLimit`     | Maximum number of time in seconds to verify a document. 0=infinite                                                                                                                                 | `0`                                                            |
-| `dafny.verificationVirtualCores`  | Maximum number of virtual cores that may be used for verification. 0=auto (use half of the available cores)                                                                                        | `0`                                                            |
-| `dafny.markGhostStatements`       | Mark ghost statements in the code (requires Dafny 3.4.0+).                                                                                                                                         | `true`                                                         |
-| `dafny.languageServerLaunchArgs`  | Optional array of strings as _Dafny_ language server arguments.                                                                                                                                    | `[ ]`                                                          |
-| `dafny.compilerRuntimePath`       | Absolute or relative path to the _Dafny_ compiler (`Dafny.dll`).                                                                                                                                   | `null`                                                         |
-| `dafny.compilerArgs`              | Optional array of strings as _Dafny_ compilation arguments.                                                                                                                                        | `[ "/verifyAllModules", "/compile:1", "/spillTargetCode:1" ]`  |
-| `dafny.compilerArgs`              | Optional array of strings as _Dafny_ compilation arguments.                                                                                                                                        | `[ "/verifyAllModules", "/compile:1", "/spillTargetCode:1" ]`  |
-| `dafny.preferredVersion`          | The preferred Dafny version to use (overriden by custom compiler and language server paths, choose between `latest`, `3.3.0`, and `3.2.0`).                                                        | `latest`                                                       |
-| `dafny.dotnetExecutablePath`      | Absolute path to the dotnet executable. Only necessary if dotnet is not in system PATH (you'll get an error if that's the case).                                                                   |                                                                |
-| `dafny.colorCounterexamples`      | Customize the color (HEX) of counterexamples. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults. | `{ "backgroundColor": null, "fontColor": null }`               |
-| `dafny.terminalCommandPrefix`     | The prefix to use when executing a command in the VS Code terminal. Defaults to & on windows.                                                                                                      |                                                                |
-
-Please note that in this new plugin version "automatic verification" is always on and a language server side feature.
-
 ## Examples
 
 Here are a few impressions of the features.
