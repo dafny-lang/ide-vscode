@@ -123,7 +123,15 @@
         ],
         "extensions": [
           ".dfy",
-          ".dfyi",
+          ".dfyi"
+        ],
+        "configuration": "./language-configuration.json"
+      }, {
+        "id": "dafnyProject",
+        "aliases": [
+          "Dafny Project file"
+        ],
+        "extensions": [
           "dfyconfig.toml"
         ],
         "configuration": "./language-configuration.json"

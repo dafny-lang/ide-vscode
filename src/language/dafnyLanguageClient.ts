@@ -152,7 +152,11 @@ export class DafnyLanguageClient extends LanguageClient {
     };
     const diagnosticsListeners: ((uri: Uri, diagnostics: Diagnostic[]) => void)[] = [];
     const clientOptions: LanguageClientOptions = {
-      documentSelector: [ DafnyDocumentFilter ],
+      documentSelector: [ DafnyDocumentFilter, {
+        scheme: 'file',
+        language: 'dafnyProject'
+      }
+      ],
       diagnosticCollectionName: LanguageServerId,
       middleware: {
         handleDiagnostics: (uri: Uri, diagnostics: Diagnostic[], next: HandleDiagnosticsSignature) => {
