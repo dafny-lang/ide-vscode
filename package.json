@@ -125,7 +125,7 @@
           ".dfy",
           ".dfyi"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./dafny-language-configuration.json"
       }, {
         "id": "dafnyProject",
         "aliases": [
@@ -134,7 +134,7 @@
         "extensions": [
           "dfyconfig.toml"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./project-language-configuration.json"
       }
     ],
     "grammars": [
@@ -142,7 +142,12 @@
         "language": "dafny",
         "scopeName": "text.dfy.dafny",
         "path": "./syntaxes/Dafny.tmLanguage"
-      }
+      },
+      // {
+      //   "language": "dafnyProject",
+      //   "scopeName": "source.toml",
+      //   "path": "./syntaxes/toml.tmLanguage.json"
+      // }
     ],
     "configuration": {
       "type": "object",
