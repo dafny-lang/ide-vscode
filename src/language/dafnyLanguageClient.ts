@@ -154,7 +154,7 @@ export class DafnyLanguageClient extends LanguageClient {
     const clientOptions: LanguageClientOptions = {
       documentSelector: [ DafnyDocumentFilter, {
         scheme: 'file',
-        language: 'dafnyProject'
+        pattern: '**/*dfyconfig.toml'
       }
       ],
       diagnosticCollectionName: LanguageServerId,
