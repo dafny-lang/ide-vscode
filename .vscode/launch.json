@@ -34,36 +34,6 @@
       "preLaunchTask": "${defaultBuildTask}"
     },
     {
-      "name": "Run with $DAFNY_DEV_SERVER2",
-      "type": "extensionHost",
-      "request": "launch",
-      "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}"
-      ],
-      "env": {
-        "DAFNY_SERVER_OVERRIDE": "/Users/rwillems/SourceCode/dafny2/Scripts/dafny",
-      },
-      "outFiles": [
-        "${workspaceFolder}/dist/**/*.js"
-      ],
-      "preLaunchTask": "${defaultBuildTask}"
-    },
-    {
-      "name": "Run with $DAFNY_DEV_SERVER3",
-      "type": "extensionHost",
-      "request": "launch",
-      "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}"
-      ],
-      "env": {
-        "DAFNY_SERVER_OVERRIDE": "/Users/rwillems/SourceCode/dafny3/Scripts/dafny",
-      },
-      "outFiles": [
-        "${workspaceFolder}/dist/**/*.js"
-      ],
-      "preLaunchTask": "${defaultBuildTask}"
-    },
-    {
       "name": "Extension Tests",
       "type": "extensionHost",
       "request": "launch",
