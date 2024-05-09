@@ -11,6 +11,9 @@
   "bugs": {
     "url": "https://github.com/dafny-lang/ide-vscode/issues"
   },
+  "activationEvents": [
+    "onLanguage:toml"
+  ],
   "qna": false,
   "license": "MIT",
   "galleryBanner": {
@@ -123,10 +126,9 @@
         ],
         "extensions": [
           ".dfy",
-          ".dfyi",
-          "dfyconfig.toml"
+          ".dfyi"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./dafny-language-configuration.json"
       }
     ],
     "grammars": [
@@ -309,7 +311,6 @@
       }
     ]
   },
-  "activationEvents": [],
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "webpack",
