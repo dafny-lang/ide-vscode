@@ -1,4 +1,4 @@
-import { DocumentUri, integer } from 'vscode-languageclient';
+import { DocumentUri, integer } from "vscode-languageclient";
 
 export interface IVerificationGutterStatusParams {
   uri: DocumentUri;
@@ -20,7 +20,7 @@ export enum LineVerificationStatus {
   VerifiedVerifying = 202,
   // Also applicable for empty spaces if they are not surrounded by errors.
   Verified = 200,
- // For trees containing children with errors (e.g. methods)
+  // For trees containing children with errors (e.g. methods)
   ErrorContextObsolete = 301,
   ErrorContextVerifying = 302,
   ErrorContext = 300,
@@ -40,15 +40,15 @@ export enum LineVerificationStatus {
   ErrorContextStartVerifying = 312,
   ErrorContextEnd = 320,
   ErrorContextEndObsolete = 321,
-  ErrorContextEndVerifying = 322
+  ErrorContextEndVerifying = 322,
 }
 
 export enum ScrollColor {
-  Unknown = '#00000000',
-  Error = '#fe536aa0',
-  ErrorActive = '#fe536ad0',
-  ErrorRange = '#fad00080',
-  Verified = '#62b45580'
+  Unknown = "#00000000",
+  Error = "#fe536aa0",
+  ErrorActive = "#fe536ad0",
+  ErrorRange = "#fad00080",
+  Verified = "#62b45580",
 }
 
 export const obsoleteLineVerificationStatus: LineVerificationStatus[] = [
@@ -56,7 +56,7 @@ export const obsoleteLineVerificationStatus: LineVerificationStatus[] = [
   LineVerificationStatus.VerifiedObsolete,
   LineVerificationStatus.ErrorContextObsolete,
   LineVerificationStatus.ErrorContextStartObsolete,
-  LineVerificationStatus.ErrorContextEndObsolete
+  LineVerificationStatus.ErrorContextEndObsolete,
 ];
 export const verifyingLineVerificationStatus: LineVerificationStatus[] = [
   LineVerificationStatus.Verifying,
@@ -65,7 +65,7 @@ export const verifyingLineVerificationStatus: LineVerificationStatus[] = [
   LineVerificationStatus.ErrorContextVerifying,
   LineVerificationStatus.ErrorContextStartVerifying,
   LineVerificationStatus.VerifiedVerifying,
-  LineVerificationStatus.AssertionVerifiedInErrorContextVerifying
+  LineVerificationStatus.AssertionVerifiedInErrorContextVerifying,
 ];
 export const nonErrorLineVerificationStatus: LineVerificationStatus[] = [
   LineVerificationStatus.Scheduled,
@@ -73,5 +73,5 @@ export const nonErrorLineVerificationStatus: LineVerificationStatus[] = [
   LineVerificationStatus.Verified,
   LineVerificationStatus.VerifiedObsolete,
   LineVerificationStatus.VerifiedVerifying,
-  LineVerificationStatus.Verifying
+  LineVerificationStatus.Verifying,
 ];

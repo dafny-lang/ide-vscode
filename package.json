@@ -75,6 +75,11 @@
           "when": "editorTextFocus && editorLangId == dafny",
           "command": "dafny.copyCounterexamples",
           "group": "7_Dafny@2"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == dafny",
+          "command": "dafny.generateLoopInvariants",
+          "group": "7_Dafny@2"
         }
       ]
     },
@@ -112,6 +117,11 @@
         "command": "dafny.hideCounterexample",
         "key": "f8",
         "when": "editorTextFocus && editorLangId == dafny"
+      },
+      {
+        "command": "dafny.generateLoopInvariants",
+        "key": "ctrl+f9",
+        "when": "editorTextFocus && editorLangId == dafny"
       }
     ],
     "languages": [
@@ -140,6 +150,16 @@
       "type": "object",
       "title": "Dafny extension configuration",
       "properties": {
+        "dafny.openAiApiKey": {
+        "type": "string",
+        "default": "",
+        "description": "The OpenAI API key"
+      },
+      "dafny.numberOfRetries": {
+        "type": "number",
+        "default": 3,
+        "description": "The number of retries"
+      },
         "dafny.automaticVerification": {
           "type": "string",
           "default": "onchange",
@@ -306,6 +326,10 @@
       {
         "command": "dafny.restartServer",
         "title": "Dafny: Restart server"
+      },
+      {
+        "command": "dafny.generateLoopInvariants",
+        "title": "Dafny: Generate Loop Invariants"
       }
     ]
   },
@@ -344,6 +368,7 @@
     "cross-fetch": "^3.1.5",
     "extract-zip": "^2.0.1",
     "got": "^11.8.2",
+    "openai": "^4.33.0",
     "promise.any": "^2.0.2",
     "proxyquire": "^2.1.3",
     "vscode-languageclient": "^9.0.0",
