@@ -24,6 +24,7 @@ const OpenAI = require("openai");
 
 // Promise.any() is only available since Node.JS 15.
 import * as PromiseAny from "promise.any";
+import { parse } from "path";
 
 const DafnyVersionTimeoutMs = 5_000;
 let extensionRuntime: ExtensionRuntime | undefined;
@@ -117,11 +118,20 @@ async function waitForDiagnostics(uri: vscode.Uri): Promise<vscode.Diagnostic[]>
 }
 
 function findRangeToReplace(document: any, textToReplace: any) {
+  const trimmedTextToReplace = textToReplace.trim();
+
   const documentText = document.getText();
-  const searchIndex = documentText.indexOf(textToReplace);
+  const searchIndex = documentText.indexOf(trimmedTextToReplace);
+  console.log("searchIndex:", searchIndex);
   const start = document.positionAt(searchIndex);
-  const end = document.positionAt(searchIndex + textToReplace.length);
+  console.log("start:", start);
+  console.log("trimmedTextToReplace.length:", trimmedTextToReplace.length);
+  console.log("text len:", textToReplace.length);
+  const end = document.positionAt(parseInt(searchIndex) + parseInt(trimmedTextToReplace.length));
+  console.log("end:", end);
   const range = new vscode.Range(start, end);
+
+  console.log("range:", range);
 
   return range;
 }
@@ -149,6 +159,7 @@ async function GenerateLoopInvariantsFunction(
     "Return only code.\n" +
     "Fix the code if it is incorrect.\n" +
     "Don't write redundant verifications.\n" +
+    "Dont modify the original code.\n" +
     "Here is the code: ";
 
   if (editor) {
@@ -165,7 +176,7 @@ async function GenerateLoopInvariantsFunction(
 
     let word = document.getText(selection);
     let errorPrompt = "";
-    const previousCompletion = "";
+    let previousCompletion = "";
     let text = "";
     let originalText = "";
 
@@ -180,17 +191,28 @@ async function GenerateLoopInvariantsFunction(
         originalText = document.getText(selection);
       } else {
         word = text;
+        console.log("text:", text);
+        console.log("previousCompletion:", previousCompletion);
+        console.log("text:", text);
         selectedTextRange = findRangeToReplace(document, text);
+        selection = editor.selection;
       }
 
       console.log("text selected");
 
+      previousCompletion = text;
       text = await callOpenAi(settingsAPIKey, prompt, word, previousCompletion, errorPrompt);
       tries += 1;
 
       editor.edit((editBuilder) => {
         editBuilder.replace(selectedTextRange, text);
+        console.log("text to replace: 7");
       });
+
+      success = true;
+
+      await document.save();
+      console.log("text to replace: 8");
 
       console.log("edited");
 
@@ -206,13 +228,12 @@ async function GenerateLoopInvariantsFunction(
       const diagnostics = vscode.languages.getDiagnostics(document.uri);
 
       let errorDiagnostics = [];
-      errorDiagnostics = diagnostics.filter(
-        (diagnostic) => diagnostic.source === "Verifier" || diagnostic.source === "Parser"
-      );
+      errorDiagnostics = diagnostics.filter((diagnostic) => diagnostic.source === "Verifier");
 
       console.log("diagnostics final:", errorDiagnostics);
 
       errorPrompt = "The following errors were found : ";
+      console.log("text to replace: 9");
       errorDiagnostics.forEach((error) => {
         console.log(error);
         if (error.source === "Verifier" || error.source === "Parser") {
@@ -223,6 +244,8 @@ async function GenerateLoopInvariantsFunction(
       if (errorDiagnostics.length === 0) {
         success = true;
       }
+
+      console.log("text to replace: 10");
 
       // try {
       //   await document.save();
@@ -246,10 +269,10 @@ async function GenerateLoopInvariantsFunction(
     }
 
     if (tries >= retriesMax) {
-      editor.edit((editBuilder) => {
-        editBuilder.replace(findRangeToReplace(document, text), originalText);
-      });
-      await document.save();
+      // editor.edit((editBuilder) => {
+      //   editBuilder.replace(findRangeToReplace(document, text), originalText);
+      // });
+      // await document.save();
       window.showInformationMessage("Max tries exceeded!");
     }
 
