@@ -89,13 +89,48 @@ async function callOpenAi(
     .replace(/^dafny\n/, "");
 }
 
-export async function GenerateLoopInvariantsFunction(
+async function waitForDiagnostics(uri: vscode.Uri): Promise<vscode.Diagnostic[]> {
+  return new Promise((resolve, reject) => {
+    const subscription = vscode.languages.onDidChangeDiagnostics((event) => {
+      if (event.uris.some((eventUri) => eventUri.toString() === uri.toString())) {
+        const diagnostics = vscode.languages.getDiagnostics(uri);
+        console.log("diagnostics:", diagnostics);
+        let errorDiagnostics = [];
+        errorDiagnostics = diagnostics.filter(
+          (diagnostic) =>
+            diagnostic.source === "Verifier" ||
+            diagnostic.source === "Parser" ||
+            diagnostic.source === "Resolver"
+        );
+
+        subscription.dispose(); // Clean up the event listener
+        resolve(errorDiagnostics); // Resolve the promise with the filtered diagnostics
+      }
+    });
+
+    // Optional: Reject the promise after a timeout if the conditions are not met
+    setTimeout(() => {
+      subscription.dispose(); // Ensure to clean up if we hit the timeout
+      reject(new Error("Timeout waiting for diagnostics to update."));
+    }, 10000); // Increase timeout to 10 seconds as an example
+  });
+}
+
+function findRangeToReplace(document: any, textToReplace: any) {
+  const documentText = document.getText();
+  const searchIndex = documentText.indexOf(textToReplace);
+  const start = document.positionAt(searchIndex);
+  const end = document.positionAt(searchIndex + textToReplace.length);
+  const range = new vscode.Range(start, end);
+
+  return range;
+}
+
+async function GenerateLoopInvariantsFunction(
   client: any,
   settingsAPIKey: any,
   retriesMax: any
 ): Promise<void> {
-  window.showInformationMessage("Generating...");
-
   vscode.workspace.onDidChangeConfiguration((event) => {
     if (event.affectsConfiguration("dafny")) {
       settingsAPIKey = vscode.workspace.getConfiguration("dafny").get("settingsAPIKey");
@@ -109,7 +144,12 @@ export async function GenerateLoopInvariantsFunction(
   const editor = window.activeTextEditor;
 
   const prompt =
-    "Generate loop invariants for this code in Dafny  (no explanations , just the completed code, without changing the original code ,Don't change the original code ,The upper bound in the 'for' loop is exclusive, Reference types (arrays, classes, etc.) do not admit null unless annotated with '?' ,The loop invariant for bounds is not needed for 'for' loops,You can use a return value directly in the 'return' instruction,Don't write redundant verifications.";
+    "Generate loop invariants for the following code in Dafny\n" +
+    "Do not include explanations.\n" +
+    "Return only code.\n" +
+    "Fix the code if it is incorrect.\n" +
+    "Don't write redundant verifications.\n" +
+    "Here is the code: ";
 
   if (editor) {
     const document = editor.document;
@@ -125,68 +165,98 @@ export async function GenerateLoopInvariantsFunction(
 
     let word = document.getText(selection);
     let errorPrompt = "";
-    let previousCompletion = "";
+    const previousCompletion = "";
+    let text = "";
+    let originalText = "";
+
+    console.log(retriesMax);
 
     while (tries <= retriesMax && !success) {
-      selection = editor.selection;
-      selectedTextRange = new vscode.Range(selection.start, selection.end);
+      window.showInformationMessage("Generating... Try number: " + tries);
+      if (tries === 0) {
+        selection = editor.selection;
+        selectedTextRange = new vscode.Range(selection.start, selection.end);
+        word = document.getText(selection);
+        originalText = document.getText(selection);
+      } else {
+        word = text;
+        selectedTextRange = findRangeToReplace(document, text);
+      }
 
-      word = document.getText(selection);
+      console.log("text selected");
 
-      const text = await callOpenAi(settingsAPIKey, prompt, word, previousCompletion, errorPrompt);
+      text = await callOpenAi(settingsAPIKey, prompt, word, previousCompletion, errorPrompt);
       tries += 1;
 
       editor.edit((editBuilder) => {
-        editBuilder.replace(selection, text);
+        editBuilder.replace(selectedTextRange, text);
       });
 
-      await document.save();
+      console.log("edited");
 
-      const succeeded = await client.runVerification({
-        textDocument: {
-          uri: document.uri.toString(),
-        },
-        position: new Position(0, 0),
+      //await vscode.commands.executeCommand("dafny.run");
+
+      // await client.runVerification({
+      //   textDocument: {
+      //     uri: document.uri.toString(),
+      //   },
+      //   position: new Position(0, 0),
+      // });
+
+      const diagnostics = vscode.languages.getDiagnostics(document.uri);
+
+      let errorDiagnostics = [];
+      errorDiagnostics = diagnostics.filter(
+        (diagnostic) => diagnostic.source === "Verifier" || diagnostic.source === "Parser"
+      );
+
+      console.log("diagnostics final:", errorDiagnostics);
+
+      errorPrompt = "The following errors were found : ";
+      errorDiagnostics.forEach((error) => {
+        console.log(error);
+        if (error.source === "Verifier" || error.source === "Parser") {
+          errorPrompt += error.message + "-" + document.getText(error.range) + ";";
+        }
       });
 
-      if (succeeded) {
-        window.showInformationMessage("Done!");
+      if (errorDiagnostics.length === 0) {
         success = true;
-        errorPrompt = "";
-        previousCompletion = "";
-        return;
-      } else {
-        const diagnosticsChangeHandler = vscode.languages.onDidChangeDiagnostics((event) => {
-          if (event.uris.some((uri) => uri.toString() === document.uri.toString())) {
-            let errorCount = 0;
-            const diagnostics = vscode.languages.getDiagnostics(document.uri);
-
-            errorPrompt = "The following errors were found (format errormessage-code) : ";
-
-            diagnostics.forEach((error) => {
-              if (error.source === "Verifier" && selectedTextRange.contains(error.range)) {
-                errorCount++;
-                errorPrompt += error.message + "-" + document.getText(error.range) + ";";
-              }
-            });
-
-            if (errorCount === 0) {
-              window.showInformationMessage("Done!");
-              success = true;
-              errorPrompt = "";
-              previousCompletion = "";
-              diagnosticsChangeHandler.dispose(); // remove the event handler
-              return;
-            } else {
-              vscode.window.showInformationMessage(
-                "Generating failed, trying again... (" + tries + ")"
-              );
-            }
-          }
-        });
       }
+
+      // try {
+      //   await document.save();
+      //   const diag = await waitForDiagnostics(document.uri);
+      //   console.log("diagnostics after verification:", diag);
+
+      //   errorPrompt = "The following errors were found : ";
+      //   diag.forEach((error) => {
+      //     console.log(error);
+      //     if (error.source === "Verifier" || error.source === "Parser") {
+      //       errorPrompt += error.message + "-" + document.getText(error.range) + ";";
+      //     }
+      //   });
+
+      //   if (diag.length === 0) {
+      //     success = true;
+      //   }
+      // } catch (error) {
+      //   console.error("Timeout or error while waiting for diagnostics:", error);
+      // }
     }
-    if (tries >= retriesMax) window.showInformationMessage("Max tries exceeded!");
+
+    if (tries >= retriesMax) {
+      editor.edit((editBuilder) => {
+        editBuilder.replace(findRangeToReplace(document, text), originalText);
+      });
+      await document.save();
+      window.showInformationMessage("Max tries exceeded!");
+    }
+
+    if (success) {
+      window.showInformationMessage("Done! Successfully generated loop invariants...");
+      await document.save();
+    }
   }
 
   return;
