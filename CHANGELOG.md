@@ -1,5 +1,15 @@
 # Release Notes
 
+## 3.3.1
+
+- Dafny project file improvements (https://github.com/dafny-lang/ide-vscode/pull/475)
+  - No longer let the syntax definitions for `.dfy` files also be applied to `dfyconfig.toml` files
+  - Activate extension when `.toml` file is opened, such as a `dfyconfig.toml`
+  - Let the language client also operate on files ending in `dfyconfig.toml`
+  - Update the description of `dafny.version`
+  - Remove outdated descriptions of options in the README
+- Add Dafny 4.7.0
+
 ## 3.3.0
 - Add Dafny 4.6.0
 
