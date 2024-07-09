@@ -14,14 +14,15 @@ import * as PromiseAny from 'promise.any';
 const DafnyVersionTimeoutMs = 5_000;
 let extensionRuntime: ExtensionRuntime | undefined;
 
-export async function activate(context: ExtensionContext): Promise<void> {
+export async function activate(context: ExtensionContext): Promise<ExtensionRuntime | undefined> {
   if(!await checkAndInformAboutInstallation(context)) {
-    return;
+    return undefined;
   }
   const statusOutput = window.createOutputChannel(ExtensionConstants.ChannelName);
   context.subscriptions.push(statusOutput);
   extensionRuntime = new ExtensionRuntime(context, statusOutput);
   await extensionRuntime.initialize();
+  return extensionRuntime;
 }
 
 export async function deactivate(): Promise<void> {
