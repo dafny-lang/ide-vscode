@@ -1,5 +1,9 @@
 # Release Notes
 
+## 3.4.0
+- Export ExtensionRuntime (or LanguageClient) for other extensions (https://github.com/dafny-lang/ide-vscode/pull/483)
+- Add Dafny 4.8.0
+
 ## 3.3.1
 
 - Dafny project file improvements (https://github.com/dafny-lang/ide-vscode/pull/475)
