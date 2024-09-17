@@ -1,5 +1,9 @@
 # Release Notes
 
+## 3.4.1
+- Add Dafny 4.8.1
+- Extension is now published to OpenVSX registry as well
+
 ## 3.4.0
 - Export ExtensionRuntime (or LanguageClient) for other extensions (https://github.com/dafny-lang/ide-vscode/pull/483)
 - Add Dafny 4.8.0
