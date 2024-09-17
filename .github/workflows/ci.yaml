@@ -12,13 +12,11 @@ jobs:
       - name: "Prepare: Checkout Repository"
         uses: actions/checkout@v2
       - name: "Prepare: Use Node.js ${{ matrix.node-version }}"
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: v16.x
+          node-version: v22.x
       #- name: "Prepare: Setup sonarqube"
       #  uses: warchant/setup-sonar-scanner@v1
-      #- run: npm install -g npm@latest
-      - run: npm install -g npm@8.13.2
       - run: npm install
       - run: npm run lint
       - run: npm run vscode:prepublish
@@ -26,12 +24,10 @@ jobs:
       #  env:
       #    CI: true
       - name: "Prepare: Package VSCode Extension"
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: v16.x
-      #- run: npm install -g npm@latest
-      - run: npm install -g npm@8.13.2
-      - run: npm install -g vsce@2.9.2
+          node-version: v22.x
+      - run: npm install -g @vscode/vsce@2.15.0
       - run: vsce package --out dist/
 
 
@@ -43,7 +39,7 @@ jobs:
       #    -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
       - name: "Upload Artifact: VSIX Packages"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: package
           path: dist/*.vsix
@@ -128,11 +124,17 @@ jobs:
         id: get_version
         run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
 
-      - run: npm install -g vsce@1.96.1
+      - run: npm install -g @vscode/vsce@2.15.0
       - run: vsce publish -p "${MARKETPLACE_TOKEN}" --packagePath dist/${PACKAGE_NAME}-${VERSION}.vsix
         env:
           # Note: Marketplace Token according to:
           #   https://code.visualstudio.com/api/working-with-extensions/publishing-extension#get-a-personal-access-token
           #  The token is only valid for a limited time - renewal might be required.
           MARKETPLACE_TOKEN: ${{ secrets.MARKETPLACE_TOKEN }}
+          VERSION: ${{ steps.get_version.outputs.VERSION }}
+
+      - run: npm install -g ovsx@0.9.4
+      - run: ovsx publish -p "${OPENVSX_NAMESPACE_TOKEN}" --packagePath dist/${PACKAGE_NAME}-${VERSION}.vsix
+        env:
+          OPENVSX_NAMESPACE_TOKEN: ${{ secrets.OPENVSX_NAMESPACE_TOKEN }}
           VERSION: ${{ steps.get_version.outputs.VERSION }}
