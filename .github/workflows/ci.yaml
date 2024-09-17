@@ -14,11 +14,9 @@ jobs:
       - name: "Prepare: Use Node.js ${{ matrix.node-version }}"
         uses: actions/setup-node@v4
         with:
-          node-version: v16.x
+          node-version: v22.x
       #- name: "Prepare: Setup sonarqube"
       #  uses: warchant/setup-sonar-scanner@v1
-      #- run: npm install -g npm@latest
-      - run: npm install -g npm@8.13.2
       - run: npm install
       - run: npm run lint
       - run: npm run vscode:prepublish
@@ -28,9 +26,7 @@ jobs:
       - name: "Prepare: Package VSCode Extension"
         uses: actions/setup-node@v4
         with:
-          node-version: v16.x
-      #- run: npm install -g npm@latest
-      - run: npm install -g npm@8.13.2
+          node-version: v22.x
       - run: npm install -g @vscode/vsce@2.15.0
       - run: vsce package --out dist/
 
