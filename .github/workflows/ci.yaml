@@ -136,3 +136,9 @@ jobs:
           #  The token is only valid for a limited time - renewal might be required.
           MARKETPLACE_TOKEN: ${{ secrets.MARKETPLACE_TOKEN }}
           VERSION: ${{ steps.get_version.outputs.VERSION }}
+
+      - run: npm install -g ovsx@0.9.4
+      - run: ovsx publish -p "${OPENVSX_NAMESPACE_TOKEN}" --packagePath dist/${PACKAGE_NAME}-${VERSION}.vsix
+        env:
+          OPENVSX_NAMESPACE_TOKEN: ${{ secrets.OPENVSX_NAMESPACE_TOKEN }}
+          VERSION: ${{ steps.get_version.outputs.VERSION }}
