@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: "Prepare: Checkout Repository"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: "Prepare: Use Node.js ${{ matrix.node-version }}"
         uses: actions/setup-node@v4
         with:
@@ -50,10 +50,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Prepare: Checkout Repository"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: "Prepare: Get Build Artifact"
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: package
           path: dist/
@@ -107,7 +107,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Prepare: Checkout Repository"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: "Prepare: Use Node.js ${{ matrix.node-version }}"
         uses: actions/setup-node@v1
@@ -115,7 +115,7 @@ jobs:
           node-version: v12.x
 
       - name: "Prepare: Get Build Artifact"
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: package
           path: dist/
