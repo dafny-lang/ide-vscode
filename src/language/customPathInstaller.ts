@@ -107,7 +107,8 @@ export class CustomPathInstaller {
         || file.endsWith('.exe')
         || file === 'z3'
         || file === 'DafnyPrelude.bpl'
-        || file === 'runtimes')) {
+        || file === 'runtimes'
+        || file === executableName)) {
         continue;
       }
       // eslint-disable-next-line max-depth
