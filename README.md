@@ -113,7 +113,7 @@ npm install
 To build and debug using Visual Studio Code, install the [TypeScript + Webpack Problem Matchers](https://marketplace.visualstudio.com/items?itemName=eamodio.tsl-problem-matcher) extension.
 After the installation, open the root folder within VSCode and hit `F5` to debug the Dafny extension.
 
-Because the latest version of the plugin requires recent changes to the Dafny language server, you will then need to change the `dafny.compilerRuntimePath` and `dafny.languageServerRuntimePath` extension settings to point to the `Dafny.dll` and `DafnyLanguageServer.dll` files from a local build of Dafny. See [here](https://github.com/dafny-lang/dafny/wiki/INSTALL#building-and-developing-from-source-code) for instructions on building Dafny locally.
+To debug the extension from source, with a custom version of Dafny, you can use the launch configuration "Run with $DAFNY_DEV_SERVER", which looks at the environment variable `DAFNY_DEV_SERVER` to determine which Dafny CLI to use to run the language server. For example, if you have a local checkout of Dafny at location `/my/path/to/dafny`, you can set `DAFNY_DEV_SERVER` to `/my/path/to/dafny/Binaries/Dafny.dll`.
 
 ### Packaging
 
