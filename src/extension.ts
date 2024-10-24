@@ -75,10 +75,12 @@ async function callAI(
         model: "gpt-4o",
       });
 
-      return completion.choices[0].message.content
-        .trim()
-        .replace(/```dafny\n/g, "")
-        .replace(/```/g, "");
+      return (
+        completion.choices[0]?.message?.content
+          ?.trim()
+          .replace(/```dafny\n/g, "")
+          .replace(/```/g, "") ?? ""
+      );
     } catch (error: unknown) {
       if (error instanceof Error) {
         throw new Error(`OpenAI API error: ${error.message}`);
