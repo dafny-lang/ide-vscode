@@ -1,15 +1,15 @@
 {
   "name": "ide-vscode",
-  "displayName": "Dafny",
-  "description": "Dafny for Visual Studio Code",
-  "version": "3.3.0",
-  "publisher": "dafny-lang",
+  "displayName": "Dafny Loop Invariants",
+  "description": "Dafny for Visual Studio Code with AI-powered loop invariants generation",
+  "version": "1.1.0",
+  "publisher": "Emantrigo",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dafny-lang/ide-vscode"
+    "url": "https://github.com/emantrigo/dafny-plugin"
   },
   "bugs": {
-    "url": "https://github.com/dafny-lang/ide-vscode/issues"
+    "url": "https://github.com/emantrigo/dafny-plugin/issues"
   },
   "activationEvents": [
     "onLanguage:toml"
@@ -153,15 +153,29 @@
       "title": "Dafny extension configuration",
       "properties": {
         "dafny.openAiApiKey": {
-        "type": "string",
-        "default": "",
-        "description": "The OpenAI API key"
-      },
-      "dafny.numberOfRetries": {
-        "type": "number",
-        "default": 3,
-        "description": "The number of retries"
-      },
+          "type": "string",
+          "default": "",
+          "description": "API key for OpenAI service"
+        },
+        "dafny.claudeApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for Claude service"
+        },
+        "dafny.aiProvider": {
+          "type": "string",
+          "enum": [
+            "openai",
+            "claude"
+          ],
+          "default": "openai",
+          "description": "Choose the AI provider for generating loop invariants"
+        },
+        "dafny.numberOfRetries": {
+          "type": "number",
+          "default": 3,
+          "description": "Number of retries for generating loop invariants"
+        },
         "dafny.automaticVerification": {
           "type": "string",
           "default": "onchange",
@@ -366,6 +380,7 @@
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.29.2",
     "cross-fetch": "^3.1.5",
     "extract-zip": "^2.0.1",
     "got": "^11.8.2",
@@ -375,11 +390,5 @@
     "vscode-languageclient": "^9.0.0",
     "vscode-uri": "^3.0.2",
     "which": "^2.0.2"
-  },
-  "__metadata": {
-    "id": "36e6ec4b-cd6e-4792-8088-91e0631e4b3d",
-    "publisherDisplayName": "dafny-lang",
-    "publisherId": "77351d22-0a7b-4a0a-b0dc-d10fc29768e1",
-    "isPreReleaseVersion": false
   }
 }

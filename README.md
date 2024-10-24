@@ -11,18 +11,30 @@ This extension supports Dafny version 3 and beyond. If you require _Dafny 2_ sup
 - **IntelliSense** to suggest symbols.
 - **Go to definition** to quickly navigate.
 - **Hover Information** for symbols.
+- **Generate Loop Invariants** using AI.
 
-You can find [examples below](#examples).
+### Generate Loop Invariants
+
+To generate loop invariants using AI:
+
+1. Select the portion of code containing the loop you want to add invariants to.
+2. Right-click to open the Dafny context menu.
+3. Choose "Generate Loop Invariants" from the menu, or use the shortcut `Ctrl+F9`.
+
+<img src="readmeResources/LoopInvariants.png" alt="Loop Invariants Generation" width="400"/>
+
+This feature helps you automatically add appropriate loop invariants to your Dafny code, potentially saving time and reducing errors in complex proofs.
 
 ## Shortcuts
 
-| Shortcut                  | Description                                                                             |
-| :------------------------ | :-------------------------------------------------------------------------------------- |
-| `Ctrl+Shift+B` or `⇧+⌘+B` | Compile to `.dll` or, if there is a `Main` method, to `.exe` file                       |
-| `F5`                      | Compile and run, if the source file has a `Main` method                                 |
-| `F6`                      | Compile with custom arguments                                                           |
-| `F7`                      | Show _Counterexample_                                                                   |
-| `F8`                      | Hide _Counterexample_                                                                   |
+| Shortcut                  | Description                                                       |
+| :------------------------ | :---------------------------------------------------------------- |
+| `Ctrl+Shift+B` or `⇧+⌘+B` | Compile to `.dll` or, if there is a `Main` method, to `.exe` file |
+| `F5`                      | Compile and run, if the source file has a `Main` method           |
+| `F6`                      | Compile with custom arguments                                     |
+| `F7`                      | Show _Counterexample_                                             |
+| `F8`                      | Hide _Counterexample_                                             |
+| `Ctrl+F9`                 | Generate Loop Invariants                                          |
 
 ## Requirements
 
@@ -35,94 +47,34 @@ Here are a few impressions of the features.
 
 ### Installation
 
-On the first start, the plugin will install the _Dafny_ language server automatically.
+1. Uninstall the original Dafny VSCode extension:
 
-![Installation](readmeResources/Installation.png)
+   - Open VS Code
+   - Go to the Extensions view (Ctrl+Shift+X or Cmd+Shift+X on macOS)
+   - Search for "Dafny"
+   - Find the original Dafny extension
+   - Click on the gear icon next to it and select "Uninstall"
 
-### Error Highlighting
+2. Install the new Dafny extension using the VSIX file:
 
-![Syntax](readmeResources/Syntax.png)
+   - Download the latest `.vsix` file from the [releases page](https://github.com/emantrigo/dafny-plugin/releases) of this repository
+   - In VS Code, go to the Extensions view
+   - Click on the "..." menu (More Actions) at the top of the Extensions view
+   - Select "Install from VSIX..."
+   - Navigate to the downloaded `.vsix` file and select it
+   - VS Code will install the new Dafny extension
 
-Whenever a syntax, semantic, or verification error is present, the plugin will inform the user.
+3. Restart VS Code to ensure the new extension is properly loaded
 
-### Compile and Run
+After installation, you can start using the new Dafny extension with all its features.
 
-Press `F5` to compile and run the program.
+4. Configure AI settings for generating loop invariants:
+   - Open VS Code settings (File > Preferences > Settings or Cmd+, on macOS)
+   - Search for "Dafny" in the settings search bar
+   - Find the "Dafny: AI Provider" setting and choose either "openai" or "claude"
+   - Depending on your choice, fill in either:
+     - "Dafny: Open Ai Api Key" with your OpenAI API key, or
+     - "Dafny: Claude Api Key" with your Claude API key
+   - You can also adjust the "Dafny: Number Of Retries" setting to control how many attempts the AI makes to generate loop invariants
 
-![Compile](readmeResources/Compile.png)
-
-### Show Counterxamples
-
-Press `F7` to show counterexamples.
-
-![Counter](readmeResources/Counter.png)
-
-### Hover Information
-
-Hover a symbol to get information about that symbol.
-
-![Hover](readmeResources/Hover.png)
-
-### IntelliSense
-
-Type a dot to get a list of possible members of the accessed symbol.
-
-![IntelliSense](readmeResources/IntelliSense.png)
-
-### Automatic Verification
-
-If VSCode appears unresponsive, you may lower the verification frequency or disable it entirely.
-
-![Automatic Verification](readmeResources/automaticVerificationOption.png)
-
-## Troubleshooting
-
-### Stuck at *Verifying...*
-
-Under certain circumstances, the extension appears to be stuck at *Verifying...*. Until now, this has only been observed for Mac OSX and occurs due to a [stack overflow](https://github.com/dafny-lang/dafny/issues/1213#issuecomment-870440082) in the language server.
-To overcome this issue, set the environment variable `COMPlus_DefaultStackSize` to a sufficiently large value before starting VSCode. For example:
-
-```sh
-# Increase the stack size
-export COMPlus_DefaultStackSize=100000
-
-# Launch VSCode
-code
-```
-
-## Contribute
-
-Dafny for Visual Studio Code is an MIT licensed open-source project that lives from code contributions.
-
-We welcome your help! For a description of how you can contribute, as well as a list of issues you can work on, please visit the [Dafny-VSCode GitHub repository](https://github.com/DafnyVSCode/ide-vscode).
-
-### Building Locally
-
-To build Dafny VSCode locally, first clone this repository.
-
-```sh
-git clone https://github.com/dafny-lang/ide-vscode.git
-```
-
-Change into the root directory of the previously cloned repository and install the node modules.
-
-```sh
-npm install
-```
-
-To build and debug using Visual Studio Code, install the [TypeScript + Webpack Problem Matchers](https://marketplace.visualstudio.com/items?itemName=eamodio.tsl-problem-matcher) extension.
-After the installation, open the root folder within VSCode and hit `F5` to debug the Dafny extension.
-
-Because the latest version of the plugin requires recent changes to the Dafny language server, you will then need to change the `dafny.compilerRuntimePath` and `dafny.languageServerRuntimePath` extension settings to point to the `Dafny.dll` and `DafnyLanguageServer.dll` files from a local build of Dafny. See [here](https://github.com/dafny-lang/dafny/wiki/INSTALL#building-and-developing-from-source-code) for instructions on building Dafny locally.
-
-### Packaging
-
-To create a VSIX package of the previously built sources, create the package through the CLI:
-
-```sh
-npx vsce package
-```
-
-### Coding Conventions
-
-We use ESLint with the TypeScript plugin to ensure code consistency across the whole source. Install the [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) extension in VSCode to have live feedback. Alternatively, you can check your code from the command line by running `npm run lint`.
+After completing these steps, the Dafny extension will be ready to use with AI-powered loop invariant generation.

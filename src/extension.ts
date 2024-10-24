@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import {
   Disposable,
   ExtensionContext,
@@ -19,21 +21,21 @@ import { timeout } from "./tools/timeout";
 import { fileIssueURL } from "./ui/statusBarActionView";
 
 import * as vscode from "vscode";
-
-const OpenAI = require("openai");
-
-// Promise.any() is only available since Node.JS 15.
-import * as PromiseAny from "promise.any";
-import { parse } from "path";
+import { OpenAI } from "openai";
+import { Anthropic } from "@anthropic-ai/sdk";
 
 const DafnyVersionTimeoutMs = 5_000;
 let extensionRuntime: ExtensionRuntime | undefined;
+
+import * as PromiseAny from "promise.any";
 
 export async function activate(context: ExtensionContext): Promise<void> {
   if (!(await checkAndInformAboutInstallation(context))) {
     return;
   }
-  const statusOutput = window.createOutputChannel(ExtensionConstants.ChannelName);
+  const statusOutput = window.createOutputChannel(
+    ExtensionConstants.ChannelName
+  );
   context.subscriptions.push(statusOutput);
   extensionRuntime = new ExtensionRuntime(context, statusOutput);
   await extensionRuntime.initialize();
@@ -47,244 +49,195 @@ export async function restartServer(): Promise<void> {
   await extensionRuntime?.restart();
 }
 
-async function callOpenAi(
-  settingsAPIKey: string,
+async function callAI(
+  openAiApiKey: string,
+  claudeApiKey: string,
   prompt: string,
   code: string,
-  previousCompletion: string,
-  error: string
+  provider: string
 ): Promise<string> {
-  const openai = new OpenAI({
-    apiKey: settingsAPIKey,
-  });
-
-  let completion;
-
-  if (error !== "") {
-    completion = await openai.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content:
-            prompt +
-            "The code: " +
-            code +
-            "The error: " +
-            error +
-            "The previous completion: " +
-            previousCompletion,
-        },
-      ],
-      model: "gpt-4o",
+  if (provider === "openai") {
+    if (!openAiApiKey) {
+      throw new Error(
+        "OpenAI API key is not set. Please configure it in the settings."
+      );
+    }
+    const openai = new OpenAI({
+      apiKey: openAiApiKey,
     });
-  } else {
-    completion = await openai.chat.completions.create({
-      messages: [{ role: "system", content: prompt + "The code: " + code }],
-      model: "gpt-4o",
-    });
-  }
 
-  return completion.choices[0].message.content
-    .trim()
-    .replace(/`/g, "")
-    .replace(/^dafny\n/, "");
-}
+    try {
+      const completion = await openai.chat.completions.create({
+        messages: [
+          { role: "system", content: prompt },
+          { role: "user", content: code },
+        ],
+        model: "gpt-4o",
+      });
 
-async function waitForDiagnostics(uri: vscode.Uri): Promise<vscode.Diagnostic[]> {
-  return new Promise((resolve, reject) => {
-    const subscription = vscode.languages.onDidChangeDiagnostics((event) => {
-      if (event.uris.some((eventUri) => eventUri.toString() === uri.toString())) {
-        const diagnostics = vscode.languages.getDiagnostics(uri);
-        console.log("diagnostics:", diagnostics);
-        let errorDiagnostics = [];
-        errorDiagnostics = diagnostics.filter(
-          (diagnostic) =>
-            diagnostic.source === "Verifier" ||
-            diagnostic.source === "Parser" ||
-            diagnostic.source === "Resolver"
-        );
-
-        subscription.dispose(); // Clean up the event listener
-        resolve(errorDiagnostics); // Resolve the promise with the filtered diagnostics
+      return completion.choices[0].message.content
+        .trim()
+        .replace(/```dafny\n/g, "")
+        .replace(/```/g, "");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(`OpenAI API error: ${error.message}`);
+      } else {
+        throw new Error("An unknown error occurred while calling OpenAI API");
       }
+    }
+  } else if (provider === "claude") {
+    if (!claudeApiKey) {
+      throw new Error(
+        "Claude API key is not set. Please configure it in the settings."
+      );
+    }
+    const anthropic = new Anthropic({
+      apiKey: claudeApiKey,
     });
 
-    // Optional: Reject the promise after a timeout if the conditions are not met
-    setTimeout(() => {
-      subscription.dispose(); // Ensure to clean up if we hit the timeout
-      reject(new Error("Timeout waiting for diagnostics to update."));
-    }, 10000); // Increase timeout to 10 seconds as an example
-  });
-}
+    try {
+      const completion = await anthropic.completions.create({
+        model: "claude-3-opus-20240229",
+        max_tokens_to_sample: 1000,
+        prompt: `${prompt}\n\nHuman: ${code}\n\nAssistant:`,
+      });
 
-function findRangeToReplace(document: any, textToReplace: any) {
-  const trimmedTextToReplace = textToReplace.trim();
-
-  const documentText = document.getText();
-  const searchIndex = documentText.indexOf(trimmedTextToReplace);
-  console.log("searchIndex:", searchIndex);
-  const start = document.positionAt(searchIndex);
-  console.log("start:", start);
-  console.log("trimmedTextToReplace.length:", trimmedTextToReplace.length);
-  console.log("text len:", textToReplace.length);
-  const end = document.positionAt(parseInt(searchIndex) + parseInt(trimmedTextToReplace.length));
-  console.log("end:", end);
-  const range = new vscode.Range(start, end);
-
-  console.log("range:", range);
-
-  return range;
+      return completion.completion
+        .trim()
+        .replace(/```dafny\n/g, "")
+        .replace(/```/g, "");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(`Claude API error: ${error.message}`);
+      } else {
+        throw new Error("An unknown error occurred while calling Claude API");
+      }
+    }
+  } else {
+    throw new Error(`Unsupported AI provider: ${provider}`);
+  }
 }
 
 async function GenerateLoopInvariantsFunction(
-  client: any,
-  settingsAPIKey: any,
-  retriesMax: any
+  client: DafnyLanguageClient,
+  openAiApiKey: string,
+  claudeApiKey: string,
+  maxTries: number,
+  aiProvider: string
 ): Promise<void> {
   vscode.workspace.onDidChangeConfiguration((event) => {
     if (event.affectsConfiguration("dafny")) {
-      settingsAPIKey = vscode.workspace.getConfiguration("dafny").get("settingsAPIKey");
-      retriesMax = vscode.workspace.getConfiguration("dafny").get("retriesMax");
+      const config = vscode.workspace.getConfiguration("dafny");
+      openAiApiKey = config.get("openAiApiKey") || "";
+      claudeApiKey = config.get("claudeApiKey") || "";
+      maxTries = config.get("numberOfRetries") || 3;
+      aiProvider = config.get("aiProvider") || "openai";
     }
   });
 
-  let success = false;
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    vscode.window.showErrorMessage("No active editor found.");
+    return;
+  }
+
+  let selection = editor.selection;
+  const firstSelection = selection;
+  const originalText = editor.document.getText(selection);
+
+  console.log("originalText", originalText);
+
+  if (!originalText) {
+    vscode.window.showErrorMessage(
+      "No text selected. Please select the code you want to process."
+    );
+    return;
+  }
+
+  let currentText = originalText;
   let tries = 0;
+  let success = false;
+  let lastErrors: string[] = [];
 
-  const editor = window.activeTextEditor;
+  while (tries < maxTries && !success) {
+    console.log("selection text", editor.document.getText(selection));
+    tries++;
+    console.log("selection", selection);
+    try {
+      let prompt =
+        "Analyze the following Dafny code. Add appropriate loop invariants and fix any errors you find. Do not change the original code structure or functionality. Only add loop invariants and fix errors. Provide the resulting code without any explanations or additional text:";
 
-  const prompt =
-    "Generate loop invariants for the following code in Dafny\n" +
-    "Do not include explanations.\n" +
-    "Return only code.\n" +
-    "Fix the code if it is incorrect.\n" +
-    "Don't write redundant verifications.\n" +
-    "Dont modify the original code.\n" +
-    "Here is the code: ";
-
-  if (editor) {
-    const document = editor.document;
-    let selection = editor.selection;
-    let selectedTextRange = new vscode.Range(selection.start, selection.end);
-
-    await client.runVerification({
-      textDocument: {
-        uri: document.uri.toString(),
-      },
-      position: new Position(0, 0),
-    });
-
-    let word = document.getText(selection);
-    let errorPrompt = "";
-    let previousCompletion = "";
-    let text = "";
-    let originalText = "";
-
-    console.log(retriesMax);
-
-    while (tries <= retriesMax && !success) {
-      window.showInformationMessage("Generating... Try number: " + tries);
-      if (tries === 0) {
-        selection = editor.selection;
-        selectedTextRange = new vscode.Range(selection.start, selection.end);
-        word = document.getText(selection);
-        originalText = document.getText(selection);
-      } else {
-        word = text;
-        console.log("text:", text);
-        console.log("previousCompletion:", previousCompletion);
-        console.log("text:", text);
-        selectedTextRange = findRangeToReplace(document, text);
-        selection = editor.selection;
+      if (lastErrors.length > 0) {
+        prompt +=
+          "\n\nThe previous attempt resulted in the following errors. Please address these specifically:\n" +
+          lastErrors.join("\n");
       }
 
-      console.log("text selected");
+      const waitMessage = vscode.window.setStatusBarMessage(
+        `Generating loop invariants... (Attempt ${tries}/${maxTries})`
+      );
 
-      previousCompletion = text;
-      text = await callOpenAi(settingsAPIKey, prompt, word, previousCompletion, errorPrompt);
-      tries += 1;
+      const aiResponse = await callAI(
+        openAiApiKey,
+        claudeApiKey,
+        prompt,
+        currentText,
+        aiProvider
+      );
 
-      editor.edit((editBuilder) => {
-        editBuilder.replace(selectedTextRange, text);
-        console.log("text to replace: 7");
+      waitMessage.dispose();
+
+      const formattedResponse = aiResponse.trim().replace(/\n{2,}/g, "\n");
+
+      await editor.edit((editBuilder) => {
+        editBuilder.replace(selection, formattedResponse);
       });
 
-      success = true;
+      selection = editor.selection;
 
-      await document.save();
-      console.log("text to replace: 8");
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      console.log("edited");
+      const diagnostics = vscode.languages.getDiagnostics(editor.document.uri);
+      const errors = diagnostics.filter(
+        (d) => d.severity === vscode.DiagnosticSeverity.Error
+      );
 
-      //await vscode.commands.executeCommand("dafny.run");
-
-      // await client.runVerification({
-      //   textDocument: {
-      //     uri: document.uri.toString(),
-      //   },
-      //   position: new Position(0, 0),
-      // });
-
-      const diagnostics = vscode.languages.getDiagnostics(document.uri);
-
-      let errorDiagnostics = [];
-      errorDiagnostics = diagnostics.filter((diagnostic) => diagnostic.source === "Verifier");
-
-      console.log("diagnostics final:", errorDiagnostics);
-
-      errorPrompt = "The following errors were found : ";
-      console.log("text to replace: 9");
-      errorDiagnostics.forEach((error) => {
-        console.log(error);
-        if (error.source === "Verifier" || error.source === "Parser") {
-          errorPrompt += error.message + "-" + document.getText(error.range) + ";";
-        }
-      });
-
-      if (errorDiagnostics.length === 0) {
+      if (errors.length === 0) {
         success = true;
+        vscode.window.showInformationMessage(
+          `Loop invariants added and errors fixed without changing the original code structure. (Attempt ${tries}/${maxTries})`
+        );
+      } else {
+        lastErrors = errors.map((e) => e.message);
+        const errorMessages = lastErrors.join("\n");
+        vscode.window.showWarningMessage(
+          `Errors found after modification (Attempt ${tries}/${maxTries}):\n${errorMessages}`
+        );
+
+        currentText = editor.document.getText(selection); // Use the latest response for the next iteration
       }
-
-      console.log("text to replace: 10");
-
-      // try {
-      //   await document.save();
-      //   const diag = await waitForDiagnostics(document.uri);
-      //   console.log("diagnostics after verification:", diag);
-
-      //   errorPrompt = "The following errors were found : ";
-      //   diag.forEach((error) => {
-      //     console.log(error);
-      //     if (error.source === "Verifier" || error.source === "Parser") {
-      //       errorPrompt += error.message + "-" + document.getText(error.range) + ";";
-      //     }
-      //   });
-
-      //   if (diag.length === 0) {
-      //     success = true;
-      //   }
-      // } catch (error) {
-      //   console.error("Timeout or error while waiting for diagnostics:", error);
-      // }
-    }
-
-    if (tries >= retriesMax) {
-      // editor.edit((editBuilder) => {
-      //   editBuilder.replace(findRangeToReplace(document, text), originalText);
-      // });
-      // await document.save();
-      window.showInformationMessage("Max tries exceeded!");
-    }
-
-    if (success) {
-      window.showInformationMessage("Done! Successfully generated loop invariants...");
-      await document.save();
+    } catch (error) {
+      vscode.window.showErrorMessage(
+        `Error processing Dafny code (Attempt ${tries}/${maxTries}): ${error}`
+      );
     }
   }
 
-  return;
+  if (!success) {
+    // Roll back to the original code
+    try {
+      await vscode.commands.executeCommand("workbench.action.files.revert");
+      vscode.window.showInformationMessage("Unsaved changes removed.");
+    } catch (error) {
+      vscode.window.showErrorMessage(
+        `Failed to remove unsaved changes: ${error}`
+      );
+    }
+  }
 }
-class ExtensionRuntime {
+
+export class ExtensionRuntime {
   private readonly installer: DafnyInstaller;
   private client?: DafnyLanguageClient;
   private languageServerVersion?: string;
@@ -299,20 +252,35 @@ class ExtensionRuntime {
   public async initialize(): Promise<void> {
     workspace.registerTextDocumentContentProvider("dafny", {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      provideTextDocumentContent: function (uri: Uri, token: CancellationToken) {
+      provideTextDocumentContent: function (
+        uri: Uri,
+        token: CancellationToken
+      ) {
         return "// Viewing Dafny libraries in the Dafny IDE is not yet supported.";
       },
     });
 
     const config = vscode.workspace.getConfiguration("dafny");
-    const settingsAPIKey = config.get("openAiApiKey");
-    const retries = config.get("numberOfRetries");
+    const openAiApiKey = config.get<string>("openAiApiKey") || "";
+    const claudeApiKey = config.get<string>("claudeApiKey") || "";
+    const maxTries = config.get<number>("numberOfRetries") || 3;
+    const aiProvider = config.get<string>("aiProvider") || "openai";
 
     await this.startClientAndWaitForVersion();
-    createAndRegisterDafnyIntegration(this.installer, this.client!, this.languageServerVersion!);
+    createAndRegisterDafnyIntegration(
+      this.installer,
+      this.client!,
+      this.languageServerVersion!
+    );
     commands.registerCommand(DafnyCommands.RestartServer, restartServer);
     commands.registerCommand(DafnyCommands.GenerateLoopInvariants, () =>
-      GenerateLoopInvariantsFunction(this.client, settingsAPIKey, retries)
+      GenerateLoopInvariantsFunction(
+        this.client!,
+        openAiApiKey,
+        claudeApiKey,
+        maxTries,
+        aiProvider
+      )
     );
     this.statusOutput.appendLine("Dafny is ready");
   }
@@ -321,7 +289,9 @@ class ExtensionRuntime {
     let versionRegistration: Disposable | undefined;
     const version = await PromiseAny([
       new Promise<string>((resolve) => {
-        versionRegistration = this.client!.onServerVersion((version) => resolve(version));
+        versionRegistration = this.client!.onServerVersion((version) =>
+          resolve(version)
+        );
       }),
       // Fallback to unknown in case the server does not report the version.
       timeout(DafnyVersionTimeoutMs, LanguageServerConstants.UnknownVersion),
@@ -335,9 +305,11 @@ class ExtensionRuntime {
   }
 
   public async startClientAndWaitForVersion() {
-    this.client = this.client ?? (await DafnyLanguageClient.create(this.installer));
+    this.client =
+      this.client ?? (await DafnyLanguageClient.create(this.installer));
     await this.client.start();
-    this.languageServerVersion = await this.getLanguageServerVersionAfterStartup();
+    this.languageServerVersion =
+      await this.getLanguageServerVersionAfterStartup();
   }
 
   public async restart(): Promise<void> {
@@ -353,8 +325,15 @@ class ExtensionRuntime {
     }
     this.context.subscriptions.splice(1);
     await this.startClientAndWaitForVersion();
-    createAndRegisterDafnyIntegration(this.installer, this.client!, this.languageServerVersion!);
-    const issueURL = await fileIssueURL(this.languageServerVersion ?? "???", this.context);
+    createAndRegisterDafnyIntegration(
+      this.installer,
+      this.client!,
+      this.languageServerVersion!
+    );
+    const issueURL = await fileIssueURL(
+      this.languageServerVersion ?? "???",
+      this.context
+    );
     this.statusOutput.appendLine(
       "Dafny is ready again.\nIf you have time, please let us know why you needed to restart by filing an issue:\n" +
         issueURL
