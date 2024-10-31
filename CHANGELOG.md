@@ -1,5 +1,9 @@
 # Release Notes
 
+## 3.4.2
+- Added Dafny 4.9.0
+- Fix binary copying to temporary folder on custom path (https://github.com/dafny-lang/ide-vscode/pull/502)
+
 ## 3.4.1
 - Add Dafny 4.8.1
 - Extension is now published to OpenVSX registry as well
