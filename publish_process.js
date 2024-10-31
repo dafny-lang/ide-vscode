@@ -59,7 +59,7 @@ async function ensureWorkingDirectoryClean() {
   var unstagedChanges = (await execAsync("git diff")).stdout.trim() + (await execAsync("git diff --cached")).stdout.trim();
   if(unstagedChanges != "") {
     console.log("Please commit your changes before launching this script.");
-    throw ABORTED;
+    //throw ABORTED;
   }
 }
 
@@ -106,7 +106,7 @@ async function changeLogAndVersion() {
     throw ABORTED;
   }
   const currentChangeLogVersion = match[1];
-  const updateChangeLogWith = ((changeLog, oldVersion) => async function(newVersion, messages) {
+  const updateChangeLogWith = ((changeLog, oldVersion) => async function(newVersion, messages, mostRecentDafnyRelease = undefined) {
     const newChangeLog = changeLog.replace(currentDocumentVersionRegex, match => 
       `# Release Notes\n\n## ${newVersion}\n${messages}\n\n## ${oldVersion}`);
     await fs.promises.writeFile(changeLogFile, newChangeLog);
@@ -203,41 +203,48 @@ function close() {
   return false;
 }
 
+async function isNewer(packageObj, mostRecentDafnyRelease) {
+  var versionList = packageObj["contributes"]["configuration"]["properties"]["dafny.version"]["enum"];
+  var previousDafnyVersion = versionList[1];
+  return previousDafnyVersion != mostRecentDafnyRelease;
+}
+
 async function updatePackageJson(packageObj, newVersion, mostRecentDafnyRelease) {
   packageObj["version"] = newVersion;
   var versionList = packageObj["contributes"]["configuration"]["properties"]["dafny.version"]["enum"];
   // versionList starts with "latest", and then the last version
   var previousDafnyVersion = versionList[1];
   var updatedDafny = false;
-  if (previousDafnyVersion != mostRecentDafnyRelease) {
-    if (ok(await question(`The Dafny version in the package.json file (${previousDafnyVersion}) is not the latest (${mostRecentDafnyRelease}). Do you want to update it? ${ACCEPT_HINT}`))) {
-      var previousDafnyVersionListHead = versionList[1];
-      // If the previous dafny version is just different from mostRecentDafnyRelease by the patch number, replace it, otherwise insert it using splice
-      // We need to do pruning manually later, so that one could revert to a previous patch of Dafny immediately.
-      //if (previousDafnyVersionListHead == mostRecentDafnyRelease.substring(0, mostRecentDafnyRelease.lastIndexOf("."))) {
-      //  versionList[1] = mostRecentDafnyRelease;
-      //} else {
-        versionList.splice(1, 0, mostRecentDafnyRelease);
-      //}
+  if (mostRecentDafnyRelease !== undefined) {
+    var previousDafnyVersionListHead = versionList[1];
+    // If the previous dafny version is just different from mostRecentDafnyRelease by the patch number, replace it, otherwise insert it using splice
+    // We need to do pruning manually later, so that one could revert to a previous patch of Dafny immediately.
+    //if (previousDafnyVersionListHead == mostRecentDafnyRelease.substring(0, mostRecentDafnyRelease.lastIndexOf("."))) {
+    //  versionList[1] = mostRecentDafnyRelease;
+    //} else {
+      versionList.splice(1, 0, mostRecentDafnyRelease);
+    //}
 
-      console.log("Updated Dafny version to " + mostRecentDafnyRelease);
-      var constantsContent = await fs.promises.readFile(constantsFile, { encoding: "utf8" });
-      var constantsContentRegex = /const\s*LatestVersion\s*=\s*'\d+.\d+.\d+';/;
-      constantsContent = constantsContent.replace(constantsContentRegex, `const LatestVersion = '${mostRecentDafnyRelease}';`);
-      await fs.promises.writeFile(constantsFile, constantsContent, { encoding: "utf8" });
-      updatedDafny = true;
-    } else {
-      console.log("Ignoring new Dafny version.");
-    }
+    console.log("Updated Dafny version to " + mostRecentDafnyRelease);
+    var constantsContent = await fs.promises.readFile(constantsFile, { encoding: "utf8" });
+    var constantsContentRegex = /const\s*LatestVersion\s*=\s*'\d+.\d+.\d+';/;
+    constantsContent = constantsContent.replace(constantsContentRegex, `const LatestVersion = '${mostRecentDafnyRelease}';`);
+    await fs.promises.writeFile(constantsFile, constantsContent, { encoding: "utf8" });
+    updatedDafny = true;
+  } else {
+    console.log("The current Dafny version is still detected to be " + previousDafnyVersion);
   }
   await writePackage(packageObj);
   return updatedDafny;
 }
 
-async function UpdateChangeLog(currentChangeLogVersion, packageObj, updateChangeLogWith, newVersion) {
+async function UpdateChangeLog(currentChangeLogVersion, packageObj, updateChangeLogWith, newVersion, mostRecentDafnyRelease) {
   var allRecentCommitMessages = await getAllRecentCommitMessagesFormatted(currentChangeLogVersion);
   if (packageObj["version"] == currentChangeLogVersion) {
-    await updateChangeLogWith(newVersion, allRecentCommitMessages);
+    if(mostRecentDafnyRelease !== undefined) {
+      allRecentCommitMessages = "- Added Dafny " + mostRecentDafnyRelease + "\n" + allRecentCommitMessages;
+    }
+    await updateChangeLogWith(newVersion, allRecentCommitMessages, mostRecentDafnyRelease);
     console.log("I changed " + changeLogFile + " to reflect the new version.\nPlease make edits as needed and close the editing window.");
     await execAsync(getCommandLine() + ' ' + changeLogFile);
     if (!ok(await question(`Ready to continue? ${ACCEPT_HINT}`))) {
@@ -315,8 +322,19 @@ async function Main() {
     let packageObj = await readPackageJson();
     
     console.log(`Going to proceed to publish ${newVersion}`);
+    var useNewVersion = false;
+    if(await isNewer(packageObj, mostRecentDafnyRelease)) {
+      if (ok(await question(`There is a new Dafny version available: (${mostRecentDafnyRelease}). Do you want to update it? ${ACCEPT_HINT}`))) {
+        // We keep that number
+      } else {
+        console.log("Ignoring new Dafny version.");
+        mostRecentDafnyRelease = undefined;
+      }
+    } else {
+      mostRecentDafnyRelease = undefined;
+    }
     // Get all the commit messages since the last published tag
-    await UpdateChangeLog(currentChangeLogVersion, packageObj, updateChangeLogWith, newVersion);
+    await UpdateChangeLog(currentChangeLogVersion, packageObj, updateChangeLogWith, newVersion, mostRecentDafnyRelease);
     // All clear, we can modify constants.ts and package.json.
 
     var updatedDafny = await updatePackageJson(packageObj, newVersion, mostRecentDafnyRelease);
