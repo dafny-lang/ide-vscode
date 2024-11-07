@@ -206,7 +206,7 @@
             "type": "string"
           },
           "default": [],
-          "description": "Optional array of strings to use an options when starting 'dafny server', the language server that powers this extension. Only works if the Dafny version is 3.10 or greater. Available options can be seen using 'dafny server --help'"
+          "description": "Optional array of strings to use an options when starting 'dafny server', the language server that powers this extension. Only works if the Dafny version is 3.10 or greater. Available options can be seen using 'dafny server --help'. Note that for project specific options, it is better to configure them in a Dafny project file, which the Dafny extension then automatically finds and uses."
         },
         "dafny.cliPath": {
           "type": "string",
