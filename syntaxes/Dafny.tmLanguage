@@ -262,6 +262,49 @@
 		<dict>
 			<key>patterns</key>
 			<array>
+			  <dict>
+					<key>begin</key>
+					<string>@([\w'\?]+)\(</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>entity.other.attribute-name.dafny</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>\)</string>
+					<key>name</key>
+					<string>attribute</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#code</string>
+						</dict>
+					</array>
+				</dict>
+				
+			  <dict>
+					<key>begin</key>
+					<string>@([\w'\?]+)(?!\()</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>entity.other.attribute-name.dafny</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>(?<=[\w'\?]+)</string>
+					<key>name</key>
+					<string>attribute</string>
+					<key>patterns</key>
+					<array>
+					</array>
+				</dict>
 				<dict>
 					<key>begin</key>
 					<string>\{:(\w+)</string>

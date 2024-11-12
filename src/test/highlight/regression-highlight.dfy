@@ -1,3 +1,6 @@
+// This attribute should be colored
+@IsolateAssertions
+
 // Issue #386
 method Test(thisNat: nat, dothis: nat) {
           //^^^^            ^^^^ this should not be highlighted separatedly in blue
