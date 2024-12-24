@@ -1,5 +1,13 @@
 # Release Notes
 
+## 3.4.3
+- Added Dafny 4.9.1
+- Support for @-syntax for attributes (https://github.com/dafny-lang/ide-vscode/pull/500)
+  Before:
+  ![image](https://github.com/user-attachments/assets/2b54ad18-3bd8-45b0-874b-2bad954706af)
+  After:
+  ![image](https://github.com/user-attachments/assets/5d4fe1c9-42df-4c55-8680-3e4a66749595)
+
 ## 3.4.2
 - Added Dafny 4.9.0
 - Fix binary copying to temporary folder on custom path (https://github.com/dafny-lang/ide-vscode/pull/502)
