@@ -147,15 +147,21 @@ export class GitHubReleaseInstaller {
         LanguageServerConstants.LatestVersion);
       break;
     case LanguageServerConstants.LatestNightly: {
-      const result: any = await (await fetch('https://api.github.com/repos/dafny-lang/dafny/releases/tags/nightly')).json();
-      if(result.name !== undefined) {
-        const name: string = result.name;
-        const versionPrefix = 'Dafny ';
-        if(name.startsWith(versionPrefix)) {
-          const version = name.substring(versionPrefix.length);
-          this.context.globalState.update('nightly-version', version);
-          return [ 'nightly', version ];
+      let name: string | undefined;
+      try {
+        const result: any = await (await fetch('https://api.github.com/repos/dafny-lang/dafny/releases/tags/nightly')).json();
+        if(result.name !== undefined) {
+          name = result.name!;
+          const versionPrefix = 'Dafny ';
+          // eslint-disable-next-line max-depth
+          if(name!.startsWith(versionPrefix)) {
+            const version = name!.substring(versionPrefix.length);
+            this.context.globalState.update('nightly-version', version);
+            return [ 'nightly', version ];
+          }
         }
+      } catch{
+        // continue
       }
       // Github has some API limitations on how many times to call its API, so this is a good fallback.
       const cachedVersion = this.context.globalState.get('nightly-version');
@@ -164,7 +170,7 @@ export class GitHubReleaseInstaller {
         return [ 'nightly', version ];
       }
       window.showWarningMessage('Failed to install latest nightly version of Dafny. Using latest stable version instead.\n'
-        + `The name of the nightly release we found was: ${result.name}`);
+        + (name !== undefined ? `The name of the nightly release we found was: ${name}` : ''));
       version = LanguageServerConstants.LatestVersion;
     }
     }

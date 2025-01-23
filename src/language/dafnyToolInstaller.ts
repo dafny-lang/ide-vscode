@@ -61,7 +61,7 @@ class DafnyToolInstaller {
 
   private async getDotnetToolVersion(): Promise<string> {
     if(this.toolVersionCache === undefined) {
-      this.toolVersionCache = await DafnyToolInstaller.getDotnetToolVersionUncached(this.context);
+      this.toolVersionCache = await this.getDotnetToolVersionUncached(this.context);
     }
     return this.toolVersionCache;
   }
@@ -81,42 +81,49 @@ class DafnyToolInstaller {
               3.7.1.40621 Downloads: 754
               3.7.2.40713 Downloads: 324
    */
-  private static async getDotnetToolVersionUncached(context: ExtensionContext): Promise<string> {
+  private async getDotnetToolVersionUncached(context: ExtensionContext): Promise<string> {
     const { path: dotnetExecutable } = await getDotnetExecutablePath();
-    const { stdout } = await execFileAsync(dotnetExecutable, [ 'tool', 'search', 'Dafny', '--detail', '--prerelease' ]);
-    const entries = stdout.split('----------------').map(entry => entry.split('\n').filter(e => e !== ''));
-    const dafnyEntry = entries.filter(entry => entry[0] === 'dafny')[0];
-    const versionsIndex = dafnyEntry.findIndex(v => v.startsWith('Versions:'));
-    const versions = dafnyEntry.slice(versionsIndex + 1).map(versionLine => versionLine.trimStart().split(' ')[0]);
+    try {
+      const { stdout } = await execFileAsync(dotnetExecutable, [ 'tool', 'search', 'Dafny', '--detail', '--prerelease' ]);
+      const entries = stdout.split('----------------').map(entry => entry.split('\n').filter(e => e !== ''));
+      const dafnyEntry = entries.filter(entry => entry[0] === 'dafny')[0];
+      const versionsIndex = dafnyEntry.findIndex(v => v.startsWith('Versions:'));
+      const versions = dafnyEntry.slice(versionsIndex + 1).map(versionLine => versionLine.trimStart().split(' ')[0]);
 
-    const versionDescription = getPreferredVersion();
-    let toolVersion: string;
+      const versionDescription = getPreferredVersion();
+      let toolVersion: string;
 
-    switch(versionDescription) {
-    case LanguageServerConstants.LatestStable: {
-      const version = LanguageServerConstants.LatestVersion;
-      toolVersion = await DafnyInstaller.dafny4upgradeCheck(
-        context, versionDescription, versions.filter(l => l.startsWith(version))[0]);
-      window.showInformationMessage(`Using latest stable version: ${toolVersion}`);
-      break;
+      switch(versionDescription) {
+      case LanguageServerConstants.LatestStable: {
+        const version = LanguageServerConstants.LatestVersion;
+        toolVersion = await DafnyInstaller.dafny4upgradeCheck(
+          context, versionDescription, versions.filter(l => l.startsWith(version))[0]);
+        window.showInformationMessage(`Using latest stable version: ${toolVersion}`);
+        break;
+      }
+      case LanguageServerConstants.LatestNightly: {
+        const nightlies = versions.filter(l => l.includes('nightly'));
+        const dates: { index: number, date: string }[] = nightlies.map((n, index) => {
+          const split: string[] = n.split('-');
+          return { index, date: split[2] + split[3] + split[4] };
+        });
+        dates.sort((a, b) => a.date < b.date ? 1 : -1);
+        toolVersion = nightlies[dates[0].index];
+        window.showInformationMessage(`Using latest nightly version: ${toolVersion}`);
+        break;
+      }
+      default: {
+        toolVersion = versions.filter(l => l.startsWith(versionDescription))[0];
+        context.globalState.update(DafnyInstaller.CurrentVersionTag, versionDescription);
+      }
+      }
+      return toolVersion;
+    } catch(e: unknown) {
+      if(e instanceof Error) {
+        this.statusOutput.appendLine('Failed to find current Dafny versions because:' + e.message);
+      }
+      return LanguageServerConstants.LatestVersion;
     }
-    case LanguageServerConstants.LatestNightly: {
-      const nightlies = versions.filter(l => l.includes('nightly'));
-      const dates: { index: number, date: string }[] = nightlies.map((n, index) => {
-        const split: string[] = n.split('-');
-        return { index, date: split[2] + split[3] + split[4] };
-      });
-      dates.sort((a, b) => a.date < b.date ? 1 : -1);
-      toolVersion = nightlies[dates[0].index];
-      window.showInformationMessage(`Using latest nightly version: ${toolVersion}`);
-      break;
-    }
-    default: {
-      toolVersion = versions.filter(l => l.startsWith(versionDescription))[0];
-      context.globalState.update(DafnyInstaller.CurrentVersionTag, versionDescription);
-    }
-    }
-    return toolVersion;
   }
   private writeStatus(message: string): void {
     this.statusOutput.appendLine(message);
