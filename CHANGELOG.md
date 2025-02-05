@@ -1,5 +1,10 @@
 # Release Notes
 
+## 3.4.4
+- Added Dafny 4.10.0
+- Enable starting using a cached nigthly (https://github.com/dafny-lang/ide-vscode/pull/519)
+  When using latest-nightly, enable starting using a cached nigthly when there is no internet connection
+
 ## 3.4.3
 - Added Dafny 4.9.1
 - Support for @-syntax for attributes (https://github.com/dafny-lang/ide-vscode/pull/500)
