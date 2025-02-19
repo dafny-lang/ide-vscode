@@ -17,7 +17,7 @@ export namespace ConfigurationConstants {
 
   export namespace LanguageServer {
     export const CliPath = 'cliPath';
-    export const LaunchArgs = 'languageServerLaunchArgs';
+    export const LaunchArgs = 'dafnyServerArguments';
     export const AutomaticVerification = 'automaticVerification';
     export const VerificationTimeLimit = 'verificationTimeLimit';
     export const VerificationVirtualCores = 'verificationVirtualCores';
@@ -30,7 +30,7 @@ export namespace ConfigurationConstants {
 
   export namespace Compiler {
     export const OutputDir = 'compilerOutputDir';
-    export const Arguments = 'runArgs';
+    export const Arguments = 'dafnyRunArguments';
     export const CommandPrefix = 'terminalCommandPrefix';
   }
 
