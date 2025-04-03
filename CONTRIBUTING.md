@@ -1,4 +1,24 @@
-# Release process:
+# Debug the language server
+
+To view the message exchange trace in VSCode,
+
+- Menu View > Command Palette
+- Search for: `Preferences: Open user settings (JSON)`
+- Add a comma and the following line if you want to see message exchange between the server and VSCode:
+
+    "dafny-vscode.trace.server": "verbose"
+
+After reloading VSCode and loading a Dafny file, you can now navigate to the View > Output, and select "Dafny Language Server"
+You only need to do this step once.
+
+## View the server log
+
+The language server is producing log that is discarded by default. You 
+
+
+
+
+# Release process
 
 ## Semi-automated release process (preferred)
 
