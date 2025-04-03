@@ -11,13 +11,6 @@ To view the message exchange trace in VSCode,
 After reloading VSCode and loading a Dafny file, you can now navigate to the View > Output, and select "Dafny Language Server"
 You only need to do this step once.
 
-## View the server log
-
-The language server is producing log that is discarded by default. You 
-
-
-
-
 # Release process
 
 ## Semi-automated release process (preferred)
