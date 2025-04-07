@@ -90,7 +90,7 @@ export class CustomPathInstaller {
     const depsjson = '.deps.json';
     const installationDir = path.dirname(configuredPath);
     const executableName = path.basename(configuredPath);
-    const vscodeDir = path.join(os.tmpdir(), await fs.promises.mkdtemp('vscode-dafny-dlls-'));
+    const vscodeDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'vscode-dafny-dlls-'));
     console.log(`Copying all necessary dlls and executables to ${vscodeDir}...`);
     const cleanup = function() {
       fs.rmdirSync(vscodeDir, { recursive: true });
