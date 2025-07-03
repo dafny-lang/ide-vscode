@@ -7,7 +7,7 @@ This extension supports Dafny version 3 and beyond. If you require _Dafny 2_ sup
 - **Compile and Run** `.dfy` files.
 - **Verification** as one types.
 - **Syntax highlighting** thanks to [sublime-dafny](https://github.com/erggo/sublime-dafny). See file `LICENSE_sublime-dafny.rst` for license.
-- Display **counterexample** for failing proof.
+- Display the **debug assumptions** for failing assertions.
 - **IntelliSense** to suggest symbols.
 - **Go to definition** to quickly navigate.
 - **Hover Information** for symbols.
@@ -21,8 +21,8 @@ You can find [examples below](#examples).
 | `Ctrl+Shift+B` or `⇧+⌘+B` | Compile to `.dll` or, if there is a `Main` method, to `.exe` file                       |
 | `F5`                      | Compile and run, if the source file has a `Main` method                                 |
 | `F6`                      | Compile with custom arguments                                                           |
-| `F7`                      | Show _Counterexample_                                                                   |
-| `F8`                      | Hide _Counterexample_                                                                   |
+| `F7`                      | Show _debug assumptions_                                                                   |
+| `F8`                      | Hide _debug assumptions_                                                                   |
 
 ## Requirements
 
@@ -51,11 +51,11 @@ Press `F5` to compile and run the program.
 
 ![Compile](readmeResources/Compile.png)
 
-### Show Counterxamples
+### Show the debug assumptions
 
-Press `F7` to show counterexamples.
+Press `F7` to show the debug assumptions.
 
-![Counter](readmeResources/Counter.png)
+![DebugAssumptions](readmeResources/DebugAssumptions.png)
 
 ### Hover Information
 

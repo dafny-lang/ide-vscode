@@ -12,7 +12,7 @@
     "url": "https://github.com/dafny-lang/ide-vscode/issues"
   },
   "activationEvents": [
-    "onLanguage:toml"
+    "onLanguage:dafny"
   ],
   "qna": false,
   "license": "MIT",
@@ -65,18 +65,18 @@
           "group": "7_Dafny@8"
         },
         {
-          "when": "editorTextFocus && editorLangId == dafny && dafny.counterexampleMenu.CanShowCounterExample",
-          "command": "dafny.showCounterexample",
+          "when": "editorTextFocus && editorLangId == dafny && dafny.debugassumptionMenu.CanShowDebugAssumption",
+          "command": "dafny.showDebugAssumption",
           "group": "7_Dafny@1"
         },
         {
-          "when": "editorTextFocus && editorLangId == dafny && !dafny.counterexampleMenu.CanShowCounterExample",
-          "command": "dafny.hideCounterexample",
+          "when": "editorTextFocus && editorLangId == dafny && !dafny.debugassumptionMenu.CanShowDebugAssumption",
+          "command": "dafny.hideDebugAssumption",
           "group": "7_Dafny@2"
         },
         {
           "when": "editorTextFocus && editorLangId == dafny",
-          "command": "dafny.copyCounterexamples",
+          "command": "dafny.copyDebugAssumption",
           "group": "7_Dafny@2"
         }
       ]
@@ -107,12 +107,12 @@
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
-        "command": "dafny.showCounterexample",
+        "command": "dafny.showDebugAssumption",
         "key": "f7",
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
-        "command": "dafny.hideCounterexample",
+        "command": "dafny.hideDebugAssumption",
         "key": "f8",
         "when": "editorTextFocus && editorLangId == dafny"
       }
@@ -267,13 +267,13 @@
           "type": "string",
           "description": "The absolute path of the dotnet binary. Only necessary if dotnet is not in system PATH (you'll get an error if that's the case)."
         },
-        "dafny.colorCounterexamples": {
+        "dafny.colorDebugAssumptions": {
           "type": "object",
           "default": {
             "backgroundColor": null,
             "fontColor": null
           },
-          "description": "Customize the color (HEX) of counterexamples. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults."
+          "description": "Customize the color (HEX) of failing contexts. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults."
         },
         "dafny.terminalCommandPrefix": {
           "type": "string",
@@ -300,16 +300,16 @@
         "title": "Dafny: Run"
       },
       {
-        "command": "dafny.showCounterexample",
-        "title": "Dafny: Show Counterexample (experimental)"
+        "command": "dafny.showDebugAssumption",
+        "title": "Dafny: Show debug assumptions"
       },
       {
-        "command": "dafny.hideCounterexample",
-        "title": "Dafny: Hide Counterexample (experimental)"
+        "command": "dafny.hideDebugAssumption",
+        "title": "Dafny: Hide debug assumptions"
       },
       {
-        "command": "dafny.copyCounterexamples",
-        "title": "Dafny: Copy Counterexamples to Clipboard (experimental)"
+        "command": "dafny.copyDebugAssumption",
+        "title": "Dafny: Copy debug assumptions to Clipboard"
       },
       {
         "command": "dafny.restartServer",

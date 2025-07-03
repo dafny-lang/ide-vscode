@@ -1,7 +1,7 @@
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import CompilationStatusView from './compilationStatusView';
 import CompileCommands from './compileCommands';
-import CounterexamplesView from './counterExamplesView';
+import DebugAssumptionsView from './debugAssumptionView';
 import DafnyVersionView from './dafnyVersionView';
 import GhostDiagnosticsView from './ghostDiagnosticsView';
 import VerificationGutterStatusView from './verificationGutterStatusView';
@@ -16,7 +16,7 @@ export default function createAndRegisterDafnyIntegration(
   languageClient: DafnyLanguageClient,
   languageServerVersion: string
 ): void {
-  CounterexamplesView.createAndRegister(installer.context, languageClient);
+  DebugAssumptionsView.createAndRegister(installer.context, languageClient);
   GhostDiagnosticsView.createAndRegister(installer.context, languageClient);
   const serverSupportsSymbolStatusView = configuredVersionToNumeric('3.8.0') <= configuredVersionToNumeric(languageServerVersion);
   CompilationStatusView.createAndRegister(installer.context, languageClient, serverSupportsSymbolStatusView, languageServerVersion);

@@ -5,7 +5,7 @@ import Configuration from '../configuration';
 import { ConfigurationConstants } from '../constants';
 import { DafnyDocumentFilter } from '../tools/vscode';
 import { ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from './api/compilationStatus';
-import { ICounterexampleItem, ICounterexampleParams } from './api/counterExample';
+import { IDebugAssumptionItem, IDebugAssumptionParams } from './api/debugAssumption';
 import { IGhostDiagnosticsParams } from './api/ghostDiagnostics';
 import { IVerificationGutterStatusParams as IVerificationGutterStatusParams } from './api/verificationGutterStatusParams';
 import { IVerificationSymbolStatusParams } from './api/verificationSymbolStatusParams';
@@ -130,8 +130,8 @@ export class DafnyLanguageClient extends LanguageClient {
     this.onNotification('dafny/textDocument/symbolStatus', params => this._onVerificationSymbolStatus.fire(params));
   }
 
-  public getCounterexamples(param: ICounterexampleParams): Promise<ICounterexampleItem[]> {
-    return this.sendRequest<ICounterexampleItem[]>('dafny/counterExample', param);
+  public getDebugAssumptions(param: IDebugAssumptionParams): Promise<IDebugAssumptionItem[]> {
+    return this.sendRequest<IDebugAssumptionItem[]>('dafny/counterExample', param);
   }
 
   public static argumentsToCommandLine(launchArguments: string[]): string {
