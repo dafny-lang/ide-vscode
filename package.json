@@ -302,15 +302,15 @@
       },
       {
         "command": "dafny.showVerificationTrace",
-        "title": "Dafny: Show verification trace"
+        "title": "Dafny: Show verification trace (experimental)"
       },
       {
         "command": "dafny.hideVerificationTrace",
-        "title": "Dafny: Hide verification trace"
+        "title": "Dafny: Hide verification trace (experimental)"
       },
       {
         "command": "dafny.copyVerificationTrace",
-        "title": "Dafny: Copy verification trace as Dafny"
+        "title": "Dafny: Copy verification trace as Dafny (experimental)"
       },
       {
         "command": "dafny.restartServer",
