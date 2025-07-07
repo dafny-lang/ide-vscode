@@ -7,7 +7,7 @@ This extension supports Dafny version 3 and beyond. If you require _Dafny 2_ sup
 - **Compile and Run** `.dfy` files.
 - **Verification** as one types.
 - **Syntax highlighting** thanks to [sublime-dafny](https://github.com/erggo/sublime-dafny). See file `LICENSE_sublime-dafny.rst` for license.
-- Display **counterexample** for failing proof.
+- Display the **verification trace** for failing assertions.
 - **IntelliSense** to suggest symbols.
 - **Go to definition** to quickly navigate.
 - **Hover Information** for symbols.
@@ -21,8 +21,8 @@ You can find [examples below](#examples).
 | `Ctrl+Shift+B` or `⇧+⌘+B` | Compile to `.dll` or, if there is a `Main` method, to `.exe` file                       |
 | `F5`                      | Compile and run, if the source file has a `Main` method                                 |
 | `F6`                      | Compile with custom arguments                                                           |
-| `F7`                      | Show _Counterexample_                                                                   |
-| `F8`                      | Hide _Counterexample_                                                                   |
+| `F7`                      | Show _verification trace_                                                               |
+| `F8`                      | Hide _verification trace_                                                               |
 
 ## Requirements
 
@@ -51,11 +51,16 @@ Press `F5` to compile and run the program.
 
 ![Compile](readmeResources/Compile.png)
 
-### Show Counterxamples
+### Show the verification trace
 
-Press `F7` to show counterexamples.
+Press `F7` to show the verification trace.
 
-![Counter](readmeResources/Counter.png)
+![VerificationTrace](readmeResources/VerificationTrace.png)
+
+Press `F8` to hide the verification trace.
+
+Additionally the context menu helps you show/hide the verification trace, as well as copy it to the clipboard with the `assume ` keyword to insert it into the code if needed.
+![VerificationTraceMenu](readmeResources/VerificationTraceMenu.png)
 
 ### Hover Information
 

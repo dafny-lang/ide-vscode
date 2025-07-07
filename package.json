@@ -12,7 +12,8 @@
     "url": "https://github.com/dafny-lang/ide-vscode/issues"
   },
   "activationEvents": [
-    "onLanguage:toml"
+    "onLanguage:dafny",
+    "workspaceContains:**/dfyconfig.toml"
   ],
   "qna": false,
   "license": "MIT",
@@ -65,18 +66,18 @@
           "group": "7_Dafny@8"
         },
         {
-          "when": "editorTextFocus && editorLangId == dafny && dafny.counterexampleMenu.CanShowCounterExample",
-          "command": "dafny.showCounterexample",
+          "when": "editorTextFocus && editorLangId == dafny && dafny.verificationTraceMenu.CanShowVerificationTrace",
+          "command": "dafny.showVerificationTrace",
           "group": "7_Dafny@1"
         },
         {
-          "when": "editorTextFocus && editorLangId == dafny && !dafny.counterexampleMenu.CanShowCounterExample",
-          "command": "dafny.hideCounterexample",
+          "when": "editorTextFocus && editorLangId == dafny && !dafny.verificationTraceMenu.CanShowVerificationTrace",
+          "command": "dafny.hideVerificationTrace",
           "group": "7_Dafny@2"
         },
         {
           "when": "editorTextFocus && editorLangId == dafny",
-          "command": "dafny.copyCounterexamples",
+          "command": "dafny.copyVerificationTrace",
           "group": "7_Dafny@2"
         }
       ]
@@ -107,12 +108,12 @@
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
-        "command": "dafny.showCounterexample",
+        "command": "dafny.showVerificationTrace",
         "key": "f7",
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
-        "command": "dafny.hideCounterexample",
+        "command": "dafny.hideVerificationTrace",
         "key": "f8",
         "when": "editorTextFocus && editorLangId == dafny"
       }
@@ -267,13 +268,13 @@
           "type": "string",
           "description": "The absolute path of the dotnet binary. Only necessary if dotnet is not in system PATH (you'll get an error if that's the case)."
         },
-        "dafny.colorCounterexamples": {
+        "dafny.colorVerificationTrace": {
           "type": "object",
           "default": {
             "backgroundColor": null,
             "fontColor": null
           },
-          "description": "Customize the color (HEX) of counterexamples. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults."
+          "description": "Customize the color (HEX) of failing contexts. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults."
         },
         "dafny.terminalCommandPrefix": {
           "type": "string",
@@ -300,16 +301,16 @@
         "title": "Dafny: Run"
       },
       {
-        "command": "dafny.showCounterexample",
-        "title": "Dafny: Show Counterexample (experimental)"
+        "command": "dafny.showVerificationTrace",
+        "title": "Dafny: Show verification trace (experimental)"
       },
       {
-        "command": "dafny.hideCounterexample",
-        "title": "Dafny: Hide Counterexample (experimental)"
+        "command": "dafny.hideVerificationTrace",
+        "title": "Dafny: Hide verification trace (experimental)"
       },
       {
-        "command": "dafny.copyCounterexamples",
-        "title": "Dafny: Copy Counterexamples to Clipboard (experimental)"
+        "command": "dafny.copyVerificationTrace",
+        "title": "Dafny: Copy verification trace as Dafny (experimental)"
       },
       {
         "command": "dafny.restartServer",

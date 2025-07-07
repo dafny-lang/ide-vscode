@@ -34,8 +34,8 @@ export namespace ConfigurationConstants {
     export const CommandPrefix = 'terminalCommandPrefix';
   }
 
-  export namespace Counterexamples {
-    export const Color = 'colorCounterexamples';
+  export namespace VerificationTrace {
+    export const Color = 'colorVerificationTrace';
   }
 }
 
