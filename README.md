@@ -57,6 +57,11 @@ Press `F7` to show the verification trace.
 
 ![VerificationTrace](readmeResources/VerificationTrace.png)
 
+Press `F8` to hide the verification trace.
+
+Additionally the context menu helps you show/hide the verification trace, as well as copy it to the clipboard with the `assume ` keyword to insert it into the code if needed.
+![VerificationTraceMenu](readmeResources/VerificationTraceMenu.png)
+
 ### Hover Information
 
 Hover a symbol to get information about that symbol.

@@ -12,7 +12,8 @@
     "url": "https://github.com/dafny-lang/ide-vscode/issues"
   },
   "activationEvents": [
-    "onLanguage:dafny"
+    "onLanguage:dafny",
+    "workspaceContains:**/dfyconfig.toml"
   ],
   "qna": false,
   "license": "MIT",
@@ -309,7 +310,7 @@
       },
       {
         "command": "dafny.copyVerificationTrace",
-        "title": "Dafny: Copy verification trace to Clipboard"
+        "title": "Dafny: Copy verification trace as Dafny"
       },
       {
         "command": "dafny.restartServer",

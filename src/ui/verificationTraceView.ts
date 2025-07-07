@@ -19,6 +19,7 @@ const DefaultDarkFontColor = '#e3f2fd';
 const DefaultLightBackgroundColor = '#bbdefb';
 const DefaultLightFontColor = '#102027';
 const AssumePrefix = "assume ";
+const SemicolonSuffix = ";";
 
 export default class VerificationTraceView {
   private readonly activeDecorations = new Map<Uri, TextEditorDecorationType>();
@@ -143,11 +144,30 @@ export default class VerificationTraceView {
     editor.setDecorations(decoration, decorators);
   }
 
-  private static createDecorator(verificationTrace: IVerificationTraceItem): DecorationOptions {
-    let contentText = verificationTrace.assumption;
+  private static normalizeVerificationTraceForDisplay(contentText: string): string {
     if (contentText.startsWith(AssumePrefix)) {
       contentText = contentText.substring(AssumePrefix.length);
     }
+    if (contentText.endsWith(SemicolonSuffix)) {
+      contentText = contentText.substring(0, contentText.length - SemicolonSuffix.length).trimEnd();
+    }
+    contentText = contentText.split(" && ").map((v: string) => {
+      // If the information is presented like
+      // value == variable, we reformulate it like
+      // variable == value which feels nicer.
+      var r = /^.* == [\w'\?]+$/;
+      if (r.test(v)) {
+        const parts = v.split(' == ');
+        return parts[1] + ' == ' + parts[0];
+      }
+      return v;
+    }).join(", ");
+    return contentText;
+  }
+
+  private static createDecorator(verificationTrace: IVerificationTraceItem): DecorationOptions {
+    let contentText = verificationTrace.assumption;
+    contentText = VerificationTraceView.normalizeVerificationTraceForDisplay(contentText);
     // TODO earlier versions showed a warning that there are references present.
     const line = verificationTrace.position.line;
     return {
