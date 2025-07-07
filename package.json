@@ -65,18 +65,18 @@
           "group": "7_Dafny@8"
         },
         {
-          "when": "editorTextFocus && editorLangId == dafny && dafny.debugassumptionMenu.CanShowDebugAssumption",
-          "command": "dafny.showDebugAssumption",
+          "when": "editorTextFocus && editorLangId == dafny && dafny.verificationTraceMenu.CanShowVerificationTrace",
+          "command": "dafny.showVerificationTrace",
           "group": "7_Dafny@1"
         },
         {
-          "when": "editorTextFocus && editorLangId == dafny && !dafny.debugassumptionMenu.CanShowDebugAssumption",
-          "command": "dafny.hideDebugAssumption",
+          "when": "editorTextFocus && editorLangId == dafny && !dafny.verificationTraceMenu.CanShowVerificationTrace",
+          "command": "dafny.hideVerificationTrace",
           "group": "7_Dafny@2"
         },
         {
           "when": "editorTextFocus && editorLangId == dafny",
-          "command": "dafny.copyDebugAssumption",
+          "command": "dafny.copyVerificationTrace",
           "group": "7_Dafny@2"
         }
       ]
@@ -107,12 +107,12 @@
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
-        "command": "dafny.showDebugAssumption",
+        "command": "dafny.showVerificationTrace",
         "key": "f7",
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
-        "command": "dafny.hideDebugAssumption",
+        "command": "dafny.hideVerificationTrace",
         "key": "f8",
         "when": "editorTextFocus && editorLangId == dafny"
       }
@@ -267,7 +267,7 @@
           "type": "string",
           "description": "The absolute path of the dotnet binary. Only necessary if dotnet is not in system PATH (you'll get an error if that's the case)."
         },
-        "dafny.colorDebugAssumptions": {
+        "dafny.colorVerificationTrace": {
           "type": "object",
           "default": {
             "backgroundColor": null,
@@ -300,16 +300,16 @@
         "title": "Dafny: Run"
       },
       {
-        "command": "dafny.showDebugAssumption",
-        "title": "Dafny: Show debug assumptions"
+        "command": "dafny.showVerificationTrace",
+        "title": "Dafny: Show verification trace"
       },
       {
-        "command": "dafny.hideDebugAssumption",
-        "title": "Dafny: Hide debug assumptions"
+        "command": "dafny.hideVerificationTrace",
+        "title": "Dafny: Hide verification trace"
       },
       {
-        "command": "dafny.copyDebugAssumption",
-        "title": "Dafny: Copy debug assumptions to Clipboard"
+        "command": "dafny.copyVerificationTrace",
+        "title": "Dafny: Copy verification trace to Clipboard"
       },
       {
         "command": "dafny.restartServer",

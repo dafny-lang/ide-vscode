@@ -1,10 +1,10 @@
 import { TextDocumentIdentifier, Position } from 'vscode-languageclient';
 
-export interface IDebugAssumptionItem {
+export interface IVerificationTraceItem {
   position: Position;
   assumption: string;
 }
 
-export interface IDebugAssumptionParams {
+export interface IVerificationTraceParams {
   textDocument: TextDocumentIdentifier;
 }
