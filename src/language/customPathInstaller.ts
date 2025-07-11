@@ -85,9 +85,6 @@ export class CustomPathInstaller {
   // We copy Dafny.dll and all its dependencies to another location
   // so that rebuilding Dafny will not fail because it's open in VSCode
   private async copyNecessaryDllsToTempFolder(configuredPath: string): Promise<string> {
-    const dll = '.dll';
-    const runtimeconfigjson = '.runtimeconfig.json';
-    const depsjson = '.deps.json';
     const installationDir = path.dirname(configuredPath);
     const executableName = path.basename(configuredPath);
     const vscodeDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'vscode-dafny-dlls-'));
@@ -100,9 +97,11 @@ export class CustomPathInstaller {
     const files = await fs.promises.readdir(installationDir);
     for(const file of files) {
       // eslint-disable-next-line max-depth
-      if(!(file.endsWith(dll)
-        || file.endsWith(runtimeconfigjson)
-        || file.endsWith(depsjson)
+      if(!(file.endsWith('.dll')
+        || file.endsWith('.dylib')
+        || file.endsWith('.so')
+        || file.endsWith('.runtimeconfig.json')
+        || file.endsWith('.deps.json')
         || file.endsWith('.pdb')
         || file.endsWith('.exe')
         || file === 'z3'
