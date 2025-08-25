@@ -1,3 +1,4 @@
+DO NOT MERGE THIS
 # Dafny for Visual Studio Code
 
 This extension supports Dafny version 3 and beyond. If you require _Dafny 2_ support, consider using the [legacy extension](https://marketplace.visualstudio.com/items?itemName=correctnessLab.dafny-vscode-legacy).
