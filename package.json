@@ -201,13 +201,13 @@
           "default": [],
           "description": "(Deprecated, use repeated --plugin:<path> in Language Server Launch Args) Absolute paths to assemblies to be used as plugins (requires restart and Dafny 3.4.0+).\nExample 1: /user/home/dafnyplugin.dll\nExample 2: /user/home/dafnyplugin.dll,oneArgument\nExample 3: /user/home/dafnyplugin.dll,\"argument with space and \\\" escaped quote\" secondArgument"
         },
-        "dafny.languageServerLaunchArgs": {
+        "dafny.dafnyServerArguments": {
           "type": "array",
           "items": {
             "type": "string"
           },
           "default": [],
-          "description": "Optional array of strings to pass to the language server. Only works if the Dafny version is 3.10 or greater. Available options can be seen using 'dafny server --help'"
+          "description": "Optional array of strings to use an options when starting 'dafny server', the language server that powers this extension. Only works if the Dafny version is 3.10 or greater. Available options can be seen using 'dafny server --help'. Note that for project specific options, it is better to configure them in a Dafny project file, which the Dafny extension then automatically finds and uses."
         },
         "dafny.cliPath": {
           "type": "string",
@@ -219,13 +219,13 @@
           "default": "bin",
           "description": "Absolute or relative path to the compilation output directory."
         },
-        "dafny.runArgs": {
+        "dafny.dafnyRunArguments": {
           "type": "array",
           "items": {
             "type": "string"
           },
           "default": [],
-          "description": "Optional array of strings as Dafny run and build arguments"
+          "description": "Optional array of strings to pass as options when invoking `dafny run` and `dafny build`. Available options can be seen using 'dafny run --help'"
         },
         "dafny.version": {
           "type": "string",
