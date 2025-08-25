@@ -1,5 +1,22 @@
 # Release Notes
 
+## 3.5.0
+- Added Dafny 4.11.0
+ Also copy native libraries when copying a custom dafny to tmpdir (https://github.com/dafny-lang/ide-vscode/pull/534)
+  Builds of Dafny downloaded from the [GitHub Releasespage](https://github.com/dafny-lang/dafny/releases) include all
+  necessary support libraries, so they don't depend on an external .NET
+  runtime. When we copy a custom dafny to a tmpdir, we need to copy these
+  libraries too, or the language server will fail to start.
+  Windows libraries, being `.dll`s, were probably already copied, but on
+  macOS and Linux, shared libraries end in `.dylib` and `.so`,
+  respectively.
+- Fix and rename counterexamples to verification trace (https://github.com/dafny-lang/ide-vscode/pull/533)
+  - Swap 'value == variable' to 'variable == value' for better readability
+  - Replace ' && ' separator with ', ' for cleaner appearance  
+  - Remove 'assume ' prefix and ';' suffix from display
+- Call fs.promises.mkdtemp on the correct path to prevent making a temp dir in $HOME (https://github.com/dafny-lang/ide-vscode/pull/529)
+- Chore: added instructions on how to view the trace (https://github.com/dafny-lang/ide-vscode/pull/528)
+
 ## 3.4.4
 - Added Dafny 4.10.0
 - Enable starting using a cached nigthly (https://github.com/dafny-lang/ide-vscode/pull/519)
