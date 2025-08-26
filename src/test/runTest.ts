@@ -19,7 +19,7 @@ async function main() {
       launchArgs: [ '--disable-extensions' ],
       extensionDevelopmentPath,
       extensionTestsPath,
-      extensionTestsEnv: { dafnyIdeVersion: LanguageServerConstants.LatestNightly }
+      extensionTestsEnv: { dafnyIdeVersion: LanguageServerConstants.Custom }
     });
   } catch(error: unknown) {
     console.error('Failed to run tests');
