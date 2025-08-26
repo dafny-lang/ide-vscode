@@ -106,11 +106,11 @@ suite('Dafny IDE Extension Installation', () => {
 
   test('Installer checks', async function() {
     // Skip this test if DAFNY_SERVER_OVERRIDE is set (CI environment)
-    if (process.env.DAFNY_SERVER_OVERRIDE) {
+    if(process.env.DAFNY_SERVER_OVERRIDE) {
       this.skip();
       return;
     }
-    
+
     const context = MockingUtils.mockedContext();
     const outputChannelBuilder = MockingUtils.mockedOutputChannelBuilder();
     mockedExec.set(MockingUtils.simpleCommandMap({
