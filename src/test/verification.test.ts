@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import * as vscode from 'vscode';
 
 suite('Verification', () => {
-  test('Program with errors has diagnostics', async () => {
+  test('Program with errors has diagnostics', async function() {
     const extension = vscode.extensions.getExtension('dafny-lang.ide-vscode')!;
 
     try {
@@ -11,6 +11,7 @@ suite('Verification', () => {
       // Skip test if Dafny language server cannot be installed in test environment
       if(error instanceof Error && error.message.includes('Could not install a Dafny language server')) {
         console.log('Skipping verification test: Dafny language server not available in test environment');
+        this.skip();
         return;
       }
       throw error;

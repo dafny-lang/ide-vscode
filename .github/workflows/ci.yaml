@@ -20,9 +20,10 @@ jobs:
       - run: npm install
       - run: npm run lint
       - run: npm run vscode:prepublish
-      #- run: npm test
-      #  env:
-      #    CI: true
+      - name: "Test: Run VSCode Extension Tests"
+        run: xvfb-run -a npm test
+        env:
+          CI: true
       - name: "Prepare: Package VSCode Extension"
         uses: actions/setup-node@v4
         with:
