@@ -22,7 +22,7 @@ jobs:
       - run: npm run vscode:prepublish
       - name: "Install Dafny for testing"
         run: |
-          wget -q https://github.com/dafny-lang/dafny/releases/download/v4.11.0/dafny-4.11.0-x64-ubuntu-20.04.zip -O dafny.zip
+          wget -q https://github.com/dafny-lang/dafny/releases/download/v4.11.0/dafny-4.11.0-x64-ubuntu-22.04.zip -O dafny.zip
           unzip -q dafny.zip -d /tmp/
           echo "DAFNY_SERVER_OVERRIDE=/tmp/dafny/dafny" >> $GITHUB_ENV
       - name: "Test: Run VSCode Extension Tests"
