@@ -8,12 +8,20 @@ jobs:
       - name: "Prepare: Checkout Repository"
         uses: actions/checkout@v4
       - name: "Install Node.js"
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
+        with:
+          node-version: v22.x
 
       - name: "Start xvfb"
         run: |
           /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
           echo ">>> Started xvfb"
+
+      - name: "Install Dafny for testing"
+        run: |
+          wget -q https://github.com/dafny-lang/dafny/releases/download/v4.11.0/dafny-4.11.0-x64-ubuntu-22.04.zip -O dafny.zip
+          unzip -q dafny.zip -d /tmp/
+          echo "DAFNY_SERVER_OVERRIDE=/tmp/dafny/dafny" >> $GITHUB_ENV
 
       - name: "Run tests"
         run: |
