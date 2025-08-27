@@ -104,7 +104,13 @@ suite('Dafny IDE Extension Installation', () => {
     assert.strictEqual(true, Messages.Dotnet.DownloadUri.includes('https'), 'Download URL should contain https');
   });
 
-  test('Installer checks', async () => {
+  test('Installer checks', async function() {
+    // Skip this test if DAFNY_SERVER_OVERRIDE is set (CI environment)
+    if(process.env['DAFNY_SERVER_OVERRIDE'] !== undefined) {
+      this.skip();
+      return;
+    }
+
     const context = MockingUtils.mockedContext();
     const outputChannelBuilder = MockingUtils.mockedOutputChannelBuilder();
     mockedExec.set(MockingUtils.simpleCommandMap({

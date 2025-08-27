@@ -49,7 +49,7 @@ export namespace LanguageServerConstants {
   export const LatestStable = 'latest stable release';
   export const LatestNightly = 'latest nightly';
   export const Custom = 'custom';
-  export const LatestVersion = '4.10.0';
+  export const LatestVersion = '4.11.0';
   export const UnknownVersion = 'unknown';
   export const DafnyGitUrl = 'https://github.com/dafny-lang/dafny.git';
   export const DownloadBaseUri = 'https://github.com/dafny-lang/dafny/releases/download';
