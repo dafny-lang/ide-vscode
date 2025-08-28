@@ -25,9 +25,9 @@ function getDafnyPlatformSuffix(version: string): string {
     case 'Windows_NT':
       return 'windows-2022';
     case 'Darwin':
-      return 'macos-11';
+      return 'macos-13';
     default:
-      return 'ubuntu-20.04';
+      return 'ubuntu-22.04';
     }
   } else {
     switch(os.type()) {
