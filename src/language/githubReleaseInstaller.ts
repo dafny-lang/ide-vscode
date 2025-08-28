@@ -23,7 +23,7 @@ function getDafnyPlatformSuffix(version: string): string {
   if(post312) {
     switch(os.type()) {
     case 'Windows_NT':
-      return 'windows-2019';
+      return 'windows-2022';
     case 'Darwin':
       return 'macos-11';
     default:
