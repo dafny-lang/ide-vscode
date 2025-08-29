@@ -167,7 +167,7 @@ async function nextVersion(currentVersion) {
     console.log("Publishing script aborted.");
     throw ABORTED;
   }
-  console.log("You chose version " + finalVersion);
+  console.log(`You chose version ${finalVersion}`);
   return finalVersion;
 }
 
