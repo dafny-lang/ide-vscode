@@ -19,8 +19,18 @@ function getDafnyPlatformSuffix(version: string): string {
   // Since every nightly published after this edit will be configured in the post-3.12 fashion, and this script
   // fetches the latest nightly, it's safe to just condition this on 'nightly' and not 'nightly-date' for a date
   // after a certain point.
+  const post411 = version.includes('nightly') || configuredVersionToNumeric(version) >= configuredVersionToNumeric('4.11');
   const post312 = version.includes('nightly') || configuredVersionToNumeric(version) >= configuredVersionToNumeric('3.13');
-  if(post312) {
+  if(post411) {
+    switch(os.type()) {
+    case 'Windows_NT':
+      return 'windows-2022';
+    case 'Darwin':
+      return 'macos-13';
+    default:
+      return 'ubuntu-22.04';
+    }
+  } else if(post312) {
     switch(os.type()) {
     case 'Windows_NT':
       return 'windows-2019';
