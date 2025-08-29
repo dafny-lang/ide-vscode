@@ -1,5 +1,9 @@
 # Release Notes
 
+## 3.5.1
+- Fix publish process for Linux systems without xdg-open (https://github.com/dafny-lang/ide-vscode/pull/541)
+- Update platform versions for Dafny >= 4.11 release downloads (https://github.com/dafny-lang/ide-vscode/pull/539)
+
 ## 3.5.0
 - Added Dafny 4.11.0
  Also copy native libraries when copying a custom dafny to tmpdir (https://github.com/dafny-lang/ide-vscode/pull/534)
