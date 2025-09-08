@@ -146,8 +146,8 @@ export class GitHubReleaseInstaller {
         return os.arch() === 'arm64' ? 'arm64' : 'x64';
       }
     }
-    // For non-macOS systems, use Node.js detection
-    return os.arch() === 'arm64' ? 'arm64' : 'x64';
+    // For non-macOS systems, use Node.js detection (preserve original behavior)
+    return os.arch();
   }
 
   public async getConfiguredVersion(): Promise<string> {
