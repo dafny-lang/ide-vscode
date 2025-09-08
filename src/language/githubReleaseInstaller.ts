@@ -126,7 +126,28 @@ export class GitHubReleaseInstaller {
     const baseUri = LanguageServerConstants.DownloadBaseUri;
     const [ tag, version ] = await this.getConfiguredTagAndVersion();
     const suffix = getDafnyPlatformSuffix(version);
-    return `${baseUri}/${tag}/dafny-${version}-${os.arch()}-${suffix}.zip`;
+    const arch = await this.getSystemArchitecture();
+    return `${baseUri}/${tag}/dafny-${version}-${arch}-${suffix}.zip`;
+  }
+
+  private async getSystemArchitecture(): Promise<string> {
+    if (os.type() === 'Darwin') {
+      // On macOS, use system command to get actual hardware architecture
+      // to avoid issues with VS Code running under Rosetta
+      try {
+        const { exec } = await import('child_process');
+        const { promisify } = await import('util');
+        const execAsync = promisify(exec);
+        const { stdout } = await execAsync('uname -m');
+        const systemArch = stdout.trim();
+        return systemArch === 'x86_64' ? 'x64' : systemArch === 'arm64' ? 'arm64' : 'x64';
+      } catch {
+        // Fallback to Node.js detection
+        return os.arch() === 'arm64' ? 'arm64' : 'x64';
+      }
+    }
+    // For non-macOS systems, use Node.js detection
+    return os.arch() === 'arm64' ? 'arm64' : 'x64';
   }
 
   public async getConfiguredVersion(): Promise<string> {
