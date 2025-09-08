@@ -131,7 +131,7 @@ export class GitHubReleaseInstaller {
   }
 
   private async getSystemArchitecture(): Promise<string> {
-    if (os.type() === 'Darwin') {
+    if(os.type() === 'Darwin') {
       // On macOS, use system command to get actual hardware architecture
       // to avoid issues with VS Code running under Rosetta
       try {
