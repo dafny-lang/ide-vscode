@@ -138,7 +138,10 @@ export class GitHubReleaseInstaller {
         const { exec } = await import('child_process');
         const { promisify } = await import('util');
         const execAsync = promisify(exec);
+        
+        // First try to get .NET runtime architecture
         const { stdout } = await execAsync('dotnet --info');
+
         // Look for RID (Runtime Identifier) which shows the actual .NET runtime architecture
         const ridRegex = /RID:\s*osx-(x64|arm64)/;
         const ridMatch = ridRegex.exec(stdout);
@@ -157,21 +160,16 @@ export class GitHubReleaseInstaller {
         }
 
         this.writeStatus('Could not parse .NET architecture from dotnet --info output');
-      } catch(error: unknown) {
-        this.writeStatus(`Failed to detect .NET architecture: ${error}`);
         this.writeStatus('Falling back to system architecture detection');
-
-        // Fallback to system architecture detection
-        try {
-          const { exec } = await import('child_process');
-          const { promisify } = await import('util');
-          const execAsync = promisify(exec);
-          const { stdout } = await execAsync('uname -m');
-          const systemArch = stdout.trim();
-          return systemArch === 'x86_64' ? 'x64' : systemArch === 'arm64' ? 'arm64' : 'x64';
-        } catch{
-          return os.arch();
-        }
+        
+        // Fallback to system architecture detection using same execAsync
+        const { stdout: systemStdout } = await execAsync('uname -m');
+        const systemArch = systemStdout.trim();
+        return systemArch === 'x86_64' ? 'x64' : systemArch === 'arm64' ? 'arm64' : 'x64';
+      } catch(error: unknown) {
+        this.writeStatus(`Failed to detect architecture: ${error}`);
+        this.writeStatus('Falling back to Node.js process architecture detection');
+        return os.arch();
       }
     }
 
