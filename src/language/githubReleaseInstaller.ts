@@ -126,28 +126,53 @@ export class GitHubReleaseInstaller {
     const baseUri = LanguageServerConstants.DownloadBaseUri;
     const [ tag, version ] = await this.getConfiguredTagAndVersion();
     const suffix = getDafnyPlatformSuffix(version);
-    const arch = await this.getSystemArchitecture();
+    const arch = await this.getDotnetArchitecture();
     return `${baseUri}/${tag}/dafny-${version}-${arch}-${suffix}.zip`;
   }
 
-  private async getSystemArchitecture(): Promise<string> {
+  private async getDotnetArchitecture(): Promise<string> {
     if(os.type() === 'Darwin') {
-      // On macOS, use system command to get actual hardware architecture
-      // to avoid issues with VS Code running under Rosetta
+      // On macOS, detect .NET runtime architecture to handle Rosetta translation
+      // This is crucial because ARM64 Macs may run .NET in x64 mode via Rosetta
       try {
         const { exec } = await import('child_process');
         const { promisify } = await import('util');
         const execAsync = promisify(exec);
-        const { stdout } = await execAsync('uname -m');
-        const systemArch = stdout.trim();
+
+        // First try to get .NET runtime architecture
+        const { stdout } = await execAsync('dotnet --info');
+
+        // Look for RID (Runtime Identifier) which shows the actual .NET runtime architecture
+        const ridRegex = /RID:\s*osx-(x64|arm64)/;
+        const ridMatch = ridRegex.exec(stdout);
+        if(ridMatch) {
+          this.writeStatus(`Detected .NET RID: osx-${ridMatch[1]}`);
+          return ridMatch[1]; // Returns 'x64' or 'arm64'
+        }
+
+        // Fallback: look for Architecture field
+        const archRegex = /Architecture:\s*(x64|Arm64)/i;
+        const archMatch = archRegex.exec(stdout);
+        if(archMatch) {
+          const detectedArch = archMatch[1].toLowerCase() === 'arm64' ? 'arm64' : 'x64';
+          this.writeStatus(`Detected .NET Architecture: ${detectedArch}`);
+          return detectedArch;
+        }
+
+        this.writeStatus('Could not parse .NET architecture from dotnet --info output');
+        this.writeStatus('Falling back to system architecture detection');
+
+        // Fallback to system architecture detection using same execAsync
+        const { stdout: systemStdout } = await execAsync('uname -m');
+        const systemArch = systemStdout.trim();
         return systemArch === 'x86_64' ? 'x64' : systemArch === 'arm64' ? 'arm64' : 'x64';
       } catch(error: unknown) {
-        // Fallback to Node.js detection
-        this.writeStatus(`Failed to detect system architecture via uname: ${error}`);
+        this.writeStatus(`Failed to detect architecture: ${error}`);
         this.writeStatus('Falling back to Node.js process architecture detection');
         return os.arch();
       }
     }
+
     // For non-macOS systems, use Node.js detection (preserve original behavior)
     return os.arch();
   }
