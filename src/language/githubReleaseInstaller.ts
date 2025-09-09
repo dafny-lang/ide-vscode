@@ -138,7 +138,7 @@ export class GitHubReleaseInstaller {
         const { exec } = await import('child_process');
         const { promisify } = await import('util');
         const execAsync = promisify(exec);
-        
+
         // First try to get .NET runtime architecture
         const { stdout } = await execAsync('dotnet --info');
 
@@ -161,7 +161,7 @@ export class GitHubReleaseInstaller {
 
         this.writeStatus('Could not parse .NET architecture from dotnet --info output');
         this.writeStatus('Falling back to system architecture detection');
-        
+
         // Fallback to system architecture detection using same execAsync
         const { stdout: systemStdout } = await execAsync('uname -m');
         const systemArch = systemStdout.trim();
