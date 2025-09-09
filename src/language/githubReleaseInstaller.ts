@@ -141,11 +141,11 @@ export class GitHubReleaseInstaller {
         const { stdout } = await execAsync('uname -m');
         const systemArch = stdout.trim();
         return systemArch === 'x86_64' ? 'x64' : systemArch === 'arm64' ? 'arm64' : 'x64';
-      } catch (error) {
+      } catch(error: unknown) {
         // Fallback to Node.js detection
         this.writeStatus(`Failed to detect system architecture via uname: ${error}`);
         this.writeStatus('Falling back to Node.js process architecture detection');
-        return os.arch() === 'arm64' ? 'arm64' : 'x64';
+        return os.arch();
       }
     }
     // For non-macOS systems, use Node.js detection (preserve original behavior)
