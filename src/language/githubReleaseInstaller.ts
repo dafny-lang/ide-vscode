@@ -169,12 +169,12 @@ export class GitHubReleaseInstaller {
           const { stdout } = await execAsync('uname -m');
           const systemArch = stdout.trim();
           return systemArch === 'x86_64' ? 'x64' : systemArch === 'arm64' ? 'arm64' : 'x64';
-        } catch {
+        } catch{
           return os.arch();
         }
       }
     }
-    
+
     // For non-macOS systems, use Node.js detection (preserve original behavior)
     return os.arch();
   }
