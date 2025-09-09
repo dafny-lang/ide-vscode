@@ -139,27 +139,28 @@ export class GitHubReleaseInstaller {
         const { promisify } = await import('util');
         const execAsync = promisify(exec);
         const { stdout } = await execAsync('dotnet --info');
-        
         // Look for RID (Runtime Identifier) which shows the actual .NET runtime architecture
-        const ridMatch = stdout.match(/RID:\s*osx-(x64|arm64)/);
+        const ridRegex = /RID:\s*osx-(x64|arm64)/;
+        const ridMatch = ridRegex.exec(stdout);
         if(ridMatch) {
           this.writeStatus(`Detected .NET RID: osx-${ridMatch[1]}`);
           return ridMatch[1]; // Returns 'x64' or 'arm64'
         }
-        
+
         // Fallback: look for Architecture field
-        const archMatch = stdout.match(/Architecture:\s*(x64|Arm64)/i);
+        const archRegex = /Architecture:\s*(x64|Arm64)/i;
+        const archMatch = archRegex.exec(stdout);
         if(archMatch) {
           const detectedArch = archMatch[1].toLowerCase() === 'arm64' ? 'arm64' : 'x64';
           this.writeStatus(`Detected .NET Architecture: ${detectedArch}`);
           return detectedArch;
         }
-        
+
         this.writeStatus('Could not parse .NET architecture from dotnet --info output');
       } catch(error: unknown) {
         this.writeStatus(`Failed to detect .NET architecture: ${error}`);
         this.writeStatus('Falling back to system architecture detection');
-        
+
         // Fallback to system architecture detection
         try {
           const { exec } = await import('child_process');
