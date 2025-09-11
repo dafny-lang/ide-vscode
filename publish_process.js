@@ -157,16 +157,18 @@ async function nextVersion(currentVersion) {
   console.log(`${currentVersion} => ${bumpedPatch}? ${ACCEPT_HINT}`);
   console.log(`${currentVersion} => ${bumpedMinor}? (m)`);
   var answer = await question(`${currentVersion} => ${bumpedMajor}? (M)\n`);
+  var finalVersion = bumpedPatch;
   if(ok(answer)) {
-    return bumpedPatch;
   } else if(answer == "m") {
-    return bumpedMinor;
+    finalVersion = bumpedMinor;
   } else if(answer == "M") {
-    return bumpedMajor;
+    finalVersion = bumpedMajor;
   } else {
     console.log("Publishing script aborted.");
     throw ABORTED;
   }
+  console.log(`You chose version ${finalVersion}`);
+  return finalVersion;
 }
 
 async function getLastPreparedTag() {
@@ -330,7 +332,7 @@ async function Main() {
     var useNewVersion = false;
     if(await isNewer(packageObj, mostRecentDafnyRelease)) {
       if (ok(await question(`There is a new Dafny version available: (${mostRecentDafnyRelease}). Do you want to update it? ${ACCEPT_HINT}`))) {
-        // We keep that number
+        console.log(`Updating latest version of Dafny to ${mostRecentDafnyRelease}`);
       } else {
         console.log("Ignoring new Dafny version.");
         mostRecentDafnyRelease = undefined;
