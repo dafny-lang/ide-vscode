@@ -3,9 +3,9 @@ export namespace DafnyCommands {
   export const BuildCustomArgs = 'dafny.buildCustomArgs';
   export const Run = 'dafny.run';
   export const Test = 'dafny.test';
-  export const ShowCounterexample = 'dafny.showCounterexample';
-  export const HideCounterexample = 'dafny.hideCounterexample';
-  export const CopyCounterexamples = 'dafny.copyCounterexamples';
+  export const ShowVerificationTrace = 'dafny.showVerificationTrace';
+  export const HideVerificationTrace = 'dafny.hideVerificationTrace';
+  export const CopyVerificationTrace = 'dafny.copyVerificationTrace';
   export const OpenStatusBarMenu = 'dafny.openStatusBarMenu';
   export const RestartServer = 'dafny.restartServer';
 }

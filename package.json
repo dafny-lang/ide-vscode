@@ -2,7 +2,7 @@
   "name": "ide-vscode",
   "displayName": "Dafny",
   "description": "Dafny for Visual Studio Code",
-  "version": "3.4.3",
+  "version": "3.5.2",
   "publisher": "dafny-lang",
   "repository": {
     "type": "git",
@@ -12,7 +12,8 @@
     "url": "https://github.com/dafny-lang/ide-vscode/issues"
   },
   "activationEvents": [
-    "onLanguage:toml"
+    "onLanguage:dafny",
+    "workspaceContains:**/dfyconfig.toml"
   ],
   "qna": false,
   "license": "MIT",
@@ -65,18 +66,18 @@
           "group": "7_Dafny@8"
         },
         {
-          "when": "editorTextFocus && editorLangId == dafny && dafny.counterexampleMenu.CanShowCounterExample",
-          "command": "dafny.showCounterexample",
+          "when": "editorTextFocus && editorLangId == dafny && dafny.verificationTraceMenu.CanShowVerificationTrace",
+          "command": "dafny.showVerificationTrace",
           "group": "7_Dafny@1"
         },
         {
-          "when": "editorTextFocus && editorLangId == dafny && !dafny.counterexampleMenu.CanShowCounterExample",
-          "command": "dafny.hideCounterexample",
+          "when": "editorTextFocus && editorLangId == dafny && !dafny.verificationTraceMenu.CanShowVerificationTrace",
+          "command": "dafny.hideVerificationTrace",
           "group": "7_Dafny@2"
         },
         {
           "when": "editorTextFocus && editorLangId == dafny",
-          "command": "dafny.copyCounterexamples",
+          "command": "dafny.copyVerificationTrace",
           "group": "7_Dafny@2"
         }
       ]
@@ -107,12 +108,12 @@
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
-        "command": "dafny.showCounterexample",
+        "command": "dafny.showVerificationTrace",
         "key": "f7",
         "when": "editorTextFocus && editorLangId == dafny"
       },
       {
-        "command": "dafny.hideCounterexample",
+        "command": "dafny.hideVerificationTrace",
         "key": "f8",
         "when": "editorTextFocus && editorLangId == dafny"
       }
@@ -200,13 +201,13 @@
           "default": [],
           "description": "(Deprecated, use repeated --plugin:<path> in Language Server Launch Args) Absolute paths to assemblies to be used as plugins (requires restart and Dafny 3.4.0+).\nExample 1: /user/home/dafnyplugin.dll\nExample 2: /user/home/dafnyplugin.dll,oneArgument\nExample 3: /user/home/dafnyplugin.dll,\"argument with space and \\\" escaped quote\" secondArgument"
         },
-        "dafny.languageServerLaunchArgs": {
+        "dafny.dafnyServerArguments": {
           "type": "array",
           "items": {
             "type": "string"
           },
           "default": [],
-          "description": "Optional array of strings to pass to the language server. Only works if the Dafny version is 3.10 or greater. Available options can be seen using 'dafny server --help'"
+          "description": "Optional array of strings to use an options when starting 'dafny server', the language server that powers this extension. Only works if the Dafny version is 3.10 or greater. Available options can be seen using 'dafny server --help'. Note that for project specific options, it is better to configure them in a Dafny project file, which the Dafny extension then automatically finds and uses."
         },
         "dafny.cliPath": {
           "type": "string",
@@ -218,18 +219,20 @@
           "default": "bin",
           "description": "Absolute or relative path to the compilation output directory."
         },
-        "dafny.runArgs": {
+        "dafny.dafnyRunArguments": {
           "type": "array",
           "items": {
             "type": "string"
           },
           "default": [],
-          "description": "Optional array of strings as Dafny run and build arguments"
+          "description": "Optional array of strings to pass as options when invoking `dafny run` and `dafny build`. Available options can be seen using 'dafny run --help'"
         },
         "dafny.version": {
           "type": "string",
           "enum": [
             "latest stable release",
+            "4.11.0",
+            "4.10.0",
             "4.9.1",
             "4.9.0",
             "4.8.1",
@@ -266,13 +269,13 @@
           "type": "string",
           "description": "The absolute path of the dotnet binary. Only necessary if dotnet is not in system PATH (you'll get an error if that's the case)."
         },
-        "dafny.colorCounterexamples": {
+        "dafny.colorVerificationTrace": {
           "type": "object",
           "default": {
             "backgroundColor": null,
             "fontColor": null
           },
-          "description": "Customize the color (HEX) of counterexamples. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults."
+          "description": "Customize the color (HEX) of failing contexts. There are two default colors: for dark theme (#0d47a1, #e3f2fd) and light theme (#bbdefb, #102027). This color setting will override both defaults."
         },
         "dafny.terminalCommandPrefix": {
           "type": "string",
@@ -299,16 +302,16 @@
         "title": "Dafny: Run"
       },
       {
-        "command": "dafny.showCounterexample",
-        "title": "Dafny: Show Counterexample (experimental)"
+        "command": "dafny.showVerificationTrace",
+        "title": "Dafny: Show verification trace (experimental)"
       },
       {
-        "command": "dafny.hideCounterexample",
-        "title": "Dafny: Hide Counterexample (experimental)"
+        "command": "dafny.hideVerificationTrace",
+        "title": "Dafny: Hide verification trace (experimental)"
       },
       {
-        "command": "dafny.copyCounterexamples",
-        "title": "Dafny: Copy Counterexamples to Clipboard (experimental)"
+        "command": "dafny.copyVerificationTrace",
+        "title": "Dafny: Copy verification trace as Dafny (experimental)"
       },
       {
         "command": "dafny.restartServer",

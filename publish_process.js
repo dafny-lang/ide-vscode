@@ -186,7 +186,7 @@ function getCommandLine() {
      case 'darwin' : return 'open';
      case 'win32' : return 'start';
      case 'win64' : return 'start';
-     default : return 'xdg-open';
+     default : return '';
   }
 }
 
@@ -248,7 +248,12 @@ async function UpdateChangeLog(currentChangeLogVersion, packageObj, updateChange
     }
     await updateChangeLogWith(newVersion, allRecentCommitMessages, mostRecentDafnyRelease);
     console.log("I changed " + changeLogFile + " to reflect the new version.\nPlease make edits as needed and close the editing window.");
-    await execAsync(getCommandLine() + ' ' + changeLogFile);
+    const cmd = getCommandLine();
+    if (cmd != "") {
+      await execAsync(getCommandLine() + ' ' + changeLogFile);
+    } else {
+      console.log("Please modify " + changeLogFile + " before continuing");
+    }
     if (!ok(await question(`Ready to continue? ${ACCEPT_HINT}`))) {
       console.log("Aborting.");
       throw ABORTED;

@@ -7,7 +7,7 @@ This extension supports Dafny version 3 and beyond. If you require _Dafny 2_ sup
 - **Compile and Run** `.dfy` files.
 - **Verification** as one types.
 - **Syntax highlighting** thanks to [sublime-dafny](https://github.com/erggo/sublime-dafny). See file `LICENSE_sublime-dafny.rst` for license.
-- Display **counterexample** for failing proof.
+- Display the **verification trace** for failing assertions.
 - **IntelliSense** to suggest symbols.
 - **Go to definition** to quickly navigate.
 - **Hover Information** for symbols.
@@ -21,8 +21,8 @@ You can find [examples below](#examples).
 | `Ctrl+Shift+B` or `⇧+⌘+B` | Compile to `.dll` or, if there is a `Main` method, to `.exe` file                       |
 | `F5`                      | Compile and run, if the source file has a `Main` method                                 |
 | `F6`                      | Compile with custom arguments                                                           |
-| `F7`                      | Show _Counterexample_                                                                   |
-| `F8`                      | Hide _Counterexample_                                                                   |
+| `F7`                      | Show _verification trace_                                                               |
+| `F8`                      | Hide _verification trace_                                                               |
 
 ## Requirements
 
@@ -51,11 +51,16 @@ Press `F5` to compile and run the program.
 
 ![Compile](readmeResources/Compile.png)
 
-### Show Counterxamples
+### Show the verification trace
 
-Press `F7` to show counterexamples.
+Press `F7` to show the verification trace.
 
-![Counter](readmeResources/Counter.png)
+![VerificationTrace](readmeResources/VerificationTrace.png)
+
+Press `F8` to hide the verification trace.
+
+Additionally the context menu helps you show/hide the verification trace, as well as copy it to the clipboard with the `assume ` keyword to insert it into the code if needed.
+![VerificationTraceMenu](readmeResources/VerificationTraceMenu.png)
 
 ### Hover Information
 
@@ -113,7 +118,7 @@ npm install
 To build and debug using Visual Studio Code, install the [TypeScript + Webpack Problem Matchers](https://marketplace.visualstudio.com/items?itemName=eamodio.tsl-problem-matcher) extension.
 After the installation, open the root folder within VSCode and hit `F5` to debug the Dafny extension.
 
-Because the latest version of the plugin requires recent changes to the Dafny language server, you will then need to change the `dafny.compilerRuntimePath` and `dafny.languageServerRuntimePath` extension settings to point to the `Dafny.dll` and `DafnyLanguageServer.dll` files from a local build of Dafny. See [here](https://github.com/dafny-lang/dafny/wiki/INSTALL#building-and-developing-from-source-code) for instructions on building Dafny locally.
+To debug the extension from source, with a custom version of Dafny, you can use the launch configuration "Run with $DAFNY_DEV_SERVER", which looks at the environment variable `DAFNY_DEV_SERVER` to determine which Dafny CLI to use to run the language server. For example, if you have a local checkout of Dafny at location `/my/path/to/dafny`, you can set `DAFNY_DEV_SERVER` to `/my/path/to/dafny/Binaries/Dafny.dll`.
 
 ### Packaging
 

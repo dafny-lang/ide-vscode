@@ -17,7 +17,7 @@ export namespace ConfigurationConstants {
 
   export namespace LanguageServer {
     export const CliPath = 'cliPath';
-    export const LaunchArgs = 'languageServerLaunchArgs';
+    export const LaunchArgs = 'dafnyServerArguments';
     export const AutomaticVerification = 'automaticVerification';
     export const VerificationTimeLimit = 'verificationTimeLimit';
     export const VerificationVirtualCores = 'verificationVirtualCores';
@@ -30,12 +30,12 @@ export namespace ConfigurationConstants {
 
   export namespace Compiler {
     export const OutputDir = 'compilerOutputDir';
-    export const Arguments = 'runArgs';
+    export const Arguments = 'dafnyRunArguments';
     export const CommandPrefix = 'terminalCommandPrefix';
   }
 
-  export namespace Counterexamples {
-    export const Color = 'colorCounterexamples';
+  export namespace VerificationTrace {
+    export const Color = 'colorVerificationTrace';
   }
 }
 
@@ -49,7 +49,7 @@ export namespace LanguageServerConstants {
   export const LatestStable = 'latest stable release';
   export const LatestNightly = 'latest nightly';
   export const Custom = 'custom';
-  export const LatestVersion = '4.9.1';
+  export const LatestVersion = '4.11.0';
   export const UnknownVersion = 'unknown';
   export const DafnyGitUrl = 'https://github.com/dafny-lang/dafny.git';
   export const DownloadBaseUri = 'https://github.com/dafny-lang/dafny/releases/download';
