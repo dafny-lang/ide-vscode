@@ -1,5 +1,5 @@
 /* eslint-disable max-depth */
-import { Range, window, ExtensionContext, workspace, TextEditor, TextEditorDecorationType, Uri } from 'vscode';
+import { Range, TextDocument, window, ExtensionContext, workspace, TextEditor, TextEditorDecorationType, Uri, Position, DocumentSymbol, Diagnostic, DiagnosticSeverity, commands, languages } from 'vscode';
 import { Disposable } from 'vscode-languageclient';
 import {
   IVerificationGutterStatusParams,
@@ -11,6 +11,7 @@ import {
 import { DafnyLanguageClient } from '../language/dafnyLanguageClient';
 import { getVsDocumentPath } from '../tools/vscode';
 import VerificationSymbolStatusView from './verificationSymbolStatusView';
+import { NamedVerifiableStatus, PublishedVerificationStatus } from '../language/api/verificationSymbolStatusParams';
 
 const DELAY_IF_RESOLUTION_ERROR = 2000;
 const ANIMATION_INTERVAL = 200;
@@ -57,7 +58,8 @@ export default class VerificationGutterStatusView {
   private static readonly emptyLinearVerificationDiagnostics: Map<LineVerificationStatus, Range[]>
     = VerificationGutterStatusView.FillLineVerificationStatusMap();
 
-  private constructor(context: ExtensionContext, private readonly symbolStatusView: VerificationSymbolStatusView | undefined) {
+  private constructor(context: ExtensionContext,
+    private readonly symbolStatusView: VerificationSymbolStatusView | undefined) {
     const icon = VerificationGutterStatusView.makeIconAux(false, context);
     const grayIcon = VerificationGutterStatusView.makeIconAux(true, context);
     const lvs = LineVerificationStatus;
@@ -114,12 +116,189 @@ export default class VerificationGutterStatusView {
     languageClient: DafnyLanguageClient,
     symbolStatusView: VerificationSymbolStatusView | undefined): VerificationGutterStatusView {
     const instance = new VerificationGutterStatusView(context, symbolStatusView);
+    languageClient.onPublishDiagnostics((uri) => {
+      instance.update(uri);
+    });
+
     context.subscriptions.push(
       workspace.onDidCloseTextDocument(document => instance.clearVerificationDiagnostics(document.uri.toString())),
       window.onDidChangeActiveTextEditor(editor => instance.refreshDisplayedVerificationGutterStatuses(editor)),
-      languageClient.onVerificationStatusGutter(params => instance.updateVerificationStatusGutter(params))
+      workspace.onDidChangeTextDocument(e => {
+        if(instance.lineCountsPerDocument.get(e.document.uri) !== e.document.lineCount) {
+          instance.update(e.document.uri);
+        }
+      })
     );
+    if(symbolStatusView !== undefined) {
+      context.subscriptions.push(
+        symbolStatusView.onUpdates(uri => {
+          instance.update(uri);
+        })
+      );
+    }
     return instance;
+  }
+
+  private readonly lineCountsPerDocument = new Map<Uri, number>();
+  private async update(uri: Uri) {
+    const rootSymbols = await commands.executeCommand('vscode.executeDocumentSymbolProvider', uri) as DocumentSymbol[] | undefined;
+    const nameToSymbolRange = rootSymbols === undefined ? undefined : this.getNameToSymbolRange(rootSymbols);
+    const diagnostics = languages.getDiagnostics(uri);
+    const verifiableRanges = this.symbolStatusView!.getVerifiableRangesForUri(uri);
+
+    const document = await workspace.openTextDocument(uri);
+
+    this.lineCountsPerDocument.set(document.uri, document.lineCount);
+    const perLineStatus = VerificationGutterStatusView.computeGutterIcons(document, true, nameToSymbolRange, verifiableRanges, diagnostics);
+    this.updateUsingLineStatus({ uri: uri.toString(), perLineStatus: perLineStatus });
+  }
+
+  private getNameToSymbolRange(rootSymbols: DocumentSymbol[]): Map<string, Range> {
+    const result = new Map<string, Range>();
+    const stack = rootSymbols;
+    while(stack.length > 0) {
+      const top = stack.pop()!;
+      const children = top.children ?? [];
+      stack.push(...children);
+      result.set(positionToString(top.selectionRange.start), top.range);
+    }
+    return result;
+  }
+
+  // eslint-disable-next-line max-params
+  public static computeGutterIcons(
+    document: TextDocument,
+    assertionTracking: boolean,
+    nameToSymbolRanges: Map<string, Range> | undefined,
+    statuses: NamedVerifiableStatus[] | undefined,
+    diagnostics: Diagnostic[]): LineVerificationStatus[] {
+    const statusPerLine = new Map<number, { progress: PublishedVerificationStatus, hitErrorLimit: boolean } >();
+    const lineToErrorSource = new Map<number, string>();
+    const lineToSymbolRange = new Map<number, Range>();
+    const linesInErrorContext = new Set<number>();
+    const linesToSkip = new Set<number>();
+    const implicitAssertionLines = new Set<number>();
+    const errorLimitHitVerifiables = new Set<string>();
+
+    if(nameToSymbolRanges !== undefined) {
+      for(const range of nameToSymbolRanges.values()) {
+        for(let line = range.start.line; line < range.end.line; line++) {
+          lineToSymbolRange.set(line, range);
+        }
+      }
+    }
+    const perLineStatus: LineVerificationStatus[] = [];
+    for(const diagnostic of diagnostics) {
+      if(diagnostic.code === 'errorLimitHit') {
+        errorLimitHitVerifiables.add(positionToString(diagnostic.range.start));
+      }
+
+      const assertionMarker = diagnostic.code === 'isAssertion';
+      if(assertionMarker) {
+        // Just the first line of the assertion is sufficient.
+        implicitAssertionLines.add(diagnostic.range.start.line);
+      }
+
+      const outdatedError = diagnostic.message.startsWith('Outdated: ');
+      if(diagnostic.severity !== DiagnosticSeverity.Error && !outdatedError) {
+        continue;
+      }
+
+      const source = diagnostic.source ?? '';
+      for(const related of diagnostic.relatedInformation ?? []) {
+        if(related.location.uri === document.uri) {
+          processErrorRange(related.location.range, source);
+        }
+      }
+      processErrorRange(diagnostic.range, source);
+    }
+
+    if(nameToSymbolRanges === undefined || statuses === undefined) {
+      for(let line = 0; line < document.lineCount; line++) {
+        statusPerLine.set(line, { progress: PublishedVerificationStatus.Stale, hitErrorLimit: false });
+      }
+    } else {
+      for(const status of statuses) {
+        const convertedRange = VerificationSymbolStatusView.convertRange(status.nameRange);
+        const positionString = positionToString(convertedRange.start);
+        const hitErrorLimit = errorLimitHitVerifiables.has(positionString);
+        const symbolRange = nameToSymbolRanges.get(positionToString(convertedRange.start));
+        linesToSkip.add(convertedRange.start.line);
+        if(symbolRange === undefined) {
+          console.error('symbol mismatch between documentSymbol and symbolStatus API');
+          continue;
+        }
+        const lineStatus = { progress: status.status, hitErrorLimit: hitErrorLimit };
+        for(let line = symbolRange.start.line; line <= symbolRange.end.line; line++) {
+          statusPerLine.set(line, lineStatus);
+        }
+      }
+    }
+
+    function processErrorRange(range: Range, source: string | undefined) {
+      for(let line = range.start.line; line <= range.end.line; line++) {
+        lineToErrorSource.set(line, source ?? '');
+        const contextRange = lineToSymbolRange.get(line);
+        if(contextRange === undefined) {
+          continue;
+        }
+        for(let contextLine = contextRange.start.line; contextLine <= contextRange.end.line; contextLine++) {
+          linesInErrorContext.add(contextLine);
+        }
+      }
+    }
+
+    for(let line = 0; line < document.lineCount; line++) {
+      if(linesToSkip.has(line)) {
+        perLineStatus.push(LineVerificationStatus.Nothing);
+        continue;
+      }
+
+      const lineText = document.getText(new Range(line, 0, line + 1, 0));
+      const isExplicitAssertion = lineText.trimStart().startsWith('assert');
+
+      const error = lineToErrorSource.get(line);
+      if(error === 'Parser' || error === 'Resolver') {
+        perLineStatus.push(LineVerificationStatus.ResolutionError);
+      } else {
+        const lineStatus = statusPerLine.get(line)!;
+        let resultStatus: number;
+        if(error !== undefined) {
+          resultStatus = LineVerificationStatus.AssertionFailed;
+        } else {
+          if(linesInErrorContext.has(line)) {
+            const considerLineAsHavingAssertions
+              = !assertionTracking || implicitAssertionLines.has(line) || isExplicitAssertion;
+            if(lineStatus?.hitErrorLimit === false && considerLineAsHavingAssertions) {
+              // If we found all errors then an assertion with no error must be correct.
+              resultStatus = LineVerificationStatus.AssertionVerifiedInErrorContext;
+            } else {
+              resultStatus = LineVerificationStatus.ErrorContext;
+            }
+          } else {
+            resultStatus = LineVerificationStatus.Verified;
+          }
+        }
+        let progressStatus: number;
+        switch(lineStatus?.progress) {
+        case PublishedVerificationStatus.Stale:
+        case PublishedVerificationStatus.Queued:
+          progressStatus = GutterIconProgress.Stale;
+          break;
+        case PublishedVerificationStatus.Running:
+          progressStatus = GutterIconProgress.Running;
+          break;
+        case PublishedVerificationStatus.Error:
+        case PublishedVerificationStatus.Correct:
+        case undefined:
+          progressStatus = GutterIconProgress.Done;
+          break;
+        default: throw new Error(`unknown PublishedVerificationStatus ${statusPerLine.get(line)}`);
+        }
+        perLineStatus.push(resultStatus + progressStatus);
+      }
+    }
+    return perLineStatus;
   }
 
   /// Creation of an decoration type
@@ -265,7 +444,7 @@ export default class VerificationGutterStatusView {
     const symbolParams
       = params.perLineStatus.indexOf(LineVerificationStatus.ResolutionError) > 0 ? []
         : (this.symbolStatusView?.getVerifiableRangesForUri(uri) ?? []);
-    const originalLinesToSkip = symbolParams.map(range => range.start.line).sort((a, b) => a - b);
+    const originalLinesToSkip = symbolParams.map(range => range.nameRange.start.line).sort((a, b) => a - b);
 
     return VerificationGutterStatusView.perLineStatusToRanges(perLineStatus, originalLinesToSkip);
   }
@@ -309,7 +488,7 @@ export default class VerificationGutterStatusView {
   }
 
   // Entry point when receiving IVErificationStatusGutter
-  private updateVerificationStatusGutter(params: IVerificationGutterStatusParams) {
+  private updateUsingLineStatus(params: IVerificationGutterStatusParams) {
     if(this.areParamsOutdated(params)) {
       return;
     }
@@ -398,4 +577,14 @@ export default class VerificationGutterStatusView {
       }
     }
   }
+}
+
+export enum GutterIconProgress {
+  Stale = 1,
+  Running = 2,
+  Done = 0
+}
+
+function positionToString(start: Position): string {
+  return `${start.line},${start.character}`;
 }

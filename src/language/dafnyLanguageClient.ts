@@ -7,10 +7,10 @@ import { DafnyDocumentFilter } from '../tools/vscode';
 import { ICompilationStatusParams, IVerificationCompletedParams, IVerificationStartedParams } from './api/compilationStatus';
 import { IVerificationTraceItem, IVerificationTraceParams } from './api/verificationTrace';
 import { IGhostDiagnosticsParams } from './api/ghostDiagnostics';
-import { IVerificationGutterStatusParams as IVerificationGutterStatusParams } from './api/verificationGutterStatusParams';
 import { IVerificationSymbolStatusParams } from './api/verificationSymbolStatusParams';
 import { DafnyInstaller } from './dafnyInstallation';
 import * as os from 'os';
+import { IVerificationGutterStatusParams } from './api/verificationGutterStatusParams';
 
 const LanguageServerId = 'dafny-vscode';
 const LanguageServerName = 'Dafny Language Server';
@@ -28,13 +28,15 @@ function getLanguageServerLaunchArgsNew(): string[] {
   const specifiedCores = parseInt(Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationVirtualCores));
   // This is a temporary fix to prevent 0 cores from being used, since the languages server currently does not handle 0 cores correctly: https://github.com/dafny-lang/dafny/pull/3276
   const cores = isNaN(specifiedCores) || specifiedCores === 0 ? Math.ceil((os.cpus().length + 1) / 2) : Math.max(1, specifiedCores);
+  const displayGutterIcons = Configuration.get<boolean>(ConfigurationConstants.LanguageServer.DisplayGutterStatus);
   return [
     `--verify-on:${verifyOn}`,
     `--verification-time-limit:${Configuration.get<string>(ConfigurationConstants.LanguageServer.VerificationTimeLimit)}`,
     getVerifierCachingPolicy(),
     `--cores:${cores}`,
     `--notify-ghostness:${Configuration.get<string>(ConfigurationConstants.LanguageServer.MarkGhostStatements)}`,
-    `--notify-line-verification-status:${Configuration.get<string>(ConfigurationConstants.LanguageServer.DisplayGutterStatus)}`,
+    '--notify-line-verification-status:false',
+    `--show-assertions:${displayGutterIcons ? 'All' : 'Implicit'}`,
     ...getDafnyPluginsArgument(),
     ...launchArgs
   ];

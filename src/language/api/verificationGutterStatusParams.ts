@@ -1,3 +1,4 @@
+
 import { DocumentUri, integer } from 'vscode-languageclient';
 
 export interface IVerificationGutterStatusParams {
