@@ -156,7 +156,7 @@
         "dafny.verificationTimeLimit": {
           "type": "number",
           "default": "20",
-          "description": "Maximum number of time in seconds to verify a document, 0=infinite (requires restart)"
+          "description": "Maximum amount of time in seconds spent on attempting to verify a document, 0=infinite (an integer, requires restart)"
         },
         "dafny.verificationVirtualCores": {
           "type": "number",
