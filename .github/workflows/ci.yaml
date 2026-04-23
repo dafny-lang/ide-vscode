@@ -59,7 +59,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: "Prepare: Get Build Artifact"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: package
           path: dist/
@@ -121,7 +121,7 @@ jobs:
           node-version: v22.x
 
       - name: "Prepare: Get Build Artifact"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: package
           path: dist/
