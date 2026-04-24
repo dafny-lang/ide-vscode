@@ -1,5 +1,8 @@
 # Release Notes
 
+## 3.5.3
+- Fix macOS platform suffix: macos-13 → macos-14 (https://github.com/dafny-lang/ide-vscode/pull/548)
+
 ## 3.5.2
 - Fix architecture detection by using .NET runtime architecture instead of system architecture (https://github.com/dafny-lang/ide-vscode/pull/544)
 
@@ -19,7 +22,7 @@
   respectively.
 - Fix and rename counterexamples to verification trace (https://github.com/dafny-lang/ide-vscode/pull/533)
   - Swap 'value == variable' to 'variable == value' for better readability
-  - Replace ' && ' separator with ', ' for cleaner appearance  
+  - Replace ' && ' separator with ', ' for cleaner appearance
   - Remove 'assume ' prefix and ';' suffix from display
 - Call fs.promises.mkdtemp on the correct path to prevent making a temp dir in $HOME (https://github.com/dafny-lang/ide-vscode/pull/529)
 - Chore: added instructions on how to view the trace (https://github.com/dafny-lang/ide-vscode/pull/528)
@@ -265,7 +268,7 @@ NOTE: the Dafny preferences for which Dafny version to use, which custom Dafny e
 ## 1.8.0
 
 - Group verification errors and their related locations by using the "Related Information" UI for diagnostics.
-  
+
 ## 1.7.0
 
 - Now showing parser and resolver errors in the status bar.
