@@ -13,46 +13,47 @@ import { getDotnetExecutablePath } from '../dotnet';
 import path = require('path');
 import { DafnyInstaller, getPreferredVersion } from './dafnyInstallation';
 import { configuredVersionToNumeric } from '../ui/dafnyIntegration';
+import { pickAssetForPlatform } from './releaseAssetMatcher';
 const ArchiveFileName = 'dafny.zip';
 
-function getDafnyPlatformSuffix(version: string): string {
-  // Since every nightly published after this edit will be configured in the post-3.12 fashion, and this script
-  // fetches the latest nightly, it's safe to just condition this on 'nightly' and not 'nightly-date' for a date
-  // after a certain point.
-  const post411 = version.includes('nightly') || configuredVersionToNumeric(version) >= configuredVersionToNumeric('4.11');
-  const post312 = version.includes('nightly') || configuredVersionToNumeric(version) >= configuredVersionToNumeric('3.13');
-  if(post411) {
-    switch(os.type()) {
-    case 'Windows_NT':
-      return 'windows-2022';
-    case 'Darwin':
-      return 'macos-14';
-    default:
-      return 'ubuntu-22.04';
-    }
-  } else if(post312) {
-    switch(os.type()) {
-    case 'Windows_NT':
-      return 'windows-2019';
-    case 'Darwin':
-      return 'macos-11';
-    default:
-      return 'ubuntu-20.04';
-    }
-  } else {
-    switch(os.type()) {
-    case 'Windows_NT':
-      return 'win';
-    case 'Darwin':
-      if(os.arch() === 'arm64') {
-        return 'osx-11.0';
-      } else {
-        return 'osx-10.14.2';
-      }
-    default:
-      return 'ubuntu-16.04';
-    }
+const DafnyReleaseTagApi = 'https://api.github.com/repos/dafny-lang/dafny/releases/tags';
+
+/**
+ * Subset of the GitHub Releases API response we rely on. `name` and
+ * `browser_download_url` are required fields on release assets per the
+ * documented schema, so we model them as non-optional.
+ */
+interface GitHubRelease {
+  name?: string;
+  assets: GitHubReleaseAsset[];
+}
+
+interface GitHubReleaseAsset {
+  name: string;
+  browser_download_url: string;
+}
+
+async function fetchReleaseByTag(tag: string): Promise<GitHubRelease> {
+  const response = await fetch(`${DafnyReleaseTagApi}/${tag}`);
+  if(!response.ok) {
+    throw new Error(`GitHub Releases API returned ${response.status} ${response.statusText} for ${tag}`);
   }
+  const release = await response.json() as Partial<GitHubRelease>;
+  return { name: release.name, assets: release.assets ?? [] };
+}
+
+/**
+ * The `nightly` release's display name is of the form `Dafny nightly-<date>-<sha>`.
+ * Strip the `Dafny ` prefix to obtain the version string we pass downstream
+ * (e.g. `nightly-2026-04-28-99d0f0d`). Returns undefined if the name is absent
+ * or doesn't start with the expected prefix.
+ */
+function parseNightlyVersionFromReleaseName(name: string | undefined): string | undefined {
+  const versionPrefix = 'Dafny ';
+  if(name === undefined || !name.startsWith(versionPrefix)) {
+    return undefined;
+  }
+  return name.substring(versionPrefix.length);
 }
 
 export class GitHubReleaseInstaller {
@@ -60,6 +61,27 @@ export class GitHubReleaseInstaller {
     public readonly context: ExtensionContext,
     public readonly statusOutput: OutputChannel
   ) {}
+
+  private readonly releaseByTagCache = new Map<string, Promise<GitHubRelease>>();
+
+  /**
+   * Per-instance memo around {@link fetchReleaseByTag}. A single install can
+   * end up resolving the same tag twice — for `latest nightly`, once to learn
+   * the concrete version string, and again to pick the matching asset. The
+   * Promise is cached eagerly so concurrent callers share a single in-flight
+   * request; on failure the entry is evicted so a retry can try again.
+   */
+  private fetchReleaseByTagCached(tag: string): Promise<GitHubRelease> {
+    let pending = this.releaseByTagCache.get(tag);
+    if(pending === undefined) {
+      pending = fetchReleaseByTag(tag).catch(error => {
+        this.releaseByTagCache.delete(tag);
+        throw error;
+      });
+      this.releaseByTagCache.set(tag, pending);
+    }
+    return pending;
+  }
 
   public async getExecutable(server: boolean, newArgs: string[], oldArgs: string[]): Promise<Executable | undefined> {
     const version = getPreferredVersion();
@@ -123,11 +145,19 @@ export class GitHubReleaseInstaller {
   }
 
   private async getDafnyDownloadAddress(): Promise<string> {
-    const baseUri = LanguageServerConstants.DownloadBaseUri;
     const [ tag, version ] = await this.getConfiguredTagAndVersion();
-    const suffix = getDafnyPlatformSuffix(version);
     const arch = await this.getDotnetArchitecture();
-    return `${baseUri}/${tag}/dafny-${version}-${arch}-${suffix}.zip`;
+    const release = await this.fetchReleaseByTagCached(tag);
+    const assetNames = release.assets.map(a => a.name);
+    const chosenName = pickAssetForPlatform(assetNames, version, arch, os.type());
+    if(chosenName === undefined) {
+      throw new Error(
+        `No Dafny release asset on tag ${tag} matches version=${version}, arch=${arch}, os=${os.type()}. `
+        + `Available assets: ${assetNames.join(', ') || '(none)'}`
+      );
+    }
+    const chosen = release.assets.find(a => a.name === chosenName)!;
+    return chosen.browser_download_url;
   }
 
   private async getDotnetArchitecture(): Promise<string> {
@@ -178,7 +208,7 @@ export class GitHubReleaseInstaller {
   }
 
   public async getConfiguredVersion(): Promise<string> {
-    const [ _, version ] = await this.getConfiguredTagAndVersion();
+    const [ , version ] = await this.getConfiguredTagAndVersion();
     return version;
   }
 
@@ -207,16 +237,12 @@ export class GitHubReleaseInstaller {
     case LanguageServerConstants.LatestNightly: {
       let name: string | undefined;
       try {
-        const result: any = await (await fetch('https://api.github.com/repos/dafny-lang/dafny/releases/tags/nightly')).json();
-        if(result.name !== undefined) {
-          name = result.name!;
-          const versionPrefix = 'Dafny ';
-          // eslint-disable-next-line max-depth
-          if(name!.startsWith(versionPrefix)) {
-            const version = name!.substring(versionPrefix.length);
-            this.context.globalState.update('nightly-version', version);
-            return [ 'nightly', version ];
-          }
+        const release = await this.fetchReleaseByTagCached('nightly');
+        name = release.name;
+        const parsed = parseNightlyVersionFromReleaseName(name);
+        if(parsed !== undefined) {
+          this.context.globalState.update('nightly-version', parsed);
+          return [ 'nightly', parsed ];
         }
       } catch{
         // continue

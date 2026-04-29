@@ -1,5 +1,8 @@
 # Release Notes
 
+## 3.5.4
+- Resolve Dafny release downloads via the GitHub Releases API instead of constructing asset URLs from a hard-coded runner-name table. Fixes the 4.11.0 macOS download failure (https://github.com/dafny-lang/dafny/issues/6472) and prevents the same class of regression the next time Dafny upgrades its CI runners.
+
 ## 3.5.3
 - Fix macOS platform suffix: macos-13 → macos-14 (https://github.com/dafny-lang/ide-vscode/pull/548)
 
