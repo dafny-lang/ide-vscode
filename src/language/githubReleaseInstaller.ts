@@ -64,6 +64,8 @@ export class GitHubReleaseInstaller {
 
   private readonly releaseByTagCache = new Map<string, Promise<GitHubRelease>>();
 
+  private static activeInstallations = new Map<string, Promise<boolean>>();
+
   /**
    * Per-instance memo around {@link fetchReleaseByTag}. A single install can
    * end up resolving the same tag twice — for `latest nightly`, once to learn
@@ -87,9 +89,11 @@ export class GitHubReleaseInstaller {
     const version = getPreferredVersion();
     const { path: dotnetExecutable } = await getDotnetExecutablePath();
 
-    const cliPath = path.join((await this.getInstallationPath()).fsPath, 'dafny', 'Dafny.dll');
-    if(!fs.existsSync(cliPath)) {
-      const installed = await this.install();
+    const installPath = await this.getInstallationPath();
+    const markerPath = path.join(installPath.fsPath, '.install-complete');
+    const cliPath = path.join(installPath.fsPath, 'dafny', 'Dafny.dll');
+    if(!fs.existsSync(markerPath) || !fs.existsSync(cliPath)) {
+      const installed = await this.installWithLock();
       if(!installed) {
         return undefined;
       }
@@ -106,6 +110,18 @@ export class GitHubReleaseInstaller {
     }
   }
 
+  private async installWithLock(): Promise<boolean> {
+    const installPath = (await this.getInstallationPath()).fsPath;
+    let promise = GitHubReleaseInstaller.activeInstallations.get(installPath);
+    if(promise === undefined) {
+      promise = this.install().finally(() => {
+        GitHubReleaseInstaller.activeInstallations.delete(installPath);
+      });
+      GitHubReleaseInstaller.activeInstallations.set(installPath, promise);
+    }
+    return promise;
+  }
+
   private async install(): Promise<boolean> {
     this.statusOutput.show();
     const startMessage = 'Standalone language server installation started.';
@@ -116,6 +132,8 @@ export class GitHubReleaseInstaller {
       const archive = await this.downloadArchive(await this.getDafnyDownloadAddress(), 'Dafny');
       await this.extractArchive(archive, 'Dafny');
       await workspace.fs.delete(archive, { useTrash: false });
+      const markerPath = path.join((await this.getInstallationPath()).fsPath, '.install-complete');
+      await fs.promises.writeFile(markerPath, JSON.stringify({ version: await this.getConfiguredVersion() }));
       const finishMessage = 'Standalone language server installation completed.';
       window.showInformationMessage(finishMessage);
       this.writeStatus(finishMessage);
@@ -147,17 +165,47 @@ export class GitHubReleaseInstaller {
   private async getDafnyDownloadAddress(): Promise<string> {
     const [ tag, version ] = await this.getConfiguredTagAndVersion();
     const arch = await this.getDotnetArchitecture();
-    const release = await this.fetchReleaseByTagCached(tag);
-    const assetNames = release.assets.map(a => a.name);
-    const chosenName = pickAssetForPlatform(assetNames, version, arch, os.type());
-    if(chosenName === undefined) {
-      throw new Error(
-        `No Dafny release asset on tag ${tag} matches version=${version}, arch=${arch}, os=${os.type()}. `
-        + `Available assets: ${assetNames.join(', ') || '(none)'}`
-      );
+    try {
+      const release = await this.fetchReleaseByTagCached(tag);
+      const assetNames = release.assets.map(a => a.name);
+      const chosenName = pickAssetForPlatform(assetNames, version, arch, os.type());
+      if(chosenName === undefined) {
+        throw new Error(
+          `No Dafny release asset on tag ${tag} matches version=${version}, arch=${arch}, os=${os.type()}. `
+          + `Available assets: ${assetNames.join(', ') || '(none)'}`
+        );
+      }
+      const chosen = release.assets.find(a => a.name === chosenName)!;
+      return chosen.browser_download_url;
+    } catch (apiError: unknown) {
+      this.writeStatus(`GitHub Releases API call failed: ${apiError}`);
+      this.writeStatus('Attempting to resolve a valid download URL via fallback candidates...');
+      const tokens = this.getFallbackTokens(os.type());
+      for (const token of tokens) {
+        const url = `https://github.com/dafny-lang/dafny/releases/download/v${version}/dafny-${version}-${arch}-${token}.zip`;
+        try {
+          const response = await fetch(url, { method: 'HEAD' });
+          if (response.ok) {
+            this.writeStatus(`Resolved fallback URL: ${url}`);
+            return url;
+          }
+        } catch {
+          // ignore network errors for specific candidates and try next
+        }
+      }
+      throw apiError;
     }
-    const chosen = release.assets.find(a => a.name === chosenName)!;
-    return chosen.browser_download_url;
+  }
+
+  private getFallbackTokens(osType: string): string[] {
+    if (osType === 'Darwin') {
+      return [ 'macos-13', 'macos-11', 'osx-10.14.2' ];
+    } else if (osType === 'Linux') {
+      return [ 'ubuntu-22.04', 'ubuntu-20.04', 'ubuntu-16.04' ];
+    } else if (osType === 'Windows_NT') {
+      return [ 'windows-2022', 'windows-2019', 'win' ];
+    }
+    return [];
   }
 
   private async getDotnetArchitecture(): Promise<string> {
@@ -281,6 +329,17 @@ export class GitHubReleaseInstaller {
   public async extractArchive(archivePath: Uri, extractName: string): Promise<void> {
     const dirPath = await this.getInstallationPath();
     this.writeStatus(`extracting ${extractName} to ${dirPath.fsPath}`);
+    if (os.type() === 'Darwin' || os.type() === 'Linux') {
+      try {
+        const { exec } = await import('child_process');
+        const { promisify } = await import('util');
+        const execAsync = promisify(exec);
+        await execAsync(`unzip -o "${archivePath.fsPath}" -d "${dirPath.fsPath}"`);
+        return;
+      } catch (error: unknown) {
+        this.writeStatus(`Native unzip failed, falling back to JS zip extractor: ${error}`);
+      }
+    }
     const progressReporter = new ProgressReporter(this.statusOutput);
     await extract(
       archivePath.fsPath,
